@@ -1,40 +1,40 @@
 ﻿using Kafka.CodeGen.Models;
-using Kafka.Common.Protocol;
+using Kafka.Common.Types;
 using Newtonsoft.Json;
 using System.Collections.Immutable;
-using Version = Kafka.CodeGen.Models.Version;
+using Version = Kafka.Common.Types.Version;
 
 namespace Kafka.CodeGen.Serialization
 {
     internal sealed class MessageJsonConverter :
-        JsonConverter<Message>
+        JsonConverter<MessageDefinition>
     {
         public override bool CanRead => true;
         public override bool CanWrite => false;
         public override void WriteJson(
             JsonWriter writer,
-            Message? value,
+            MessageDefinition? value,
             JsonSerializer serializer
         ) =>
             throw new NotImplementedException()
         ;
 
-        public override Message ReadJson(
+        public override MessageDefinition ReadJson(
             JsonReader reader,
             Type objectType,
-            Message? existingValue,
+            MessageDefinition? existingValue,
             bool hasExistingValue,
             JsonSerializer serializer
         )
         {
-            var apiKey = ApiKey.None;
+            var apiKey = Api.None;
             var type = "";
             var listeners = Array.Empty<string>();
             var name = "";
             var validVersions = Version.Empty;
             var flexibleVersions = Version.Empty;
             var fields = new List<Field>();
-            var structs = new Dictionary<string, Struct>();
+            var structs = new Dictionary<string, StructDefinition>();
             while (reader.Read())
             {
                 switch (reader.TokenType)
@@ -43,7 +43,7 @@ namespace Kafka.CodeGen.Serialization
                         switch (reader.Value)
                         {
                             case "apiKey":
-                                apiKey = (ApiKey)(reader.ReadAsInt32() ?? -1);
+                                apiKey = (Api)(reader.ReadAsInt32() ?? -1);
                                 break;
                             case "type":
                                 type = reader.ReadAsString() ?? "";
@@ -89,7 +89,7 @@ namespace Kafka.CodeGen.Serialization
 
             return type switch
             {
-                "request" => new RequestMessage(
+                "request" => new ApiRequestMessage(
                     apiKey,
                     listeners,
                     name,
@@ -98,7 +98,7 @@ namespace Kafka.CodeGen.Serialization
                     fields.ToImmutableArray(),
                     structs.ToImmutableDictionary()
                 ),
-                "response" => new ResponseMessage(
+                "response" => new ApiResponseMessage(
                     apiKey,
                     name,
                     validVersions,
@@ -127,7 +127,7 @@ namespace Kafka.CodeGen.Serialization
         private static void ParseFields(
             JsonReader reader,
             IList<Field> fields,
-            IDictionary<string, Struct> structs
+            IDictionary<string, StructDefinition> structs
         )
         {
             while (reader.TokenType != JsonToken.EndArray)
@@ -143,7 +143,7 @@ namespace Kafka.CodeGen.Serialization
 
         private static void ParseStructs(
             JsonReader reader,
-            IDictionary<string, Struct> structs
+            IDictionary<string, StructDefinition> structs
         )
         {
             while (reader.TokenType != JsonToken.EndArray)
@@ -159,7 +159,7 @@ namespace Kafka.CodeGen.Serialization
         private static void ParseField(
             JsonReader reader,
             IList<Field> fields,
-            IDictionary<string, Struct> structs
+            IDictionary<string, StructDefinition> structs
         )
         {
             var name = "";
@@ -172,11 +172,11 @@ namespace Kafka.CodeGen.Serialization
             var mapKey = false;
             var nullableVersions = Version.Empty;
             var defaultValue = "";
-            var flexibleVersions = Version.Empty;
+            var flexibleVersions = Version.All;
             var taggedVersions = Version.Empty;
             var zeroCopy = false;
             var localFields = new List<Field>();
-            var localStructs = new Dictionary<string, Struct>();
+            var localStructs = new Dictionary<string, StructDefinition>();
             while (reader.TokenType != JsonToken.EndObject && reader.Read())
             {
                 switch (reader.TokenType)
@@ -263,16 +263,18 @@ namespace Kafka.CodeGen.Serialization
                 new(
                     Name: name,
                     Type: type,
-                    Versions: versions,
-                    NullableVersions: nullableVersions,
-                    TaggedVersions: taggedVersions,
-                    FlexibleVersions: flexibleVersions,
-                    EntityType: entityType,
-                    About: about,
-                    Ignorable: ignorable,
-                    MapKey: mapKey,
-                    ZeroCopy: zeroCopy,
-                    Tag: tag,
+                    Properties: new(
+                        Versions: versions,
+                        NullableVersions: nullableVersions,
+                        TaggedVersions: taggedVersions,
+                        FlexibleVersions: flexibleVersions,
+                        EntityType: entityType,
+                        About: about,
+                        Ignorable: ignorable,
+                        MapKey: mapKey,
+                        ZeroCopy: zeroCopy,
+                        Tag: tag
+                    ),
                     DefaultValue: defaultValue
                 )
             );
@@ -292,13 +294,13 @@ namespace Kafka.CodeGen.Serialization
 
         private static void ParseStruct(
             JsonReader reader,
-            IDictionary<string, Struct> structs
+            IDictionary<string, StructDefinition> structs
         )
         {
             var name = "";
             var versions = Version.Empty;
             var fields = new List<Field>();
-            var localStructs = new Dictionary<string, Struct>();
+            var localStructs = new Dictionary<string, StructDefinition>();
             while (reader.TokenType != JsonToken.EndObject && reader.Read())
             {
                 switch (reader.TokenType)

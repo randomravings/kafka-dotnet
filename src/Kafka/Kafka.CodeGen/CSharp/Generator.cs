@@ -1,8 +1,11 @@
 ﻿using Kafka.CodeGen.Models;
 using Kafka.CodeGen.Models.Extensions;
+using Kafka.Common.Encoding;
+using Kafka.Common.Records;
+using Kafka.Common.Types.Extensions;
 using System.Collections.Immutable;
 using System.IO.Abstractions;
-using Version = Kafka.CodeGen.Models.Version;
+using Version = Kafka.Common.Types.Version;
 
 namespace Kafka.CodeGen.CSharp
 {
@@ -11,160 +14,369 @@ namespace Kafka.CodeGen.CSharp
         public static async ValueTask Write(
             IFileSystem fileSystem,
             string directory,
-            Message message
+            MessageDefinition message
         )
         {
             TestValidVersion(message.ValidVersions);
             var typeLookup = CreateTypeLookup(message);
-            await WriteMessage( 
+            var typeFlags = GetUsings(message, typeLookup);
+            await WriteModel(
                 fileSystem,
                 message,
                 directory,
-                typeLookup
+                typeLookup,
+                typeFlags
             );
-            await WriteMessageExtension(
+            await WriteSerde(
                 fileSystem,
                 message,
                 directory,
-                typeLookup
+                typeLookup,
+                typeFlags
             );
         }
 
-        private static async ValueTask WriteMessage(
+        private static async ValueTask WriteModel(
             IFileSystem fileSystem,
-            Message message,
+            MessageDefinition message,
             string directory,
-            IReadOnlyDictionary<string, QualifiedStruct> typeLookup
+            IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
+            UsingsFlags typeFlags
         )
         {
-            var path = fileSystem.Path.Join(directory, $"{message.Name}.cs");
-            using var writer = new StreamWriter(
-                fileSystem.FileStream.Create(
-                    fileSystem.Path.Combine(
-                        path
-                    ),
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.ReadWrite
-                )
+            using var writer = CreateWriter(
+                fileSystem,
+                directory,
+                message.Name
             );
 
-            if(HasRecords(message, typeLookup))
-                await writer.WriteLineAsync($"using Kafka.Common.Records;");
+            var usings = new List<string>();
+            if (typeFlags.HasFlag(UsingsFlags.Array))
+                usings.Add("System.Collections.Immutable");
+            if (typeFlags.HasFlag(UsingsFlags.Record))
+                usings.Add("Kafka.Common.Records");
+            foreach (var type in typeLookup)
+                usings.Add($"{type.Key} = Kafka.Client.Messages.{type.Value.ParentName}");
+
+            await WriteNamespace(
+                writer,
+                message,
+                typeLookup,
+                usings,
+                (w, m, t) => WriteMessageRecord(w, m)
+            );
+            await writer.FlushAsync();
+        }
+
+        private static async ValueTask WriteSerde(
+            IFileSystem fileSystem,
+            MessageDefinition message,
+            string directory,
+            IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
+            UsingsFlags typeFlags
+        )
+        {
+            using var writer = CreateWriter(
+                fileSystem,
+                directory,
+                $"{message.Name}.Extensions"
+            );
+
+            var usings = new List<string>()
+            {
+                typeof(Encoder).Namespace ?? ""
+            };
+            if (typeFlags.HasFlag(UsingsFlags.Array))
+                usings.Add("System.Collections.Immutable");
+            if (typeFlags.HasFlag(UsingsFlags.Record))
+                usings.Add("Kafka.Common.Records");
+            foreach (var type in typeLookup)
+                usings.Add($"{type.Key} = Kafka.Client.Messages.{type.Value.ParentName}");
+
+            await WriteNamespace(
+                writer,
+                message,
+                typeLookup,
+                usings,
+                (w, m, t) => WriteMessageRecordExtension(w, m)
+            );
+            await writer.FlushAsync();
+        }
+
+        private static async ValueTask WriteNamespace(
+            TextWriter writer,
+            MessageDefinition message,
+            IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
+            IEnumerable<string> namespaces,
+            Func<TextWriter, MessageDefinition, IReadOnlyDictionary<string, QualifiedStruct>, ValueTask> classWriter
+        )
+        {
             await writer.WriteLineAsync($"using System.CodeDom.Compiler;");
+            foreach (var ns in namespaces)
+                await writer.WriteLineAsync($"using {ns};");
+            await writer.WriteLineAsync();
             await writer.WriteLineAsync($"namespace Kafka.Client.Messages");
             await writer.WriteLineAsync($"{{");
-            await writer.WriteLineAsync($"    [GeneratedCode(\"{typeof(Generator).Assembly.GetName().Name}\", \"{typeof(Generator).Assembly.GetName().Version}\")]");
+            await classWriter(
+                writer,
+                message,
+                typeLookup
+            );
+            await writer.WriteAsync($"}}");
+            await writer.FlushAsync();
+        }
+
+        private static async ValueTask WriteMessageRecord(
+            TextWriter writer,
+            MessageDefinition message
+        )
+        {
+            var assemblyName = typeof(Generator).Assembly.GetName();
+            await WriteSummary(writer, "    ", message);
+            await writer.WriteLineAsync($"    [GeneratedCode(\"{assemblyName.Name}\", \"{assemblyName.Version}\")]");
             await writer.WriteLineAsync($"    public sealed record {message.Name} (");
-            await writer.WriteAsync($"        {FieldToProperty(message.Fields.First(), typeLookup)}");
-            foreach (var field in message.Fields.Skip(1))
+            await WriteFields(
+                writer,
+                message.Fields,
+                "    "
+            );
+            await writer.WriteLineAsync($"    )");
+            await writer.WriteLineAsync($"    {{");
+            await WriteDefaultEmptyValue(
+                writer,
+                "        ",
+                message.Name,
+                message.Fields
+            );
+            await WriteMessageNestedRecords(
+                message.Structs,
+                writer,
+                "        "
+            );
+            await writer.WriteLineAsync($"    }};");
+        }
+
+        private static async ValueTask WriteMessageNestedRecords(
+            IImmutableDictionary<string, StructDefinition> types,
+            TextWriter writer,
+            string indent
+        )
+        {
+            if (!types.Any())
+                return;
+            foreach (var type in types.Values)
+                await WriteMessageNestedRecord(type, writer, indent);
+        }
+
+        private static async ValueTask WriteMessageNestedRecord(
+            StructDefinition @struct,
+            TextWriter writer,
+            string indent
+        )
+        {
+            await WriteSummary(writer, indent, @struct);
+            await writer.WriteLineAsync($"{indent}public sealed record {@struct.Name} (");
+            await WriteFields(
+                writer,
+                @struct.Fields,
+                indent
+            );
+            await writer.WriteLineAsync($"{indent})");
+            await writer.WriteLineAsync($"{indent}{{");
+            await WriteDefaultEmptyValue(
+                writer,
+                $"{indent}    ",
+                @struct.Name,
+                @struct.Fields
+            );
+            await WriteMessageNestedRecords(@struct.Structs, writer, $"{indent}    ");
+            await writer.WriteLineAsync($"{indent}}};");
+        }
+
+        private static async ValueTask WriteDefaultEmptyValue(
+            TextWriter writer,
+            string indent,
+            string name,
+            IEnumerable<Field> fields
+        )
+        {
+            await writer.WriteLineAsync($"{indent}public static {name} Empty {{ get; }} = new(");
+            var value = DefaultValue(fields.First());
+            await writer.WriteAsync($"{indent}    {value}");
+            foreach (var field in fields.Skip(1))
             {
-                await writer.WriteLineAsync($",");
-                await writer.WriteAsync($"        {FieldToProperty(field, typeLookup)}");
+                value = DefaultValue(field);
+                await writer.WriteLineAsync(",");
+                await writer.WriteAsync($"{indent}    {value}");
             }
             await writer.WriteLineAsync();
-            await writer.WriteAsync($"    )");
-            if (message.Structs.Any())
-            {
-                await writer.WriteLineAsync();
-                await writer.WriteLineAsync($"    {{");
-                await WriteMessageStructs(message.Structs, typeLookup, writer, 0);
-                await writer.WriteAsync($"    }}");
-            }
-            await writer.WriteLineAsync($";");
-            await writer.WriteLineAsync($"}}");
-            await writer.FlushAsync();
+            await writer.WriteLineAsync($"{indent});");
         }
 
-        private static async ValueTask WriteMessageExtension(
-            IFileSystem fileSystem,
-            Message message,
-            string directory,
-            IReadOnlyDictionary<string, QualifiedStruct> typeLookup
+        private static async ValueTask WriteFields(
+            TextWriter writer,
+            IEnumerable<Field> fields,
+            string indent
         )
         {
-            var path = fileSystem.Path.Join(directory, $"{message.Name}.Extensions.cs");
-            using var writer = new StreamWriter(
-                fileSystem.FileStream.Create(
-                    fileSystem.Path.Combine(
-                        path
-                    ),
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.ReadWrite
-                )
-            );
-            await writer.WriteLineAsync($"using Kafka.Common.Encoding;");
-            await writer.WriteLineAsync($"using System.CodeDom.Compiler;");
-            await writer.WriteLineAsync($"namespace Kafka.Client.Messages.Extensions");
-            await writer.WriteLineAsync($"{{");
-            await writer.WriteLineAsync($"    [GeneratedCode(\"{typeof(Generator).Assembly.GetName().Name}\", \"{typeof(Generator).Assembly.GetName().Version}\")]");
-            await writer.WriteLineAsync($"    public static class {message.Name}Extensions");
+            await WriteFieldProperty(writer, $"{indent}    ", fields.First());
+            foreach (var field in fields.Skip(1))
+            {
+                await writer.WriteLineAsync($",");
+                await WriteFieldProperty(writer, $"{indent}    ", field);
+            }
+            await writer.WriteLineAsync();
+        }
+
+        private static async ValueTask WriteMessageRecordExtension(
+            TextWriter writer,
+            MessageDefinition message
+        )
+        {
+            var assemblyName = typeof(Generator).Assembly.GetName();
+            await writer.WriteLineAsync($"    [GeneratedCode(\"{assemblyName.Name}\", \"{assemblyName.Version}\")]");
+            await writer.WriteLineAsync($"    public static class {message.Name}Serde");
             await writer.WriteLineAsync($"    {{");
-            await writer.WriteLineAsync($"        public static void Write(this {message.Name} message, MemoryStream buffer)");
-            await writer.WriteLineAsync($"        {{");
-            foreach (var field in message.Fields)
-                await FieldTypeToEncode(writer, field.Type, $"message.{field.Name}Field", typeLookup, 0);
-            await writer.WriteLineAsync($"        }}");
-            await writer.WriteLineAsync($"    }}");
-            await writer.WriteLineAsync($"}}");
-            await writer.FlushAsync();
-        }
-
-        private static async ValueTask WriteMessageStructs(
-            IImmutableDictionary<string, Struct> types,
-            IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
-            TextWriter writer,
-            int depth
-        )
-        {
-            var indent = "".PadRight(4 + (depth * 4));
-            foreach (var type in types.Values)
+            await writer.WriteLineAsync($"        private static readonly Func<Stream, {message.Name}>[] READ_VERSIONS = {{");
+            foreach (var version in message.ValidVersions.Enumerate())
+                await writer.WriteLineAsync($"            b => ReadV{version:0#}(b),");
+            await writer.WriteLineAsync($"        }};");
+            await writer.WriteLineAsync($"        private static readonly Action<Stream, {message.Name}>[] WRITE_VERSIONS = {{");
+            foreach (var version in message.ValidVersions.Enumerate())
+                await writer.WriteLineAsync($"            (b, m) => WriteV{version:0#}(b, m),");
+            await writer.WriteLineAsync($"        }};");
+            await writer.WriteLineAsync($"        public static {message.Name} Read(Stream buffer, short version) =>");
+            await writer.WriteLineAsync($"            READ_VERSIONS[version](buffer)");
+            await writer.WriteLineAsync($"        ;");
+            await writer.WriteLineAsync($"        public static void Write(Stream buffer, short version, {message.Name} message) =>");
+            await writer.WriteLineAsync($"            WRITE_VERSIONS[version](buffer, message)");
+            await writer.WriteLineAsync($"        ;");
+            foreach (var version in message.ValidVersions.Enumerate())
             {
-                await WriteMessageStruct(type, typeLookup, writer, depth);
-                if (type.Structs.Any())
+                var flexible = message.FlexibleVersions.Includes(version);
+                var variableList = new List<string>();
+                await writer.WriteLineAsync($"        private static {message.Name} ReadV{version:0#}(Stream buffer)");
+                await writer.WriteLineAsync($"        {{");
+                foreach (var field in message.Fields)
                 {
-                    await writer.WriteLineAsync();
-                    await writer.WriteAsync(indent);
-                    await writer.WriteLineAsync($"    {{");
-                    await WriteMessageStructs(type.Structs, typeLookup, writer, depth + 1);
-                    await writer.WriteAsync(indent);
-                    await writer.WriteAsync($"    }}");
+                    var variable = $"{char.ToLower(field.Name[0])}{field.Name[1..]}Field";
+                    variableList.Add(variable);
+                    await DecodeField(writer, "            ", flexible, field, version, variable);
                 }
-                await writer.WriteLineAsync($";");
+                if (flexible)
+                    await writer.WriteLineAsync("            _ = Decoder.ReadVarUInt32(buffer);");
+                await writer.WriteLineAsync($"            return new(");
+                foreach (var variable in variableList.GetRange(0, variableList.Count - 1))
+                    await writer.WriteLineAsync($"                {variable},");
+                await writer.WriteLineAsync($"                {variableList.Last()}");
+                await writer.WriteLineAsync($"            );");
+                await writer.WriteLineAsync($"        }}");
+                await writer.WriteLineAsync($"        private static void WriteV{version:0#}(Stream buffer, {message.Name} message)");
+                await writer.WriteLineAsync($"        {{");
+                foreach (var field in message.Fields.Where(f => f.Properties.Versions.Includes(version)))
+                    await EncodeField(writer, "            ", flexible, field, version, $"message.{field.Name}Field");
+                if(flexible)
+                    await writer.WriteLineAsync("            Encoder.WriteVarUInt32(buffer, 0);");
+                await writer.WriteLineAsync($"        }}");
             }
+            foreach (var @struct in message.Structs.Values)
+                await WriteMessageRecordExtension(writer, @struct, message.FlexibleVersions, @struct.Versions.Constrain(message.ValidVersions), 0);
+            await writer.WriteLineAsync($"    }}");
         }
 
-        private static async ValueTask WriteMessageStruct(
-            Struct type,
-            IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
+        private static async ValueTask WriteMessageRecordExtension(
             TextWriter writer,
+            StructDefinition @struct,
+            Version flexibleVersions,
+            Version versions,
             int depth
         )
         {
             var indent = "".PadRight(8 + (depth * 4));
-            await writer.WriteAsync(indent);
-            await writer.WriteLineAsync($"public sealed record {type.Name} (");
-            await writer.WriteAsync(indent);
-            await writer.WriteAsync($"    {FieldToProperty(type.Fields.First(), typeLookup)}");
-            foreach (var field in type.Fields.Skip(1))
+            await writer.WriteLineAsync($"{indent}private static class {@struct.Name}Serde");
+            await writer.WriteLineAsync($"{indent}{{");
+            foreach (var version in versions.Enumerate())
             {
-                await writer.WriteLineAsync($",");
-                await writer.WriteAsync(indent);
-                await writer.WriteAsync($"    {FieldToProperty(field, typeLookup)}");
+                var flexible = flexibleVersions.Includes(version);
+                var variableList = new List<string>();
+                await writer.WriteLineAsync($"{indent}    public static {@struct.Name} ReadV{version:0#}(Stream buffer)");
+                await writer.WriteLineAsync($"{indent}    {{");
+                foreach (var field in @struct.Fields)
+                {
+                    var variable = $"{char.ToLower(field.Name[0])}{field.Name[1..]}Field";
+                    variableList.Add(variable);
+                    await DecodeField(writer, $"{indent}        ", flexible, field, version, variable);
+                }
+                if (flexible)
+                    await writer.WriteLineAsync($"{indent}        _ = Decoder.ReadVarUInt32(buffer);");
+                await writer.WriteLineAsync($"{indent}        return new(");
+                foreach (var variable in variableList.GetRange(0, variableList.Count - 1))
+                    await writer.WriteLineAsync($"{indent}            {variable},");
+                await writer.WriteLineAsync($"{indent}            {variableList.Last()}");
+                await writer.WriteLineAsync($"{indent}        );");
+                await writer.WriteLineAsync($"{indent}    }}");
+                await writer.WriteLineAsync($"{indent}    public static void WriteV{version:0#}(Stream buffer, {@struct.Name} message)");
+                await writer.WriteLineAsync($"{indent}    {{");
+                foreach (var field in @struct.Fields.Where(f => f.Properties.Versions.Includes(version)))
+                    await EncodeField(writer, $"{indent}        ", flexible, field, version, $"message.{field.Name}Field");
+                if (flexible)
+                    await writer.WriteLineAsync($"{indent}        Encoder.WriteVarUInt32(buffer, 0);");
+                await writer.WriteLineAsync($"{indent}    }}");
             }
-            await writer.WriteLineAsync();
-            await writer.WriteAsync(indent);
-            await writer.WriteAsync($")");
+            foreach (var nestedStruct in @struct.Structs.Values)
+                await WriteMessageRecordExtension(writer, nestedStruct, flexibleVersions, nestedStruct.Versions.Constrain(versions), depth + 1);
+            await writer.WriteLineAsync($"{indent}}}");
         }
+
+        private static async ValueTask WriteSummary(
+            TextWriter writer,
+            string indent,
+            MessageDefinition message
+        )
+        {
+            await writer.WriteLineAsync($"{indent}/// <summary>");
+            await WriteFieldDocumentations(writer, indent, message.Fields);
+            await writer.WriteLineAsync($"{indent}/// </summary>");
+        }
+
+        private static async ValueTask WriteSummary(
+            TextWriter writer,
+            string indent,
+            StructDefinition @struct
+        )
+        {
+            await writer.WriteLineAsync($"{indent}/// <summary>");
+            await WriteFieldDocumentations(writer, indent, @struct.Fields);
+            await writer.WriteLineAsync($"{indent}/// </summary>");
+        }
+
+        private static async ValueTask WriteFieldDocumentations(
+            TextWriter writer,
+            string indent,
+            IEnumerable<Field> fields
+        )
+        {
+            foreach (var field in fields)
+            {
+                await writer.WriteAsync(indent);
+                await writer.WriteAsync(@"/// <param name=""");
+                await writer.WriteAsync(FieldPropertyNamify(field));
+                await writer.WriteAsync(@""">");
+                await writer.WriteAsync(field.Properties.About);
+                await writer.WriteAsync(@"</param>");
+                await writer.WriteLineAsync();
+            }
+        }
+
         private static bool TestValidVersion(
             Version version
         ) =>
             TestValidVersion(
                 version,
-                Version.Any
+                Version.All
             )
         ;
+
         private static bool TestValidVersion(
             Version version,
             Version limit
@@ -173,109 +385,422 @@ namespace Kafka.CodeGen.CSharp
             version.Max <= limit.Max
         ;
 
-        private static string FieldToProperty(
-            Field field,
-            IReadOnlyDictionary<string, QualifiedStruct> typeLookup
-        ) =>
-            $"{QualifyType(field.Type, typeLookup)} {field.Name}Field"
-        ;
+        private static async ValueTask WriteFieldProperty(
+            TextWriter writer,
+            string indent,
+            Field field
+        )
+        {
+            await writer.WriteAsync(indent);
+            await writer.WriteAsync(FieldTypify(field));
+            await writer.WriteAsync(' ');
+            await writer.WriteAsync(FieldPropertyNamify(field));
+        }
 
         private static string QualifyType(
-            FieldType fieldType,
-            IReadOnlyDictionary<string, QualifiedStruct> typeLookup
+            FieldType fieldType
         ) =>
             fieldType switch
             {
-                StructFieldType f => typeLookup[f.Name].ParentName,
-                ArrayFieldType f => $"{QualifyType(f.ItemType, typeLookup)}[]",
+                StructFieldType f => f.Name,
+                ArrayFieldType f => $"ImmutableArray<{QualifyType(f.ItemType)}>",
                 RecordsFieldType => "IRecords",
                 FieldType f => f.ToSystemType()
             }
         ;
 
-        private static async ValueTask FieldTypeToEncode(
+        private static async ValueTask EncodeField(
             TextWriter writer,
-            FieldType fieldType,
-            string dereference,
-            IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
-            int depth
+            string indent,
+            bool flexible,
+            Field field,
+            short version,
+            string dereference
         )
         {
-            var indent = "".PadRight(12 + (depth * 4));
-            switch (fieldType)
+            await EncodeIfNullThrow(
+                writer,
+                indent,
+                field,
+                version,
+                dereference
+            );
+            var flexibleField = flexible && field.Properties.FlexibleVersions.Includes(version);
+            switch (field.Type)
             {
-                case StructFieldType s:
-                    await StructFieldToEncode(
-                        writer,
-                        s,
-                        dereference,
-                        typeLookup,
-                        depth
-                    );
-                    break;
                 case ArrayFieldType a:
-                    await writer.WriteAsync(indent);
-                    await writer.WriteLineAsync($"Encoder.WriteArray(buffer, {dereference}, (b, i) =>");
-                    await writer.WriteAsync(indent);
-                    await writer.WriteLineAsync($"{{");
-                    await FieldTypeToEncode(writer, a.ItemType, "i", typeLookup, depth + 1);
-                    await writer.WriteAsync(indent);
-                    await writer.WriteLineAsync($"    return 0;");
-                    await writer.WriteAsync(indent);
-                    await writer.WriteLineAsync($"}});");
+                    await EncodeArrayField(writer, indent, flexibleField, field.Properties, a, version, dereference);
                     break;
-                case RecordsFieldType _:
-                    await writer.WriteAsync(indent);
-                    await writer.WriteLineAsync($"Encoder.WriteRecords(buffer, {dereference});");
+                case StructFieldType s:
+                    await EncodeStructField(writer, indent, s, version, dereference);
+                    break;
+                case RecordsFieldType r:
+                    await EncodeRecordsField(writer, indent, flexibleField, field.Properties, r, version, dereference);
                     break;
                 case ScalarFieldType f:
-                    var scalarWrite = ScalarFieldToEncode(f);
-                    await writer.WriteAsync(indent);
-                    await writer.WriteLineAsync($"Encoder.{scalarWrite}(buffer, {dereference});");
+                    await EncodeScalarField(writer, indent, flexibleField, field.Properties, f, version, dereference);
                     break;
                 default:
-                    throw new InvalidOperationException($"Unsupported field type '{fieldType.GetType().Name}'");
+                    throw new InvalidOperationException($"Unsupported field type '{field.Type.GetType().Name}'");
             }
         }
 
-        private static async ValueTask StructFieldToEncode(
+        private static async ValueTask EncodeIfNullThrow(
             TextWriter writer,
-            StructFieldType fieldType,
-            string dereference,
-            IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
-            int depth
+            string indent,
+            Field field,
+            short version,
+            string dereference
         )
         {
-            var qualifiedStruct = typeLookup[fieldType.Name];
-            foreach (var field in qualifiedStruct.Struct.Fields)
-                await FieldTypeToEncode(writer, field.Type, $"{dereference}.{field.Name}Field", typeLookup, depth);
+            // If no field version is nullable -> defer to developer to pay attention to compiler warnings.
+            if (field.Properties.NullableVersions.None())
+                return;
+            // If the current version is nullable -> generated code should allow null values.
+            if (field.Properties.NullableVersions.Includes(version))
+                return;
+            await writer.WriteLineAsync($"{indent}if ({dereference} == null)");
+            await writer.WriteLineAsync($"{indent}    throw new {nameof(ArgumentNullException)}(nameof({dereference}));");
+        }
+
+        private static async ValueTask EncodeStructField(
+            TextWriter writer,
+            string indent,
+            StructFieldType fieldType,
+            short version,
+            string dereference
+        )
+        {
+            await writer.WriteAsync(indent);
+            await writer.WriteLineAsync($"{fieldType.Name}Serde.WriteV{version:0#}(buffer, {dereference});");
+        }
+
+        private static async ValueTask EncodeRecordsField(
+            TextWriter writer,
+            string indent,
+            bool flexible,
+            FieldProperties fieldProperties,
+            RecordsFieldType fieldType,
+            short version,
+            string dereference
+        )
+        {
+            await writer.WriteAsync(indent);
+            if (flexible)
+                await writer.WriteLineAsync($"{nameof(Encoder)}.{nameof(Encoder.WriteCompactRecords)}(buffer, {dereference});");
+            else
+                await writer.WriteLineAsync($"{nameof(Encoder)}.{nameof(Encoder.WriteRecords)}(buffer, {dereference});");
+        }
+
+        private static async ValueTask EncodeScalarField(
+            TextWriter writer,
+            string indent,
+            bool flexible,
+            FieldProperties fieldProperties,
+            ScalarFieldType fieldType,
+            short version,
+            string dereference
+        )
+        {
+            var scalarWrite = ScalarFieldToEncode(fieldType, fieldProperties.NullableVersions.Includes(version), flexible);
+            await writer.WriteAsync(indent);
+            await writer.WriteLineAsync($"{nameof(Encoder)}.{scalarWrite}(buffer, {dereference});");
+        }
+
+        private static async ValueTask EncodeArrayField(
+            TextWriter writer,
+            string indent,
+            bool flexible,
+            FieldProperties fieldProperties,
+            ArrayFieldType fieldType,
+            short version,
+            string dereference
+        )
+        {
+            var typeArg = QualifyType(fieldType.ItemType);
+            await writer.WriteAsync(indent);
+            await writer.WriteAsync($"{nameof(Encoder)}.Write");
+            if (flexible)
+                await writer.WriteAsync("Compact");
+            await writer.WriteAsync($"Array<{typeArg}>(buffer, {dereference}, (b, i) => ");
+            switch (fieldType.ItemType)
+            {
+                case StructFieldType s:
+                    await writer.WriteAsync($"{s.Name}Serde.WriteV{version:0#}(b, i)");
+                    break;
+                case RecordsFieldType r:
+                    await writer.WriteLineAsync($"{nameof(Encoder)}{nameof(Encoder.WriteRecords)}(b, i)");
+                    break;
+                case ScalarFieldType f:
+                    await writer.WriteAsync($"{nameof(Encoder)}.{ScalarFieldToEncode(f, false, fieldProperties.FlexibleVersions.Includes(version))}(b, i)");
+                    break;
+
+                default:
+                    throw new InvalidOperationException($"Unsupported array field item type '{fieldType.GetType().Name}'");
+            }
+            await writer.WriteLineAsync($");");
         }
 
         private static string ScalarFieldToEncode(
-            ScalarFieldType field
+            ScalarFieldType field,
+            bool nullable,
+            bool flexible
         ) =>
-            field.Name switch
+            (field.Name, nullable, flexible) switch
             {
-                "bool" => $"WriteBoolean",
-                "int8" => $"WriteInt8",
-                "int16" => $"WriteInt16",
-                "uint16" => $"WriteUInt16",
-                "int32" => $"WriteInt32",
-                "uint32" => $"WriteUInt32",
-                "int64" => $"WriteInt64",
-                "uint64" => $"WriteUInt64",
-                "varint" => $"WriteVarInt32",
-                "varlong" => $"WriteVarInt64",
-                "uuid" => $"WriteUuid",
-                "float64" => $"WriteFloat64",
-                "string" => $"WriteString",
-                "bytes" => $"WriteBytes",
-                var t => throw new InvalidOperationException($"Unsupported scalar type '{t}'")
+                ("bool", _, _) => nameof(Encoder.WriteBoolean),
+                ("int8", _, _) => nameof(Encoder.WriteInt8),
+                ("int16", _, _) => nameof(Encoder.WriteInt16),
+                ("uint16", _, _) => nameof(Encoder.WriteUInt16),
+                ("int32", _, _) => nameof(Encoder.WriteInt32),
+                ("uint32", _, _) => nameof(Encoder.WriteUInt32),
+                ("int64", _, _) => nameof(Encoder.WriteInt64),
+                ("uint64", _, _) => nameof(Encoder.WriteUInt64),
+                ("varint", _, _) => nameof(Encoder.WriteVarInt32),
+                ("varlong", _, _) => nameof(Encoder.WriteVarInt64),
+                ("uuid", _, _) => nameof(Encoder.WriteUuid),
+                ("float64", _, _) => nameof(Encoder.WriteFloat64),
+                ("string", true, true) => nameof(Encoder.WriteCompactNullableString),
+                ("string", false, true) => nameof(Encoder.WriteCompactString),
+                ("string", true, false) => nameof(Encoder.WriteNullableString),
+                ("string", false, false) => nameof(Encoder.WriteString),
+                ("bytes", true, true) => nameof(Encoder.WriteCompactNullableBytes),
+                ("bytes", false, true) => nameof(Encoder.WriteCompactBytes),
+                ("bytes", true, false) => nameof(Encoder.WriteNullableBytes),
+                ("bytes", false, false) => nameof(Encoder.WriteBytes),
+                (var t, _, _) => throw new InvalidOperationException($"Unsupported scalar type '{t}'")
+            }
+        ;
+
+        private static string ScalarFieldToDecode(
+            ScalarFieldType field,
+            bool nullable,
+            bool flexible
+        ) =>
+            (field.Name, nullable, flexible) switch
+            {
+                ("bool", _, _) => nameof(Decoder.ReadBoolean),
+                ("int8", _, _) => nameof(Decoder.ReadInt8),
+                ("int16", _, _) => nameof(Decoder.ReadInt16),
+                ("uint16", _, _) => nameof(Decoder.ReadUInt16),
+                ("int32", _, _) => nameof(Decoder.ReadInt32),
+                ("uint32", _, _) => nameof(Decoder.ReadUInt32),
+                ("int64", _, _) => nameof(Decoder.ReadInt64),
+                ("uint64", _, _) => nameof(Decoder.ReadUInt64),
+                ("varint", _, _) => nameof(Decoder.ReadVarInt32),
+                ("varlong", _, _) => nameof(Decoder.ReadVarInt64),
+                ("uuid", _, _) => nameof(Decoder.ReadUuid),
+                ("float64", _, _) _ => nameof(Decoder.ReadFloat64),
+                ("string", true, true) => nameof(Decoder.ReadCompactNullableString),
+                ("string", false, true) => nameof(Decoder.ReadCompactString),
+                ("string", true, false) => nameof(Decoder.ReadNullableString),
+                ("string", false, false) => nameof(Decoder.ReadString),
+                ("bytes", true, true) => nameof(Decoder.ReadCompactNullableBytes),
+                ("bytes", false, true) => nameof(Decoder.ReadCompactBytes),
+                ("bytes", true, false) => nameof(Decoder.ReadNullableBytes),
+                ("bytes", false, false) => nameof(Decoder.ReadBytes),
+                (var t, _, _) => throw new InvalidOperationException($"Unsupported scalar type '{t}'")
+            }
+        ;
+
+        private static async ValueTask DecodeField(
+            TextWriter writer,
+            string indent,
+            bool flexible,
+            Field field,
+            short version,
+            string dereference
+        )
+        {
+            var flexibleField = flexible && field.Properties.FlexibleVersions.Includes(version);
+            await writer.WriteAsync(indent);
+            await writer.WriteAsync($"var {dereference} = ");
+            switch (field.Type)
+            {
+                case ArrayFieldType a:
+                    await DecodeArrayField(writer, field.Name, flexibleField, field.Properties, a, version);
+                    break;
+                case StructFieldType s:
+                    await DecodeStructField(writer, field.Properties, s, version);
+                    break;
+                case RecordsFieldType r:
+                    await DecodeRecordsField(writer, field.Name, flexibleField, field.Properties, r, version);
+                    break;
+                case ScalarFieldType f:
+                    await DecodeScalarField(writer, flexibleField, field.Properties, f, version);
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unsupported field type '{field.Type.GetType().Name}'");
+            }
+        }
+
+        private static async ValueTask DecodeArrayField(
+            TextWriter writer,
+            string fieldName,
+            bool flexible,
+            FieldProperties fieldProperties,
+            ArrayFieldType fieldType,
+            short version
+        )
+        {
+            var typeArg = QualifyType(fieldType.ItemType);
+            if (!fieldProperties.Versions.Includes(version) || fieldProperties.TaggedVersions.Includes(version))
+            {
+                if (fieldProperties.NullableVersions.Includes(version))
+                    await writer.WriteLineAsync($"default;");
+                else
+                    await writer.WriteLineAsync($"{nameof(ImmutableArray)}<{typeArg}>.Empty;");
+                return;
+            }
+            else
+            {
+                await writer.WriteAsync($"Decoder.Read");
+                if (flexible)
+                    await writer.WriteAsync("Compact");
+                await writer.WriteAsync($"Array");
+                await writer.WriteAsync($"<{typeArg}>(buffer, b => ");
+            }
+            switch (fieldType.ItemType)
+            {
+                case StructFieldType s:
+                    await writer.WriteAsync($"{s.Name}Serde.ReadV{version:0#}(b)");
+                    break;
+                case RecordsFieldType r:
+                    await writer.WriteLineAsync($"{nameof(Decoder)}{nameof(Decoder.ReadRecords)}(b)");
+                    break;
+                case ScalarFieldType f:
+                    await writer.WriteAsync($"{nameof(Decoder)}.{ScalarFieldToDecode(f, false, fieldProperties.FlexibleVersions.Includes(version))}(b)");
+                    break;
+                default:
+                    throw new InvalidOperationException($"Unsupported array field item type '{fieldType.GetType().Name}'");
+            }
+            await writer.WriteAsync($")");
+            if (!fieldProperties.NullableVersions.Includes(version))
+                await writer.WriteAsync(@$" ?? throw new {nameof(NullReferenceException)}(""Null not allowed for '{fieldName}'"")");
+            await writer.WriteLineAsync($";");
+        }
+
+        private static async ValueTask DecodeStructField(
+            TextWriter writer,
+            FieldProperties fieldProperties,
+            StructFieldType fieldType,
+            short version
+        )
+        {
+            if (!fieldProperties.Versions.Includes(version) || fieldProperties.TaggedVersions.Includes(version))
+                if (fieldProperties.NullableVersions.Includes(version))
+                    await writer.WriteLineAsync($"default({fieldType.Name});");
+                else
+                    await writer.WriteLineAsync($"{fieldType.Name}.Empty;");
+            else
+                await writer.WriteLineAsync($"{fieldType.Name}Serde.ReadV{version:0#}(buffer);");
+        }
+
+        private static async ValueTask DecodeRecordsField(
+            TextWriter writer,
+            string fieldName,
+            bool flexible,
+            FieldProperties fieldProperties,
+            RecordsFieldType fieldType,
+            short version
+        )
+        {
+            if (!fieldProperties.Versions.Includes(version) || fieldProperties.TaggedVersions.Includes(version))
+                if (fieldProperties.NullableVersions.Includes(version))
+                    await writer.WriteLineAsync($"default({nameof(IRecords)});");
+                else
+                    await writer.WriteLineAsync($"{nameof(RecordBatch)}.{nameof(RecordBatch.Empty)};");
+            else
+                if (fieldProperties.NullableVersions.Includes(version))
+                    await writer.WriteLineAsync($"Decoder.ReadRecords(buffer) ?? throw new {nameof(NullReferenceException)}(\"Null not allowed for '{fieldName}'\");");
+                else
+                    await writer.WriteLineAsync($"Decoder.ReadRecords(buffer) ?? {nameof(RecordBatch)}.{nameof(RecordBatch.Empty)};");
+        }
+
+        private static async ValueTask DecodeScalarField(
+            TextWriter writer,
+            bool flexible,
+            FieldProperties fieldProperties,
+            ScalarFieldType fieldType,
+            short version
+        )
+        {
+            if (!fieldProperties.Versions.Includes(version) || fieldProperties.TaggedVersions.Includes(version))
+            {
+                var expr = DefaultScalar(fieldType, fieldProperties.NullableVersions.Some());
+                await writer.WriteLineAsync($"{expr};");
+            }
+            else
+            {
+                var scalarRead = ScalarFieldToDecode(fieldType, fieldProperties.NullableVersions.Includes(version), flexible);
+                await writer.WriteLineAsync($"Decoder.{scalarRead}(buffer);");
+            }
+        }
+
+        private static string DefaultValue(
+            Field field
+        ) =>
+            (field.Type, field.Properties.NullableVersions.Some()) switch
+            {
+                (ScalarFieldType f, bool n) => DefaultScalar(f, n),
+                (ArrayFieldType f, bool n) => DefaultArray(f, n),
+                (StructFieldType f, bool n) => DefaultStruct(f, n),
+                (RecordsFieldType _, bool n) => DefaultRecords(n),
+                _ => "default"
+            }
+        ;
+
+        private static string DefaultRecords(
+            bool nullable
+        ) =>
+            nullable switch
+            {
+                true => $"default({nameof(IRecords)})",
+                false => $"{nameof(RecordBatch)}.{nameof(RecordBatch.Empty)}"
+            }
+        ;
+
+        private static string DefaultScalar(
+            ScalarFieldType fieldType,
+            bool nullable
+        ) =>
+            (fieldType.Name, nullable) switch
+            {
+                ("string", false) => @"""""",
+                ("bytes", false) => @"System.Array.Empty<byte>()",
+                _ => $"default({fieldType.ToSystemType()}{(nullable ? "?" : "")})"
+            }
+        ;
+
+        private static string DefaultStruct(
+            StructFieldType fieldType,
+            bool nullable
+        ) =>
+            nullable switch
+            {
+                true => $"default{fieldType.Name}",
+                false => $"{fieldType.Name}.Empty"
+            }
+        ;
+
+        private static string DefaultArray(
+            ArrayFieldType fieldType,
+            bool nullable
+        ) =>
+            (fieldType.ItemType, nullable) switch
+            {
+                (ScalarFieldType f, false) => $"ImmutableArray<{f.ToSystemType()}>.Empty",
+                (RecordsFieldType f, false) => $"ImmutableArray<{nameof(IRecords)}>.Empty",
+                (StructFieldType f, false) => $"ImmutableArray<{f.Name}>.Empty",
+                (ScalarFieldType f, true) => $"default(ImmutableArray<{f.ToSystemType()}>?)",
+                (RecordsFieldType f, true) => $"default(ImmutableArray<{nameof(IRecords)}>?)",
+                (StructFieldType f, true) => $"default(ImmutableArray<{f.Name}>?)",
+                _ => "default",
             }
         ;
 
         private static IReadOnlyDictionary<string, QualifiedStruct> CreateTypeLookup(
-            Message message
+            MessageDefinition message
         )
         {
             var names = new Dictionary<string, QualifiedStruct>();
@@ -286,7 +811,7 @@ namespace Kafka.CodeGen.CSharp
         private static void AddTypeLookup(
             Dictionary<string, QualifiedStruct> names,
             string fullName,
-            IImmutableDictionary<string, Struct> structs
+            IImmutableDictionary<string, StructDefinition> structs
         )
         {
             foreach (var kv in structs)
@@ -300,49 +825,101 @@ namespace Kafka.CodeGen.CSharp
 
         private sealed record QualifiedStruct(
             string ParentName,
-            Struct Struct
+            StructDefinition Struct
         );
 
-        private static bool HasRecords(
-            Message message,
+        private static UsingsFlags GetUsings(
+            MessageDefinition message,
             IReadOnlyDictionary<string, QualifiedStruct> structs
         ) =>
-            HasRecords(
-                message.Fields,
-                structs
-            )
-        ;
-
-        private static bool HasRecords(
-            IEnumerable<Field> fields,
-            IReadOnlyDictionary<string, QualifiedStruct> structs
-        ) =>
-            fields.Aggregate(
-                false,
-                (s, f) => s || IsRecords(
+            message.Fields.Aggregate(
+                UsingsFlags.None,
+                (s, f) => s | OrUsing(
                     f.Type,
                     structs
                 )
             )
         ;
 
-        private static bool IsRecords(
+        private static UsingsFlags AggregateUsings(
+            IEnumerable<Field> fields,
+            IReadOnlyDictionary<string, QualifiedStruct> structs
+        ) =>
+            fields.Aggregate(
+                UsingsFlags.None,
+                (s, f) => s | OrUsing(
+                    f.Type,
+                    structs
+                )
+            )
+        ;
+
+        private static UsingsFlags OrUsing(
             FieldType field,
             IReadOnlyDictionary<string, QualifiedStruct> structs
         ) =>
             field switch
             {
-                RecordsFieldType _ => true,
-                ArrayFieldType f => IsRecords(
+                RecordsFieldType _ => UsingsFlags.Record,
+                ArrayFieldType f => UsingsFlags.Array | OrUsing(
                     f.ItemType,
                     structs
                 ),
-                StructFieldType f => HasRecords(
+                StructFieldType f => AggregateUsings(
                     structs[f.Name].Struct.Fields,
                     structs
                 ),
-                _ => false
+                _ => UsingsFlags.None
             }
+        ;
+
+        [Flags]
+        private enum UsingsFlags
+        {
+            None = 0,
+            Array = 1,
+            Record = 2
+        }
+
+        private static TextWriter CreateWriter(
+            IFileSystem fileSystem,
+            string directory,
+            string name
+        )
+        {
+            var path = fileSystem.Path.Join(directory, $"{name}.cs");
+            return new StreamWriter(
+                fileSystem.FileStream.Create(
+                    fileSystem.Path.Combine(
+                        path
+                    ),
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.ReadWrite
+                )
+            );
+        }
+
+        private static string FieldTypify(
+            Field field
+        )
+        {
+            var type = QualifyType(field.Type);
+            if (field.Properties.NullableVersions.Some())
+                type += "?";
+            return type;
+        }
+
+        private static string FieldPropertyNamify(
+            Field field
+        ) =>
+            $"{field.Name}Field"
+        ;
+
+        private static string FieldVariableNamify(
+            Field field
+        ) =>
+            $"{char.ToLower(field.Name[0])}{field.Name[1..]}Field"
         ;
     }
 }

@@ -1,10 +1,9 @@
-﻿using System.Collections.Concurrent;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace Kafka.Client.Clients.Producer
 {
     public sealed class ProducerConfig
-        : Config
+        : ClientConfig
     {
         [JsonPropertyName("partitioner.class")]
         public string PartitionerClass { get; } = "";

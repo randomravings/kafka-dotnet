@@ -1,4 +1,6 @@
-﻿namespace Kafka.Common
+﻿using Kafka.Common.Types;
+
+namespace Kafka.Common
 {
     public sealed record TopicPartitionOffsets(
         string Topic,

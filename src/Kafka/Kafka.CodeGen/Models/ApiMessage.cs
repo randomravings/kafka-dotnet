@@ -1,16 +1,17 @@
-﻿using Kafka.Common.Protocol;
+﻿using Kafka.Common.Types;
 using System.Collections.Immutable;
+using Version = Kafka.Common.Types.Version;
 
 namespace Kafka.CodeGen.Models
 {
-    public record ApiMessage(
-        ApiKey ApiKey,
+    public abstract record ApiMessage(
+        Api ApiKey,
         string Name,
         Version ValidVersions,
         Version FlexibleVersions,
         ImmutableArray<Field> Fields,
-        IImmutableDictionary<string, Struct> Structs
-    ) : Message(
+        IImmutableDictionary<string, StructDefinition> Structs
+    ) : MessageDefinition(
         Name,
         ValidVersions,
         FlexibleVersions,

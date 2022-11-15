@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Kafka.Common.Types;
 
 namespace Kafka.Common
 {

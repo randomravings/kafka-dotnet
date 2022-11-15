@@ -1,4 +1,5 @@
 ﻿using Kafka.Common;
+using Kafka.Common.Types;
 
 namespace Kafka.Client.Clients.Consumer
 {

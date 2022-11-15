@@ -224,7 +224,7 @@ namespace Kafka.Common.UnitTest.Encoding
         {
             Assert.That(Guid.TryParse(expected, out var expectedUuid), Is.True);
             using var buf = new MemoryStream(bytes);
-            var actualUuid = Decoder.ReadUUID(buf);
+            var actualUuid = Decoder.ReadUuid(buf);
             Assert.That(actualUuid, Is.EqualTo(expectedUuid));
         }
 

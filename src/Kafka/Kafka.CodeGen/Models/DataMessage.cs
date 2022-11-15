@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Version = Kafka.Common.Types.Version;
 
 namespace Kafka.CodeGen.Models
 {
@@ -7,9 +8,9 @@ namespace Kafka.CodeGen.Models
         Version ValidVersions,
         Version FlexibleVersions,
         ImmutableArray<Field> Fields,
-        IImmutableDictionary<string, Struct> Structs
+        IImmutableDictionary<string, StructDefinition> Structs
     ) :
-        Message(
+        MessageDefinition(
             Name,
             ValidVersions,
             FlexibleVersions,

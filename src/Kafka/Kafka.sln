@@ -13,7 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kafka.Common.UnitTest", "Ka
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kafka.CodeGen", "Kafka.CodeGen\Kafka.CodeGen.csproj", "{8B51CDE4-9B2D-4748-8B1C-402F49A88756}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kafka.CodeGen.UnitTest", "Kafka.CodeGen.UnitTest\Kafka.CodeGen.UnitTest.csproj", "{BA4A6A03-9408-400B-9ED7-2A494B4C4AA3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kafka.CodeGen.UnitTest", "Kafka.CodeGen.UnitTest\Kafka.CodeGen.UnitTest.csproj", "{BA4A6A03-9408-400B-9ED7-2A494B4C4AA3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kafka.Cli.AdminClient", "Kafka.Cli.AdminClient\Kafka.Cli.AdminClient.csproj", "{F2001CCD-FBC3-4164-866D-1145D717DFAA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,6 +47,10 @@ Global
 		{BA4A6A03-9408-400B-9ED7-2A494B4C4AA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA4A6A03-9408-400B-9ED7-2A494B4C4AA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA4A6A03-9408-400B-9ED7-2A494B4C4AA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2001CCD-FBC3-4164-866D-1145D717DFAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2001CCD-FBC3-4164-866D-1145D717DFAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2001CCD-FBC3-4164-866D-1145D717DFAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2001CCD-FBC3-4164-866D-1145D717DFAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

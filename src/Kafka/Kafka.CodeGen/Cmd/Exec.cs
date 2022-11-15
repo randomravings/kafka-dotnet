@@ -48,7 +48,7 @@ namespace Kafka.CodeGen.Cmd
                 Console.Write(file);
                 try
                 {
-                    var message = JsonConvert.DeserializeObject<Message>(File.ReadAllText(file));
+                    var message = JsonConvert.DeserializeObject<MessageDefinition>(File.ReadAllText(file));
                     if (message == null)
                     {
                         Console.WriteLine($" ... Null");

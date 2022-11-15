@@ -1,21 +1,51 @@
 using System.CodeDom.Compiler;
+using System.Collections.Immutable;
+using ReassignablePartition = Kafka.Client.Messages.AlterPartitionReassignmentsRequest.ReassignableTopic.ReassignablePartition;
+using ReassignableTopic = Kafka.Client.Messages.AlterPartitionReassignmentsRequest.ReassignableTopic;
+
 namespace Kafka.Client.Messages
 {
+    /// <summary>
+    /// <param name="TimeoutMsField">The time in ms to wait for the request to complete.</param>
+    /// <param name="TopicsField">The topics to reassign.</param>
+    /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record AlterPartitionReassignmentsRequest (
         int TimeoutMsField,
-        AlterPartitionReassignmentsRequest.ReassignableTopic[] TopicsField
+        ImmutableArray<ReassignableTopic> TopicsField
     )
     {
+        public static AlterPartitionReassignmentsRequest Empty { get; } = new(
+            default(int),
+            ImmutableArray<ReassignableTopic>.Empty
+        );
+        /// <summary>
+        /// <param name="NameField">The topic name.</param>
+        /// <param name="PartitionsField">The partitions to reassign.</param>
+        /// </summary>
         public sealed record ReassignableTopic (
             string NameField,
-            AlterPartitionReassignmentsRequest.ReassignableTopic.ReassignablePartition[] PartitionsField
+            ImmutableArray<ReassignablePartition> PartitionsField
         )
         {
+            public static ReassignableTopic Empty { get; } = new(
+                "",
+                ImmutableArray<ReassignablePartition>.Empty
+            );
+            /// <summary>
+            /// <param name="PartitionIndexField">The partition index.</param>
+            /// <param name="ReplicasField">The replicas to place the partitions on, or null to cancel a pending reassignment for this partition.</param>
+            /// </summary>
             public sealed record ReassignablePartition (
                 int PartitionIndexField,
-                int[] ReplicasField
-            );
+                ImmutableArray<int>? ReplicasField
+            )
+            {
+                public static ReassignablePartition Empty { get; } = new(
+                    default(int),
+                    default(ImmutableArray<int>?)
+                );
+            };
         };
     };
 }

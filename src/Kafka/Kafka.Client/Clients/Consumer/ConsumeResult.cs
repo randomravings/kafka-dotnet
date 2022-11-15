@@ -1,4 +1,4 @@
-﻿using Kafka.Common;
+﻿using Kafka.Common.Types;
 using System.Collections;
 using System.Collections.Immutable;
 

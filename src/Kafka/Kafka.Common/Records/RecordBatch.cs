@@ -20,6 +20,21 @@ namespace Kafka.Common.Records
         [property: SerializationSequence(12)] IImmutableList<IRecord> Records
     ) : IRecords
     {
+        public static RecordBatch Empty { get; } = new(
+            long.MinValue,
+            int.MinValue,
+            int.MinValue,
+            sbyte.MinValue,
+            0,
+            Attributes.None,
+            int.MinValue,
+            long.MinValue,
+            long.MinValue,
+            long.MinValue,
+            short.MinValue,
+            int.MinValue,
+            ImmutableArray<IRecord>.Empty
+        );
         long IRecords.Offset => BaseOffset;
 
         int IRecords.Size => BatchLength;

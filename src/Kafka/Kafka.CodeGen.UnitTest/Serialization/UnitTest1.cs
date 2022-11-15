@@ -8,7 +8,7 @@ namespace Kafka.CodeGen.UnitTest
         [Test]
         public void Test1()
         {
-           var x = JsonConvert.DeserializeObject<RequestMessage>(KIP);
+           var x = JsonConvert.DeserializeObject<ApiRequestMessage>(KIP);
         }
 
         private const string KIP = @"

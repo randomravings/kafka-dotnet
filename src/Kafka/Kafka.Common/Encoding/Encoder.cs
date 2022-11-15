@@ -1,4 +1,5 @@
 ﻿using Kafka.Common.Records;
+using System;
 using System.Collections.Immutable;
 using System.Numerics;
 
@@ -6,175 +7,170 @@ namespace Kafka.Common.Encoding
 {
     public static class Encoder
     {
-        public static int WriteBoolean(MemoryStream buffer, bool value)
-        {
-            buffer.WriteByte((byte)(value ? 1 : 0));
-            return 1;
-        }
+        public static void WriteBoolean(Stream buffer, bool value) =>
+            buffer.WriteByte((byte)(value ? 1 : 0))
+        ;
 
-        public static int WriteInt8(MemoryStream buffer, sbyte value)
-        {
-            buffer.WriteByte((byte)value);
-            return 1;
-        }
+        public static void WriteInt8(Stream buffer, sbyte value) =>
+            buffer.WriteByte((byte)value)
+        ;
 
-        public static int WriteInt16(MemoryStream buffer, short value)
+        public static void WriteInt16(Stream buffer, short value)
         {
             buffer.WriteByte((byte)((value >> 8) & 0xff));
             buffer.WriteByte((byte)value);
-            return 2;
         }
 
-        public static int WriteUInt16(MemoryStream buffer, ushort value)
+        public static void WriteUInt16(Stream buffer, ushort value)
         {
             buffer.WriteByte((byte)((value >> 8) & 0xff));
             buffer.WriteByte((byte)value);
-            return 2;
         }
 
-        public static int WriteInt32(MemoryStream buffer, int value) =>
+        public static void WriteInt32(Stream buffer, int value) =>
             WriteUInt32(buffer, (uint)value)
         ;
 
-        public static int WriteUInt32(MemoryStream buffer, uint value)
+        public static void WriteUInt32(Stream buffer, uint value)
         {
             for (int i = 24; i >= 0; i -= 8)
                 buffer.WriteByte((byte)((value >> i) & 0xff));
-            return 4;
         }
 
-        public static int WriteInt64(MemoryStream buffer, long value)
+        public static void WriteInt64(Stream buffer, long value) =>
+            WriteVarUInt64(buffer, (ulong)value)
+        ;
+
+        public static void WriteUInt64(Stream buffer, ulong value)
         {
             for (int i = 56; i >= 0; i -= 8)
                 buffer.WriteByte((byte)((value >> i) & 0xff));
-            return 8;
         }
 
-        public static int WriteVarUInt32(MemoryStream buffer, uint value) =>
+        public static void WriteVarInt16(Stream buffer, short value) =>
+            WriteVarUInt64(buffer, (ushort)((value << 1) ^ (value >> 15)))
+        ;
+
+        public static void WriteVarUInt16(Stream buffer, ushort value) =>
             WriteVarUInt64(buffer, value)
         ;
 
-        public static int WriteVarInt32(MemoryStream buffer, int value) =>
+        public static void WriteVarInt32(Stream buffer, int value) =>
             WriteVarUInt64(buffer, (uint)((value << 1) ^ (value >> 31)))
         ;
 
-        public static int WriteVarInt64(MemoryStream buffer, long value) =>
+        public static void WriteVarUInt32(Stream buffer, uint value) =>
+            WriteVarUInt64(buffer, value)
+        ;
+
+        public static void WriteVarInt64(Stream buffer, long value) =>
             WriteVarUInt64(buffer, (ulong)((value << 1) ^ (value >> 63)))
         ;
 
-        public static int WriteVarUInt64(MemoryStream buffer, ulong value)
+        public static void WriteVarUInt64(Stream buffer, ulong value)
         {
-            var i = 0;
             var v = value;
             while ((v & 0xffffffffffffff80UL) != 0UL)
             {
                 buffer.WriteByte((byte)((v & 0x7fUL) | 0x80UL));
                 v >>= 7;
-                i++;
             }
             buffer.WriteByte((byte)v);
-            return i + 1;
         }
 
-        public static int WriteUuid(MemoryStream buffer, Guid value)
-        {
-            buffer.Write(value.ToByteArray());
-            return 16;
-        }
+        public static void WriteUuid(Stream buffer, Guid value) =>
+            buffer.Write(value.ToByteArray())
+        ;
 
-        public static int WriteFloat64(MemoryStream buffer, double value)
+        public static void WriteFloat64(Stream buffer, double value)
         {
             var bits = BitConverter.DoubleToInt64Bits(value);
-            return WriteInt64(buffer, bits);
+            WriteInt64(buffer, bits);
         }
 
-        public static int WriteString(MemoryStream buffer, string value)
+        public static void WriteString(Stream buffer, string value)
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes(value);
-            var len = WriteInt16(buffer, (short)value.Length);
+            WriteInt16(buffer, (short)bytes.Length);
             buffer.Write(bytes);
-            return len + bytes.Length;
         }
 
-        public static int WriteCompactString(MemoryStream buffer, string value)
+        public static void WriteCompactString(Stream buffer, string value)
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes(value);
-            var len = WriteVarUInt32(buffer, (uint)value.Length);
+            WriteVarUInt32(buffer, (uint)bytes.Length + 1);
             buffer.Write(bytes);
-            return len + bytes.Length;
         }
 
-        public static int WriteNullableString(MemoryStream buffer, string? value) =>
-            value switch
-            {
-                string s => WriteString(buffer, s),
-                _ => WriteInt16(buffer, -1)
-            }
-        ;
-
-        public static int WriteCompactNullableString(MemoryStream buffer, string? value) =>
-            value switch
-            {
-                string s => WriteCompactString(buffer, s),
-                _ => WriteVarUInt32(buffer, 0)
-            }
-        ;
-
-        public static int WriteBytes(MemoryStream buffer, byte[] value)
+        public static void WriteNullableString(Stream buffer, string? value)
         {
-            var len = WriteInt32(buffer, value.Length);
+            if (value == null)
+                WriteInt16(buffer, -1);
+            else
+                WriteString(buffer, value);
+        }
+
+        public static void WriteCompactNullableString(Stream buffer, string? value)
+        {
+            if (value == null)
+                WriteVarUInt32(buffer, 0);
+            else
+                WriteCompactString(buffer, value);
+        }
+
+        public static void WriteBytes(Stream buffer, byte[] value)
+        {
+            WriteInt32(buffer, value.Length);
             buffer.Write(value);
-            return len + value.Length;
         }
 
-        public static int WriteBytes(MemoryStream buffer, ImmutableArray<byte> value)
+        public static void WriteBytes(Stream buffer, ImmutableArray<byte> value)
         {
-            var len = WriteInt32(buffer, value.Length);
+            WriteInt32(buffer, value.Length);
             buffer.Write(value.AsSpan());
-            return len + value.Length;
         }
 
-        public static int WriteCompactBytes(MemoryStream buffer, byte[] value)
+        public static void WriteCompactBytes(Stream buffer, byte[] value)
         {
-            var len = WriteVarUInt32(buffer, (uint)value.Length);
+            WriteVarUInt32(buffer, (uint)value.Length + 1);
             buffer.Write(value);
-            return len + value.Length;
         }
 
-        public static int WriteCompactBytes(MemoryStream buffer, ImmutableArray<byte> value)
+        public static void WriteCompactBytes(Stream buffer, ImmutableArray<byte> value)
         {
-            var len = WriteVarUInt32(buffer, (uint)value.Length);
+            WriteVarUInt32(buffer, (uint)value.Length);
             buffer.Write(value.AsSpan());
-            return len + value.Length;
         }
 
-        public static int WriteNullableBytes(MemoryStream buffer, byte[]? value) =>
-            value switch
-            {
-                byte[] b => WriteBytes(buffer, b),
-                _ => WriteInt32(buffer, -1)
-
-            }
-        ;
-
-        public static int WriteCompactNullableBytes(MemoryStream buffer, byte[]? value) =>
-            value switch
-            {
-
-                byte[] b => WriteCompactBytes(buffer, b),
-                _ => WriteVarUInt32(buffer, 0)
-            }
-        ;
-
-        public static long WriteMessageSet(MemoryStream buffer, IRecords records)
+        public static void WriteNullableBytes(Stream buffer, byte[]? value)
         {
+            if (value == null)
+                WriteInt32(buffer, -1);
+            else
+                WriteBytes(buffer, value);
+        }
+
+        public static void WriteCompactNullableBytes(Stream buffer, byte[]? value)
+        {
+            if (value == null)
+                WriteVarUInt32(buffer, 0);
+            else
+                WriteCompactBytes(buffer, value);
+        }
+
+        public static void WriteMessageSet(Stream buffer, IRecords? records)
+        {
+            if (records == null)
+            {
+                WriteInt32(buffer, -1);
+                return;
+            }
             var pos = buffer.Position;
             foreach (var record in records)
                 WriteMessage(buffer, record);
-            return buffer.Position - pos;
         }
 
-        private static void WriteMessage(MemoryStream buffer, IRecord record)
+        private static void WriteMessage(Stream buffer, IRecord record)
         {
             WriteInt64(buffer, record.Offset);
             WriteInt32(buffer, record.SizeInBytes);
@@ -187,7 +183,23 @@ namespace Kafka.Common.Encoding
             WriteNullableBytes(buffer, record.Value);
         }
 
-        public static long WriteRecords(MemoryStream buffer, IRecords records)
+        public static void WriteRecords(Stream buffer, IRecords? records)
+        {
+            if (records == null)
+                WriteInt32(buffer, -1);
+            else
+                WriteRecordsInternal(buffer, records);
+        }
+
+        public static void WriteCompactRecords(Stream buffer, IRecords? records)
+        {
+            if (records == null)
+                WriteVarUInt32(buffer, 0);
+            else
+                WriteRecordsInternal(buffer, records);
+        }
+
+        private static long WriteRecordsInternal(Stream buffer, IRecords records)
         {
             var pos = buffer.Position;
             WriteInt64(buffer, records.Offset);
@@ -207,7 +219,7 @@ namespace Kafka.Common.Encoding
             return buffer.Position - pos;
         }
 
-        private static void WriteRecord(MemoryStream buffer, IRecord record)
+        private static void WriteRecord(Stream buffer, IRecord record)
         {
             WriteVarInt32(buffer, record.SizeInBytes);
             WriteInt16(buffer, (short)record.Attributes);
@@ -219,30 +231,34 @@ namespace Kafka.Common.Encoding
                 WriteRecordHeader(buffer, header);
         }
 
-        private static void WriteRecordHeader(MemoryStream buffer, RecordHeader header)
+        private static void WriteRecordHeader(Stream buffer, RecordHeader header)
         {
             WriteCompactString(buffer, header.HeaderKey);
             WriteCompactBytes(buffer, header.Value);
         }
 
-        public static int WriteArray<TItem>(MemoryStream buffer, TItem[]? array, Func<MemoryStream, TItem, int> encodeItem)
+        public static void WriteArray<TItem>(Stream buffer, ImmutableArray<TItem>? array, Action<Stream, TItem> encodeItem)
         {
             if (array == null)
-                return WriteInt32(buffer, -1);
-            var size = WriteInt32(buffer, array.Length);
+            {
+                WriteInt32(buffer, -1);
+                return;
+            }
+            WriteInt32(buffer, array.Value.Length);
             foreach (var item in array)
-                size += encodeItem(buffer, item);
-            return size;
+                encodeItem(buffer, item);
         }
 
-        public static int WriteCompactArray<TItem>(MemoryStream buffer, TItem[]? array, Func<MemoryStream, TItem, int> encodeItem)
+        public static void WriteCompactArray<TItem>(Stream buffer, ImmutableArray<TItem>? array, Action<Stream, TItem> encodeItem)
         {
             if (array == null)
-                return WriteVarUInt32(buffer, 0);
-            var size = WriteVarUInt32(buffer, (uint)array.Length);
+            {
+                WriteVarUInt32(buffer, 0);
+                return;
+            }
+            WriteVarUInt32(buffer, (uint)array.Value.Length + 1);
             foreach (var item in array)
-                size += encodeItem(buffer, item);
-            return size;
+                encodeItem(buffer, item);
         }
 
         public static int SizeOfInt32(int value) =>

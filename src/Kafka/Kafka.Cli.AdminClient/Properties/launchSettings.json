@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Kafka.Cli.AdminClient": {
+      "commandName": "Project",
+      "commandLineArgs": "topics create --topic test --bootstrap-server localhost:9092"
+    }
+  }
+}

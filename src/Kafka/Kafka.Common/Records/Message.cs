@@ -43,30 +43,29 @@ namespace Kafka.Common.Records
 
         void IRecord.EnsureValid()
         {
-            var pos = 0;
-            var len = 0;
+            var pos = 0L;
             var crc = 0U;
             var bytes = new MemoryStream(21);
             // CRC magic byte, attributes and timestamp.
-            len += Encoding.Encoder.WriteInt8(bytes, MagicByte);
-            len += Encoding.Encoder.WriteInt32(bytes, (int)Attributes);
+            Encoding.Encoder.WriteInt8(bytes, MagicByte);
+            Encoding.Encoder.WriteInt32(bytes, (int)Attributes);
             if(MagicByte > 0)
-                len += Encoding.Encoder.WriteInt64(bytes, Timestamp);
-            crc = Crc32.Update(crc, bytes.GetBuffer()[pos..(pos - len)]);
-            pos = len;
+                Encoding.Encoder.WriteInt64(bytes, Timestamp);
+            crc = Crc32.Update(crc, bytes.GetBuffer()[(int)pos..(int)(bytes.Position - pos)]);
+            pos = bytes.Position;
             // CRC Key
             if (Key != null)
             {
-                len += Encoding.Encoder.WriteInt32(bytes, Key.Length);
-                crc = Crc32.Update(crc, bytes.GetBuffer()[pos..(pos - len)]);
+                Encoding.Encoder.WriteInt32(bytes, Key.Length);
+                crc = Crc32.Update(crc, bytes.GetBuffer()[(int)pos..(int)(bytes.Position - pos)]);
                 crc = Crc32.Update(crc, Key);
-                pos = len;
+                pos = bytes.Position;
             }
             // CRC Value
             if (Value != null)
             {
-                len += Encoding.Encoder.WriteInt32(bytes, Value.Length);
-                crc = Crc32.Update(crc, bytes.GetBuffer()[pos..(pos - len)]);
+                Encoding.Encoder.WriteInt32(bytes, Value.Length);
+                crc = Crc32.Update(crc, bytes.GetBuffer()[(int)pos..(int)(bytes.Position - pos)]);
                 crc = Crc32.Update(crc, Value);
             }
             // Throw if not valid.
