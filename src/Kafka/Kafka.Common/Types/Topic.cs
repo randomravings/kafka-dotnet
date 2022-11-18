@@ -1,42 +1,65 @@
 ﻿namespace Kafka.Common.Types
 {
     public readonly record struct Topic(
-        string Value
+        Guid Id,
+        string? Name
     )
     {
-        public static readonly Topic Empty = new("");
-        public static implicit operator Topic(string value) => new(value);
-        public static implicit operator string(Topic value) => value.Value;
+        public static readonly Topic Empty = new(Guid.Empty, null);
+        public static implicit operator Topic(string? name) => new(Guid.Empty, name);
+        public static implicit operator Topic(Guid id) => new(id, null);
         public static bool operator <=(Topic a, Topic b) =>
-            string.CompareOrdinal(a.Value, b.Value) switch
+            a.Id.CompareTo(b.Id) switch
             {
                 -1 => true,
                 1 => false,
-                _ => true,
+                _ => string.CompareOrdinal(a.Name, b.Name) switch
+                {
+                    -1 => true,
+                    1 => false,
+                    _ => true,
+                }
             }
+            
         ;
         public static bool operator >=(Topic a, Topic b) =>
-            string.CompareOrdinal(a.Value, b.Value) switch
+            a.Id.CompareTo(b.Id) switch
             {
                 -1 => false,
                 1 => true,
-                _ => true,
+                _ => string.CompareOrdinal(a.Name, b.Name) switch
+                {
+                    -1 => false,
+                    1 => true,
+                    _ => true,
+                }
             }
         ;
         public static bool operator <(Topic a, Topic b) =>
-            string.CompareOrdinal(a.Value, b.Value) switch
+            a.Id.CompareTo(b.Id) switch
             {
                 -1 => true,
                 1 => false,
-                _ => false,
+                _ => string.CompareOrdinal(a.Name, b.Name) switch
+                {
+                    -1 => true,
+                    1 => false,
+                    _ => false,
+                }
             }
         ;
+
         public static bool operator >(Topic a, Topic b) =>
-            string.CompareOrdinal(a.Value, b.Value) switch
+            a.Id.CompareTo(b.Id) switch
             {
                 -1 => false,
                 1 => true,
-                _ => false,
+                _ => string.CompareOrdinal(a.Name, b.Name) switch
+                {
+                    -1 => false,
+                    1 => true,
+                    _ => false,
+                }
             }
         ;
     }

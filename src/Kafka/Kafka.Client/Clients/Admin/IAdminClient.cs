@@ -7,17 +7,22 @@ namespace Kafka.Client.Clients.Admin
         IClient
     {
         ValueTask<ApiVersionsResult> GetApiVersions(
-            ApiVersionsOptions apiVersionsOptions,
+            ApiVersionsOptions options,
             CancellationToken cancellationToken
         );
 
         ValueTask<ListTopicsResult> ListTopics(
-            ListTopicsOptions listTopicOption,
+            ListTopicsOptions options,
             CancellationToken cancellationToken
         );
 
-        ValueTask<CreateTopicsResult> CreateTopic(
-            CreateTopicsOptions createTopicOptions,
+        ValueTask<CreateTopicsResult> CreateTopics(
+            CreateTopicsOptions options,
+            CancellationToken cancellationToken
+        );
+
+        ValueTask<DeleteTopicsResult> DeleteTopics(
+            DeleteTopicsOptions options,
             CancellationToken cancellationToken
         );
     }

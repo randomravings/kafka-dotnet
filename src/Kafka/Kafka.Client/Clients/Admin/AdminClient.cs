@@ -13,13 +13,10 @@ namespace Kafka.Client.Clients.Admin
         IAdminClient
     {
         public AdminClient(AdminClientConfig config)
-            : base(config)
-        {
-
-        }
+            : base(config) { }
 
         async ValueTask<ApiVersionsResult> IAdminClient.GetApiVersions(
-            ApiVersionsOptions apiVersionsOptions,
+            ApiVersionsOptions options,
             CancellationToken cancellationToken
         )
         {
@@ -32,7 +29,7 @@ namespace Kafka.Client.Clients.Admin
                 request,
                 (s, v, r) => ApiVersionsRequestSerde.Write(s, v, r),
                 (s, v) => ApiVersionsResponseSerde.Read(s, v),
-                null,
+                options.ApiVersion,
                 cancellationToken
             );
             return new(
@@ -52,46 +49,43 @@ namespace Kafka.Client.Clients.Admin
         }
 
         async ValueTask<ListTopicsResult> IAdminClient.ListTopics(
-            ListTopicsOptions listTopicOption,
+            ListTopicsOptions options,
             CancellationToken cancellationToken
         )
         {
             var request = new MetadataRequest(
-                ImmutableArray<MetadataRequest.MetadataRequestTopic>.Empty,
-                false,
-                true,
-                true
+                null,
+                options.IncludeInternal,
+                options.IncludeClusterAuthorizedOperations,
+                options.IncludeTopicAuthorizedOperations
             );
             var response = await HandleRequest(
                 Api.Metadata,
                 request,
                 (s, v, r) => MetadataRequestSerde.Write(s, v, r),
                 (s, v) => MetadataResponseSerde.Read(s, v),
-                null,
+                options.ApiVersion,
                 cancellationToken
             );
             var topics = response
                 .TopicsField
-                .Where(r => listTopicOption.IncludeInternal || r.IsInternalField == false)
+                .Where(r => options.IncludeInternal || r.IsInternalField == false)
+                .Select(r => new TopicListing(new(r.TopicIdField, r.NameField), r.IsInternalField))
                 .ToImmutableSortedDictionary(
-                    k => new Topic(k.NameField ?? ""),
-                    v => new TopicListing(
-                        v.NameField ?? "",
-                        v.IsInternalField,
-                        v.TopicIdField
-                    )
+                    k => k.Topic,
+                    v => v
                 )
             ;
             return new(topics);
         }
 
-        async ValueTask<CreateTopicsResult> IAdminClient.CreateTopic(
-            CreateTopicsOptions createTopicOptions,
+        async ValueTask<CreateTopicsResult> IAdminClient.CreateTopics(
+            CreateTopicsOptions options,
             CancellationToken cancellationToken
         )
         {
             var request = new CreateTopicsRequest(
-                createTopicOptions.Topics.Select(t =>
+                options.Topics.Select(t =>
                     new CreateTopicsRequest.CreatableTopic(
                         t.Name,
                         t.NumPartitions ?? -1,
@@ -110,40 +104,43 @@ namespace Kafka.Client.Clients.Admin
                         ).ToImmutableArray()
                     )
                 ).ToImmutableArray(),
-                createTopicOptions.TimeoutMs,
-                createTopicOptions.ValidateOnly
+                options.TimeoutMs,
+                options.ValidateOnly
             );
             var response = await HandleRequest(
                 Api.CreateTopics,
                 request,
                 (s, v, r) => CreateTopicsRequestSerde.Write(s, v, r),
                 (s, v) => CreateTopicsResponseSerde.Read(s, v),
-                null,
+                options.ApiVersion,
                 cancellationToken
             );
             var createdTopics = response
                 .TopicsField
                 .Where(r => r.ErrorCodeField == 0)
-                .ToImmutableSortedDictionary(
-                    k => new Topic(k.NameField ?? ""),
-                    v => new CreateTopicsResult.CreateTopicResult(
-                        v.TopicIdField,
-                        v.NumPartitionsField,
-                        v.ReplicationFactorField,
-                        v.ConfigsField.HasValue ?
-                            v.ConfigsField.Value.ToImmutableSortedDictionary(
+                .Select(
+                    r => new CreateTopicsResult.CreateTopicResult(
+                        new(r.TopicIdField, r.NameField),
+                        r.NumPartitionsField,
+                        r.ReplicationFactorField,
+                        r.ConfigsField.HasValue ?
+                            r.ConfigsField.Value.ToImmutableSortedDictionary(
                                 k => k.NameField,
                                 v => v.ValueField
                             ) :
                             ImmutableSortedDictionary<string, string?>.Empty
                     )
                 )
+                .ToImmutableSortedDictionary(
+                    k => k.Topic,
+                    v => v
+                )
             ;
             var errorTopics = response
                 .TopicsField
                 .Where(r => r.ErrorCodeField != 0)
                 .ToImmutableSortedDictionary(
-                    k => new Topic(k.NameField ?? ""),
+                    k => new Topic(k.TopicIdField, k.NameField),
                     v => new ApiException(
                         $"Error Code: {v.ErrorCodeField} - Message: {v.ErrorMessageField}"
                     )
@@ -151,6 +148,53 @@ namespace Kafka.Client.Clients.Admin
             ;
             return new CreateTopicsResult(
                 createdTopics,
+                errorTopics
+            );
+        }
+
+        async ValueTask<DeleteTopicsResult> IAdminClient.DeleteTopics(
+            DeleteTopicsOptions options,
+            CancellationToken cancellationToken
+        )
+        {
+            var request = new DeleteTopicsRequest(
+                options.TopicsField.Select(
+                    r => new DeleteTopicsRequest.DeleteTopicState(
+                        r.NameField,
+                        r.TopicIdField
+                    )
+                ).ToImmutableArray(),
+                options.TopicNamesField,
+                options.TimeoutMs
+            );
+            var response = await HandleRequest(
+                Api.DeleteTopics,
+                request,
+                (s, v, r) => DeleteTopicsRequestSerde.Write(s, v, r),
+                (s, v) => DeleteTopicsResponseSerde.Read(s, v),
+                options.ApiVersion,
+                cancellationToken
+            );
+            var deletedTopics = response
+                .ResponsesField
+                .Where(r => r.ErrorCodeField == 0)
+                .Select(
+                    r => new Topic(r.TopicIdField, r.NameField)
+                )
+                .ToImmutableArray()
+            ;
+            var errorTopics = response
+                .ResponsesField
+                .Where(r => r.ErrorCodeField != 0)
+                .ToImmutableSortedDictionary(
+                    k => new Topic(k.TopicIdField, k.NameField),
+                    v => new ApiException(
+                        $"Error Code: {v.ErrorCodeField} - Message: {v.ErrorMessageField}"
+                    )
+                )
+            ;
+            return new(
+                deletedTopics,
                 errorTopics
             );
         }

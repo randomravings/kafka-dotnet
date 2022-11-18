@@ -7,6 +7,7 @@ namespace Kafka.Cli.AdminClient.Verbs
     public sealed class VerbTopicsList
         : OptionsBase
     {
-        
+        [Option("include-internal")]
+        public bool IncludeInternal { get; set; } = false;
     }
 }

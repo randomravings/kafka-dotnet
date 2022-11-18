@@ -16,7 +16,7 @@ namespace Kafka.Client.Clients.Admin.Model
         );
 
         public sealed record CreateTopicResult(
-            Guid TopicId,
+            Topic Topic,
             int NumPartitions,
             int ReplicationFactor,
             ImmutableSortedDictionary<string, string?> Config

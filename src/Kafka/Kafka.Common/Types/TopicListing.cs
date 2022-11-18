@@ -2,10 +2,12 @@
 {
     public sealed record TopicListing(
         Topic Topic,
-        bool IsInternal,
-        Guid TopicId
+        bool IsInternal
     )
     {
-        public static readonly Topic Empty = new("");
+        public static readonly TopicListing Empty = new(
+            Topic.Empty,
+            false
+        );
     }
 }

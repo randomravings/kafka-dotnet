@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using Kafka.Cli.AdminClient.Cmd;
 using Kafka.Cli.AdminClient.Verbs;
+using Kafka.Client.Clients.Admin;
 
 await new Parser(with =>
     {

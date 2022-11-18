@@ -8,6 +8,6 @@ namespace Kafka.Cli.AdminClient.Options
         public string BootstrapServer { get; set; } = "";
 
         [Option("apiversion")]
-        public short ApiVersion { get; set; } = 0;
+        public short? ApiVersion { get; set; } = null;
     }
 }
