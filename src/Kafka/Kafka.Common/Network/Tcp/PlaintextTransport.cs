@@ -1,11 +1,11 @@
-﻿using System.Net.Sockets;
+﻿using Kafka.Common.Encoding;
+using System.Net.Sockets;
 
 namespace Kafka.Common.Network.Tcp
 {
     public sealed class PlaintextTransport :
         ITransport
     {
-        private readonly int _receiveBufferSize = 1024 * 1024;
         private readonly string _host;
         private readonly int _port;
         private readonly TcpClient _tcpClient;
@@ -34,16 +34,38 @@ namespace Kafka.Common.Network.Tcp
             await ValueTask.CompletedTask
         ;
 
-        async ValueTask<MemoryStream> ITransport.HandleRequest(MemoryStream buffer, CancellationToken cancellationToken)
+        async ValueTask<ReadOnlyMemory<byte>> ITransport.HandleRequest(
+            ReadOnlyMemory<byte> requestBytes,
+            CancellationToken cancellationToken
+        )
         {
-            var len = (int)buffer.Length;
-            var bytes = buffer.GetBuffer().AsMemory(0, len);
             var networkStream = _tcpClient.GetStream();
-            await networkStream.WriteAsync(bytes, cancellationToken);
+            Encoder.WriteInt32(networkStream, requestBytes.Length);
+            await networkStream.WriteAsync(requestBytes, cancellationToken);
             await networkStream.FlushAsync(cancellationToken);
-            var receiveBytes = new byte[_receiveBufferSize];
-            await networkStream.ReadAsync(receiveBytes, cancellationToken);
-            return new(receiveBytes);
+            var sizeBytes = new byte[4].AsMemory();
+            await ReadBytesFromNetwork(networkStream, sizeBytes, cancellationToken);
+            var sizeBytesRef = (ReadOnlyMemory<byte>)sizeBytes;
+            var messageLen = Decoder.ReadInt32(ref sizeBytesRef);
+            var responseBytes = new byte[messageLen].AsMemory();
+            await ReadBytesFromNetwork(networkStream, responseBytes, cancellationToken);
+            return responseBytes;
+        }
+
+        private static async ValueTask ReadBytesFromNetwork(
+            NetworkStream stream,
+            Memory<byte> bytes,
+            CancellationToken cancellationToken
+        )
+        {
+            var offset = 0;
+            while (offset < bytes.Length)
+            {
+                var len = await stream.ReadAsync(bytes[offset..], cancellationToken);
+                if (len == 0)
+                    throw new IOException("No bytes received");
+                offset += len;
+            }
         }
 
         void IDisposable.Dispose()

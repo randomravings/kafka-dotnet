@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using TxnOffsetCommitRequestTopic = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic;
+using Kafka.Common.Protocol;
 using TxnOffsetCommitRequestPartition = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic.TxnOffsetCommitRequestPartition;
+using TxnOffsetCommitRequestTopic = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -25,7 +26,7 @@ namespace Kafka.Client.Messages
         string MemberIdField,
         string? GroupInstanceIdField,
         ImmutableArray<TxnOffsetCommitRequestTopic> TopicsField
-    )
+    ) : Request(28)
     {
         public static TxnOffsetCommitRequest Empty { get; } = new(
             "",

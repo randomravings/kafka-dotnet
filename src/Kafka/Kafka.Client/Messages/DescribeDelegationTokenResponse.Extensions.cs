@@ -9,110 +9,113 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class DescribeDelegationTokenResponseSerde
     {
-        private static readonly Func<Stream, DescribeDelegationTokenResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
-            b => ReadV03(b),
+        private static readonly DecodeDelegate<DescribeDelegationTokenResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
         };
-        private static readonly Action<Stream, DescribeDelegationTokenResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<DescribeDelegationTokenResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
             (b, m) => WriteV03(b, m),
         };
-        public static DescribeDelegationTokenResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static DescribeDelegationTokenResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, DescribeDelegationTokenResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static DescribeDelegationTokenResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeDelegationTokenResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static DescribeDelegationTokenResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var tokensField = Decoder.ReadArray<DescribedDelegationToken>(buffer, b => DescribedDelegationTokenSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Tokens'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var tokensField = Decoder.ReadArray<DescribedDelegationToken>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedDelegationTokenSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Tokens'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 errorCodeField,
                 tokensField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV00(Stream buffer, DescribeDelegationTokenResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeDelegationTokenResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteArray<DescribedDelegationToken>(buffer, message.TokensField, (b, i) => DescribedDelegationTokenSerde.WriteV00(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteArray<DescribedDelegationToken>(buffer, message.TokensField, (b, i) => DescribedDelegationTokenSerde.WriteV00(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static DescribeDelegationTokenResponse ReadV01(Stream buffer)
+        private static DescribeDelegationTokenResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var tokensField = Decoder.ReadArray<DescribedDelegationToken>(buffer, b => DescribedDelegationTokenSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Tokens'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var tokensField = Decoder.ReadArray<DescribedDelegationToken>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedDelegationTokenSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Tokens'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 errorCodeField,
                 tokensField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV01(Stream buffer, DescribeDelegationTokenResponse message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, DescribeDelegationTokenResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteArray<DescribedDelegationToken>(buffer, message.TokensField, (b, i) => DescribedDelegationTokenSerde.WriteV01(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteArray<DescribedDelegationToken>(buffer, message.TokensField, (b, i) => DescribedDelegationTokenSerde.WriteV01(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static DescribeDelegationTokenResponse ReadV02(Stream buffer)
+        private static DescribeDelegationTokenResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var tokensField = Decoder.ReadCompactArray<DescribedDelegationToken>(buffer, b => DescribedDelegationTokenSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Tokens'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var tokensField = Decoder.ReadCompactArray<DescribedDelegationToken>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedDelegationTokenSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Tokens'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 errorCodeField,
                 tokensField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV02(Stream buffer, DescribeDelegationTokenResponse message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, DescribeDelegationTokenResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteCompactArray<DescribedDelegationToken>(buffer, message.TokensField, (b, i) => DescribedDelegationTokenSerde.WriteV02(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteCompactArray<DescribedDelegationToken>(buffer, message.TokensField, (b, i) => DescribedDelegationTokenSerde.WriteV02(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
-        private static DescribeDelegationTokenResponse ReadV03(Stream buffer)
+        private static DescribeDelegationTokenResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var tokensField = Decoder.ReadCompactArray<DescribedDelegationToken>(buffer, b => DescribedDelegationTokenSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Tokens'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var tokensField = Decoder.ReadCompactArray<DescribedDelegationToken>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedDelegationTokenSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Tokens'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 errorCodeField,
                 tokensField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV03(Stream buffer, DescribeDelegationTokenResponse message)
+        private static Memory<byte> WriteV03(Memory<byte> buffer, DescribeDelegationTokenResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteCompactArray<DescribedDelegationToken>(buffer, message.TokensField, (b, i) => DescribedDelegationTokenSerde.WriteV03(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteCompactArray<DescribedDelegationToken>(buffer, message.TokensField, (b, i) => DescribedDelegationTokenSerde.WriteV03(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class DescribedDelegationTokenSerde
         {
-            public static DescribedDelegationToken ReadV00(Stream buffer)
+            public static DescribedDelegationToken ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var principalTypeField = Decoder.ReadString(buffer);
-                var principalNameField = Decoder.ReadString(buffer);
+                var principalTypeField = Decoder.ReadString(ref buffer);
+                var principalNameField = Decoder.ReadString(ref buffer);
                 var tokenRequesterPrincipalTypeField = "";
                 var tokenRequesterPrincipalNameField = "";
-                var issueTimestampField = Decoder.ReadInt64(buffer);
-                var expiryTimestampField = Decoder.ReadInt64(buffer);
-                var maxTimestampField = Decoder.ReadInt64(buffer);
-                var tokenIdField = Decoder.ReadString(buffer);
-                var hmacField = Decoder.ReadBytes(buffer);
-                var renewersField = Decoder.ReadArray<DescribedDelegationTokenRenewer>(buffer, b => DescribedDelegationTokenRenewerSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+                var issueTimestampField = Decoder.ReadInt64(ref buffer);
+                var expiryTimestampField = Decoder.ReadInt64(ref buffer);
+                var maxTimestampField = Decoder.ReadInt64(ref buffer);
+                var tokenIdField = Decoder.ReadString(ref buffer);
+                var hmacField = Decoder.ReadBytes(ref buffer);
+                var renewersField = Decoder.ReadArray<DescribedDelegationTokenRenewer>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedDelegationTokenRenewerSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
                 return new(
                     principalTypeField,
                     principalNameField,
@@ -126,29 +129,30 @@ namespace Kafka.Client.Messages
                     renewersField
                 );
             }
-            public static void WriteV00(Stream buffer, DescribedDelegationToken message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, DescribedDelegationToken message)
             {
-                Encoder.WriteString(buffer, message.PrincipalTypeField);
-                Encoder.WriteString(buffer, message.PrincipalNameField);
-                Encoder.WriteInt64(buffer, message.IssueTimestampField);
-                Encoder.WriteInt64(buffer, message.ExpiryTimestampField);
-                Encoder.WriteInt64(buffer, message.MaxTimestampField);
-                Encoder.WriteString(buffer, message.TokenIdField);
-                Encoder.WriteBytes(buffer, message.HmacField);
-                Encoder.WriteArray<DescribedDelegationTokenRenewer>(buffer, message.RenewersField, (b, i) => DescribedDelegationTokenRenewerSerde.WriteV00(b, i));
+                buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
+                buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
+                buffer = Encoder.WriteInt64(buffer, message.IssueTimestampField);
+                buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampField);
+                buffer = Encoder.WriteInt64(buffer, message.MaxTimestampField);
+                buffer = Encoder.WriteString(buffer, message.TokenIdField);
+                buffer = Encoder.WriteBytes(buffer, message.HmacField);
+                buffer = Encoder.WriteArray<DescribedDelegationTokenRenewer>(buffer, message.RenewersField, (b, i) => DescribedDelegationTokenRenewerSerde.WriteV00(b, i));
+                return buffer;
             }
-            public static DescribedDelegationToken ReadV01(Stream buffer)
+            public static DescribedDelegationToken ReadV01(ref ReadOnlyMemory<byte> buffer)
             {
-                var principalTypeField = Decoder.ReadString(buffer);
-                var principalNameField = Decoder.ReadString(buffer);
+                var principalTypeField = Decoder.ReadString(ref buffer);
+                var principalNameField = Decoder.ReadString(ref buffer);
                 var tokenRequesterPrincipalTypeField = "";
                 var tokenRequesterPrincipalNameField = "";
-                var issueTimestampField = Decoder.ReadInt64(buffer);
-                var expiryTimestampField = Decoder.ReadInt64(buffer);
-                var maxTimestampField = Decoder.ReadInt64(buffer);
-                var tokenIdField = Decoder.ReadString(buffer);
-                var hmacField = Decoder.ReadBytes(buffer);
-                var renewersField = Decoder.ReadArray<DescribedDelegationTokenRenewer>(buffer, b => DescribedDelegationTokenRenewerSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+                var issueTimestampField = Decoder.ReadInt64(ref buffer);
+                var expiryTimestampField = Decoder.ReadInt64(ref buffer);
+                var maxTimestampField = Decoder.ReadInt64(ref buffer);
+                var tokenIdField = Decoder.ReadString(ref buffer);
+                var hmacField = Decoder.ReadBytes(ref buffer);
+                var renewersField = Decoder.ReadArray<DescribedDelegationTokenRenewer>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedDelegationTokenRenewerSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
                 return new(
                     principalTypeField,
                     principalNameField,
@@ -162,30 +166,31 @@ namespace Kafka.Client.Messages
                     renewersField
                 );
             }
-            public static void WriteV01(Stream buffer, DescribedDelegationToken message)
+            public static Memory<byte> WriteV01(Memory<byte> buffer, DescribedDelegationToken message)
             {
-                Encoder.WriteString(buffer, message.PrincipalTypeField);
-                Encoder.WriteString(buffer, message.PrincipalNameField);
-                Encoder.WriteInt64(buffer, message.IssueTimestampField);
-                Encoder.WriteInt64(buffer, message.ExpiryTimestampField);
-                Encoder.WriteInt64(buffer, message.MaxTimestampField);
-                Encoder.WriteString(buffer, message.TokenIdField);
-                Encoder.WriteBytes(buffer, message.HmacField);
-                Encoder.WriteArray<DescribedDelegationTokenRenewer>(buffer, message.RenewersField, (b, i) => DescribedDelegationTokenRenewerSerde.WriteV01(b, i));
+                buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
+                buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
+                buffer = Encoder.WriteInt64(buffer, message.IssueTimestampField);
+                buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampField);
+                buffer = Encoder.WriteInt64(buffer, message.MaxTimestampField);
+                buffer = Encoder.WriteString(buffer, message.TokenIdField);
+                buffer = Encoder.WriteBytes(buffer, message.HmacField);
+                buffer = Encoder.WriteArray<DescribedDelegationTokenRenewer>(buffer, message.RenewersField, (b, i) => DescribedDelegationTokenRenewerSerde.WriteV01(b, i));
+                return buffer;
             }
-            public static DescribedDelegationToken ReadV02(Stream buffer)
+            public static DescribedDelegationToken ReadV02(ref ReadOnlyMemory<byte> buffer)
             {
-                var principalTypeField = Decoder.ReadCompactString(buffer);
-                var principalNameField = Decoder.ReadCompactString(buffer);
+                var principalTypeField = Decoder.ReadCompactString(ref buffer);
+                var principalNameField = Decoder.ReadCompactString(ref buffer);
                 var tokenRequesterPrincipalTypeField = "";
                 var tokenRequesterPrincipalNameField = "";
-                var issueTimestampField = Decoder.ReadInt64(buffer);
-                var expiryTimestampField = Decoder.ReadInt64(buffer);
-                var maxTimestampField = Decoder.ReadInt64(buffer);
-                var tokenIdField = Decoder.ReadCompactString(buffer);
-                var hmacField = Decoder.ReadCompactBytes(buffer);
-                var renewersField = Decoder.ReadCompactArray<DescribedDelegationTokenRenewer>(buffer, b => DescribedDelegationTokenRenewerSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
-                _ = Decoder.ReadVarUInt32(buffer);
+                var issueTimestampField = Decoder.ReadInt64(ref buffer);
+                var expiryTimestampField = Decoder.ReadInt64(ref buffer);
+                var maxTimestampField = Decoder.ReadInt64(ref buffer);
+                var tokenIdField = Decoder.ReadCompactString(ref buffer);
+                var hmacField = Decoder.ReadCompactBytes(ref buffer);
+                var renewersField = Decoder.ReadCompactArray<DescribedDelegationTokenRenewer>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedDelegationTokenRenewerSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     principalTypeField,
                     principalNameField,
@@ -199,31 +204,32 @@ namespace Kafka.Client.Messages
                     renewersField
                 );
             }
-            public static void WriteV02(Stream buffer, DescribedDelegationToken message)
+            public static Memory<byte> WriteV02(Memory<byte> buffer, DescribedDelegationToken message)
             {
-                Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-                Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-                Encoder.WriteInt64(buffer, message.IssueTimestampField);
-                Encoder.WriteInt64(buffer, message.ExpiryTimestampField);
-                Encoder.WriteInt64(buffer, message.MaxTimestampField);
-                Encoder.WriteCompactString(buffer, message.TokenIdField);
-                Encoder.WriteCompactBytes(buffer, message.HmacField);
-                Encoder.WriteCompactArray<DescribedDelegationTokenRenewer>(buffer, message.RenewersField, (b, i) => DescribedDelegationTokenRenewerSerde.WriteV02(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
+                buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
+                buffer = Encoder.WriteInt64(buffer, message.IssueTimestampField);
+                buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampField);
+                buffer = Encoder.WriteInt64(buffer, message.MaxTimestampField);
+                buffer = Encoder.WriteCompactString(buffer, message.TokenIdField);
+                buffer = Encoder.WriteCompactBytes(buffer, message.HmacField);
+                buffer = Encoder.WriteCompactArray<DescribedDelegationTokenRenewer>(buffer, message.RenewersField, (b, i) => DescribedDelegationTokenRenewerSerde.WriteV02(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
-            public static DescribedDelegationToken ReadV03(Stream buffer)
+            public static DescribedDelegationToken ReadV03(ref ReadOnlyMemory<byte> buffer)
             {
-                var principalTypeField = Decoder.ReadCompactString(buffer);
-                var principalNameField = Decoder.ReadCompactString(buffer);
-                var tokenRequesterPrincipalTypeField = Decoder.ReadCompactString(buffer);
-                var tokenRequesterPrincipalNameField = Decoder.ReadCompactString(buffer);
-                var issueTimestampField = Decoder.ReadInt64(buffer);
-                var expiryTimestampField = Decoder.ReadInt64(buffer);
-                var maxTimestampField = Decoder.ReadInt64(buffer);
-                var tokenIdField = Decoder.ReadCompactString(buffer);
-                var hmacField = Decoder.ReadCompactBytes(buffer);
-                var renewersField = Decoder.ReadCompactArray<DescribedDelegationTokenRenewer>(buffer, b => DescribedDelegationTokenRenewerSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
-                _ = Decoder.ReadVarUInt32(buffer);
+                var principalTypeField = Decoder.ReadCompactString(ref buffer);
+                var principalNameField = Decoder.ReadCompactString(ref buffer);
+                var tokenRequesterPrincipalTypeField = Decoder.ReadCompactString(ref buffer);
+                var tokenRequesterPrincipalNameField = Decoder.ReadCompactString(ref buffer);
+                var issueTimestampField = Decoder.ReadInt64(ref buffer);
+                var expiryTimestampField = Decoder.ReadInt64(ref buffer);
+                var maxTimestampField = Decoder.ReadInt64(ref buffer);
+                var tokenIdField = Decoder.ReadCompactString(ref buffer);
+                var hmacField = Decoder.ReadCompactBytes(ref buffer);
+                var renewersField = Decoder.ReadCompactArray<DescribedDelegationTokenRenewer>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedDelegationTokenRenewerSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     principalTypeField,
                     principalNameField,
@@ -237,81 +243,86 @@ namespace Kafka.Client.Messages
                     renewersField
                 );
             }
-            public static void WriteV03(Stream buffer, DescribedDelegationToken message)
+            public static Memory<byte> WriteV03(Memory<byte> buffer, DescribedDelegationToken message)
             {
-                Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-                Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-                Encoder.WriteCompactString(buffer, message.TokenRequesterPrincipalTypeField);
-                Encoder.WriteCompactString(buffer, message.TokenRequesterPrincipalNameField);
-                Encoder.WriteInt64(buffer, message.IssueTimestampField);
-                Encoder.WriteInt64(buffer, message.ExpiryTimestampField);
-                Encoder.WriteInt64(buffer, message.MaxTimestampField);
-                Encoder.WriteCompactString(buffer, message.TokenIdField);
-                Encoder.WriteCompactBytes(buffer, message.HmacField);
-                Encoder.WriteCompactArray<DescribedDelegationTokenRenewer>(buffer, message.RenewersField, (b, i) => DescribedDelegationTokenRenewerSerde.WriteV03(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
+                buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
+                buffer = Encoder.WriteCompactString(buffer, message.TokenRequesterPrincipalTypeField);
+                buffer = Encoder.WriteCompactString(buffer, message.TokenRequesterPrincipalNameField);
+                buffer = Encoder.WriteInt64(buffer, message.IssueTimestampField);
+                buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampField);
+                buffer = Encoder.WriteInt64(buffer, message.MaxTimestampField);
+                buffer = Encoder.WriteCompactString(buffer, message.TokenIdField);
+                buffer = Encoder.WriteCompactBytes(buffer, message.HmacField);
+                buffer = Encoder.WriteCompactArray<DescribedDelegationTokenRenewer>(buffer, message.RenewersField, (b, i) => DescribedDelegationTokenRenewerSerde.WriteV03(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
             private static class DescribedDelegationTokenRenewerSerde
             {
-                public static DescribedDelegationTokenRenewer ReadV00(Stream buffer)
+                public static DescribedDelegationTokenRenewer ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var principalTypeField = Decoder.ReadString(buffer);
-                    var principalNameField = Decoder.ReadString(buffer);
+                    var principalTypeField = Decoder.ReadString(ref buffer);
+                    var principalNameField = Decoder.ReadString(ref buffer);
                     return new(
                         principalTypeField,
                         principalNameField
                     );
                 }
-                public static void WriteV00(Stream buffer, DescribedDelegationTokenRenewer message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, DescribedDelegationTokenRenewer message)
                 {
-                    Encoder.WriteString(buffer, message.PrincipalTypeField);
-                    Encoder.WriteString(buffer, message.PrincipalNameField);
+                    buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
+                    buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
+                    return buffer;
                 }
-                public static DescribedDelegationTokenRenewer ReadV01(Stream buffer)
+                public static DescribedDelegationTokenRenewer ReadV01(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var principalTypeField = Decoder.ReadString(buffer);
-                    var principalNameField = Decoder.ReadString(buffer);
+                    var principalTypeField = Decoder.ReadString(ref buffer);
+                    var principalNameField = Decoder.ReadString(ref buffer);
                     return new(
                         principalTypeField,
                         principalNameField
                     );
                 }
-                public static void WriteV01(Stream buffer, DescribedDelegationTokenRenewer message)
+                public static Memory<byte> WriteV01(Memory<byte> buffer, DescribedDelegationTokenRenewer message)
                 {
-                    Encoder.WriteString(buffer, message.PrincipalTypeField);
-                    Encoder.WriteString(buffer, message.PrincipalNameField);
+                    buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
+                    buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
+                    return buffer;
                 }
-                public static DescribedDelegationTokenRenewer ReadV02(Stream buffer)
+                public static DescribedDelegationTokenRenewer ReadV02(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var principalTypeField = Decoder.ReadCompactString(buffer);
-                    var principalNameField = Decoder.ReadCompactString(buffer);
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var principalTypeField = Decoder.ReadCompactString(ref buffer);
+                    var principalNameField = Decoder.ReadCompactString(ref buffer);
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         principalTypeField,
                         principalNameField
                     );
                 }
-                public static void WriteV02(Stream buffer, DescribedDelegationTokenRenewer message)
+                public static Memory<byte> WriteV02(Memory<byte> buffer, DescribedDelegationTokenRenewer message)
                 {
-                    Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-                    Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
+                    buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
-                public static DescribedDelegationTokenRenewer ReadV03(Stream buffer)
+                public static DescribedDelegationTokenRenewer ReadV03(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var principalTypeField = Decoder.ReadCompactString(buffer);
-                    var principalNameField = Decoder.ReadCompactString(buffer);
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var principalTypeField = Decoder.ReadCompactString(ref buffer);
+                    var principalNameField = Decoder.ReadCompactString(ref buffer);
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         principalTypeField,
                         principalNameField
                     );
                 }
-                public static void WriteV03(Stream buffer, DescribedDelegationTokenRenewer message)
+                public static Memory<byte> WriteV03(Memory<byte> buffer, DescribedDelegationTokenRenewer message)
                 {
-                    Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-                    Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
+                    buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
             }
         }

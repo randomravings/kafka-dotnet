@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TopicRequest = Kafka.Client.Messages.DescribeProducersRequest.TopicRequest;
 
 namespace Kafka.Client.Messages
@@ -10,7 +11,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DescribeProducersRequest (
         ImmutableArray<TopicRequest> TopicsField
-    )
+    ) : Request(61)
     {
         public static DescribeProducersRequest Empty { get; } = new(
             ImmutableArray<TopicRequest>.Empty

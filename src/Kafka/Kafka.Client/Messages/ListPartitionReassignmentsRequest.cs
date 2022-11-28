@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using ListPartitionReassignmentsTopics = Kafka.Client.Messages.ListPartitionReassignmentsRequest.ListPartitionReassignmentsTopics;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record ListPartitionReassignmentsRequest (
         int TimeoutMsField,
         ImmutableArray<ListPartitionReassignmentsTopics>? TopicsField
-    )
+    ) : Request(46)
     {
         public static ListPartitionReassignmentsRequest Empty { get; } = new(
             default(int),

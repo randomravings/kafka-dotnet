@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using CreatePartitionsTopicResult = Kafka.Client.Messages.CreatePartitionsResponse.CreatePartitionsTopicResult;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record CreatePartitionsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<CreatePartitionsTopicResult> ResultsField
-    )
+    ) : Response(37)
     {
         public static CreatePartitionsResponse Empty { get; } = new(
             default(int),

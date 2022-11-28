@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DeleteTopicState = Kafka.Client.Messages.DeleteTopicsRequest.DeleteTopicState;
 
 namespace Kafka.Client.Messages
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<DeleteTopicState> TopicsField,
         ImmutableArray<string> TopicNamesField,
         int TimeoutMsField
-    )
+    ) : Request(20)
     {
         public static DeleteTopicsRequest Empty { get; } = new(
             ImmutableArray<DeleteTopicState>.Empty,

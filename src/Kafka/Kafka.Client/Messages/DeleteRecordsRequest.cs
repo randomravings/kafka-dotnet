@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using DeleteRecordsTopic = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic;
+using Kafka.Common.Protocol;
 using DeleteRecordsPartition = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic.DeleteRecordsPartition;
+using DeleteRecordsTopic = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record DeleteRecordsRequest (
         ImmutableArray<DeleteRecordsTopic> TopicsField,
         int TimeoutMsField
-    )
+    ) : Request(21)
     {
         public static DeleteRecordsRequest Empty { get; } = new(
             ImmutableArray<DeleteRecordsTopic>.Empty,

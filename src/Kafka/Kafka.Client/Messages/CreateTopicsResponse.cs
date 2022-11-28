@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponse.CreatableTopicResult;
+using Kafka.Common.Protocol;
 using CreatableTopicConfigs = Kafka.Client.Messages.CreateTopicsResponse.CreatableTopicResult.CreatableTopicConfigs;
+using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponse.CreatableTopicResult;
 
 namespace Kafka.Client.Messages
 {
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record CreateTopicsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<CreatableTopicResult> TopicsField
-    )
+    ) : Response(19)
     {
         public static CreateTopicsResponse Empty { get; } = new(
             default(int),

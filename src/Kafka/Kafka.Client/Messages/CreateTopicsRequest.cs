@@ -1,8 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
+using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreateableTopicConfig;
 using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
 using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreatableReplicaAssignment;
-using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreateableTopicConfig;
 
 namespace Kafka.Client.Messages
 {
@@ -16,7 +17,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<CreatableTopic> TopicsField,
         int timeoutMsField,
         bool validateOnlyField
-    )
+    ) : Request(19)
     {
         public static CreateTopicsRequest Empty { get; } = new(
             ImmutableArray<CreatableTopic>.Empty,
@@ -46,20 +47,6 @@ namespace Kafka.Client.Messages
                 ImmutableArray<CreateableTopicConfig>.Empty
             );
             /// <summary>
-            /// <param name="PartitionIndexField">The partition index.</param>
-            /// <param name="BrokerIdsField">The brokers to place the partition on.</param>
-            /// </summary>
-            public sealed record CreatableReplicaAssignment (
-                int PartitionIndexField,
-                ImmutableArray<int> BrokerIdsField
-            )
-            {
-                public static CreatableReplicaAssignment Empty { get; } = new(
-                    default(int),
-                    ImmutableArray<int>.Empty
-                );
-            };
-            /// <summary>
             /// <param name="NameField">The configuration name.</param>
             /// <param name="ValueField">The configuration value.</param>
             /// </summary>
@@ -71,6 +58,20 @@ namespace Kafka.Client.Messages
                 public static CreateableTopicConfig Empty { get; } = new(
                     "",
                     default(string?)
+                );
+            };
+            /// <summary>
+            /// <param name="PartitionIndexField">The partition index.</param>
+            /// <param name="BrokerIdsField">The brokers to place the partition on.</param>
+            /// </summary>
+            public sealed record CreatableReplicaAssignment (
+                int PartitionIndexField,
+                ImmutableArray<int> BrokerIdsField
+            )
+            {
+                public static CreatableReplicaAssignment Empty { get; } = new(
+                    default(int),
+                    ImmutableArray<int>.Empty
                 );
             };
         };

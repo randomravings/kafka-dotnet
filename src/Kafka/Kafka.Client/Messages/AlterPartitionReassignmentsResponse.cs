@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ReassignableTopicResponse = Kafka.Client.Messages.AlterPartitionReassignmentsResponse.ReassignableTopicResponse;
+using Kafka.Common.Protocol;
 using ReassignablePartitionResponse = Kafka.Client.Messages.AlterPartitionReassignmentsResponse.ReassignableTopicResponse.ReassignablePartitionResponse;
+using ReassignableTopicResponse = Kafka.Client.Messages.AlterPartitionReassignmentsResponse.ReassignableTopicResponse;
 
 namespace Kafka.Client.Messages
 {
@@ -17,7 +18,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         string? ErrorMessageField,
         ImmutableArray<ReassignableTopicResponse> ResponsesField
-    )
+    ) : Response(45)
     {
         public static AlterPartitionReassignmentsResponse Empty { get; } = new(
             default(int),

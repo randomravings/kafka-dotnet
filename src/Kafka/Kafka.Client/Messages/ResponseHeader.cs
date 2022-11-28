@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {

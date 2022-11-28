@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         long ProducerIdStartField,
         int ProducerIdLenField
-    )
+    ) : Response(67)
     {
         public static AllocateProducerIdsResponse Empty { get; } = new(
             default(int),

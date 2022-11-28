@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -20,7 +21,7 @@ namespace Kafka.Client.Messages
         string? HostFilterField,
         sbyte OperationField,
         sbyte PermissionTypeField
-    )
+    ) : Request(29)
     {
         public static DescribeAclsRequest Empty { get; } = new(
             default(sbyte),

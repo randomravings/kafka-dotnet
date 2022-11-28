@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using UserName = Kafka.Client.Messages.DescribeUserScramCredentialsRequest.UserName;
 
 namespace Kafka.Client.Messages
@@ -10,7 +11,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DescribeUserScramCredentialsRequest (
         ImmutableArray<UserName>? UsersField
-    )
+    ) : Request(50)
     {
         public static DescribeUserScramCredentialsRequest Empty { get; } = new(
             default(ImmutableArray<UserName>?)

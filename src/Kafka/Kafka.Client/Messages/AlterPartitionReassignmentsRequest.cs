@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ReassignablePartition = Kafka.Client.Messages.AlterPartitionReassignmentsRequest.ReassignableTopic.ReassignablePartition;
+using Kafka.Common.Protocol;
 using ReassignableTopic = Kafka.Client.Messages.AlterPartitionReassignmentsRequest.ReassignableTopic;
+using ReassignablePartition = Kafka.Client.Messages.AlterPartitionReassignmentsRequest.ReassignableTopic.ReassignablePartition;
 
 namespace Kafka.Client.Messages
 {
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record AlterPartitionReassignmentsRequest (
         int TimeoutMsField,
         ImmutableArray<ReassignableTopic> TopicsField
-    )
+    ) : Request(45)
     {
         public static AlterPartitionReassignmentsRequest Empty { get; } = new(
             default(int),

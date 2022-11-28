@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using OffsetDeleteRequestPartition = Kafka.Client.Messages.OffsetDeleteRequest.OffsetDeleteRequestTopic.OffsetDeleteRequestPartition;
 using OffsetDeleteRequestTopic = Kafka.Client.Messages.OffsetDeleteRequest.OffsetDeleteRequestTopic;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record OffsetDeleteRequest (
         string GroupIdField,
         ImmutableArray<OffsetDeleteRequestTopic> TopicsField
-    )
+    ) : Request(47)
     {
         public static OffsetDeleteRequest Empty { get; } = new(
             "",

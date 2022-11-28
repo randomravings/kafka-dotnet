@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using SyncGroupRequestAssignment = Kafka.Client.Messages.SyncGroupRequest.SyncGroupRequestAssignment;
 
 namespace Kafka.Client.Messages
@@ -22,7 +23,7 @@ namespace Kafka.Client.Messages
         string? ProtocolTypeField,
         string? ProtocolNameField,
         ImmutableArray<SyncGroupRequestAssignment> AssignmentsField
-    )
+    ) : Request(14)
     {
         public static SyncGroupRequest Empty { get; } = new(
             "",
@@ -39,12 +40,12 @@ namespace Kafka.Client.Messages
         /// </summary>
         public sealed record SyncGroupRequestAssignment (
             string MemberIdField,
-            byte[] AssignmentField
+            ImmutableArray<byte> AssignmentField
         )
         {
             public static SyncGroupRequestAssignment Empty { get; } = new(
                 "",
-                System.Array.Empty<byte>()
+                ImmutableArray<byte>.Empty
             );
         };
     };

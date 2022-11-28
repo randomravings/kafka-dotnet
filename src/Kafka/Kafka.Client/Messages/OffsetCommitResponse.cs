@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using OffsetCommitResponseTopic = Kafka.Client.Messages.OffsetCommitResponse.OffsetCommitResponseTopic;
 using OffsetCommitResponsePartition = Kafka.Client.Messages.OffsetCommitResponse.OffsetCommitResponseTopic.OffsetCommitResponsePartition;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record OffsetCommitResponse (
         int ThrottleTimeMsField,
         ImmutableArray<OffsetCommitResponseTopic> TopicsField
-    )
+    ) : Response(8)
     {
         public static OffsetCommitResponse Empty { get; } = new(
             default(int),

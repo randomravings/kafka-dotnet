@@ -9,15 +9,15 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class DescribeGroupsResponseSerde
     {
-        private static readonly Func<Stream, DescribeGroupsResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
-            b => ReadV03(b),
-            b => ReadV04(b),
-            b => ReadV05(b),
+        private static readonly DecodeDelegate<DescribeGroupsResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
         };
-        private static readonly Action<Stream, DescribeGroupsResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<DescribeGroupsResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
@@ -25,107 +25,112 @@ namespace Kafka.Client.Messages
             (b, m) => WriteV04(b, m),
             (b, m) => WriteV05(b, m),
         };
-        public static DescribeGroupsResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static DescribeGroupsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, DescribeGroupsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static DescribeGroupsResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeGroupsResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static DescribeGroupsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
             var throttleTimeMsField = default(int);
-            var groupsField = Decoder.ReadArray<DescribedGroup>(buffer, b => DescribedGroupSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            var groupsField = Decoder.ReadArray<DescribedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
             return new(
                 throttleTimeMsField,
                 groupsField
             );
         }
-        private static void WriteV00(Stream buffer, DescribeGroupsResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeGroupsResponse message)
         {
-            Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV00(b, i));
+            buffer = Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV00(b, i));
+            return buffer;
         }
-        private static DescribeGroupsResponse ReadV01(Stream buffer)
+        private static DescribeGroupsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var groupsField = Decoder.ReadArray<DescribedGroup>(buffer, b => DescribedGroupSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var groupsField = Decoder.ReadArray<DescribedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
             return new(
                 throttleTimeMsField,
                 groupsField
             );
         }
-        private static void WriteV01(Stream buffer, DescribeGroupsResponse message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, DescribeGroupsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV01(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV01(b, i));
+            return buffer;
         }
-        private static DescribeGroupsResponse ReadV02(Stream buffer)
+        private static DescribeGroupsResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var groupsField = Decoder.ReadArray<DescribedGroup>(buffer, b => DescribedGroupSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var groupsField = Decoder.ReadArray<DescribedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
             return new(
                 throttleTimeMsField,
                 groupsField
             );
         }
-        private static void WriteV02(Stream buffer, DescribeGroupsResponse message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, DescribeGroupsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV02(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV02(b, i));
+            return buffer;
         }
-        private static DescribeGroupsResponse ReadV03(Stream buffer)
+        private static DescribeGroupsResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var groupsField = Decoder.ReadArray<DescribedGroup>(buffer, b => DescribedGroupSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var groupsField = Decoder.ReadArray<DescribedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
             return new(
                 throttleTimeMsField,
                 groupsField
             );
         }
-        private static void WriteV03(Stream buffer, DescribeGroupsResponse message)
+        private static Memory<byte> WriteV03(Memory<byte> buffer, DescribeGroupsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV03(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV03(b, i));
+            return buffer;
         }
-        private static DescribeGroupsResponse ReadV04(Stream buffer)
+        private static DescribeGroupsResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var groupsField = Decoder.ReadArray<DescribedGroup>(buffer, b => DescribedGroupSerde.ReadV04(b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var groupsField = Decoder.ReadArray<DescribedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
             return new(
                 throttleTimeMsField,
                 groupsField
             );
         }
-        private static void WriteV04(Stream buffer, DescribeGroupsResponse message)
+        private static Memory<byte> WriteV04(Memory<byte> buffer, DescribeGroupsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV04(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV04(b, i));
+            return buffer;
         }
-        private static DescribeGroupsResponse ReadV05(Stream buffer)
+        private static DescribeGroupsResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var groupsField = Decoder.ReadCompactArray<DescribedGroup>(buffer, b => DescribedGroupSerde.ReadV05(b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
-            _ = Decoder.ReadVarUInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var groupsField = Decoder.ReadCompactArray<DescribedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 throttleTimeMsField,
                 groupsField
             );
         }
-        private static void WriteV05(Stream buffer, DescribeGroupsResponse message)
+        private static Memory<byte> WriteV05(Memory<byte> buffer, DescribeGroupsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteCompactArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV05(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteCompactArray<DescribedGroup>(buffer, message.GroupsField, (b, i) => DescribedGroupSerde.WriteV05(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class DescribedGroupSerde
         {
-            public static DescribedGroup ReadV00(Stream buffer)
+            public static DescribedGroup ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var groupIdField = Decoder.ReadString(buffer);
-                var groupStateField = Decoder.ReadString(buffer);
-                var protocolTypeField = Decoder.ReadString(buffer);
-                var protocolDataField = Decoder.ReadString(buffer);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, b => DescribedGroupMemberSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var groupIdField = Decoder.ReadString(ref buffer);
+                var groupStateField = Decoder.ReadString(ref buffer);
+                var protocolTypeField = Decoder.ReadString(ref buffer);
+                var protocolDataField = Decoder.ReadString(ref buffer);
+                var membersField = Decoder.ReadArray<DescribedGroupMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupMemberSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
                 var authorizedOperationsField = default(int);
                 return new(
                     errorCodeField,
@@ -137,23 +142,24 @@ namespace Kafka.Client.Messages
                     authorizedOperationsField
                 );
             }
-            public static void WriteV00(Stream buffer, DescribedGroup message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, DescribedGroup message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteString(buffer, message.GroupIdField);
-                Encoder.WriteString(buffer, message.GroupStateField);
-                Encoder.WriteString(buffer, message.ProtocolTypeField);
-                Encoder.WriteString(buffer, message.ProtocolDataField);
-                Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV00(b, i));
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteString(buffer, message.GroupIdField);
+                buffer = Encoder.WriteString(buffer, message.GroupStateField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolTypeField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolDataField);
+                buffer = Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV00(b, i));
+                return buffer;
             }
-            public static DescribedGroup ReadV01(Stream buffer)
+            public static DescribedGroup ReadV01(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var groupIdField = Decoder.ReadString(buffer);
-                var groupStateField = Decoder.ReadString(buffer);
-                var protocolTypeField = Decoder.ReadString(buffer);
-                var protocolDataField = Decoder.ReadString(buffer);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, b => DescribedGroupMemberSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var groupIdField = Decoder.ReadString(ref buffer);
+                var groupStateField = Decoder.ReadString(ref buffer);
+                var protocolTypeField = Decoder.ReadString(ref buffer);
+                var protocolDataField = Decoder.ReadString(ref buffer);
+                var membersField = Decoder.ReadArray<DescribedGroupMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupMemberSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
                 var authorizedOperationsField = default(int);
                 return new(
                     errorCodeField,
@@ -165,23 +171,24 @@ namespace Kafka.Client.Messages
                     authorizedOperationsField
                 );
             }
-            public static void WriteV01(Stream buffer, DescribedGroup message)
+            public static Memory<byte> WriteV01(Memory<byte> buffer, DescribedGroup message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteString(buffer, message.GroupIdField);
-                Encoder.WriteString(buffer, message.GroupStateField);
-                Encoder.WriteString(buffer, message.ProtocolTypeField);
-                Encoder.WriteString(buffer, message.ProtocolDataField);
-                Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV01(b, i));
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteString(buffer, message.GroupIdField);
+                buffer = Encoder.WriteString(buffer, message.GroupStateField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolTypeField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolDataField);
+                buffer = Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV01(b, i));
+                return buffer;
             }
-            public static DescribedGroup ReadV02(Stream buffer)
+            public static DescribedGroup ReadV02(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var groupIdField = Decoder.ReadString(buffer);
-                var groupStateField = Decoder.ReadString(buffer);
-                var protocolTypeField = Decoder.ReadString(buffer);
-                var protocolDataField = Decoder.ReadString(buffer);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, b => DescribedGroupMemberSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var groupIdField = Decoder.ReadString(ref buffer);
+                var groupStateField = Decoder.ReadString(ref buffer);
+                var protocolTypeField = Decoder.ReadString(ref buffer);
+                var protocolDataField = Decoder.ReadString(ref buffer);
+                var membersField = Decoder.ReadArray<DescribedGroupMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupMemberSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
                 var authorizedOperationsField = default(int);
                 return new(
                     errorCodeField,
@@ -193,24 +200,25 @@ namespace Kafka.Client.Messages
                     authorizedOperationsField
                 );
             }
-            public static void WriteV02(Stream buffer, DescribedGroup message)
+            public static Memory<byte> WriteV02(Memory<byte> buffer, DescribedGroup message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteString(buffer, message.GroupIdField);
-                Encoder.WriteString(buffer, message.GroupStateField);
-                Encoder.WriteString(buffer, message.ProtocolTypeField);
-                Encoder.WriteString(buffer, message.ProtocolDataField);
-                Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV02(b, i));
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteString(buffer, message.GroupIdField);
+                buffer = Encoder.WriteString(buffer, message.GroupStateField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolTypeField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolDataField);
+                buffer = Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV02(b, i));
+                return buffer;
             }
-            public static DescribedGroup ReadV03(Stream buffer)
+            public static DescribedGroup ReadV03(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var groupIdField = Decoder.ReadString(buffer);
-                var groupStateField = Decoder.ReadString(buffer);
-                var protocolTypeField = Decoder.ReadString(buffer);
-                var protocolDataField = Decoder.ReadString(buffer);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, b => DescribedGroupMemberSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-                var authorizedOperationsField = Decoder.ReadInt32(buffer);
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var groupIdField = Decoder.ReadString(ref buffer);
+                var groupStateField = Decoder.ReadString(ref buffer);
+                var protocolTypeField = Decoder.ReadString(ref buffer);
+                var protocolDataField = Decoder.ReadString(ref buffer);
+                var membersField = Decoder.ReadArray<DescribedGroupMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupMemberSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var authorizedOperationsField = Decoder.ReadInt32(ref buffer);
                 return new(
                     errorCodeField,
                     groupIdField,
@@ -221,25 +229,26 @@ namespace Kafka.Client.Messages
                     authorizedOperationsField
                 );
             }
-            public static void WriteV03(Stream buffer, DescribedGroup message)
+            public static Memory<byte> WriteV03(Memory<byte> buffer, DescribedGroup message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteString(buffer, message.GroupIdField);
-                Encoder.WriteString(buffer, message.GroupStateField);
-                Encoder.WriteString(buffer, message.ProtocolTypeField);
-                Encoder.WriteString(buffer, message.ProtocolDataField);
-                Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV03(b, i));
-                Encoder.WriteInt32(buffer, message.AuthorizedOperationsField);
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteString(buffer, message.GroupIdField);
+                buffer = Encoder.WriteString(buffer, message.GroupStateField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolTypeField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolDataField);
+                buffer = Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV03(b, i));
+                buffer = Encoder.WriteInt32(buffer, message.AuthorizedOperationsField);
+                return buffer;
             }
-            public static DescribedGroup ReadV04(Stream buffer)
+            public static DescribedGroup ReadV04(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var groupIdField = Decoder.ReadString(buffer);
-                var groupStateField = Decoder.ReadString(buffer);
-                var protocolTypeField = Decoder.ReadString(buffer);
-                var protocolDataField = Decoder.ReadString(buffer);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, b => DescribedGroupMemberSerde.ReadV04(b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-                var authorizedOperationsField = Decoder.ReadInt32(buffer);
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var groupIdField = Decoder.ReadString(ref buffer);
+                var groupStateField = Decoder.ReadString(ref buffer);
+                var protocolTypeField = Decoder.ReadString(ref buffer);
+                var protocolDataField = Decoder.ReadString(ref buffer);
+                var membersField = Decoder.ReadArray<DescribedGroupMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupMemberSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var authorizedOperationsField = Decoder.ReadInt32(ref buffer);
                 return new(
                     errorCodeField,
                     groupIdField,
@@ -250,26 +259,27 @@ namespace Kafka.Client.Messages
                     authorizedOperationsField
                 );
             }
-            public static void WriteV04(Stream buffer, DescribedGroup message)
+            public static Memory<byte> WriteV04(Memory<byte> buffer, DescribedGroup message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteString(buffer, message.GroupIdField);
-                Encoder.WriteString(buffer, message.GroupStateField);
-                Encoder.WriteString(buffer, message.ProtocolTypeField);
-                Encoder.WriteString(buffer, message.ProtocolDataField);
-                Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV04(b, i));
-                Encoder.WriteInt32(buffer, message.AuthorizedOperationsField);
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteString(buffer, message.GroupIdField);
+                buffer = Encoder.WriteString(buffer, message.GroupStateField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolTypeField);
+                buffer = Encoder.WriteString(buffer, message.ProtocolDataField);
+                buffer = Encoder.WriteArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV04(b, i));
+                buffer = Encoder.WriteInt32(buffer, message.AuthorizedOperationsField);
+                return buffer;
             }
-            public static DescribedGroup ReadV05(Stream buffer)
+            public static DescribedGroup ReadV05(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var groupIdField = Decoder.ReadCompactString(buffer);
-                var groupStateField = Decoder.ReadCompactString(buffer);
-                var protocolTypeField = Decoder.ReadCompactString(buffer);
-                var protocolDataField = Decoder.ReadCompactString(buffer);
-                var membersField = Decoder.ReadCompactArray<DescribedGroupMember>(buffer, b => DescribedGroupMemberSerde.ReadV05(b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-                var authorizedOperationsField = Decoder.ReadInt32(buffer);
-                _ = Decoder.ReadVarUInt32(buffer);
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var groupIdField = Decoder.ReadCompactString(ref buffer);
+                var groupStateField = Decoder.ReadCompactString(ref buffer);
+                var protocolTypeField = Decoder.ReadCompactString(ref buffer);
+                var protocolDataField = Decoder.ReadCompactString(ref buffer);
+                var membersField = Decoder.ReadCompactArray<DescribedGroupMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribedGroupMemberSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var authorizedOperationsField = Decoder.ReadInt32(ref buffer);
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     errorCodeField,
                     groupIdField,
@@ -280,27 +290,28 @@ namespace Kafka.Client.Messages
                     authorizedOperationsField
                 );
             }
-            public static void WriteV05(Stream buffer, DescribedGroup message)
+            public static Memory<byte> WriteV05(Memory<byte> buffer, DescribedGroup message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteCompactString(buffer, message.GroupIdField);
-                Encoder.WriteCompactString(buffer, message.GroupStateField);
-                Encoder.WriteCompactString(buffer, message.ProtocolTypeField);
-                Encoder.WriteCompactString(buffer, message.ProtocolDataField);
-                Encoder.WriteCompactArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV05(b, i));
-                Encoder.WriteInt32(buffer, message.AuthorizedOperationsField);
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteCompactString(buffer, message.GroupIdField);
+                buffer = Encoder.WriteCompactString(buffer, message.GroupStateField);
+                buffer = Encoder.WriteCompactString(buffer, message.ProtocolTypeField);
+                buffer = Encoder.WriteCompactString(buffer, message.ProtocolDataField);
+                buffer = Encoder.WriteCompactArray<DescribedGroupMember>(buffer, message.MembersField, (b, i) => DescribedGroupMemberSerde.WriteV05(b, i));
+                buffer = Encoder.WriteInt32(buffer, message.AuthorizedOperationsField);
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
             private static class DescribedGroupMemberSerde
             {
-                public static DescribedGroupMember ReadV00(Stream buffer)
+                public static DescribedGroupMember ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var memberIdField = Decoder.ReadString(buffer);
+                    var memberIdField = Decoder.ReadString(ref buffer);
                     var groupInstanceIdField = default(string?);
-                    var clientIdField = Decoder.ReadString(buffer);
-                    var clientHostField = Decoder.ReadString(buffer);
-                    var memberMetadataField = Decoder.ReadBytes(buffer);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer);
+                    var clientIdField = Decoder.ReadString(ref buffer);
+                    var clientHostField = Decoder.ReadString(ref buffer);
+                    var memberMetadataField = Decoder.ReadBytes(ref buffer);
+                    var memberAssignmentField = Decoder.ReadBytes(ref buffer);
                     return new(
                         memberIdField,
                         groupInstanceIdField,
@@ -310,22 +321,23 @@ namespace Kafka.Client.Messages
                         memberAssignmentField
                     );
                 }
-                public static void WriteV00(Stream buffer, DescribedGroupMember message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, DescribedGroupMember message)
                 {
-                    Encoder.WriteString(buffer, message.MemberIdField);
-                    Encoder.WriteString(buffer, message.ClientIdField);
-                    Encoder.WriteString(buffer, message.ClientHostField);
-                    Encoder.WriteBytes(buffer, message.MemberMetadataField);
-                    Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    buffer = Encoder.WriteString(buffer, message.MemberIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientHostField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberMetadataField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    return buffer;
                 }
-                public static DescribedGroupMember ReadV01(Stream buffer)
+                public static DescribedGroupMember ReadV01(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var memberIdField = Decoder.ReadString(buffer);
+                    var memberIdField = Decoder.ReadString(ref buffer);
                     var groupInstanceIdField = default(string?);
-                    var clientIdField = Decoder.ReadString(buffer);
-                    var clientHostField = Decoder.ReadString(buffer);
-                    var memberMetadataField = Decoder.ReadBytes(buffer);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer);
+                    var clientIdField = Decoder.ReadString(ref buffer);
+                    var clientHostField = Decoder.ReadString(ref buffer);
+                    var memberMetadataField = Decoder.ReadBytes(ref buffer);
+                    var memberAssignmentField = Decoder.ReadBytes(ref buffer);
                     return new(
                         memberIdField,
                         groupInstanceIdField,
@@ -335,22 +347,23 @@ namespace Kafka.Client.Messages
                         memberAssignmentField
                     );
                 }
-                public static void WriteV01(Stream buffer, DescribedGroupMember message)
+                public static Memory<byte> WriteV01(Memory<byte> buffer, DescribedGroupMember message)
                 {
-                    Encoder.WriteString(buffer, message.MemberIdField);
-                    Encoder.WriteString(buffer, message.ClientIdField);
-                    Encoder.WriteString(buffer, message.ClientHostField);
-                    Encoder.WriteBytes(buffer, message.MemberMetadataField);
-                    Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    buffer = Encoder.WriteString(buffer, message.MemberIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientHostField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberMetadataField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    return buffer;
                 }
-                public static DescribedGroupMember ReadV02(Stream buffer)
+                public static DescribedGroupMember ReadV02(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var memberIdField = Decoder.ReadString(buffer);
+                    var memberIdField = Decoder.ReadString(ref buffer);
                     var groupInstanceIdField = default(string?);
-                    var clientIdField = Decoder.ReadString(buffer);
-                    var clientHostField = Decoder.ReadString(buffer);
-                    var memberMetadataField = Decoder.ReadBytes(buffer);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer);
+                    var clientIdField = Decoder.ReadString(ref buffer);
+                    var clientHostField = Decoder.ReadString(ref buffer);
+                    var memberMetadataField = Decoder.ReadBytes(ref buffer);
+                    var memberAssignmentField = Decoder.ReadBytes(ref buffer);
                     return new(
                         memberIdField,
                         groupInstanceIdField,
@@ -360,22 +373,23 @@ namespace Kafka.Client.Messages
                         memberAssignmentField
                     );
                 }
-                public static void WriteV02(Stream buffer, DescribedGroupMember message)
+                public static Memory<byte> WriteV02(Memory<byte> buffer, DescribedGroupMember message)
                 {
-                    Encoder.WriteString(buffer, message.MemberIdField);
-                    Encoder.WriteString(buffer, message.ClientIdField);
-                    Encoder.WriteString(buffer, message.ClientHostField);
-                    Encoder.WriteBytes(buffer, message.MemberMetadataField);
-                    Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    buffer = Encoder.WriteString(buffer, message.MemberIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientHostField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberMetadataField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    return buffer;
                 }
-                public static DescribedGroupMember ReadV03(Stream buffer)
+                public static DescribedGroupMember ReadV03(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var memberIdField = Decoder.ReadString(buffer);
+                    var memberIdField = Decoder.ReadString(ref buffer);
                     var groupInstanceIdField = default(string?);
-                    var clientIdField = Decoder.ReadString(buffer);
-                    var clientHostField = Decoder.ReadString(buffer);
-                    var memberMetadataField = Decoder.ReadBytes(buffer);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer);
+                    var clientIdField = Decoder.ReadString(ref buffer);
+                    var clientHostField = Decoder.ReadString(ref buffer);
+                    var memberMetadataField = Decoder.ReadBytes(ref buffer);
+                    var memberAssignmentField = Decoder.ReadBytes(ref buffer);
                     return new(
                         memberIdField,
                         groupInstanceIdField,
@@ -385,22 +399,23 @@ namespace Kafka.Client.Messages
                         memberAssignmentField
                     );
                 }
-                public static void WriteV03(Stream buffer, DescribedGroupMember message)
+                public static Memory<byte> WriteV03(Memory<byte> buffer, DescribedGroupMember message)
                 {
-                    Encoder.WriteString(buffer, message.MemberIdField);
-                    Encoder.WriteString(buffer, message.ClientIdField);
-                    Encoder.WriteString(buffer, message.ClientHostField);
-                    Encoder.WriteBytes(buffer, message.MemberMetadataField);
-                    Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    buffer = Encoder.WriteString(buffer, message.MemberIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientHostField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberMetadataField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    return buffer;
                 }
-                public static DescribedGroupMember ReadV04(Stream buffer)
+                public static DescribedGroupMember ReadV04(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var memberIdField = Decoder.ReadString(buffer);
-                    var groupInstanceIdField = Decoder.ReadNullableString(buffer);
-                    var clientIdField = Decoder.ReadString(buffer);
-                    var clientHostField = Decoder.ReadString(buffer);
-                    var memberMetadataField = Decoder.ReadBytes(buffer);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer);
+                    var memberIdField = Decoder.ReadString(ref buffer);
+                    var groupInstanceIdField = Decoder.ReadNullableString(ref buffer);
+                    var clientIdField = Decoder.ReadString(ref buffer);
+                    var clientHostField = Decoder.ReadString(ref buffer);
+                    var memberMetadataField = Decoder.ReadBytes(ref buffer);
+                    var memberAssignmentField = Decoder.ReadBytes(ref buffer);
                     return new(
                         memberIdField,
                         groupInstanceIdField,
@@ -410,24 +425,25 @@ namespace Kafka.Client.Messages
                         memberAssignmentField
                     );
                 }
-                public static void WriteV04(Stream buffer, DescribedGroupMember message)
+                public static Memory<byte> WriteV04(Memory<byte> buffer, DescribedGroupMember message)
                 {
-                    Encoder.WriteString(buffer, message.MemberIdField);
-                    Encoder.WriteNullableString(buffer, message.GroupInstanceIdField);
-                    Encoder.WriteString(buffer, message.ClientIdField);
-                    Encoder.WriteString(buffer, message.ClientHostField);
-                    Encoder.WriteBytes(buffer, message.MemberMetadataField);
-                    Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    buffer = Encoder.WriteString(buffer, message.MemberIdField);
+                    buffer = Encoder.WriteNullableString(buffer, message.GroupInstanceIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientIdField);
+                    buffer = Encoder.WriteString(buffer, message.ClientHostField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberMetadataField);
+                    buffer = Encoder.WriteBytes(buffer, message.MemberAssignmentField);
+                    return buffer;
                 }
-                public static DescribedGroupMember ReadV05(Stream buffer)
+                public static DescribedGroupMember ReadV05(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var memberIdField = Decoder.ReadCompactString(buffer);
-                    var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer);
-                    var clientIdField = Decoder.ReadCompactString(buffer);
-                    var clientHostField = Decoder.ReadCompactString(buffer);
-                    var memberMetadataField = Decoder.ReadCompactBytes(buffer);
-                    var memberAssignmentField = Decoder.ReadCompactBytes(buffer);
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var memberIdField = Decoder.ReadCompactString(ref buffer);
+                    var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
+                    var clientIdField = Decoder.ReadCompactString(ref buffer);
+                    var clientHostField = Decoder.ReadCompactString(ref buffer);
+                    var memberMetadataField = Decoder.ReadCompactBytes(ref buffer);
+                    var memberAssignmentField = Decoder.ReadCompactBytes(ref buffer);
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         memberIdField,
                         groupInstanceIdField,
@@ -437,15 +453,16 @@ namespace Kafka.Client.Messages
                         memberAssignmentField
                     );
                 }
-                public static void WriteV05(Stream buffer, DescribedGroupMember message)
+                public static Memory<byte> WriteV05(Memory<byte> buffer, DescribedGroupMember message)
                 {
-                    Encoder.WriteCompactString(buffer, message.MemberIdField);
-                    Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-                    Encoder.WriteCompactString(buffer, message.ClientIdField);
-                    Encoder.WriteCompactString(buffer, message.ClientHostField);
-                    Encoder.WriteCompactBytes(buffer, message.MemberMetadataField);
-                    Encoder.WriteCompactBytes(buffer, message.MemberAssignmentField);
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
+                    buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
+                    buffer = Encoder.WriteCompactString(buffer, message.ClientIdField);
+                    buffer = Encoder.WriteCompactString(buffer, message.ClientHostField);
+                    buffer = Encoder.WriteCompactBytes(buffer, message.MemberMetadataField);
+                    buffer = Encoder.WriteCompactBytes(buffer, message.MemberAssignmentField);
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
             }
         }

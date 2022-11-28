@@ -1,8 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using DescribeLogDirsResult = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult;
+using Kafka.Common.Protocol;
 using DescribeLogDirsPartition = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic.DescribeLogDirsPartition;
 using DescribeLogDirsTopic = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic;
+using DescribeLogDirsResult = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult;
 
 namespace Kafka.Client.Messages
 {
@@ -16,7 +17,7 @@ namespace Kafka.Client.Messages
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<DescribeLogDirsResult> ResultsField
-    )
+    ) : Response(35)
     {
         public static DescribeLogDirsResponse Empty { get; } = new(
             default(int),

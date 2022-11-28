@@ -1,8 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
+using Kafka.Common.Protocol;
 using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
 using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
+using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 using StopReplicaTopicState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState;
 
 namespace Kafka.Client.Messages
@@ -25,7 +26,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<StopReplicaPartitionV0> UngroupedPartitionsField,
         ImmutableArray<StopReplicaTopicV1> TopicsField,
         ImmutableArray<StopReplicaTopicState> TopicStatesField
-    )
+    ) : Request(5)
     {
         public static StopReplicaRequest Empty { get; } = new(
             default(int),
@@ -36,20 +37,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<StopReplicaTopicV1>.Empty,
             ImmutableArray<StopReplicaTopicState>.Empty
         );
-        /// <summary>
-        /// <param name="NameField">The topic name.</param>
-        /// <param name="PartitionIndexesField">The partition indexes.</param>
-        /// </summary>
-        public sealed record StopReplicaTopicV1 (
-            string NameField,
-            ImmutableArray<int> PartitionIndexesField
-        )
-        {
-            public static StopReplicaTopicV1 Empty { get; } = new(
-                "",
-                ImmutableArray<int>.Empty
-            );
-        };
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionIndexField">The partition index.</param>
@@ -62,6 +49,20 @@ namespace Kafka.Client.Messages
             public static StopReplicaPartitionV0 Empty { get; } = new(
                 "",
                 default(int)
+            );
+        };
+        /// <summary>
+        /// <param name="NameField">The topic name.</param>
+        /// <param name="PartitionIndexesField">The partition indexes.</param>
+        /// </summary>
+        public sealed record StopReplicaTopicV1 (
+            string NameField,
+            ImmutableArray<int> PartitionIndexesField
+        )
+        {
+            public static StopReplicaTopicV1 Empty { get; } = new(
+                "",
+                ImmutableArray<int>.Empty
             );
         };
         /// <summary>

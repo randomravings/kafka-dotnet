@@ -2,9 +2,9 @@
 using Kafka.Client.Messages;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Types;
+using Kafka.Common.Types.Comparison;
 using System.Collections.Immutable;
 using static Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
-using Version = Kafka.Common.Types.Version;
 
 namespace Kafka.Client.Clients.Admin
 {
@@ -20,30 +20,12 @@ namespace Kafka.Client.Clients.Admin
             CancellationToken cancellationToken
         )
         {
-            var request = new ApiVersionsRequest(
-                ".Net Client",
-                "1.0.0"
-            );
-            var response = await HandleRequest(
-                Api.ApiVersions,
-                request,
-                (s, v, r) => ApiVersionsRequestSerde.Write(s, v, r),
-                (s, v) => ApiVersionsResponseSerde.Read(s, v),
-                options.ApiVersion,
-                cancellationToken
-            );
+            await EnsureConnection(cancellationToken);
             return new(
-                response
-                .ApiKeysField
+                _apiVersions
                 .ToImmutableSortedDictionary(
-                    k => new Api(k.ApiKeyField),
-                    v => new ApiVersion(
-                        new Api(v.ApiKeyField),
-                        new Version(
-                            v.MinVersionField,
-                            v.MaxVersionField
-                        )
-                    )
+                    k => new Api(k.Key),
+                    v => v.Value
                 )
             );
         }
@@ -54,16 +36,15 @@ namespace Kafka.Client.Clients.Admin
         )
         {
             var request = new MetadataRequest(
-                null,
+                (options.ApiVersion == 0 ? null : ImmutableArray<MetadataRequest.MetadataRequestTopic>.Empty),
                 options.IncludeInternal,
-                options.IncludeClusterAuthorizedOperations,
-                options.IncludeTopicAuthorizedOperations
+                false,
+                false
             );
             var response = await HandleRequest(
-                Api.Metadata,
                 request,
                 (s, v, r) => MetadataRequestSerde.Write(s, v, r),
-                (s, v) => MetadataResponseSerde.Read(s, v),
+                (ref ReadOnlyMemory<byte> s, short v) => MetadataResponseSerde.Read(ref s, v),
                 options.ApiVersion,
                 cancellationToken
             );
@@ -71,9 +52,8 @@ namespace Kafka.Client.Clients.Admin
                 .TopicsField
                 .Where(r => options.IncludeInternal || r.IsInternalField == false)
                 .Select(r => new TopicListing(new(r.TopicIdField, r.NameField), r.IsInternalField))
-                .ToImmutableSortedDictionary(
-                    k => k.Topic,
-                    v => v
+                .ToImmutableSortedSet(
+                    TopicListingCompare.Instance
                 )
             ;
             return new(topics);
@@ -108,10 +88,9 @@ namespace Kafka.Client.Clients.Admin
                 options.ValidateOnly
             );
             var response = await HandleRequest(
-                Api.CreateTopics,
                 request,
                 (s, v, r) => CreateTopicsRequestSerde.Write(s, v, r),
-                (s, v) => CreateTopicsResponseSerde.Read(s, v),
+                (ref ReadOnlyMemory<byte> s, short v) => CreateTopicsResponseSerde.Read(ref s, v),
                 options.ApiVersion,
                 cancellationToken
             );
@@ -119,7 +98,7 @@ namespace Kafka.Client.Clients.Admin
                 .TopicsField
                 .Where(r => r.ErrorCodeField == 0)
                 .Select(
-                    r => new CreateTopicsResult.CreateTopicResult(
+                    r => new CreateTopicsResult.CreatedTopicResult(
                         new(r.TopicIdField, r.NameField),
                         r.NumPartitionsField,
                         r.ReplicationFactorField,
@@ -142,7 +121,8 @@ namespace Kafka.Client.Clients.Admin
                 .ToImmutableSortedDictionary(
                     k => new Topic(k.TopicIdField, k.NameField),
                     v => new ApiException(
-                        $"Error Code: {v.ErrorCodeField} - Message: {v.ErrorMessageField}"
+                        (ErrorCode)v.ErrorCodeField,
+                        v.ErrorMessageField
                     )
                 )
             ;
@@ -157,21 +137,30 @@ namespace Kafka.Client.Clients.Admin
             CancellationToken cancellationToken
         )
         {
-            var request = new DeleteTopicsRequest(
-                options.TopicsField.Select(
+            var deleteTopicStateByIds = options.TopicIds.Select(
                     r => new DeleteTopicsRequest.DeleteTopicState(
-                        r.NameField,
-                        r.TopicIdField
+                        null,
+                        r
                     )
+                );
+            var deleteTopicStateByNames = options.TopicNames.Select(
+                    r => new DeleteTopicsRequest.DeleteTopicState(
+                        r,
+                        Guid.Empty
+                    )
+                );
+            var request = new DeleteTopicsRequest(
+                Enumerable.Concat(
+                    deleteTopicStateByIds,
+                    deleteTopicStateByNames
                 ).ToImmutableArray(),
-                options.TopicNamesField,
+                options.TopicNames,
                 options.TimeoutMs
             );
             var response = await HandleRequest(
-                Api.DeleteTopics,
                 request,
                 (s, v, r) => DeleteTopicsRequestSerde.Write(s, v, r),
-                (s, v) => DeleteTopicsResponseSerde.Read(s, v),
+                (ref ReadOnlyMemory<byte> s, short v) => DeleteTopicsResponseSerde.Read(ref s, v),
                 options.ApiVersion,
                 cancellationToken
             );
@@ -189,13 +178,78 @@ namespace Kafka.Client.Clients.Admin
                 .ToImmutableSortedDictionary(
                     k => new Topic(k.TopicIdField, k.NameField),
                     v => new ApiException(
-                        $"Error Code: {v.ErrorCodeField} - Message: {v.ErrorMessageField}"
+                        (ErrorCode)v.ErrorCodeField,
+                        v.ErrorMessageField
                     )
                 )
             ;
             return new(
                 deletedTopics,
                 errorTopics
+            );
+        }
+
+        async ValueTask<DescribeTopicsResult> IAdminClient.DescribeTopics(
+            DescribeTopicsOptions options,
+            CancellationToken cancellationToken
+        )
+        {
+            var topicIds = options.TopicIds.Select(
+                    r => new MetadataRequest.MetadataRequestTopic(
+                        r,
+                        null
+                    )
+                );
+            var topicNames = options.TopicNames.Select(
+                    r => new MetadataRequest.MetadataRequestTopic(
+                        Guid.Empty,
+                        r
+                    )
+                );
+            var topics = Enumerable.Concat(
+                    topicIds,
+                    topicNames
+                ).ToImmutableArray()
+            ;
+            var request = new MetadataRequest(
+                topics,
+                false,
+                false,
+                true
+            );
+            var response = await HandleRequest(
+                request,
+                (s, v, r) => MetadataRequestSerde.Write(s, v, r),
+                (ref ReadOnlyMemory<byte> s, short v) => MetadataResponseSerde.Read(ref s, v),
+                options.ApiVersion,
+                cancellationToken
+            );
+            return new(
+                response.TopicsField.Select(
+                    t => new DescribeTopicsResult.DescribeTopicResult(
+                        t.TopicIdField,
+                        t.NameField,
+                        t.IsInternalField,
+                        t.TopicAuthorizedOperationsField,
+                        (ErrorCode)t.ErrorCodeField,
+                        t.PartitionsField.Select(
+                            p => new DescribeTopicsResult.DescribeTopicResult.TopicPartitionDescription(
+                                p.PartitionIndexField,
+                                p.LeaderIdField,
+                                p.LeaderEpochField,
+                                (ErrorCode)p.ErrorCodeField,
+                                p.ReplicaNodesField,
+                                p.IsrNodesField,
+                                p.OfflineReplicasField
+                            )
+                        ).ToImmutableArray()
+                    )
+                )
+                .ToImmutableSortedDictionary(
+                    k => new Topic(k.TopicId, k.Name),
+                    v => v,
+                    TopicCompare.Instance
+                )
             );
         }
     }

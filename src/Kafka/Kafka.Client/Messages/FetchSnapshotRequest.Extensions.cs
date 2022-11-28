@@ -1,34 +1,33 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot;
 using SnapshotId = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot.PartitionSnapshot.SnapshotId;
 using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot.PartitionSnapshot;
+using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot;
 
 namespace Kafka.Client.Messages
 {
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class FetchSnapshotRequestSerde
     {
-        private static readonly Func<Stream, FetchSnapshotRequest>[] READ_VERSIONS = {
-            b => ReadV00(b),
+        private static readonly DecodeDelegate<FetchSnapshotRequest>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
         };
-        private static readonly Action<Stream, FetchSnapshotRequest>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<FetchSnapshotRequest>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
         };
-        public static FetchSnapshotRequest Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static FetchSnapshotRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, FetchSnapshotRequest message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static FetchSnapshotRequest ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, FetchSnapshotRequest message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static FetchSnapshotRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
             var clusterIdField = default(string?);
-            var replicaIdField = Decoder.ReadInt32(buffer);
-            var maxBytesField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadCompactArray<TopicSnapshot>(buffer, b => TopicSnapshotSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(buffer);
+            var replicaIdField = Decoder.ReadInt32(ref buffer);
+            var maxBytesField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<TopicSnapshot>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicSnapshotSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 clusterIdField,
                 replicaIdField,
@@ -36,41 +35,43 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static void WriteV00(Stream buffer, FetchSnapshotRequest message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, FetchSnapshotRequest message)
         {
-            Encoder.WriteCompactNullableString(buffer, message.ClusterIdField);
-            Encoder.WriteInt32(buffer, message.ReplicaIdField);
-            Encoder.WriteInt32(buffer, message.MaxBytesField);
-            Encoder.WriteCompactArray<TopicSnapshot>(buffer, message.TopicsField, (b, i) => TopicSnapshotSerde.WriteV00(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteCompactNullableString(buffer, message.ClusterIdField);
+            buffer = Encoder.WriteInt32(buffer, message.ReplicaIdField);
+            buffer = Encoder.WriteInt32(buffer, message.MaxBytesField);
+            buffer = Encoder.WriteCompactArray<TopicSnapshot>(buffer, message.TopicsField, (b, i) => TopicSnapshotSerde.WriteV00(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class TopicSnapshotSerde
         {
-            public static TopicSnapshot ReadV00(Stream buffer)
+            public static TopicSnapshot ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadCompactString(buffer);
-                var partitionsField = Decoder.ReadCompactArray<PartitionSnapshot>(buffer, b => PartitionSnapshotSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(buffer);
+                var nameField = Decoder.ReadCompactString(ref buffer);
+                var partitionsField = Decoder.ReadCompactArray<PartitionSnapshot>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionSnapshotSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV00(Stream buffer, TopicSnapshot message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, TopicSnapshot message)
             {
-                Encoder.WriteCompactString(buffer, message.NameField);
-                Encoder.WriteCompactArray<PartitionSnapshot>(buffer, message.PartitionsField, (b, i) => PartitionSnapshotSerde.WriteV00(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.NameField);
+                buffer = Encoder.WriteCompactArray<PartitionSnapshot>(buffer, message.PartitionsField, (b, i) => PartitionSnapshotSerde.WriteV00(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
             private static class PartitionSnapshotSerde
             {
-                public static PartitionSnapshot ReadV00(Stream buffer)
+                public static PartitionSnapshot ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionField = Decoder.ReadInt32(buffer);
-                    var currentLeaderEpochField = Decoder.ReadInt32(buffer);
-                    var snapshotIdField = SnapshotIdSerde.ReadV00(buffer);
-                    var positionField = Decoder.ReadInt64(buffer);
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var partitionField = Decoder.ReadInt32(ref buffer);
+                    var currentLeaderEpochField = Decoder.ReadInt32(ref buffer);
+                    var snapshotIdField = SnapshotIdSerde.ReadV00(ref buffer);
+                    var positionField = Decoder.ReadInt64(ref buffer);
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         partitionField,
                         currentLeaderEpochField,
@@ -78,31 +79,33 @@ namespace Kafka.Client.Messages
                         positionField
                     );
                 }
-                public static void WriteV00(Stream buffer, PartitionSnapshot message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, PartitionSnapshot message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionField);
-                    Encoder.WriteInt32(buffer, message.CurrentLeaderEpochField);
-                    SnapshotIdSerde.WriteV00(buffer, message.SnapshotIdField);
-                    Encoder.WriteInt64(buffer, message.PositionField);
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionField);
+                    buffer = Encoder.WriteInt32(buffer, message.CurrentLeaderEpochField);
+                    buffer = SnapshotIdSerde.WriteV00(buffer, message.SnapshotIdField);
+                    buffer = Encoder.WriteInt64(buffer, message.PositionField);
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
                 private static class SnapshotIdSerde
                 {
-                    public static SnapshotId ReadV00(Stream buffer)
+                    public static SnapshotId ReadV00(ref ReadOnlyMemory<byte> buffer)
                     {
-                        var endOffsetField = Decoder.ReadInt64(buffer);
-                        var epochField = Decoder.ReadInt32(buffer);
-                        _ = Decoder.ReadVarUInt32(buffer);
+                        var endOffsetField = Decoder.ReadInt64(ref buffer);
+                        var epochField = Decoder.ReadInt32(ref buffer);
+                        _ = Decoder.ReadVarUInt32(ref buffer);
                         return new(
                             endOffsetField,
                             epochField
                         );
                     }
-                    public static void WriteV00(Stream buffer, SnapshotId message)
+                    public static Memory<byte> WriteV00(Memory<byte> buffer, SnapshotId message)
                     {
-                        Encoder.WriteInt64(buffer, message.EndOffsetField);
-                        Encoder.WriteInt32(buffer, message.EpochField);
-                        Encoder.WriteVarUInt32(buffer, 0);
+                        buffer = Encoder.WriteInt64(buffer, message.EndOffsetField);
+                        buffer = Encoder.WriteInt32(buffer, message.EpochField);
+                        buffer = Encoder.WriteVarUInt32(buffer, 0);
+                        return buffer;
                     }
                 }
             }

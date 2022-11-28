@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using MetadataRequestTopic = Kafka.Client.Messages.MetadataRequest.MetadataRequestTopic;
 
 namespace Kafka.Client.Messages
@@ -16,7 +17,7 @@ namespace Kafka.Client.Messages
         bool AllowAutoTopicCreationField,
         bool IncludeClusterAuthorizedOperationsField,
         bool IncludeTopicAuthorizedOperationsField
-    )
+    ) : Request(3)
     {
         public static MetadataRequest Empty { get; } = new(
             default(ImmutableArray<MetadataRequestTopic>?),

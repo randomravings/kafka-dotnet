@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using LeaderAndIsrTopicError = Kafka.Client.Messages.LeaderAndIsrResponse.LeaderAndIsrTopicError;
 using LeaderAndIsrPartitionError = Kafka.Client.Messages.LeaderAndIsrResponse.LeaderAndIsrPartitionError;
 
@@ -15,7 +16,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         ImmutableArray<LeaderAndIsrPartitionError> PartitionErrorsField,
         ImmutableArray<LeaderAndIsrTopicError> TopicsField
-    )
+    ) : Response(4)
     {
         public static LeaderAndIsrResponse Empty { get; } = new(
             default(short),

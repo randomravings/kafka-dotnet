@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         int GenerationIdField,
         string MemberIdField,
         string? GroupInstanceIdField
-    )
+    ) : Request(12)
     {
         public static HeartbeatRequest Empty { get; } = new(
             "",

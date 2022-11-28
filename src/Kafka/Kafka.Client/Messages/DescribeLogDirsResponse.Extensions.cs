@@ -1,130 +1,134 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using DescribeLogDirsResult = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult;
 using DescribeLogDirsPartition = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic.DescribeLogDirsPartition;
 using DescribeLogDirsTopic = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic;
+using DescribeLogDirsResult = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult;
 
 namespace Kafka.Client.Messages
 {
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class DescribeLogDirsResponseSerde
     {
-        private static readonly Func<Stream, DescribeLogDirsResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
-            b => ReadV03(b),
-            b => ReadV04(b),
+        private static readonly DecodeDelegate<DescribeLogDirsResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
         };
-        private static readonly Action<Stream, DescribeLogDirsResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<DescribeLogDirsResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
             (b, m) => WriteV03(b, m),
             (b, m) => WriteV04(b, m),
         };
-        public static DescribeLogDirsResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static DescribeLogDirsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, DescribeLogDirsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static DescribeLogDirsResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeLogDirsResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static DescribeLogDirsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             var errorCodeField = default(short);
-            var resultsField = Decoder.ReadArray<DescribeLogDirsResult>(buffer, b => DescribeLogDirsResultSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            var resultsField = Decoder.ReadArray<DescribeLogDirsResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsResultSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 resultsField
             );
         }
-        private static void WriteV00(Stream buffer, DescribeLogDirsResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeLogDirsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV00(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV00(b, i));
+            return buffer;
         }
-        private static DescribeLogDirsResponse ReadV01(Stream buffer)
+        private static DescribeLogDirsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             var errorCodeField = default(short);
-            var resultsField = Decoder.ReadArray<DescribeLogDirsResult>(buffer, b => DescribeLogDirsResultSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            var resultsField = Decoder.ReadArray<DescribeLogDirsResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsResultSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 resultsField
             );
         }
-        private static void WriteV01(Stream buffer, DescribeLogDirsResponse message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, DescribeLogDirsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV01(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV01(b, i));
+            return buffer;
         }
-        private static DescribeLogDirsResponse ReadV02(Stream buffer)
+        private static DescribeLogDirsResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             var errorCodeField = default(short);
-            var resultsField = Decoder.ReadCompactArray<DescribeLogDirsResult>(buffer, b => DescribeLogDirsResultSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(buffer);
+            var resultsField = Decoder.ReadCompactArray<DescribeLogDirsResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsResultSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 resultsField
             );
         }
-        private static void WriteV02(Stream buffer, DescribeLogDirsResponse message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, DescribeLogDirsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteCompactArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV02(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteCompactArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV02(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
-        private static DescribeLogDirsResponse ReadV03(Stream buffer)
+        private static DescribeLogDirsResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var resultsField = Decoder.ReadCompactArray<DescribeLogDirsResult>(buffer, b => DescribeLogDirsResultSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var resultsField = Decoder.ReadCompactArray<DescribeLogDirsResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsResultSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 resultsField
             );
         }
-        private static void WriteV03(Stream buffer, DescribeLogDirsResponse message)
+        private static Memory<byte> WriteV03(Memory<byte> buffer, DescribeLogDirsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteCompactArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV03(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteCompactArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV03(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
-        private static DescribeLogDirsResponse ReadV04(Stream buffer)
+        private static DescribeLogDirsResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var resultsField = Decoder.ReadCompactArray<DescribeLogDirsResult>(buffer, b => DescribeLogDirsResultSerde.ReadV04(b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var resultsField = Decoder.ReadCompactArray<DescribeLogDirsResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsResultSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 resultsField
             );
         }
-        private static void WriteV04(Stream buffer, DescribeLogDirsResponse message)
+        private static Memory<byte> WriteV04(Memory<byte> buffer, DescribeLogDirsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteCompactArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV04(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteCompactArray<DescribeLogDirsResult>(buffer, message.ResultsField, (b, i) => DescribeLogDirsResultSerde.WriteV04(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class DescribeLogDirsResultSerde
         {
-            public static DescribeLogDirsResult ReadV00(Stream buffer)
+            public static DescribeLogDirsResult ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var logDirField = Decoder.ReadString(buffer);
-                var topicsField = Decoder.ReadArray<DescribeLogDirsTopic>(buffer, b => DescribeLogDirsTopicSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var logDirField = Decoder.ReadString(ref buffer);
+                var topicsField = Decoder.ReadArray<DescribeLogDirsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
                 var totalBytesField = default(long);
                 var usableBytesField = default(long);
                 return new(
@@ -135,17 +139,18 @@ namespace Kafka.Client.Messages
                     usableBytesField
                 );
             }
-            public static void WriteV00(Stream buffer, DescribeLogDirsResult message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, DescribeLogDirsResult message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteString(buffer, message.LogDirField);
-                Encoder.WriteArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV00(b, i));
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteString(buffer, message.LogDirField);
+                buffer = Encoder.WriteArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV00(b, i));
+                return buffer;
             }
-            public static DescribeLogDirsResult ReadV01(Stream buffer)
+            public static DescribeLogDirsResult ReadV01(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var logDirField = Decoder.ReadString(buffer);
-                var topicsField = Decoder.ReadArray<DescribeLogDirsTopic>(buffer, b => DescribeLogDirsTopicSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var logDirField = Decoder.ReadString(ref buffer);
+                var topicsField = Decoder.ReadArray<DescribeLogDirsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsTopicSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
                 var totalBytesField = default(long);
                 var usableBytesField = default(long);
                 return new(
@@ -156,20 +161,21 @@ namespace Kafka.Client.Messages
                     usableBytesField
                 );
             }
-            public static void WriteV01(Stream buffer, DescribeLogDirsResult message)
+            public static Memory<byte> WriteV01(Memory<byte> buffer, DescribeLogDirsResult message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteString(buffer, message.LogDirField);
-                Encoder.WriteArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV01(b, i));
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteString(buffer, message.LogDirField);
+                buffer = Encoder.WriteArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV01(b, i));
+                return buffer;
             }
-            public static DescribeLogDirsResult ReadV02(Stream buffer)
+            public static DescribeLogDirsResult ReadV02(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var logDirField = Decoder.ReadCompactString(buffer);
-                var topicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(buffer, b => DescribeLogDirsTopicSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var logDirField = Decoder.ReadCompactString(ref buffer);
+                var topicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsTopicSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
                 var totalBytesField = default(long);
                 var usableBytesField = default(long);
-                _ = Decoder.ReadVarUInt32(buffer);
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     errorCodeField,
                     logDirField,
@@ -178,21 +184,22 @@ namespace Kafka.Client.Messages
                     usableBytesField
                 );
             }
-            public static void WriteV02(Stream buffer, DescribeLogDirsResult message)
+            public static Memory<byte> WriteV02(Memory<byte> buffer, DescribeLogDirsResult message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteCompactString(buffer, message.LogDirField);
-                Encoder.WriteCompactArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV02(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteCompactString(buffer, message.LogDirField);
+                buffer = Encoder.WriteCompactArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV02(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
-            public static DescribeLogDirsResult ReadV03(Stream buffer)
+            public static DescribeLogDirsResult ReadV03(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var logDirField = Decoder.ReadCompactString(buffer);
-                var topicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(buffer, b => DescribeLogDirsTopicSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var logDirField = Decoder.ReadCompactString(ref buffer);
+                var topicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsTopicSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
                 var totalBytesField = default(long);
                 var usableBytesField = default(long);
-                _ = Decoder.ReadVarUInt32(buffer);
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     errorCodeField,
                     logDirField,
@@ -201,21 +208,22 @@ namespace Kafka.Client.Messages
                     usableBytesField
                 );
             }
-            public static void WriteV03(Stream buffer, DescribeLogDirsResult message)
+            public static Memory<byte> WriteV03(Memory<byte> buffer, DescribeLogDirsResult message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteCompactString(buffer, message.LogDirField);
-                Encoder.WriteCompactArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV03(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteCompactString(buffer, message.LogDirField);
+                buffer = Encoder.WriteCompactArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV03(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
-            public static DescribeLogDirsResult ReadV04(Stream buffer)
+            public static DescribeLogDirsResult ReadV04(ref ReadOnlyMemory<byte> buffer)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var logDirField = Decoder.ReadCompactString(buffer);
-                var topicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(buffer, b => DescribeLogDirsTopicSerde.ReadV04(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-                var totalBytesField = Decoder.ReadInt64(buffer);
-                var usableBytesField = Decoder.ReadInt64(buffer);
-                _ = Decoder.ReadVarUInt32(buffer);
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var logDirField = Decoder.ReadCompactString(ref buffer);
+                var topicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsTopicSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var totalBytesField = Decoder.ReadInt64(ref buffer);
+                var usableBytesField = Decoder.ReadInt64(ref buffer);
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     errorCodeField,
                     logDirField,
@@ -224,101 +232,107 @@ namespace Kafka.Client.Messages
                     usableBytesField
                 );
             }
-            public static void WriteV04(Stream buffer, DescribeLogDirsResult message)
+            public static Memory<byte> WriteV04(Memory<byte> buffer, DescribeLogDirsResult message)
             {
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteCompactString(buffer, message.LogDirField);
-                Encoder.WriteCompactArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV04(b, i));
-                Encoder.WriteInt64(buffer, message.TotalBytesField);
-                Encoder.WriteInt64(buffer, message.UsableBytesField);
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteCompactString(buffer, message.LogDirField);
+                buffer = Encoder.WriteCompactArray<DescribeLogDirsTopic>(buffer, message.TopicsField, (b, i) => DescribeLogDirsTopicSerde.WriteV04(b, i));
+                buffer = Encoder.WriteInt64(buffer, message.TotalBytesField);
+                buffer = Encoder.WriteInt64(buffer, message.UsableBytesField);
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
             private static class DescribeLogDirsTopicSerde
             {
-                public static DescribeLogDirsTopic ReadV00(Stream buffer)
+                public static DescribeLogDirsTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var nameField = Decoder.ReadString(buffer);
-                    var partitionsField = Decoder.ReadArray<DescribeLogDirsPartition>(buffer, b => DescribeLogDirsPartitionSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var nameField = Decoder.ReadString(ref buffer);
+                    var partitionsField = Decoder.ReadArray<DescribeLogDirsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsPartitionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     return new(
                         nameField,
                         partitionsField
                     );
                 }
-                public static void WriteV00(Stream buffer, DescribeLogDirsTopic message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, DescribeLogDirsTopic message)
                 {
-                    Encoder.WriteString(buffer, message.NameField);
-                    Encoder.WriteArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV00(b, i));
+                    buffer = Encoder.WriteString(buffer, message.NameField);
+                    buffer = Encoder.WriteArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV00(b, i));
+                    return buffer;
                 }
-                public static DescribeLogDirsTopic ReadV01(Stream buffer)
+                public static DescribeLogDirsTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var nameField = Decoder.ReadString(buffer);
-                    var partitionsField = Decoder.ReadArray<DescribeLogDirsPartition>(buffer, b => DescribeLogDirsPartitionSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var nameField = Decoder.ReadString(ref buffer);
+                    var partitionsField = Decoder.ReadArray<DescribeLogDirsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsPartitionSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     return new(
                         nameField,
                         partitionsField
                     );
                 }
-                public static void WriteV01(Stream buffer, DescribeLogDirsTopic message)
+                public static Memory<byte> WriteV01(Memory<byte> buffer, DescribeLogDirsTopic message)
                 {
-                    Encoder.WriteString(buffer, message.NameField);
-                    Encoder.WriteArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV01(b, i));
+                    buffer = Encoder.WriteString(buffer, message.NameField);
+                    buffer = Encoder.WriteArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV01(b, i));
+                    return buffer;
                 }
-                public static DescribeLogDirsTopic ReadV02(Stream buffer)
+                public static DescribeLogDirsTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer);
-                    var partitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(buffer, b => DescribeLogDirsPartitionSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var nameField = Decoder.ReadCompactString(ref buffer);
+                    var partitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsPartitionSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         nameField,
                         partitionsField
                     );
                 }
-                public static void WriteV02(Stream buffer, DescribeLogDirsTopic message)
+                public static Memory<byte> WriteV02(Memory<byte> buffer, DescribeLogDirsTopic message)
                 {
-                    Encoder.WriteCompactString(buffer, message.NameField);
-                    Encoder.WriteCompactArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV02(b, i));
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteCompactString(buffer, message.NameField);
+                    buffer = Encoder.WriteCompactArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV02(b, i));
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
-                public static DescribeLogDirsTopic ReadV03(Stream buffer)
+                public static DescribeLogDirsTopic ReadV03(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer);
-                    var partitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(buffer, b => DescribeLogDirsPartitionSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var nameField = Decoder.ReadCompactString(ref buffer);
+                    var partitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsPartitionSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         nameField,
                         partitionsField
                     );
                 }
-                public static void WriteV03(Stream buffer, DescribeLogDirsTopic message)
+                public static Memory<byte> WriteV03(Memory<byte> buffer, DescribeLogDirsTopic message)
                 {
-                    Encoder.WriteCompactString(buffer, message.NameField);
-                    Encoder.WriteCompactArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV03(b, i));
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteCompactString(buffer, message.NameField);
+                    buffer = Encoder.WriteCompactArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV03(b, i));
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
-                public static DescribeLogDirsTopic ReadV04(Stream buffer)
+                public static DescribeLogDirsTopic ReadV04(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer);
-                    var partitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(buffer, b => DescribeLogDirsPartitionSerde.ReadV04(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var nameField = Decoder.ReadCompactString(ref buffer);
+                    var partitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeLogDirsPartitionSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         nameField,
                         partitionsField
                     );
                 }
-                public static void WriteV04(Stream buffer, DescribeLogDirsTopic message)
+                public static Memory<byte> WriteV04(Memory<byte> buffer, DescribeLogDirsTopic message)
                 {
-                    Encoder.WriteCompactString(buffer, message.NameField);
-                    Encoder.WriteCompactArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV04(b, i));
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteCompactString(buffer, message.NameField);
+                    buffer = Encoder.WriteCompactArray<DescribeLogDirsPartition>(buffer, message.PartitionsField, (b, i) => DescribeLogDirsPartitionSerde.WriteV04(b, i));
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
                 private static class DescribeLogDirsPartitionSerde
                 {
-                    public static DescribeLogDirsPartition ReadV00(Stream buffer)
+                    public static DescribeLogDirsPartition ReadV00(ref ReadOnlyMemory<byte> buffer)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer);
-                        var partitionSizeField = Decoder.ReadInt64(buffer);
-                        var offsetLagField = Decoder.ReadInt64(buffer);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer);
+                        var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                        var partitionSizeField = Decoder.ReadInt64(ref buffer);
+                        var offsetLagField = Decoder.ReadInt64(ref buffer);
+                        var isFutureKeyField = Decoder.ReadBoolean(ref buffer);
                         return new(
                             partitionIndexField,
                             partitionSizeField,
@@ -326,19 +340,20 @@ namespace Kafka.Client.Messages
                             isFutureKeyField
                         );
                     }
-                    public static void WriteV00(Stream buffer, DescribeLogDirsPartition message)
+                    public static Memory<byte> WriteV00(Memory<byte> buffer, DescribeLogDirsPartition message)
                     {
-                        Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                        Encoder.WriteInt64(buffer, message.PartitionSizeField);
-                        Encoder.WriteInt64(buffer, message.OffsetLagField);
-                        Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
+                        buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                        buffer = Encoder.WriteInt64(buffer, message.PartitionSizeField);
+                        buffer = Encoder.WriteInt64(buffer, message.OffsetLagField);
+                        buffer = Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
+                        return buffer;
                     }
-                    public static DescribeLogDirsPartition ReadV01(Stream buffer)
+                    public static DescribeLogDirsPartition ReadV01(ref ReadOnlyMemory<byte> buffer)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer);
-                        var partitionSizeField = Decoder.ReadInt64(buffer);
-                        var offsetLagField = Decoder.ReadInt64(buffer);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer);
+                        var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                        var partitionSizeField = Decoder.ReadInt64(ref buffer);
+                        var offsetLagField = Decoder.ReadInt64(ref buffer);
+                        var isFutureKeyField = Decoder.ReadBoolean(ref buffer);
                         return new(
                             partitionIndexField,
                             partitionSizeField,
@@ -346,20 +361,21 @@ namespace Kafka.Client.Messages
                             isFutureKeyField
                         );
                     }
-                    public static void WriteV01(Stream buffer, DescribeLogDirsPartition message)
+                    public static Memory<byte> WriteV01(Memory<byte> buffer, DescribeLogDirsPartition message)
                     {
-                        Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                        Encoder.WriteInt64(buffer, message.PartitionSizeField);
-                        Encoder.WriteInt64(buffer, message.OffsetLagField);
-                        Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
+                        buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                        buffer = Encoder.WriteInt64(buffer, message.PartitionSizeField);
+                        buffer = Encoder.WriteInt64(buffer, message.OffsetLagField);
+                        buffer = Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
+                        return buffer;
                     }
-                    public static DescribeLogDirsPartition ReadV02(Stream buffer)
+                    public static DescribeLogDirsPartition ReadV02(ref ReadOnlyMemory<byte> buffer)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer);
-                        var partitionSizeField = Decoder.ReadInt64(buffer);
-                        var offsetLagField = Decoder.ReadInt64(buffer);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer);
-                        _ = Decoder.ReadVarUInt32(buffer);
+                        var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                        var partitionSizeField = Decoder.ReadInt64(ref buffer);
+                        var offsetLagField = Decoder.ReadInt64(ref buffer);
+                        var isFutureKeyField = Decoder.ReadBoolean(ref buffer);
+                        _ = Decoder.ReadVarUInt32(ref buffer);
                         return new(
                             partitionIndexField,
                             partitionSizeField,
@@ -367,21 +383,22 @@ namespace Kafka.Client.Messages
                             isFutureKeyField
                         );
                     }
-                    public static void WriteV02(Stream buffer, DescribeLogDirsPartition message)
+                    public static Memory<byte> WriteV02(Memory<byte> buffer, DescribeLogDirsPartition message)
                     {
-                        Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                        Encoder.WriteInt64(buffer, message.PartitionSizeField);
-                        Encoder.WriteInt64(buffer, message.OffsetLagField);
-                        Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
-                        Encoder.WriteVarUInt32(buffer, 0);
+                        buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                        buffer = Encoder.WriteInt64(buffer, message.PartitionSizeField);
+                        buffer = Encoder.WriteInt64(buffer, message.OffsetLagField);
+                        buffer = Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
+                        buffer = Encoder.WriteVarUInt32(buffer, 0);
+                        return buffer;
                     }
-                    public static DescribeLogDirsPartition ReadV03(Stream buffer)
+                    public static DescribeLogDirsPartition ReadV03(ref ReadOnlyMemory<byte> buffer)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer);
-                        var partitionSizeField = Decoder.ReadInt64(buffer);
-                        var offsetLagField = Decoder.ReadInt64(buffer);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer);
-                        _ = Decoder.ReadVarUInt32(buffer);
+                        var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                        var partitionSizeField = Decoder.ReadInt64(ref buffer);
+                        var offsetLagField = Decoder.ReadInt64(ref buffer);
+                        var isFutureKeyField = Decoder.ReadBoolean(ref buffer);
+                        _ = Decoder.ReadVarUInt32(ref buffer);
                         return new(
                             partitionIndexField,
                             partitionSizeField,
@@ -389,21 +406,22 @@ namespace Kafka.Client.Messages
                             isFutureKeyField
                         );
                     }
-                    public static void WriteV03(Stream buffer, DescribeLogDirsPartition message)
+                    public static Memory<byte> WriteV03(Memory<byte> buffer, DescribeLogDirsPartition message)
                     {
-                        Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                        Encoder.WriteInt64(buffer, message.PartitionSizeField);
-                        Encoder.WriteInt64(buffer, message.OffsetLagField);
-                        Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
-                        Encoder.WriteVarUInt32(buffer, 0);
+                        buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                        buffer = Encoder.WriteInt64(buffer, message.PartitionSizeField);
+                        buffer = Encoder.WriteInt64(buffer, message.OffsetLagField);
+                        buffer = Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
+                        buffer = Encoder.WriteVarUInt32(buffer, 0);
+                        return buffer;
                     }
-                    public static DescribeLogDirsPartition ReadV04(Stream buffer)
+                    public static DescribeLogDirsPartition ReadV04(ref ReadOnlyMemory<byte> buffer)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer);
-                        var partitionSizeField = Decoder.ReadInt64(buffer);
-                        var offsetLagField = Decoder.ReadInt64(buffer);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer);
-                        _ = Decoder.ReadVarUInt32(buffer);
+                        var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                        var partitionSizeField = Decoder.ReadInt64(ref buffer);
+                        var offsetLagField = Decoder.ReadInt64(ref buffer);
+                        var isFutureKeyField = Decoder.ReadBoolean(ref buffer);
+                        _ = Decoder.ReadVarUInt32(ref buffer);
                         return new(
                             partitionIndexField,
                             partitionSizeField,
@@ -411,13 +429,14 @@ namespace Kafka.Client.Messages
                             isFutureKeyField
                         );
                     }
-                    public static void WriteV04(Stream buffer, DescribeLogDirsPartition message)
+                    public static Memory<byte> WriteV04(Memory<byte> buffer, DescribeLogDirsPartition message)
                     {
-                        Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                        Encoder.WriteInt64(buffer, message.PartitionSizeField);
-                        Encoder.WriteInt64(buffer, message.OffsetLagField);
-                        Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
-                        Encoder.WriteVarUInt32(buffer, 0);
+                        buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                        buffer = Encoder.WriteInt64(buffer, message.PartitionSizeField);
+                        buffer = Encoder.WriteInt64(buffer, message.OffsetLagField);
+                        buffer = Encoder.WriteBoolean(buffer, message.IsFutureKeyField);
+                        buffer = Encoder.WriteVarUInt32(buffer, 0);
+                        return buffer;
                     }
                 }
             }

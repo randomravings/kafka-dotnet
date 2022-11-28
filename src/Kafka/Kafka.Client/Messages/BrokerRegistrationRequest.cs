@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using Listener = Kafka.Client.Messages.BrokerRegistrationRequest.Listener;
+using Kafka.Common.Protocol;
 using Feature = Kafka.Client.Messages.BrokerRegistrationRequest.Feature;
+using Listener = Kafka.Client.Messages.BrokerRegistrationRequest.Listener;
 
 namespace Kafka.Client.Messages
 {
@@ -21,7 +22,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<Listener> ListenersField,
         ImmutableArray<Feature> FeaturesField,
         string? RackField
-    )
+    ) : Request(62)
     {
         public static BrokerRegistrationRequest Empty { get; } = new(
             default(int),
@@ -31,6 +32,23 @@ namespace Kafka.Client.Messages
             ImmutableArray<Feature>.Empty,
             default(string?)
         );
+        /// <summary>
+        /// <param name="NameField">The feature name.</param>
+        /// <param name="MinSupportedVersionField">The minimum supported feature level.</param>
+        /// <param name="MaxSupportedVersionField">The maximum supported feature level.</param>
+        /// </summary>
+        public sealed record Feature (
+            string NameField,
+            short MinSupportedVersionField,
+            short MaxSupportedVersionField
+        )
+        {
+            public static Feature Empty { get; } = new(
+                "",
+                default(short),
+                default(short)
+            );
+        };
         /// <summary>
         /// <param name="NameField">The name of the endpoint.</param>
         /// <param name="HostField">The hostname.</param>
@@ -48,23 +66,6 @@ namespace Kafka.Client.Messages
                 "",
                 "",
                 default(ushort),
-                default(short)
-            );
-        };
-        /// <summary>
-        /// <param name="NameField">The feature name.</param>
-        /// <param name="MinSupportedVersionField">The minimum supported feature level.</param>
-        /// <param name="MaxSupportedVersionField">The maximum supported feature level.</param>
-        /// </summary>
-        public sealed record Feature (
-            string NameField,
-            short MinSupportedVersionField,
-            short MaxSupportedVersionField
-        )
-        {
-            public static Feature Empty { get; } = new(
-                "",
-                default(short),
                 default(short)
             );
         };

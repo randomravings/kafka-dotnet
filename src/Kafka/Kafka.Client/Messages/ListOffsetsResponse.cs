@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ListOffsetsTopicResponse = Kafka.Client.Messages.ListOffsetsResponse.ListOffsetsTopicResponse;
+using Kafka.Common.Protocol;
 using ListOffsetsPartitionResponse = Kafka.Client.Messages.ListOffsetsResponse.ListOffsetsTopicResponse.ListOffsetsPartitionResponse;
+using ListOffsetsTopicResponse = Kafka.Client.Messages.ListOffsetsResponse.ListOffsetsTopicResponse;
 
 namespace Kafka.Client.Messages
 {
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record ListOffsetsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<ListOffsetsTopicResponse> TopicsField
-    )
+    ) : Response(2)
     {
         public static ListOffsetsResponse Empty { get; } = new(
             default(int),

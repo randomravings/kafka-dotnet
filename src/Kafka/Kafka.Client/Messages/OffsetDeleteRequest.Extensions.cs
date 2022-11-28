@@ -9,60 +9,62 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class OffsetDeleteRequestSerde
     {
-        private static readonly Func<Stream, OffsetDeleteRequest>[] READ_VERSIONS = {
-            b => ReadV00(b),
+        private static readonly DecodeDelegate<OffsetDeleteRequest>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
         };
-        private static readonly Action<Stream, OffsetDeleteRequest>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<OffsetDeleteRequest>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
         };
-        public static OffsetDeleteRequest Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static OffsetDeleteRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, OffsetDeleteRequest message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static OffsetDeleteRequest ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, OffsetDeleteRequest message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static OffsetDeleteRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var groupIdField = Decoder.ReadString(buffer);
-            var topicsField = Decoder.ReadArray<OffsetDeleteRequestTopic>(buffer, b => OffsetDeleteRequestTopicSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var groupIdField = Decoder.ReadString(ref buffer);
+            var topicsField = Decoder.ReadArray<OffsetDeleteRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetDeleteRequestTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 groupIdField,
                 topicsField
             );
         }
-        private static void WriteV00(Stream buffer, OffsetDeleteRequest message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, OffsetDeleteRequest message)
         {
-            Encoder.WriteString(buffer, message.GroupIdField);
-            Encoder.WriteArray<OffsetDeleteRequestTopic>(buffer, message.TopicsField, (b, i) => OffsetDeleteRequestTopicSerde.WriteV00(b, i));
+            buffer = Encoder.WriteString(buffer, message.GroupIdField);
+            buffer = Encoder.WriteArray<OffsetDeleteRequestTopic>(buffer, message.TopicsField, (b, i) => OffsetDeleteRequestTopicSerde.WriteV00(b, i));
+            return buffer;
         }
         private static class OffsetDeleteRequestTopicSerde
         {
-            public static OffsetDeleteRequestTopic ReadV00(Stream buffer)
+            public static OffsetDeleteRequestTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<OffsetDeleteRequestPartition>(buffer, b => OffsetDeleteRequestPartitionSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<OffsetDeleteRequestPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetDeleteRequestPartitionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV00(Stream buffer, OffsetDeleteRequestTopic message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, OffsetDeleteRequestTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<OffsetDeleteRequestPartition>(buffer, message.PartitionsField, (b, i) => OffsetDeleteRequestPartitionSerde.WriteV00(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<OffsetDeleteRequestPartition>(buffer, message.PartitionsField, (b, i) => OffsetDeleteRequestPartitionSerde.WriteV00(b, i));
+                return buffer;
             }
             private static class OffsetDeleteRequestPartitionSerde
             {
-                public static OffsetDeleteRequestPartition ReadV00(Stream buffer)
+                public static OffsetDeleteRequestPartition ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
                     return new(
                         partitionIndexField
                     );
                 }
-                public static void WriteV00(Stream buffer, OffsetDeleteRequestPartition message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, OffsetDeleteRequestPartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    return buffer;
                 }
             }
         }

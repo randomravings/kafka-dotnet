@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using PartitionResult = Kafka.Client.Messages.ElectLeadersResponse.ReplicaElectionResult.PartitionResult;
+using Kafka.Common.Protocol;
 using ReplicaElectionResult = Kafka.Client.Messages.ElectLeadersResponse.ReplicaElectionResult;
+using PartitionResult = Kafka.Client.Messages.ElectLeadersResponse.ReplicaElectionResult.PartitionResult;
 
 namespace Kafka.Client.Messages
 {
@@ -15,7 +16,7 @@ namespace Kafka.Client.Messages
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<ReplicaElectionResult> ReplicaElectionResultsField
-    )
+    ) : Response(43)
     {
         public static ElectLeadersResponse Empty { get; } = new(
             default(int),

@@ -1,4 +1,6 @@
 using System.CodeDom.Compiler;
+using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -9,15 +11,15 @@ namespace Kafka.Client.Messages
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record EnvelopeRequest (
-        byte[] RequestDataField,
-        byte[]? RequestPrincipalField,
-        byte[] ClientHostAddressField
-    )
+        ImmutableArray<byte> RequestDataField,
+        ImmutableArray<byte>? RequestPrincipalField,
+        ImmutableArray<byte> ClientHostAddressField
+    ) : Request(58)
     {
         public static EnvelopeRequest Empty { get; } = new(
-            System.Array.Empty<byte>(),
-            default(byte[]?),
-            System.Array.Empty<byte>()
+            ImmutableArray<byte>.Empty,
+            default(ImmutableArray<byte>?),
+            ImmutableArray<byte>.Empty
         );
     };
 }

@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using DescribeAclsResource = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource;
+using Kafka.Common.Protocol;
 using AclDescription = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource.AclDescription;
+using DescribeAclsResource = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource;
 
 namespace Kafka.Client.Messages
 {
@@ -17,7 +18,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         string? ErrorMessageField,
         ImmutableArray<DescribeAclsResource> ResourcesField
-    )
+    ) : Response(29)
     {
         public static DescribeAclsResponse Empty { get; } = new(
             default(int),

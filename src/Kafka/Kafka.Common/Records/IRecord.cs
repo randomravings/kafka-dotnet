@@ -1,4 +1,6 @@
-﻿namespace Kafka.Common.Records
+﻿using System.Collections.Immutable;
+
+namespace Kafka.Common.Records
 {
     public interface IRecord
     {        
@@ -42,12 +44,12 @@
         /// <summary>
         /// Get the record's key, null if there is none.
         /// </summary>
-        byte[]? Key { get; }
+        ImmutableArray<byte>? Key { get; }
 
         /// <summary>
         /// Get the record's value, null if there is none.
         /// </summary>
-        byte[]? Value { get; }
+        ImmutableArray<byte>? Value { get; }
 
         /// <summary>
         /// 

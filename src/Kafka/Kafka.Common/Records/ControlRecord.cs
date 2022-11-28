@@ -1,4 +1,5 @@
 ﻿using Kafka.Common.Attributes;
+using System.Collections.Immutable;
 
 namespace Kafka.Common.Records
 {
@@ -23,9 +24,9 @@ namespace Kafka.Common.Records
 
         long IRecord.Timestamp => -1;
 
-        byte[]? IRecord.Key => default;
+        ImmutableArray<byte>? IRecord.Key => default;
 
-        byte[]? IRecord.Value => default;
+        ImmutableArray<byte>? IRecord.Value => default;
 
         long IRecord.TimestampDelta => 0;
 

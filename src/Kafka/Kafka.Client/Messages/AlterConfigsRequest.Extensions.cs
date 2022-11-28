@@ -9,166 +9,174 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class AlterConfigsRequestSerde
     {
-        private static readonly Func<Stream, AlterConfigsRequest>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
+        private static readonly DecodeDelegate<AlterConfigsRequest>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
         };
-        private static readonly Action<Stream, AlterConfigsRequest>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<AlterConfigsRequest>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
         };
-        public static AlterConfigsRequest Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static AlterConfigsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, AlterConfigsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static AlterConfigsRequest ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, AlterConfigsRequest message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static AlterConfigsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var resourcesField = Decoder.ReadArray<AlterConfigsResource>(buffer, b => AlterConfigsResourceSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
-            var validateOnlyField = Decoder.ReadBoolean(buffer);
+            var resourcesField = Decoder.ReadArray<AlterConfigsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterConfigsResourceSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
             return new(
                 resourcesField,
                 validateOnlyField
             );
         }
-        private static void WriteV00(Stream buffer, AlterConfigsRequest message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, AlterConfigsRequest message)
         {
-            Encoder.WriteArray<AlterConfigsResource>(buffer, message.ResourcesField, (b, i) => AlterConfigsResourceSerde.WriteV00(b, i));
-            Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
+            buffer = Encoder.WriteArray<AlterConfigsResource>(buffer, message.ResourcesField, (b, i) => AlterConfigsResourceSerde.WriteV00(b, i));
+            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
+            return buffer;
         }
-        private static AlterConfigsRequest ReadV01(Stream buffer)
+        private static AlterConfigsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var resourcesField = Decoder.ReadArray<AlterConfigsResource>(buffer, b => AlterConfigsResourceSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
-            var validateOnlyField = Decoder.ReadBoolean(buffer);
+            var resourcesField = Decoder.ReadArray<AlterConfigsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterConfigsResourceSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
             return new(
                 resourcesField,
                 validateOnlyField
             );
         }
-        private static void WriteV01(Stream buffer, AlterConfigsRequest message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, AlterConfigsRequest message)
         {
-            Encoder.WriteArray<AlterConfigsResource>(buffer, message.ResourcesField, (b, i) => AlterConfigsResourceSerde.WriteV01(b, i));
-            Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
+            buffer = Encoder.WriteArray<AlterConfigsResource>(buffer, message.ResourcesField, (b, i) => AlterConfigsResourceSerde.WriteV01(b, i));
+            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
+            return buffer;
         }
-        private static AlterConfigsRequest ReadV02(Stream buffer)
+        private static AlterConfigsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
-            var resourcesField = Decoder.ReadCompactArray<AlterConfigsResource>(buffer, b => AlterConfigsResourceSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
-            var validateOnlyField = Decoder.ReadBoolean(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var resourcesField = Decoder.ReadCompactArray<AlterConfigsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterConfigsResourceSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 resourcesField,
                 validateOnlyField
             );
         }
-        private static void WriteV02(Stream buffer, AlterConfigsRequest message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, AlterConfigsRequest message)
         {
-            Encoder.WriteCompactArray<AlterConfigsResource>(buffer, message.ResourcesField, (b, i) => AlterConfigsResourceSerde.WriteV02(b, i));
-            Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteCompactArray<AlterConfigsResource>(buffer, message.ResourcesField, (b, i) => AlterConfigsResourceSerde.WriteV02(b, i));
+            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class AlterConfigsResourceSerde
         {
-            public static AlterConfigsResource ReadV00(Stream buffer)
+            public static AlterConfigsResource ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer);
-                var resourceNameField = Decoder.ReadString(buffer);
-                var configsField = Decoder.ReadArray<AlterableConfig>(buffer, b => AlterableConfigSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var resourceTypeField = Decoder.ReadInt8(ref buffer);
+                var resourceNameField = Decoder.ReadString(ref buffer);
+                var configsField = Decoder.ReadArray<AlterableConfig>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterableConfigSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
                     resourceTypeField,
                     resourceNameField,
                     configsField
                 );
             }
-            public static void WriteV00(Stream buffer, AlterConfigsResource message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, AlterConfigsResource message)
             {
-                Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                Encoder.WriteString(buffer, message.ResourceNameField);
-                Encoder.WriteArray<AlterableConfig>(buffer, message.ConfigsField, (b, i) => AlterableConfigSerde.WriteV00(b, i));
+                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
+                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
+                buffer = Encoder.WriteArray<AlterableConfig>(buffer, message.ConfigsField, (b, i) => AlterableConfigSerde.WriteV00(b, i));
+                return buffer;
             }
-            public static AlterConfigsResource ReadV01(Stream buffer)
+            public static AlterConfigsResource ReadV01(ref ReadOnlyMemory<byte> buffer)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer);
-                var resourceNameField = Decoder.ReadString(buffer);
-                var configsField = Decoder.ReadArray<AlterableConfig>(buffer, b => AlterableConfigSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var resourceTypeField = Decoder.ReadInt8(ref buffer);
+                var resourceNameField = Decoder.ReadString(ref buffer);
+                var configsField = Decoder.ReadArray<AlterableConfig>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterableConfigSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
                     resourceTypeField,
                     resourceNameField,
                     configsField
                 );
             }
-            public static void WriteV01(Stream buffer, AlterConfigsResource message)
+            public static Memory<byte> WriteV01(Memory<byte> buffer, AlterConfigsResource message)
             {
-                Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                Encoder.WriteString(buffer, message.ResourceNameField);
-                Encoder.WriteArray<AlterableConfig>(buffer, message.ConfigsField, (b, i) => AlterableConfigSerde.WriteV01(b, i));
+                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
+                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
+                buffer = Encoder.WriteArray<AlterableConfig>(buffer, message.ConfigsField, (b, i) => AlterableConfigSerde.WriteV01(b, i));
+                return buffer;
             }
-            public static AlterConfigsResource ReadV02(Stream buffer)
+            public static AlterConfigsResource ReadV02(ref ReadOnlyMemory<byte> buffer)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer);
-                var resourceNameField = Decoder.ReadCompactString(buffer);
-                var configsField = Decoder.ReadCompactArray<AlterableConfig>(buffer, b => AlterableConfigSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
-                _ = Decoder.ReadVarUInt32(buffer);
+                var resourceTypeField = Decoder.ReadInt8(ref buffer);
+                var resourceNameField = Decoder.ReadCompactString(ref buffer);
+                var configsField = Decoder.ReadCompactArray<AlterableConfig>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterableConfigSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     resourceTypeField,
                     resourceNameField,
                     configsField
                 );
             }
-            public static void WriteV02(Stream buffer, AlterConfigsResource message)
+            public static Memory<byte> WriteV02(Memory<byte> buffer, AlterConfigsResource message)
             {
-                Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                Encoder.WriteCompactString(buffer, message.ResourceNameField);
-                Encoder.WriteCompactArray<AlterableConfig>(buffer, message.ConfigsField, (b, i) => AlterableConfigSerde.WriteV02(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
+                buffer = Encoder.WriteCompactString(buffer, message.ResourceNameField);
+                buffer = Encoder.WriteCompactArray<AlterableConfig>(buffer, message.ConfigsField, (b, i) => AlterableConfigSerde.WriteV02(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
             private static class AlterableConfigSerde
             {
-                public static AlterableConfig ReadV00(Stream buffer)
+                public static AlterableConfig ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var nameField = Decoder.ReadString(buffer);
-                    var valueField = Decoder.ReadNullableString(buffer);
+                    var nameField = Decoder.ReadString(ref buffer);
+                    var valueField = Decoder.ReadNullableString(ref buffer);
                     return new(
                         nameField,
                         valueField
                     );
                 }
-                public static void WriteV00(Stream buffer, AlterableConfig message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, AlterableConfig message)
                 {
-                    Encoder.WriteString(buffer, message.NameField);
-                    Encoder.WriteNullableString(buffer, message.ValueField);
+                    buffer = Encoder.WriteString(buffer, message.NameField);
+                    buffer = Encoder.WriteNullableString(buffer, message.ValueField);
+                    return buffer;
                 }
-                public static AlterableConfig ReadV01(Stream buffer)
+                public static AlterableConfig ReadV01(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var nameField = Decoder.ReadString(buffer);
-                    var valueField = Decoder.ReadNullableString(buffer);
+                    var nameField = Decoder.ReadString(ref buffer);
+                    var valueField = Decoder.ReadNullableString(ref buffer);
                     return new(
                         nameField,
                         valueField
                     );
                 }
-                public static void WriteV01(Stream buffer, AlterableConfig message)
+                public static Memory<byte> WriteV01(Memory<byte> buffer, AlterableConfig message)
                 {
-                    Encoder.WriteString(buffer, message.NameField);
-                    Encoder.WriteNullableString(buffer, message.ValueField);
+                    buffer = Encoder.WriteString(buffer, message.NameField);
+                    buffer = Encoder.WriteNullableString(buffer, message.ValueField);
+                    return buffer;
                 }
-                public static AlterableConfig ReadV02(Stream buffer)
+                public static AlterableConfig ReadV02(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer);
-                    var valueField = Decoder.ReadCompactNullableString(buffer);
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var nameField = Decoder.ReadCompactString(ref buffer);
+                    var valueField = Decoder.ReadCompactNullableString(ref buffer);
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         nameField,
                         valueField
                     );
                 }
-                public static void WriteV02(Stream buffer, AlterableConfig message)
+                public static Memory<byte> WriteV02(Memory<byte> buffer, AlterableConfig message)
                 {
-                    Encoder.WriteCompactString(buffer, message.NameField);
-                    Encoder.WriteCompactNullableString(buffer, message.ValueField);
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteCompactString(buffer, message.NameField);
+                    buffer = Encoder.WriteCompactNullableString(buffer, message.ValueField);
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
             }
         }

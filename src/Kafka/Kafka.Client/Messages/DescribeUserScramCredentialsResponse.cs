@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using DescribeUserScramCredentialsResult = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult;
+using Kafka.Common.Protocol;
 using CredentialInfo = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult.CredentialInfo;
+using DescribeUserScramCredentialsResult = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult;
 
 namespace Kafka.Client.Messages
 {
@@ -17,7 +18,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         string? ErrorMessageField,
         ImmutableArray<DescribeUserScramCredentialsResult> ResultsField
-    )
+    ) : Response(50)
     {
         public static DescribeUserScramCredentialsResponse Empty { get; } = new(
             default(int),

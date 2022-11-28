@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using JoinGroupRequestProtocol = Kafka.Client.Messages.JoinGroupRequest.JoinGroupRequestProtocol;
 
 namespace Kafka.Client.Messages
@@ -24,7 +25,7 @@ namespace Kafka.Client.Messages
         string ProtocolTypeField,
         ImmutableArray<JoinGroupRequestProtocol> ProtocolsField,
         string? ReasonField
-    )
+    ) : Request(11)
     {
         public static JoinGroupRequest Empty { get; } = new(
             "",
@@ -42,12 +43,12 @@ namespace Kafka.Client.Messages
         /// </summary>
         public sealed record JoinGroupRequestProtocol (
             string NameField,
-            byte[] MetadataField
+            ImmutableArray<byte> MetadataField
         )
         {
             public static JoinGroupRequestProtocol Empty { get; } = new(
                 "",
-                System.Array.Empty<byte>()
+                ImmutableArray<byte>.Empty
             );
         };
     };

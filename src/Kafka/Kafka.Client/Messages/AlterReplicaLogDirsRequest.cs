@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using AlterReplicaLogDir = Kafka.Client.Messages.AlterReplicaLogDirsRequest.AlterReplicaLogDir;
 using AlterReplicaLogDirTopic = Kafka.Client.Messages.AlterReplicaLogDirsRequest.AlterReplicaLogDir.AlterReplicaLogDirTopic;
 
@@ -11,7 +12,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record AlterReplicaLogDirsRequest (
         ImmutableArray<AlterReplicaLogDir> DirsField
-    )
+    ) : Request(34)
     {
         public static AlterReplicaLogDirsRequest Empty { get; } = new(
             ImmutableArray<AlterReplicaLogDir>.Empty

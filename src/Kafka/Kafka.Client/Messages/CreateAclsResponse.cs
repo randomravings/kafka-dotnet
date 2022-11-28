@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using AclCreationResult = Kafka.Client.Messages.CreateAclsResponse.AclCreationResult;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record CreateAclsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<AclCreationResult> ResultsField
-    )
+    ) : Response(30)
     {
         public static CreateAclsResponse Empty { get; } = new(
             default(int),

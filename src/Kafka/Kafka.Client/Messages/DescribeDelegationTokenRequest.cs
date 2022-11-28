@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DescribeDelegationTokenOwner = Kafka.Client.Messages.DescribeDelegationTokenRequest.DescribeDelegationTokenOwner;
 
 namespace Kafka.Client.Messages
@@ -10,7 +11,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DescribeDelegationTokenRequest (
         ImmutableArray<DescribeDelegationTokenOwner>? OwnersField
-    )
+    ) : Request(41)
     {
         public static DescribeDelegationTokenRequest Empty { get; } = new(
             default(ImmutableArray<DescribeDelegationTokenOwner>?)

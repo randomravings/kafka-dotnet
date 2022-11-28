@@ -6,26 +6,25 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class BrokerHeartbeatRequestSerde
     {
-        private static readonly Func<Stream, BrokerHeartbeatRequest>[] READ_VERSIONS = {
-            b => ReadV00(b),
+        private static readonly DecodeDelegate<BrokerHeartbeatRequest>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
         };
-        private static readonly Action<Stream, BrokerHeartbeatRequest>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<BrokerHeartbeatRequest>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
         };
-        public static BrokerHeartbeatRequest Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static BrokerHeartbeatRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, BrokerHeartbeatRequest message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static BrokerHeartbeatRequest ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, BrokerHeartbeatRequest message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static BrokerHeartbeatRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var brokerIdField = Decoder.ReadInt32(buffer);
-            var brokerEpochField = Decoder.ReadInt64(buffer);
-            var currentMetadataOffsetField = Decoder.ReadInt64(buffer);
-            var wantFenceField = Decoder.ReadBoolean(buffer);
-            var wantShutDownField = Decoder.ReadBoolean(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var brokerIdField = Decoder.ReadInt32(ref buffer);
+            var brokerEpochField = Decoder.ReadInt64(ref buffer);
+            var currentMetadataOffsetField = Decoder.ReadInt64(ref buffer);
+            var wantFenceField = Decoder.ReadBoolean(ref buffer);
+            var wantShutDownField = Decoder.ReadBoolean(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 brokerIdField,
                 brokerEpochField,
@@ -34,14 +33,15 @@ namespace Kafka.Client.Messages
                 wantShutDownField
             );
         }
-        private static void WriteV00(Stream buffer, BrokerHeartbeatRequest message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, BrokerHeartbeatRequest message)
         {
-            Encoder.WriteInt32(buffer, message.BrokerIdField);
-            Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            Encoder.WriteInt64(buffer, message.CurrentMetadataOffsetField);
-            Encoder.WriteBoolean(buffer, message.WantFenceField);
-            Encoder.WriteBoolean(buffer, message.WantShutDownField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
+            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
+            buffer = Encoder.WriteInt64(buffer, message.CurrentMetadataOffsetField);
+            buffer = Encoder.WriteBoolean(buffer, message.WantFenceField);
+            buffer = Encoder.WriteBoolean(buffer, message.WantShutDownField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -10,7 +11,7 @@ namespace Kafka.Client.Messages
     public sealed record HeartbeatResponse (
         int ThrottleTimeMsField,
         short ErrorCodeField
-    )
+    ) : Response(12)
     {
         public static HeartbeatResponse Empty { get; } = new(
             default(int),

@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using MemberIdentity = Kafka.Client.Messages.LeaveGroupRequest.MemberIdentity;
 
 namespace Kafka.Client.Messages
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         string GroupIdField,
         string MemberIdField,
         ImmutableArray<MemberIdentity> MembersField
-    )
+    ) : Request(13)
     {
         public static LeaveGroupRequest Empty { get; } = new(
             "",

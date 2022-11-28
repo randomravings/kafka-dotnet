@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using AlterUserScramCredentialsResult = Kafka.Client.Messages.AlterUserScramCredentialsResponse.AlterUserScramCredentialsResult;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record AlterUserScramCredentialsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<AlterUserScramCredentialsResult> ResultsField
-    )
+    ) : Response(51)
     {
         public static AlterUserScramCredentialsResponse Empty { get; } = new(
             default(int),

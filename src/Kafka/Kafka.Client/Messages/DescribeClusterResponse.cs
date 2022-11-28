@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DescribeClusterBroker = Kafka.Client.Messages.DescribeClusterResponse.DescribeClusterBroker;
 
 namespace Kafka.Client.Messages
@@ -22,7 +23,7 @@ namespace Kafka.Client.Messages
         int ControllerIdField,
         ImmutableArray<DescribeClusterBroker> BrokersField,
         int ClusterAuthorizedOperationsField
-    )
+    ) : Response(60)
     {
         public static DescribeClusterResponse Empty { get; } = new(
             default(int),

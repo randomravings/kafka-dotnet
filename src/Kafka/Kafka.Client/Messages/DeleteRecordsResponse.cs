@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using DeleteRecordsPartitionResult = Kafka.Client.Messages.DeleteRecordsResponse.DeleteRecordsTopicResult.DeleteRecordsPartitionResult;
+using Kafka.Common.Protocol;
 using DeleteRecordsTopicResult = Kafka.Client.Messages.DeleteRecordsResponse.DeleteRecordsTopicResult;
+using DeleteRecordsPartitionResult = Kafka.Client.Messages.DeleteRecordsResponse.DeleteRecordsTopicResult.DeleteRecordsPartitionResult;
 
 namespace Kafka.Client.Messages
 {
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record DeleteRecordsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<DeleteRecordsTopicResult> TopicsField
-    )
+    ) : Response(21)
     {
         public static DeleteRecordsResponse Empty { get; } = new(
             default(int),

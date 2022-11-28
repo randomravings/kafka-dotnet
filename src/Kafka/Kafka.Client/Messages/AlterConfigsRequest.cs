@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using AlterableConfig = Kafka.Client.Messages.AlterConfigsRequest.AlterConfigsResource.AlterableConfig;
 using AlterConfigsResource = Kafka.Client.Messages.AlterConfigsRequest.AlterConfigsResource;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record AlterConfigsRequest (
         ImmutableArray<AlterConfigsResource> ResourcesField,
         bool ValidateOnlyField
-    )
+    ) : Request(33)
     {
         public static AlterConfigsRequest Empty { get; } = new(
             ImmutableArray<AlterConfigsResource>.Empty,

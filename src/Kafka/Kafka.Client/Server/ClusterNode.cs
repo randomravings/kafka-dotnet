@@ -1,4 +1,6 @@
-﻿namespace Kafka.Client.Server
+﻿using Kafka.Common.Types;
+
+namespace Kafka.Client.Server
 {
     public sealed record ClusterNode(
         ClusterNodeId Id,

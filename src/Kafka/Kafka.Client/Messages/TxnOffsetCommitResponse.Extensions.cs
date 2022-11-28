@@ -9,201 +9,212 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class TxnOffsetCommitResponseSerde
     {
-        private static readonly Func<Stream, TxnOffsetCommitResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
-            b => ReadV03(b),
+        private static readonly DecodeDelegate<TxnOffsetCommitResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
         };
-        private static readonly Action<Stream, TxnOffsetCommitResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<TxnOffsetCommitResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
             (b, m) => WriteV03(b, m),
         };
-        public static TxnOffsetCommitResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static TxnOffsetCommitResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, TxnOffsetCommitResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static TxnOffsetCommitResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, TxnOffsetCommitResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static TxnOffsetCommitResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadArray<TxnOffsetCommitResponseTopic>(buffer, b => TxnOffsetCommitResponseTopicSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<TxnOffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitResponseTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV00(Stream buffer, TxnOffsetCommitResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, TxnOffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<TxnOffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitResponseTopicSerde.WriteV00(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TxnOffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitResponseTopicSerde.WriteV00(b, i));
+            return buffer;
         }
-        private static TxnOffsetCommitResponse ReadV01(Stream buffer)
+        private static TxnOffsetCommitResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadArray<TxnOffsetCommitResponseTopic>(buffer, b => TxnOffsetCommitResponseTopicSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<TxnOffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitResponseTopicSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV01(Stream buffer, TxnOffsetCommitResponse message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, TxnOffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<TxnOffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitResponseTopicSerde.WriteV01(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TxnOffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitResponseTopicSerde.WriteV01(b, i));
+            return buffer;
         }
-        private static TxnOffsetCommitResponse ReadV02(Stream buffer)
+        private static TxnOffsetCommitResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadArray<TxnOffsetCommitResponseTopic>(buffer, b => TxnOffsetCommitResponseTopicSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<TxnOffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitResponseTopicSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV02(Stream buffer, TxnOffsetCommitResponse message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, TxnOffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<TxnOffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitResponseTopicSerde.WriteV02(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TxnOffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitResponseTopicSerde.WriteV02(b, i));
+            return buffer;
         }
-        private static TxnOffsetCommitResponse ReadV03(Stream buffer)
+        private static TxnOffsetCommitResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadCompactArray<TxnOffsetCommitResponseTopic>(buffer, b => TxnOffsetCommitResponseTopicSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<TxnOffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitResponseTopicSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV03(Stream buffer, TxnOffsetCommitResponse message)
+        private static Memory<byte> WriteV03(Memory<byte> buffer, TxnOffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteCompactArray<TxnOffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitResponseTopicSerde.WriteV03(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteCompactArray<TxnOffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitResponseTopicSerde.WriteV03(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class TxnOffsetCommitResponseTopicSerde
         {
-            public static TxnOffsetCommitResponseTopic ReadV00(Stream buffer)
+            public static TxnOffsetCommitResponseTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<TxnOffsetCommitResponsePartition>(buffer, b => TxnOffsetCommitResponsePartitionSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<TxnOffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitResponsePartitionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV00(Stream buffer, TxnOffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, TxnOffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<TxnOffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitResponsePartitionSerde.WriteV00(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<TxnOffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitResponsePartitionSerde.WriteV00(b, i));
+                return buffer;
             }
-            public static TxnOffsetCommitResponseTopic ReadV01(Stream buffer)
+            public static TxnOffsetCommitResponseTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<TxnOffsetCommitResponsePartition>(buffer, b => TxnOffsetCommitResponsePartitionSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<TxnOffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitResponsePartitionSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV01(Stream buffer, TxnOffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV01(Memory<byte> buffer, TxnOffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<TxnOffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitResponsePartitionSerde.WriteV01(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<TxnOffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitResponsePartitionSerde.WriteV01(b, i));
+                return buffer;
             }
-            public static TxnOffsetCommitResponseTopic ReadV02(Stream buffer)
+            public static TxnOffsetCommitResponseTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<TxnOffsetCommitResponsePartition>(buffer, b => TxnOffsetCommitResponsePartitionSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<TxnOffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitResponsePartitionSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV02(Stream buffer, TxnOffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV02(Memory<byte> buffer, TxnOffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<TxnOffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitResponsePartitionSerde.WriteV02(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<TxnOffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitResponsePartitionSerde.WriteV02(b, i));
+                return buffer;
             }
-            public static TxnOffsetCommitResponseTopic ReadV03(Stream buffer)
+            public static TxnOffsetCommitResponseTopic ReadV03(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadCompactString(buffer);
-                var partitionsField = Decoder.ReadCompactArray<TxnOffsetCommitResponsePartition>(buffer, b => TxnOffsetCommitResponsePartitionSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(buffer);
+                var nameField = Decoder.ReadCompactString(ref buffer);
+                var partitionsField = Decoder.ReadCompactArray<TxnOffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitResponsePartitionSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV03(Stream buffer, TxnOffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV03(Memory<byte> buffer, TxnOffsetCommitResponseTopic message)
             {
-                Encoder.WriteCompactString(buffer, message.NameField);
-                Encoder.WriteCompactArray<TxnOffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitResponsePartitionSerde.WriteV03(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.NameField);
+                buffer = Encoder.WriteCompactArray<TxnOffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitResponsePartitionSerde.WriteV03(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
             private static class TxnOffsetCommitResponsePartitionSerde
             {
-                public static TxnOffsetCommitResponsePartition ReadV00(Stream buffer)
+                public static TxnOffsetCommitResponsePartition ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV00(Stream buffer, TxnOffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, TxnOffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static TxnOffsetCommitResponsePartition ReadV01(Stream buffer)
+                public static TxnOffsetCommitResponsePartition ReadV01(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV01(Stream buffer, TxnOffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV01(Memory<byte> buffer, TxnOffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static TxnOffsetCommitResponsePartition ReadV02(Stream buffer)
+                public static TxnOffsetCommitResponsePartition ReadV02(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV02(Stream buffer, TxnOffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV02(Memory<byte> buffer, TxnOffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static TxnOffsetCommitResponsePartition ReadV03(Stream buffer)
+                public static TxnOffsetCommitResponsePartition ReadV03(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV03(Stream buffer, TxnOffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV03(Memory<byte> buffer, TxnOffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
             }
         }

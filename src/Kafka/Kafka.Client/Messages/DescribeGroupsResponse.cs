@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DescribedGroup = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup;
 using DescribedGroupMember = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup.DescribedGroupMember;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record DescribeGroupsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<DescribedGroup> GroupsField
-    )
+    ) : Response(15)
     {
         public static DescribeGroupsResponse Empty { get; } = new(
             default(int),
@@ -60,8 +61,8 @@ namespace Kafka.Client.Messages
                 string? GroupInstanceIdField,
                 string ClientIdField,
                 string ClientHostField,
-                byte[] MemberMetadataField,
-                byte[] MemberAssignmentField
+                ImmutableArray<byte> MemberMetadataField,
+                ImmutableArray<byte> MemberAssignmentField
             )
             {
                 public static DescribedGroupMember Empty { get; } = new(
@@ -69,8 +70,8 @@ namespace Kafka.Client.Messages
                     default(string?),
                     "",
                     "",
-                    System.Array.Empty<byte>(),
-                    System.Array.Empty<byte>()
+                    ImmutableArray<byte>.Empty,
+                    ImmutableArray<byte>.Empty
                 );
             };
         };

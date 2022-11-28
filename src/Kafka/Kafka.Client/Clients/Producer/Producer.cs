@@ -1,15 +1,19 @@
-﻿using Kafka.Common.Serialization;
+﻿using Kafka.Client.Messages;
+using Kafka.Common.Records;
+using Kafka.Common.Serialization;
+using Kafka.Common.Types;
+using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Producer
 {
-    internal sealed class Producer<TKey, TValue> :
+    public sealed class Producer<TKey, TValue> :
         Client<ProducerConfig>,
         IProducer<TKey, TValue>
     {
         private readonly ISerializer<TKey> _keySerializer;
         private readonly ISerializer<TValue> _valueSerializer;
         private readonly IPartitioner _partitioner;
-        internal Producer(
+        public Producer(
             ProducerConfig config
         ) : base(config)
         {
@@ -18,7 +22,7 @@ namespace Kafka.Client.Clients.Producer
             _partitioner = GetPartitioner(config);
         }
 
-        internal Producer(
+        public Producer(
             ProducerConfig config,
             ISerializer<TKey> keySerializer,
             ISerializer<TValue> valueSerializer
@@ -29,7 +33,7 @@ namespace Kafka.Client.Clients.Producer
             _partitioner = GetPartitioner(config);
         }
 
-        internal Producer(
+        public Producer(
             ProducerConfig config,
             IPartitioner partitioner
         ) : base(config)
@@ -39,7 +43,7 @@ namespace Kafka.Client.Clients.Producer
             _partitioner = partitioner;
         }
 
-        internal Producer(
+        public Producer(
             ProducerConfig config,
             ISerializer<TKey> keySerializer,
             ISerializer<TValue> valueSerializer,
@@ -53,14 +57,139 @@ namespace Kafka.Client.Clients.Producer
 
         public async ValueTask<ProduceResult<TKey, TValue>> Send(
             string topic,
-            ProducerRecord<TKey, TValue> record
+            TKey key,
+            TValue value,
+            CancellationToken cancellationToken
+        ) =>
+            await Send(
+                topic,
+                key,
+                value,
+                Timestamp.Now(),
+                ImmutableArray<RecordHeader>.Empty,
+                cancellationToken
+            )
+        ;
+
+        public async ValueTask<ProduceResult<TKey, TValue>> Send(
+            string topic,
+            TKey key,
+            TValue value,
+            Timestamp timestamp,
+            CancellationToken cancellationToken
+        ) =>
+            await Send(
+                topic,
+                key,
+                value,
+                timestamp,
+                ImmutableArray<RecordHeader>.Empty,
+                cancellationToken
+            )
+        ;
+
+        public async ValueTask<ProduceResult<TKey, TValue>> Send(
+            string topic,
+            TKey key,
+            TValue value,
+            ImmutableArray<RecordHeader> recordHeaders,
+            CancellationToken cancellationToken
+        ) =>
+            await Send(
+                topic,
+                key,
+                value,
+                Timestamp.Now(),
+                recordHeaders,
+                cancellationToken
+            )
+        ;
+
+        public async ValueTask<ProduceResult<TKey, TValue>> Send(
+            string topic,
+            TKey key,
+            TValue value,
+            Timestamp timestamp,
+            ImmutableArray<RecordHeader> recordHeaders,
+            CancellationToken cancellationToken
         )
         {
-            var keyBytes = _keySerializer.Write(record.Key);
-            var valueBytes = _valueSerializer.Write(record.Value);
-            var partition = await _partitioner.Select(_cluster, topic, keyBytes);            
+            var record = new ProducerRecord<TKey, TValue>(
+                timestamp,
+                recordHeaders,
+                key,
+                value
+            );
+            return await Send(topic, record, cancellationToken);
+        }
 
-            return new ProduceResult<TKey, TValue>(new(topic, new(partition,0)), record);
+        public async ValueTask<ProduceResult<TKey, TValue>> Send(
+            string topic,
+            ProducerRecord<TKey, TValue> producerRecord,
+            CancellationToken cancellationToken
+        )
+        {
+            var keyBytes = _keySerializer.Write(producerRecord.Key);
+            var valueBytes = _valueSerializer.Write(producerRecord.Value);
+            var partition = await _partitioner.Select(_cluster, topic, keyBytes);
+
+            var record = new Record(
+                0,
+                0,
+                0,
+                1,
+                Attributes.None,
+                0,
+                0,
+                keyBytes,
+                valueBytes,
+                producerRecord.Headers
+            );
+
+            var batch = new RecordBatch(
+                0,
+                1,
+                0,
+                2,
+                0,
+                Attributes.None,
+                0,
+                0,
+                0,
+                0,
+                0,
+                0,
+                new IRecord[] { record }.ToImmutableArray()
+            );
+
+            var request = new ProduceRequest(
+                null,
+                1,
+                5000,
+                new[]
+                {
+                    new ProduceRequest.TopicProduceData(
+                        topic,
+                        new[]
+                        {
+                            new ProduceRequest.TopicProduceData.PartitionProduceData(
+                                0,
+                                batch
+                            )
+                        }.ToImmutableArray()
+                    )
+                }.ToImmutableArray()
+            );
+
+            var respose = await HandleRequest(
+                request,
+                (s, v, r) => ProduceRequestSerde.Write(s, v, r),
+                (ref ReadOnlyMemory<byte> s, short v) => ProduceResponseSerde.Read(ref s, v),
+                null,
+                cancellationToken
+            );
+
+            return new ProduceResult<TKey, TValue>(new(topic, new(partition, 0)), producerRecord);
         }
 
         private static IPartitioner GetPartitioner(
@@ -94,12 +223,12 @@ namespace Kafka.Client.Clients.Producer
         )
         {
             var type = Type.GetType(fullName);
-            if(type == null)
+            if (type == null)
                 throw new TypeLoadException(fullName);
-            if(!typeof(TType).IsAssignableFrom(type))
+            if (!typeof(TType).IsAssignableFrom(type))
                 throw new TypeLoadException(fullName);
             var instance = Activator.CreateInstance(type);
-            if(instance == null)
+            if (instance == null)
                 throw new TypeLoadException(fullName);
             return (TType)instance;
         }

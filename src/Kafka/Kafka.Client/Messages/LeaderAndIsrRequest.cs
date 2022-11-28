@@ -1,8 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using LeaderAndIsrTopicState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrTopicState;
-using LeaderAndIsrPartitionState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrPartitionState;
+using Kafka.Common.Protocol;
 using LeaderAndIsrLiveLeader = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrLiveLeader;
+using LeaderAndIsrPartitionState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrPartitionState;
+using LeaderAndIsrTopicState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrTopicState;
 
 namespace Kafka.Client.Messages
 {
@@ -24,7 +25,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<LeaderAndIsrPartitionState> UngroupedPartitionStatesField,
         ImmutableArray<LeaderAndIsrTopicState> TopicStatesField,
         ImmutableArray<LeaderAndIsrLiveLeader> LiveLeadersField
-    )
+    ) : Request(4)
     {
         public static LeaderAndIsrRequest Empty { get; } = new(
             default(int),
@@ -36,20 +37,20 @@ namespace Kafka.Client.Messages
             ImmutableArray<LeaderAndIsrLiveLeader>.Empty
         );
         /// <summary>
-        /// <param name="TopicNameField">The topic name.</param>
-        /// <param name="TopicIdField">The unique topic ID.</param>
-        /// <param name="PartitionStatesField">The state of each partition</param>
+        /// <param name="BrokerIdField">The leader's broker ID.</param>
+        /// <param name="HostNameField">The leader's hostname.</param>
+        /// <param name="PortField">The leader's port.</param>
         /// </summary>
-        public sealed record LeaderAndIsrTopicState (
-            string TopicNameField,
-            Guid TopicIdField,
-            ImmutableArray<LeaderAndIsrPartitionState> PartitionStatesField
+        public sealed record LeaderAndIsrLiveLeader (
+            int BrokerIdField,
+            string HostNameField,
+            int PortField
         )
         {
-            public static LeaderAndIsrTopicState Empty { get; } = new(
+            public static LeaderAndIsrLiveLeader Empty { get; } = new(
+                default(int),
                 "",
-                default(Guid),
-                ImmutableArray<LeaderAndIsrPartitionState>.Empty
+                default(int)
             );
         };
         /// <summary>
@@ -97,20 +98,20 @@ namespace Kafka.Client.Messages
             );
         };
         /// <summary>
-        /// <param name="BrokerIdField">The leader's broker ID.</param>
-        /// <param name="HostNameField">The leader's hostname.</param>
-        /// <param name="PortField">The leader's port.</param>
+        /// <param name="TopicNameField">The topic name.</param>
+        /// <param name="TopicIdField">The unique topic ID.</param>
+        /// <param name="PartitionStatesField">The state of each partition</param>
         /// </summary>
-        public sealed record LeaderAndIsrLiveLeader (
-            int BrokerIdField,
-            string HostNameField,
-            int PortField
+        public sealed record LeaderAndIsrTopicState (
+            string TopicNameField,
+            Guid TopicIdField,
+            ImmutableArray<LeaderAndIsrPartitionState> PartitionStatesField
         )
         {
-            public static LeaderAndIsrLiveLeader Empty { get; } = new(
-                default(int),
+            public static LeaderAndIsrTopicState Empty { get; } = new(
                 "",
-                default(int)
+                default(Guid),
+                ImmutableArray<LeaderAndIsrPartitionState>.Empty
             );
         };
     };

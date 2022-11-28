@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using TransactionState = Kafka.Client.Messages.DescribeTransactionsResponse.TransactionState;
+using Kafka.Common.Protocol;
 using TopicData = Kafka.Client.Messages.DescribeTransactionsResponse.TransactionState.TopicData;
+using TransactionState = Kafka.Client.Messages.DescribeTransactionsResponse.TransactionState;
 
 namespace Kafka.Client.Messages
 {
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record DescribeTransactionsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<TransactionState> TransactionStatesField
-    )
+    ) : Response(65)
     {
         public static DescribeTransactionsResponse Empty { get; } = new(
             default(int),

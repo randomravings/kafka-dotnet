@@ -6,36 +6,36 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class DefaultPrincipalDataSerde
     {
-        private static readonly Func<Stream, DefaultPrincipalData>[] READ_VERSIONS = {
-            b => ReadV00(b),
+        private static readonly DecodeDelegate<DefaultPrincipalData>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
         };
-        private static readonly Action<Stream, DefaultPrincipalData>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<DefaultPrincipalData>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
         };
-        public static DefaultPrincipalData Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static DefaultPrincipalData Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, DefaultPrincipalData message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static DefaultPrincipalData ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, DefaultPrincipalData message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static DefaultPrincipalData ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var typeField = Decoder.ReadCompactString(buffer);
-            var nameField = Decoder.ReadCompactString(buffer);
-            var tokenAuthenticatedField = Decoder.ReadBoolean(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var typeField = Decoder.ReadCompactString(ref buffer);
+            var nameField = Decoder.ReadCompactString(ref buffer);
+            var tokenAuthenticatedField = Decoder.ReadBoolean(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 typeField,
                 nameField,
                 tokenAuthenticatedField
             );
         }
-        private static void WriteV00(Stream buffer, DefaultPrincipalData message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, DefaultPrincipalData message)
         {
-            Encoder.WriteCompactString(buffer, message.TypeField);
-            Encoder.WriteCompactString(buffer, message.NameField);
-            Encoder.WriteBoolean(buffer, message.TokenAuthenticatedField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteCompactString(buffer, message.TypeField);
+            buffer = Encoder.WriteCompactString(buffer, message.NameField);
+            buffer = Encoder.WriteBoolean(buffer, message.TokenAuthenticatedField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
     }
 }

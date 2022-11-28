@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using OpData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.OpData;
 using EntryData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData;
 using EntityData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.EntityData;
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
     public sealed record AlterClientQuotasRequest (
         ImmutableArray<EntryData> EntriesField,
         bool ValidateOnlyField
-    )
+    ) : Request(49)
     {
         public static AlterClientQuotasRequest Empty { get; } = new(
             ImmutableArray<EntryData>.Empty,

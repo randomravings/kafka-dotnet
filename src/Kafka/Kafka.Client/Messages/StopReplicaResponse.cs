@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using StopReplicaPartitionError = Kafka.Client.Messages.StopReplicaResponse.StopReplicaPartitionError;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record StopReplicaResponse (
         short ErrorCodeField,
         ImmutableArray<StopReplicaPartitionError> PartitionErrorsField
-    )
+    ) : Response(5)
     {
         public static StopReplicaResponse Empty { get; } = new(
             default(short),

@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using UpdatableFeatureResult = Kafka.Client.Messages.UpdateFeaturesResponse.UpdatableFeatureResult;
 
 namespace Kafka.Client.Messages
@@ -16,7 +17,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         string? ErrorMessageField,
         ImmutableArray<UpdatableFeatureResult> ResultsField
-    )
+    ) : Response(57)
     {
         public static UpdateFeaturesResponse Empty { get; } = new(
             default(int),

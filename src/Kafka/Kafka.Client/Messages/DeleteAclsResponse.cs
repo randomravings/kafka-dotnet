@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DeleteAclsMatchingAcl = Kafka.Client.Messages.DeleteAclsResponse.DeleteAclsFilterResult.DeleteAclsMatchingAcl;
 using DeleteAclsFilterResult = Kafka.Client.Messages.DeleteAclsResponse.DeleteAclsFilterResult;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record DeleteAclsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<DeleteAclsFilterResult> FilterResultsField
-    )
+    ) : Response(31)
     {
         public static DeleteAclsResponse Empty { get; } = new(
             default(int),

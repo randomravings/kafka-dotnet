@@ -1,10 +1,11 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
-using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
+using Kafka.Common.Protocol;
 using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
 using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
+using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
 
 namespace Kafka.Client.Messages
 {
@@ -18,7 +19,7 @@ namespace Kafka.Client.Messages
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<TopicSnapshot> TopicsField
-    )
+    ) : Response(59)
     {
         public static FetchSnapshotResponse Empty { get; } = new(
             default(int),
@@ -67,20 +68,6 @@ namespace Kafka.Client.Messages
                     RecordBatch.Empty
                 );
                 /// <summary>
-                /// <param name="LeaderIdField">The ID of the current leader or -1 if the leader is unknown.</param>
-                /// <param name="LeaderEpochField">The latest known leader epoch</param>
-                /// </summary>
-                public sealed record LeaderIdAndEpoch (
-                    int LeaderIdField,
-                    int LeaderEpochField
-                )
-                {
-                    public static LeaderIdAndEpoch Empty { get; } = new(
-                        default(int),
-                        default(int)
-                    );
-                };
-                /// <summary>
                 /// <param name="EndOffsetField"></param>
                 /// <param name="EpochField"></param>
                 /// </summary>
@@ -91,6 +78,20 @@ namespace Kafka.Client.Messages
                 {
                     public static SnapshotId Empty { get; } = new(
                         default(long),
+                        default(int)
+                    );
+                };
+                /// <summary>
+                /// <param name="LeaderIdField">The ID of the current leader or -1 if the leader is unknown.</param>
+                /// <param name="LeaderEpochField">The latest known leader epoch</param>
+                /// </summary>
+                public sealed record LeaderIdAndEpoch (
+                    int LeaderIdField,
+                    int LeaderEpochField
+                )
+                {
+                    public static LeaderIdAndEpoch Empty { get; } = new(
+                        default(int),
                         default(int)
                     );
                 };

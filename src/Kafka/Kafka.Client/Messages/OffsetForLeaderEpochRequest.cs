@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using OffsetForLeaderTopic = Kafka.Client.Messages.OffsetForLeaderEpochRequest.OffsetForLeaderTopic;
 using OffsetForLeaderPartition = Kafka.Client.Messages.OffsetForLeaderEpochRequest.OffsetForLeaderTopic.OffsetForLeaderPartition;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record OffsetForLeaderEpochRequest (
         int ReplicaIdField,
         ImmutableArray<OffsetForLeaderTopic> TopicsField
-    )
+    ) : Request(23)
     {
         public static OffsetForLeaderEpochRequest Empty { get; } = new(
             default(int),

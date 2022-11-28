@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using ProducerState = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse.ProducerState;
 using TopicResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse;
 using PartitionResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse;
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
     public sealed record DescribeProducersResponse (
         int ThrottleTimeMsField,
         ImmutableArray<TopicResponse> TopicsField
-    )
+    ) : Response(61)
     {
         public static DescribeProducersResponse Empty { get; } = new(
             default(int),

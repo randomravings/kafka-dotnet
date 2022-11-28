@@ -8,77 +8,80 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class ConsumerProtocolAssignmentSerde
     {
-        private static readonly Func<Stream, ConsumerProtocolAssignment>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
+        private static readonly DecodeDelegate<ConsumerProtocolAssignment>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
         };
-        private static readonly Action<Stream, ConsumerProtocolAssignment>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<ConsumerProtocolAssignment>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
         };
-        public static ConsumerProtocolAssignment Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static ConsumerProtocolAssignment Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, ConsumerProtocolAssignment message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static ConsumerProtocolAssignment ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, ConsumerProtocolAssignment message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static ConsumerProtocolAssignment ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var assignedPartitionsField = Decoder.ReadArray<TopicPartition>(buffer, b => TopicPartitionSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'AssignedPartitions'");
-            var userDataField = Decoder.ReadNullableBytes(buffer);
+            var assignedPartitionsField = Decoder.ReadArray<TopicPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicPartitionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'AssignedPartitions'");
+            var userDataField = Decoder.ReadNullableBytes(ref buffer);
             return new(
                 assignedPartitionsField,
                 userDataField
             );
         }
-        private static void WriteV00(Stream buffer, ConsumerProtocolAssignment message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, ConsumerProtocolAssignment message)
         {
-            Encoder.WriteArray<TopicPartition>(buffer, message.AssignedPartitionsField, (b, i) => TopicPartitionSerde.WriteV00(b, i));
-            Encoder.WriteNullableBytes(buffer, message.UserDataField);
+            buffer = Encoder.WriteArray<TopicPartition>(buffer, message.AssignedPartitionsField, (b, i) => TopicPartitionSerde.WriteV00(b, i));
+            buffer = Encoder.WriteNullableBytes(buffer, message.UserDataField);
+            return buffer;
         }
-        private static ConsumerProtocolAssignment ReadV01(Stream buffer)
+        private static ConsumerProtocolAssignment ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var assignedPartitionsField = Decoder.ReadArray<TopicPartition>(buffer, b => TopicPartitionSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'AssignedPartitions'");
-            var userDataField = Decoder.ReadNullableBytes(buffer);
+            var assignedPartitionsField = Decoder.ReadArray<TopicPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicPartitionSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'AssignedPartitions'");
+            var userDataField = Decoder.ReadNullableBytes(ref buffer);
             return new(
                 assignedPartitionsField,
                 userDataField
             );
         }
-        private static void WriteV01(Stream buffer, ConsumerProtocolAssignment message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, ConsumerProtocolAssignment message)
         {
-            Encoder.WriteArray<TopicPartition>(buffer, message.AssignedPartitionsField, (b, i) => TopicPartitionSerde.WriteV01(b, i));
-            Encoder.WriteNullableBytes(buffer, message.UserDataField);
+            buffer = Encoder.WriteArray<TopicPartition>(buffer, message.AssignedPartitionsField, (b, i) => TopicPartitionSerde.WriteV01(b, i));
+            buffer = Encoder.WriteNullableBytes(buffer, message.UserDataField);
+            return buffer;
         }
         private static class TopicPartitionSerde
         {
-            public static TopicPartition ReadV00(Stream buffer)
+            public static TopicPartition ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var topicField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<int>(buffer, b => Decoder.ReadInt32(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var topicField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     topicField,
                     partitionsField
                 );
             }
-            public static void WriteV00(Stream buffer, TopicPartition message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, TopicPartition message)
             {
-                Encoder.WriteString(buffer, message.TopicField);
-                Encoder.WriteArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
+                buffer = Encoder.WriteString(buffer, message.TopicField);
+                buffer = Encoder.WriteArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
+                return buffer;
             }
-            public static TopicPartition ReadV01(Stream buffer)
+            public static TopicPartition ReadV01(ref ReadOnlyMemory<byte> buffer)
             {
-                var topicField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<int>(buffer, b => Decoder.ReadInt32(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var topicField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     topicField,
                     partitionsField
                 );
             }
-            public static void WriteV01(Stream buffer, TopicPartition message)
+            public static Memory<byte> WriteV01(Memory<byte> buffer, TopicPartition message)
             {
-                Encoder.WriteString(buffer, message.TopicField);
-                Encoder.WriteArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
+                buffer = Encoder.WriteString(buffer, message.TopicField);
+                buffer = Encoder.WriteArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
+                return buffer;
             }
         }
     }

@@ -1,4 +1,6 @@
 using System.CodeDom.Compiler;
+using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -8,12 +10,12 @@ namespace Kafka.Client.Messages
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record RenewDelegationTokenRequest (
-        byte[] HmacField,
+        ImmutableArray<byte> HmacField,
         long RenewPeriodMsField
-    )
+    ) : Request(39)
     {
         public static RenewDelegationTokenRequest Empty { get; } = new(
-            System.Array.Empty<byte>(),
+            ImmutableArray<byte>.Empty,
             default(long)
         );
     };

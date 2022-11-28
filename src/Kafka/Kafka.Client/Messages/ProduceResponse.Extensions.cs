@@ -10,19 +10,19 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class ProduceResponseSerde
     {
-        private static readonly Func<Stream, ProduceResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
-            b => ReadV03(b),
-            b => ReadV04(b),
-            b => ReadV05(b),
-            b => ReadV06(b),
-            b => ReadV07(b),
-            b => ReadV08(b),
-            b => ReadV09(b),
+        private static readonly DecodeDelegate<ProduceResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV07(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV08(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV09(ref b),
         };
-        private static readonly Action<Stream, ProduceResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<ProduceResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
@@ -34,304 +34,323 @@ namespace Kafka.Client.Messages
             (b, m) => WriteV08(b, m),
             (b, m) => WriteV09(b, m),
         };
-        public static ProduceResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static ProduceResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, ProduceResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static ProduceResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, ProduceResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static ProduceResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var responsesField = Decoder.ReadArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
             var throttleTimeMsField = default(int);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV00(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV00(b, i));
+            buffer = Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV00(b, i));
+            return buffer;
         }
-        private static ProduceResponse ReadV01(Stream buffer)
+        private static ProduceResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var responsesField = Decoder.ReadArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV01(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV01(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV01(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static ProduceResponse ReadV02(Stream buffer)
+        private static ProduceResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var responsesField = Decoder.ReadArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV02(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV02(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV02(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static ProduceResponse ReadV03(Stream buffer)
+        private static ProduceResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var responsesField = Decoder.ReadArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV03(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV03(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV03(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV03(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static ProduceResponse ReadV04(Stream buffer)
+        private static ProduceResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV04(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var responsesField = Decoder.ReadArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV04(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV04(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV04(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV04(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static ProduceResponse ReadV05(Stream buffer)
+        private static ProduceResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV05(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var responsesField = Decoder.ReadArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV05(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV05(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV05(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV05(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static ProduceResponse ReadV06(Stream buffer)
+        private static ProduceResponse ReadV06(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV06(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var responsesField = Decoder.ReadArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV06(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV06(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV06(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV06(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static ProduceResponse ReadV07(Stream buffer)
+        private static ProduceResponse ReadV07(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV07(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var responsesField = Decoder.ReadArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV07(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV07(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV07(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV07(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static ProduceResponse ReadV08(Stream buffer)
+        private static ProduceResponse ReadV08(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV08(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
+            var responsesField = Decoder.ReadArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV08(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV08(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV08(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV08(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV08(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            return buffer;
         }
-        private static ProduceResponse ReadV09(Stream buffer)
+        private static ProduceResponse ReadV09(ref ReadOnlyMemory<byte> buffer)
         {
-            var responsesField = Decoder.ReadCompactArray<TopicProduceResponse>(buffer, b => TopicProduceResponseSerde.ReadV09(b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var responsesField = Decoder.ReadCompactArray<TopicProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicProduceResponseSerde.ReadV09(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 responsesField,
                 throttleTimeMsField
             );
         }
-        private static void WriteV09(Stream buffer, ProduceResponse message)
+        private static Memory<byte> WriteV09(Memory<byte> buffer, ProduceResponse message)
         {
-            Encoder.WriteCompactArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV09(b, i));
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteCompactArray<TopicProduceResponse>(buffer, message.ResponsesField, (b, i) => TopicProduceResponseSerde.WriteV09(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class TopicProduceResponseSerde
         {
-            public static TopicProduceResponse ReadV00(Stream buffer)
+            public static TopicProduceResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV00(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV00(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV00(b, i));
+                return buffer;
             }
-            public static TopicProduceResponse ReadV01(Stream buffer)
+            public static TopicProduceResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV01(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV01(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV01(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV01(b, i));
+                return buffer;
             }
-            public static TopicProduceResponse ReadV02(Stream buffer)
+            public static TopicProduceResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV02(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV02(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV02(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV02(b, i));
+                return buffer;
             }
-            public static TopicProduceResponse ReadV03(Stream buffer)
+            public static TopicProduceResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV03(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV03(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV03(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV03(b, i));
+                return buffer;
             }
-            public static TopicProduceResponse ReadV04(Stream buffer)
+            public static TopicProduceResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV04(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV04(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV04(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV04(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV04(b, i));
+                return buffer;
             }
-            public static TopicProduceResponse ReadV05(Stream buffer)
+            public static TopicProduceResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV05(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV05(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV05(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV05(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV05(b, i));
+                return buffer;
             }
-            public static TopicProduceResponse ReadV06(Stream buffer)
+            public static TopicProduceResponse ReadV06(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV06(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV06(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV06(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV06(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV06(b, i));
+                return buffer;
             }
-            public static TopicProduceResponse ReadV07(Stream buffer)
+            public static TopicProduceResponse ReadV07(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV07(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV07(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV07(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV07(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV07(b, i));
+                return buffer;
             }
-            public static TopicProduceResponse ReadV08(Stream buffer)
+            public static TopicProduceResponse ReadV08(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV08(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV08(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV08(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV08(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV08(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV08(b, i));
+                return buffer;
             }
-            public static TopicProduceResponse ReadV09(Stream buffer)
+            public static TopicProduceResponse ReadV09(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadCompactString(buffer);
-                var partitionResponsesField = Decoder.ReadCompactArray<PartitionProduceResponse>(buffer, b => PartitionProduceResponseSerde.ReadV09(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                _ = Decoder.ReadVarUInt32(buffer);
+                var nameField = Decoder.ReadCompactString(ref buffer);
+                var partitionResponsesField = Decoder.ReadCompactArray<PartitionProduceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionProduceResponseSerde.ReadV09(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     nameField,
                     partitionResponsesField
                 );
             }
-            public static void WriteV09(Stream buffer, TopicProduceResponse message)
+            public static Memory<byte> WriteV09(Memory<byte> buffer, TopicProduceResponse message)
             {
-                Encoder.WriteCompactString(buffer, message.NameField);
-                Encoder.WriteCompactArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV09(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.NameField);
+                buffer = Encoder.WriteCompactArray<PartitionProduceResponse>(buffer, message.PartitionResponsesField, (b, i) => PartitionProduceResponseSerde.WriteV09(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
             private static class PartitionProduceResponseSerde
             {
-                public static PartitionProduceResponse ReadV00(Stream buffer)
+                public static PartitionProduceResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
                     var logAppendTimeMsField = default(long);
                     var logStartOffsetField = default(long);
                     var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
@@ -346,17 +365,18 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV00(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    return buffer;
                 }
-                public static PartitionProduceResponse ReadV01(Stream buffer)
+                public static PartitionProduceResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
                     var logAppendTimeMsField = default(long);
                     var logStartOffsetField = default(long);
                     var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
@@ -371,18 +391,19 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV01(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV01(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    return buffer;
                 }
-                public static PartitionProduceResponse ReadV02(Stream buffer)
+                public static PartitionProduceResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
+                    var logAppendTimeMsField = Decoder.ReadInt64(ref buffer);
                     var logStartOffsetField = default(long);
                     var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
                     var errorMessageField = default(string?);
@@ -396,19 +417,20 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV02(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV02(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
-                    Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    return buffer;
                 }
-                public static PartitionProduceResponse ReadV03(Stream buffer)
+                public static PartitionProduceResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
+                    var logAppendTimeMsField = Decoder.ReadInt64(ref buffer);
                     var logStartOffsetField = default(long);
                     var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
                     var errorMessageField = default(string?);
@@ -422,19 +444,20 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV03(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV03(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
-                    Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    return buffer;
                 }
-                public static PartitionProduceResponse ReadV04(Stream buffer)
+                public static PartitionProduceResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
+                    var logAppendTimeMsField = Decoder.ReadInt64(ref buffer);
                     var logStartOffsetField = default(long);
                     var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
                     var errorMessageField = default(string?);
@@ -448,20 +471,21 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV04(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV04(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
-                    Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    return buffer;
                 }
-                public static PartitionProduceResponse ReadV05(Stream buffer)
+                public static PartitionProduceResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
+                    var logAppendTimeMsField = Decoder.ReadInt64(ref buffer);
+                    var logStartOffsetField = Decoder.ReadInt64(ref buffer);
                     var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
                     var errorMessageField = default(string?);
                     return new(
@@ -474,21 +498,22 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV05(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV05(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
-                    Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
-                    Encoder.WriteInt64(buffer, message.LogStartOffsetField);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogStartOffsetField);
+                    return buffer;
                 }
-                public static PartitionProduceResponse ReadV06(Stream buffer)
+                public static PartitionProduceResponse ReadV06(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
+                    var logAppendTimeMsField = Decoder.ReadInt64(ref buffer);
+                    var logStartOffsetField = Decoder.ReadInt64(ref buffer);
                     var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
                     var errorMessageField = default(string?);
                     return new(
@@ -501,21 +526,22 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV06(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV06(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
-                    Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
-                    Encoder.WriteInt64(buffer, message.LogStartOffsetField);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogStartOffsetField);
+                    return buffer;
                 }
-                public static PartitionProduceResponse ReadV07(Stream buffer)
+                public static PartitionProduceResponse ReadV07(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
+                    var logAppendTimeMsField = Decoder.ReadInt64(ref buffer);
+                    var logStartOffsetField = Decoder.ReadInt64(ref buffer);
                     var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
                     var errorMessageField = default(string?);
                     return new(
@@ -528,23 +554,24 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV07(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV07(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
-                    Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
-                    Encoder.WriteInt64(buffer, message.LogStartOffsetField);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogStartOffsetField);
+                    return buffer;
                 }
-                public static PartitionProduceResponse ReadV08(Stream buffer)
+                public static PartitionProduceResponse ReadV08(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer);
-                    var recordErrorsField = Decoder.ReadArray<BatchIndexAndErrorMessage>(buffer, b => BatchIndexAndErrorMessageSerde.ReadV08(b)) ?? throw new NullReferenceException("Null not allowed for 'RecordErrors'");
-                    var errorMessageField = Decoder.ReadNullableString(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
+                    var logAppendTimeMsField = Decoder.ReadInt64(ref buffer);
+                    var logStartOffsetField = Decoder.ReadInt64(ref buffer);
+                    var recordErrorsField = Decoder.ReadArray<BatchIndexAndErrorMessage>(ref buffer, (ref ReadOnlyMemory<byte> b) => BatchIndexAndErrorMessageSerde.ReadV08(ref b)) ?? throw new NullReferenceException("Null not allowed for 'RecordErrors'");
+                    var errorMessageField = Decoder.ReadNullableString(ref buffer);
                     return new(
                         indexField,
                         errorCodeField,
@@ -555,26 +582,27 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV08(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV08(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
-                    Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
-                    Encoder.WriteInt64(buffer, message.LogStartOffsetField);
-                    Encoder.WriteArray<BatchIndexAndErrorMessage>(buffer, message.RecordErrorsField, (b, i) => BatchIndexAndErrorMessageSerde.WriteV08(b, i));
-                    Encoder.WriteNullableString(buffer, message.ErrorMessageField);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogStartOffsetField);
+                    buffer = Encoder.WriteArray<BatchIndexAndErrorMessage>(buffer, message.RecordErrorsField, (b, i) => BatchIndexAndErrorMessageSerde.WriteV08(b, i));
+                    buffer = Encoder.WriteNullableString(buffer, message.ErrorMessageField);
+                    return buffer;
                 }
-                public static PartitionProduceResponse ReadV09(Stream buffer)
+                public static PartitionProduceResponse ReadV09(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var indexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    var baseOffsetField = Decoder.ReadInt64(buffer);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer);
-                    var recordErrorsField = Decoder.ReadCompactArray<BatchIndexAndErrorMessage>(buffer, b => BatchIndexAndErrorMessageSerde.ReadV09(b)) ?? throw new NullReferenceException("Null not allowed for 'RecordErrors'");
-                    var errorMessageField = Decoder.ReadCompactNullableString(buffer);
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var indexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var baseOffsetField = Decoder.ReadInt64(ref buffer);
+                    var logAppendTimeMsField = Decoder.ReadInt64(ref buffer);
+                    var logStartOffsetField = Decoder.ReadInt64(ref buffer);
+                    var recordErrorsField = Decoder.ReadCompactArray<BatchIndexAndErrorMessage>(ref buffer, (ref ReadOnlyMemory<byte> b) => BatchIndexAndErrorMessageSerde.ReadV09(ref b)) ?? throw new NullReferenceException("Null not allowed for 'RecordErrors'");
+                    var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         indexField,
                         errorCodeField,
@@ -585,48 +613,51 @@ namespace Kafka.Client.Messages
                         errorMessageField
                     );
                 }
-                public static void WriteV09(Stream buffer, PartitionProduceResponse message)
+                public static Memory<byte> WriteV09(Memory<byte> buffer, PartitionProduceResponse message)
                 {
-                    Encoder.WriteInt32(buffer, message.IndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteInt64(buffer, message.BaseOffsetField);
-                    Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
-                    Encoder.WriteInt64(buffer, message.LogStartOffsetField);
-                    Encoder.WriteCompactArray<BatchIndexAndErrorMessage>(buffer, message.RecordErrorsField, (b, i) => BatchIndexAndErrorMessageSerde.WriteV09(b, i));
-                    Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt64(buffer, message.BaseOffsetField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogAppendTimeMsField);
+                    buffer = Encoder.WriteInt64(buffer, message.LogStartOffsetField);
+                    buffer = Encoder.WriteCompactArray<BatchIndexAndErrorMessage>(buffer, message.RecordErrorsField, (b, i) => BatchIndexAndErrorMessageSerde.WriteV09(b, i));
+                    buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
                 private static class BatchIndexAndErrorMessageSerde
                 {
-                    public static BatchIndexAndErrorMessage ReadV08(Stream buffer)
+                    public static BatchIndexAndErrorMessage ReadV08(ref ReadOnlyMemory<byte> buffer)
                     {
-                        var batchIndexField = Decoder.ReadInt32(buffer);
-                        var batchIndexErrorMessageField = Decoder.ReadNullableString(buffer);
+                        var batchIndexField = Decoder.ReadInt32(ref buffer);
+                        var batchIndexErrorMessageField = Decoder.ReadNullableString(ref buffer);
                         return new(
                             batchIndexField,
                             batchIndexErrorMessageField
                         );
                     }
-                    public static void WriteV08(Stream buffer, BatchIndexAndErrorMessage message)
+                    public static Memory<byte> WriteV08(Memory<byte> buffer, BatchIndexAndErrorMessage message)
                     {
-                        Encoder.WriteInt32(buffer, message.BatchIndexField);
-                        Encoder.WriteNullableString(buffer, message.BatchIndexErrorMessageField);
+                        buffer = Encoder.WriteInt32(buffer, message.BatchIndexField);
+                        buffer = Encoder.WriteNullableString(buffer, message.BatchIndexErrorMessageField);
+                        return buffer;
                     }
-                    public static BatchIndexAndErrorMessage ReadV09(Stream buffer)
+                    public static BatchIndexAndErrorMessage ReadV09(ref ReadOnlyMemory<byte> buffer)
                     {
-                        var batchIndexField = Decoder.ReadInt32(buffer);
-                        var batchIndexErrorMessageField = Decoder.ReadCompactNullableString(buffer);
-                        _ = Decoder.ReadVarUInt32(buffer);
+                        var batchIndexField = Decoder.ReadInt32(ref buffer);
+                        var batchIndexErrorMessageField = Decoder.ReadCompactNullableString(ref buffer);
+                        _ = Decoder.ReadVarUInt32(ref buffer);
                         return new(
                             batchIndexField,
                             batchIndexErrorMessageField
                         );
                     }
-                    public static void WriteV09(Stream buffer, BatchIndexAndErrorMessage message)
+                    public static Memory<byte> WriteV09(Memory<byte> buffer, BatchIndexAndErrorMessage message)
                     {
-                        Encoder.WriteInt32(buffer, message.BatchIndexField);
-                        Encoder.WriteCompactNullableString(buffer, message.BatchIndexErrorMessageField);
-                        Encoder.WriteVarUInt32(buffer, 0);
+                        buffer = Encoder.WriteInt32(buffer, message.BatchIndexField);
+                        buffer = Encoder.WriteCompactNullableString(buffer, message.BatchIndexErrorMessageField);
+                        buffer = Encoder.WriteVarUInt32(buffer, 0);
+                        return buffer;
                     }
                 }
             }

@@ -1,4 +1,6 @@
 using System.CodeDom.Compiler;
+using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -15,15 +17,15 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         string? ProtocolTypeField,
         string? ProtocolNameField,
-        byte[] AssignmentField
-    )
+        ImmutableArray<byte> AssignmentField
+    ) : Response(14)
     {
         public static SyncGroupResponse Empty { get; } = new(
             default(int),
             default(short),
             default(string?),
             default(string?),
-            System.Array.Empty<byte>()
+            ImmutableArray<byte>.Empty
         );
     };
 }

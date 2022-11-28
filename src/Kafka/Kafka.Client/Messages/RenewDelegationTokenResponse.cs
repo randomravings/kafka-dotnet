@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         long ExpiryTimestampMsField,
         int ThrottleTimeMsField
-    )
+    ) : Response(39)
     {
         public static RenewDelegationTokenResponse Empty { get; } = new(
             default(short),

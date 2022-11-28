@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using EpochEndOffset = Kafka.Client.Messages.OffsetForLeaderEpochResponse.OffsetForLeaderTopicResult.EpochEndOffset;
 using OffsetForLeaderTopicResult = Kafka.Client.Messages.OffsetForLeaderEpochResponse.OffsetForLeaderTopicResult;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record OffsetForLeaderEpochResponse (
         int ThrottleTimeMsField,
         ImmutableArray<OffsetForLeaderTopicResult> TopicsField
-    )
+    ) : Response(23)
     {
         public static OffsetForLeaderEpochResponse Empty { get; } = new(
             default(int),

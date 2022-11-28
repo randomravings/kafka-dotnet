@@ -1,8 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot;
+using Kafka.Common.Protocol;
 using SnapshotId = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot.PartitionSnapshot.SnapshotId;
 using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot.PartitionSnapshot;
+using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot;
 
 namespace Kafka.Client.Messages
 {
@@ -18,7 +19,7 @@ namespace Kafka.Client.Messages
         int ReplicaIdField,
         int MaxBytesField,
         ImmutableArray<TopicSnapshot> TopicsField
-    )
+    ) : Request(59)
     {
         public static FetchSnapshotRequest Empty { get; } = new(
             default(string?),

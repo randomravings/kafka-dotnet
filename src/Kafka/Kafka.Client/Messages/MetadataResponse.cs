@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic.MetadataResponsePartition;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponse.MetadataResponseBroker;
 using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic;
@@ -22,7 +23,7 @@ namespace Kafka.Client.Messages
         int ControllerIdField,
         ImmutableArray<MetadataResponseTopic> TopicsField,
         int ClusterAuthorizedOperationsField
-    )
+    ) : Response(3)
     {
         public static MetadataResponse Empty { get; } = new(
             default(int),

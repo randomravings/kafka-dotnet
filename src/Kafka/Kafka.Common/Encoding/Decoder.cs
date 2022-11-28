@@ -5,187 +5,194 @@ namespace Kafka.Common.Encoding
 {
     public static class Decoder
     {
-        public static bool ReadBoolean(Stream buffer)
+        public static bool ReadBoolean(ref ReadOnlyMemory<byte> buffer)
         {
             CheckRemaining(buffer, 1);
-            return buffer.ReadByte() switch
-            {
-                0 => false,
-                1 => true,
-                var b => throw new InvalidCastException($"Unable to cast {b} to BOOLEAN")
-            };
+            var value = buffer.Span[0] != 0;
+            buffer = buffer[1..];
+            return value;
         }
 
-        public static sbyte ReadInt8(Stream buffer)
+        public static sbyte ReadInt8(ref ReadOnlyMemory<byte> buffer)
         {
             CheckRemaining(buffer, 1);
-            return unchecked((sbyte)buffer.ReadByte());
+            var value = unchecked((sbyte)buffer.Span[0]);
+            buffer = buffer[1..];
+            return value;
         }
 
-        public static short ReadInt16(Stream buffer)
+        public static short ReadInt16(ref ReadOnlyMemory<byte> buffer)
         {
             CheckRemaining(buffer, 2);
-            return unchecked((short)(
-                (buffer.ReadByte() & 0xff) << 8 |
-                (buffer.ReadByte() & 0xff) << 0
+            var value = unchecked((short)(
+                (buffer.Span[0] & 0xff) << 8 |
+                (buffer.Span[1] & 0xff) << 0
             ));
+            buffer = buffer[2..];
+            return value;
         }
 
-        public static ushort ReadUInt16(Stream buffer) =>
-            (ushort)ReadInt16(buffer)
+        public static ushort ReadUInt16(ref ReadOnlyMemory<byte> buffer) =>
+            (ushort)ReadInt16(ref buffer)
         ;
 
-        public static int ReadInt32(Stream buffer)
+        public static int ReadInt32(ref ReadOnlyMemory<byte> buffer)
         {
             CheckRemaining(buffer, 4);
-            var value = 0;
-            for (int i = 0; i < 4; i++)
-            {
-                value <<= 8;
-                value |= buffer.ReadByte() & 0xff;
-            }
+            var value = unchecked(
+                (buffer.Span[0] & 0xff) << 24 |
+                (buffer.Span[1] & 0xff) << 16 |
+                (buffer.Span[2] & 0xff) << 8 |
+                (buffer.Span[3] & 0xff) << 0
+            );
+            buffer = buffer[4..];
             return value;
         }
 
-        public static uint ReadUInt32(Stream buffer) =>
-            (uint)ReadInt32(buffer)
+        public static uint ReadUInt32(ref ReadOnlyMemory<byte> buffer) =>
+            (uint)ReadInt32(ref buffer)
         ;
 
-        public static long ReadInt64(Stream buffer)
+        public static long ReadInt64(ref ReadOnlyMemory<byte> buffer)
         {
             CheckRemaining(buffer, 8);
-            var value = 0L;
-            for (int i = 0; i < 8; i++)
-            {
-                value <<= 8;
-                value |= (long)buffer.ReadByte() & 0xff;
-            }
+            var value = unchecked(
+                ((long)(buffer.Span[0] & 0xff) << 56) |
+                ((long)(buffer.Span[1] & 0xff) << 48) |
+                ((long)(buffer.Span[2] & 0xff) << 40) |
+                ((long)(buffer.Span[3] & 0xff) << 32) |
+                ((long)(buffer.Span[4] & 0xff) << 24) |
+                ((long)(buffer.Span[5] & 0xff) << 16) |
+                ((long)(buffer.Span[6] & 0xff) << 8) |
+                ((long)(buffer.Span[7] & 0xff) << 0)
+            );
+            buffer = buffer[8..];
             return value;
         }
 
-        public static ulong ReadUInt64(Stream buffer) =>
-            (ulong)ReadInt64(buffer)
+        public static ulong ReadUInt64(ref ReadOnlyMemory<byte> buffer) =>
+            (ulong)ReadInt64(ref buffer)
         ;
 
-        public static int ReadVarInt32(Stream buffer)
+        public static int ReadVarInt32(ref ReadOnlyMemory<byte> buffer)
         {
-            var value = unchecked((uint)ZigZagDecode(buffer, 31));
+            var value = unchecked((uint)ZigZagDecode(ref buffer, 31));
             return (int)(value >> 1) ^ -(int)(value & 1);
         }
 
-        public static uint ReadVarUInt32(Stream buffer) =>
-            unchecked((uint)ZigZagDecode(buffer, 31))
+        public static uint ReadVarUInt32(ref ReadOnlyMemory<byte> buffer) =>
+            unchecked((uint)ZigZagDecode(ref buffer, 31))
         ;
 
-        public static long ReadVarInt64(Stream buffer)
+        public static long ReadVarInt64(ref ReadOnlyMemory<byte> buffer)
         {
-            var value = ZigZagDecode(buffer, 63);
+            var value = ZigZagDecode(ref buffer, 63);
             return (long)(value >> 1) ^ -(long)(value & 1);
         }
 
-        public static double ReadFloat64(Stream buffer)
+        public static double ReadFloat64(ref ReadOnlyMemory<byte> buffer)
         {
-            var bits = ReadInt64(buffer);
+            var bits = ReadInt64(ref buffer);
             return BitConverter.Int64BitsToDouble(bits);
         }
 
-        public static Guid ReadUuid(Stream buffer)
+        public static Guid ReadUuid(ref ReadOnlyMemory<byte> buffer)
         {
             CheckRemaining(buffer, 16);
-            var bytes = new byte[16];
-            buffer.Read(bytes);
-            return new Guid(bytes);
+            var bytes = buffer[0..16];
+            buffer = buffer[16..];
+            return new Guid(bytes.Span);
         }
 
-        public static string ReadString(Stream buffer)
+        public static string ReadString(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadInt16(buffer);
+            var length = ReadInt16(ref buffer);
             CheckRemaining(buffer, length);
-            var bytes = new byte[length];
-            buffer.Read(bytes);
-            return System.Text.Encoding.UTF8.GetString(bytes);
+            var bytes = buffer[0..length];
+            buffer = buffer[length..];
+            return System.Text.Encoding.UTF8.GetString(bytes.Span);
         }
 
-        public static string ReadCompactString(Stream buffer)
+        public static string ReadCompactString(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadVarUInt32(buffer) - 1;
+            var length = Convert.ToInt32(ReadVarUInt32(ref buffer) - 1);
             CheckRemaining(buffer, length);
-            var bytes = new byte[length];
-            buffer.Read(bytes);
-            return System.Text.Encoding.UTF8.GetString(bytes);
+            var bytes = buffer[0..length];
+            buffer = buffer[length..];
+            return System.Text.Encoding.UTF8.GetString(bytes.Span);
         }
 
-        public static string? ReadNullableString(Stream buffer)
+        public static string? ReadNullableString(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadInt16(buffer);
+            var length = ReadInt16(ref buffer);
             if (length == -1)
                 return default;
             CheckRemaining(buffer, length);
-            var bytes = new byte[length];
-            buffer.Read(bytes);
-            return System.Text.Encoding.UTF8.GetString(bytes);
+            var bytes = buffer[0..length];
+            buffer = buffer[length..];
+            return System.Text.Encoding.UTF8.GetString(bytes.Span);
         }
 
-        public static string? ReadCompactNullableString(Stream buffer)
+        public static string? ReadCompactNullableString(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadVarUInt32(buffer);
+            var length = Convert.ToInt32(ReadVarUInt32(ref buffer));
             if (length == 0)
                 return default;
             length -= 1;
             CheckRemaining(buffer, length);
-            var bytes = new byte[length];
-            buffer.Read(bytes);
-            return System.Text.Encoding.UTF8.GetString(bytes);
+            var bytes = buffer[0..length];
+            buffer = buffer[length..];
+            return System.Text.Encoding.UTF8.GetString(bytes.Span);
         }
 
-        public static byte[] ReadBytes(Stream buffer)
+        public static ImmutableArray<byte> ReadBytes(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadInt32(buffer);
+            var length = ReadInt32(ref buffer);
             CheckRemaining(buffer, length);
-            var bytes = new byte[length];
-            buffer.Read(bytes);
-            return bytes;
+            var bytes = buffer[0..length];
+            buffer = buffer[length..];
+            return ImmutableArrayFromSpan(bytes);
         }
 
-        public static byte[] ReadCompactBytes(Stream buffer)
+        public static ImmutableArray<byte> ReadCompactBytes(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadVarUInt32(buffer);
+            var length = Convert.ToInt32(ReadVarUInt32(ref buffer));
             CheckRemaining(buffer, length);
-            var bytes = new byte[length];
-            buffer.Read(bytes);
-            return bytes;
+            var bytes = buffer[0..length];
+            buffer = buffer[length..];
+            return ImmutableArrayFromSpan(bytes);
         }
 
-        public static byte[]? ReadNullableBytes(Stream buffer)
+        public static ImmutableArray<byte>? ReadNullableBytes(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadInt32(buffer);
+            var length = ReadInt32(ref buffer);
             if (length == -1)
                 return default;
             CheckRemaining(buffer, length);
-            var bytes = new byte[length];
-            buffer.Read(bytes);
-            return bytes;
+            var bytes = buffer[0..length];
+            buffer = buffer[length..];
+            return ImmutableArrayFromSpan(bytes);
         }
 
-        public static byte[]? ReadCompactNullableBytes(Stream buffer)
+        public static ImmutableArray<byte>? ReadCompactNullableBytes(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadVarUInt32(buffer);
+            var length = Convert.ToInt32(ReadVarUInt32(ref buffer));
             if (length == 0)
                 return default;
             length -= 1;
             CheckRemaining(buffer, length);
-            var bytes = new byte[length];
-            buffer.Read(bytes);
-            return bytes;
+            var bytes = buffer[0..length];
+            buffer = buffer[length..];
+            return ImmutableArrayFromSpan(bytes);
         }
 
-        public static IRecords? ReadMessageSet(Stream buffer)
+        public static IRecords? ReadMessageSet(ref ReadOnlyMemory<byte> buffer)
         {
             var records = ImmutableList.CreateBuilder<IRecord>();
-            while (buffer.Position < buffer.Length)
+            while (buffer.Length > 0)
                 records.Add(
                     ReadMessage(
-                        buffer,
+                        ref buffer,
                         records.Count
                     )
                 );
@@ -194,18 +201,18 @@ namespace Kafka.Common.Encoding
             );
         }
 
-        private static Message ReadMessage(Stream buffer, int sequence)
+        private static Message ReadMessage(ref ReadOnlyMemory<byte> buffer, int sequence)
         {
-            var offset = ReadInt64(buffer);
-            var messageSize = ReadInt32(buffer);
-            var crc = ReadInt32(buffer);
-            var magic = ReadInt8(buffer);
-            var attributes = (Records.Attributes)ReadInt16(buffer);
+            var offset = ReadInt64(ref buffer);
+            var messageSize = ReadInt32(ref buffer);
+            var crc = ReadInt32(ref buffer);
+            var magic = ReadInt8(ref buffer);
+            var attributes = (Records.Attributes)ReadInt16(ref buffer);
             var timestamp = 0L;
             if (magic == 1)
-                timestamp = ReadInt64(buffer);
-            var key = ReadBytes(buffer);
-            var value = ReadBytes(buffer);
+                timestamp = ReadInt64(ref buffer);
+            var key = ReadBytes(ref buffer);
+            var value = ReadBytes(ref buffer);
             return new Message(
                 Sequence: sequence,
                 Offset: offset,
@@ -219,41 +226,41 @@ namespace Kafka.Common.Encoding
             );
         }
 
-        public static IRecords? ReadRecords(Stream buffer)
+        public static IRecords? ReadRecords(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadInt32(buffer);
+            var length = ReadInt32(ref buffer);
             if (length == 0)
                 return default;
-            return ReadRecords(buffer, length);
+            return ReadRecords(ref buffer, length);
         }
 
-        public static IRecords? ReadCompactRecords(Stream buffer)
+        public static IRecords? ReadCompactRecords(ref ReadOnlyMemory<byte> buffer)
         {
-            var length = ReadVarUInt32(buffer);
+            var length = ReadVarUInt32(ref buffer);
             if (length == 0)
                 return default;
-            return ReadRecords(buffer, length);
+            return ReadRecords(ref buffer, length);
         }
 
-        private static IRecords? ReadRecords(Stream buffer, long batchSize)
+        private static IRecords? ReadRecords(ref ReadOnlyMemory<byte> buffer, long batchSize)
         {
-            var offset = ReadInt64(buffer);
-            var size = ReadInt32(buffer);
-            var partitionLeaderEpoch = ReadInt32(buffer);
-            var magic = ReadInt8(buffer);
-            var crc = ReadInt32(buffer);
-            var attributes = ReadInt16(buffer);
-            var lastOffsetDelta = ReadInt32(buffer);
-            var baseTimestamp = ReadInt64(buffer);
-            var maxTimestamp = ReadInt64(buffer);
-            var producerId = ReadInt64(buffer);
-            var producerEpoch = ReadInt16(buffer);
-            var baseSequence = ReadInt32(buffer);
+            var offset = ReadInt64(ref buffer);
+            var size = ReadInt32(ref buffer);
+            var partitionLeaderEpoch = ReadInt32(ref buffer);
+            var magic = ReadInt8(ref buffer);
+            var crc = ReadInt32(ref buffer);
+            var attributes = ReadInt16(ref buffer);
+            var lastOffsetDelta = ReadInt32(ref buffer);
+            var baseTimestamp = ReadInt64(ref buffer);
+            var maxTimestamp = ReadInt64(ref buffer);
+            var producerId = ReadInt64(ref buffer);
+            var producerEpoch = ReadInt16(ref buffer);
+            var baseSequence = ReadInt32(ref buffer);
             var records = ImmutableList.CreateBuilder<IRecord>();
-            while (buffer.Position < buffer.Length)
+            while (buffer.Length > 0)
                 records.Add(
                     ReadRecord(
-                        buffer,
+                        ref buffer,
                         offset,
                         baseTimestamp,
                         records.Count
@@ -276,16 +283,16 @@ namespace Kafka.Common.Encoding
             );
         }
 
-        private static Record ReadRecord(Stream buffer, long offset, long baseTimestamp, int sequence)
+        private static Record ReadRecord(ref ReadOnlyMemory<byte> buffer, long offset, long baseTimestamp, int sequence)
         {
-            var length = ReadVarInt32(buffer);
-            var attributes = ReadInt16(buffer);
-            var timestampDelta = ReadVarInt64(buffer);
-            var offsetDelta = ReadVarInt32(buffer);
-            var key = ReadCompactBytes(buffer);
-            var value = ReadCompactBytes(buffer);
+            var length = ReadVarInt32(ref buffer);
+            var attributes = ReadInt16(ref buffer);
+            var timestampDelta = ReadVarInt64(ref buffer);
+            var offsetDelta = ReadVarInt32(ref buffer);
+            var key = ReadCompactBytes(ref buffer);
+            var value = ReadCompactBytes(ref buffer);
             var headers = ReadArray(
-                buffer,
+                ref buffer,
                 ReadRecordHeader
             );
             return new Record(
@@ -302,112 +309,50 @@ namespace Kafka.Common.Encoding
             );
         }
 
-        private static RecordHeader ReadRecordHeader(Stream buffer)
+        private static RecordHeader ReadRecordHeader(ref ReadOnlyMemory<byte> buffer)
         {
-            var key = ReadCompactString(buffer);
-            var value = ReadCompactBytes(buffer);
+            var key = ReadCompactString(ref buffer);
+            var value = ReadCompactBytes(ref buffer);
             return new(key, value);
         }
 
-        public static ImmutableArray<TItem>? ReadArray<TItem>(Stream buffer, Func<Stream, TItem> readItem)
+        public static ImmutableArray<TItem>? ReadArray<TItem>(ref ReadOnlyMemory<byte> buffer, DecodeDelegate<TItem> readItem)
         {
-            var length = ReadInt32(buffer);
+            var length = ReadInt32(ref buffer);
             if (length == -1)
                 return default;
             var items = new TItem[length];
             for (int i = 0; i < length; i++)
-                items[i] = readItem(buffer);
+                items[i] = readItem(ref buffer);
             return items.ToImmutableArray();
         }
 
-        public static ImmutableArray<TItem>? ReadCompactArray<TItem>(Stream buffer, Func<Stream, TItem> readItem)
+        public static ImmutableArray<TItem>? ReadCompactArray<TItem>(ref ReadOnlyMemory<byte> buffer, DecodeDelegate<TItem> readItem)
         {
-            var length = ReadVarUInt32(buffer);
+            var length = Convert.ToInt32(ReadVarUInt32(ref buffer));
             if (length == 0)
                 return default;
             length -= 1;
             var items = new TItem[length];
             for (int i = 0; i < length; i++)
-                items[i] = readItem(buffer);
+                items[i] = readItem(ref buffer);
             return items.ToImmutableArray();
         }
 
-        public static ImmutableDictionary<TKey, TValue>? ReadMap<TKey, TValue>(Stream buffer, Func<Stream, TKey> readKey, Func<Stream, TValue> readValue)
-            where TKey : notnull
+        private static void CheckRemaining(ReadOnlyMemory<byte> buffer, long required)
         {
-            var length = ReadInt32(buffer);
-            if (length == -1)
-                return default;
-            var builder = ImmutableDictionary.CreateBuilder<TKey, TValue>();
-            for (int i = 0; i < length; i++)
-            {
-                var key = readKey(buffer);
-                var value = readValue(buffer);
-                builder.Add(key, value);
-            }
-            return builder.ToImmutable();
+            if (buffer.Length < required)
+                throw new EndOfStreamException($"Required bytes to decode: {required} - was {buffer.Length}");
         }
 
-        public static ImmutableDictionary<TKey, TValue> ReadMapDefault<TKey, TValue>(Stream buffer, Func<Stream, TKey> readKey, Func<Stream, TValue> readValue)
-            where TKey : notnull =>
-            ReadMap(buffer, readKey, readValue) ?? ImmutableDictionary<TKey, TValue>.Empty
-        ;
-
-        public static ImmutableDictionary<TKey, TValue>? ReadMapNull<TKey, TValue>()
-            where TKey : notnull =>
-            default
-        ;
-
-        public static ImmutableDictionary<TKey, TValue> ReadMapEmpty<TKey, TValue>()
-            where TKey : notnull =>
-            ImmutableDictionary<TKey, TValue>.Empty
-        ;
-
-        public static ImmutableDictionary<TKey, TValue>? ReadCompactMap<TKey, TValue>(Stream buffer, Func<Stream, TKey> readKey, Func<Stream, TValue> readValue)
-            where TKey : notnull
-        {
-            var length = ReadVarUInt32(buffer);
-            if (length == 0)
-                return default;
-            var builder = ImmutableDictionary.CreateBuilder<TKey, TValue>();
-            for (int i = 0; i < length; i++)
-            {
-                var key = readKey(buffer);
-                var value = readValue(buffer);
-                builder.Add(key, value);
-            }
-            return builder.ToImmutable();
-        }
-
-        public static ImmutableDictionary<TKey, TValue> ReadCompactMapDefault<TKey, TValue>(Stream buffer, Func<Stream, TKey> readKey, Func<Stream, TValue> readValue)
-            where TKey : notnull =>
-            ReadMap(buffer, readKey, readValue) ?? ImmutableDictionary<TKey, TValue>.Empty
-        ;
-
-        public static ImmutableDictionary<TKey, TValue>? ReadCompactMapNull<TKey, TValue>()
-            where TKey : notnull =>
-            default
-        ;
-
-        public static ImmutableDictionary<TKey, TValue> ReadCompactMapEmpty<TKey, TValue>()
-            where TKey : notnull =>
-            ImmutableDictionary<TKey, TValue>.Empty
-        ;
-
-        private static void CheckRemaining(Stream buffer, long required)
-        {
-            var remaining = buffer.Length - buffer.Position;
-            if (remaining < required)
-                throw new EndOfStreamException($"Required bytes to decode: {required} - was {remaining}");
-        }
-
-        private static ulong ZigZagDecode(Stream buffer, int bits)
+        private static ulong ZigZagDecode(ref ReadOnlyMemory<byte> buffer, int bits)
         {
             var value = 0UL;
             var i = 0;
             while (i <= bits)
             {
-                var b = buffer.ReadByte();
+                var b = buffer.Span[0];
+                buffer = buffer[1..];
                 if (b < 0)
                     throw new EndOfStreamException();
                 value |= ((ulong)b & 0x7f) << i;
@@ -419,6 +364,14 @@ namespace Kafka.Common.Encoding
             if (i > bits)
                 throw new InvalidDataException($"ZigZag decoding exceeded ({bits}) bits");
             return value;
+        }
+
+        private static ImmutableArray<T> ImmutableArrayFromSpan<T>(ReadOnlyMemory<T> buffer)
+        {
+            var builder = ImmutableArray.CreateBuilder<T>(buffer.Length);
+            foreach (var i in buffer.Span)
+                builder.Add(i);
+            return builder.MoveToImmutable();
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -8,7 +9,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record UpdateMetadataResponse (
         short ErrorCodeField
-    )
+    ) : Response(6)
     {
         public static UpdateMetadataResponse Empty { get; } = new(
             default(short)

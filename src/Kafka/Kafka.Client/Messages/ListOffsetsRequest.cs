@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic;
 using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic.ListOffsetsPartition;
 
@@ -15,7 +16,7 @@ namespace Kafka.Client.Messages
         int ReplicaIdField,
         sbyte IsolationLevelField,
         ImmutableArray<ListOffsetsTopic> TopicsField
-    )
+    ) : Request(2)
     {
         public static ListOffsetsRequest Empty { get; } = new(
             default(int),

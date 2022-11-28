@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using Voter = Kafka.Client.Messages.LeaderChangeMessage.Voter;
 
 namespace Kafka.Client.Messages

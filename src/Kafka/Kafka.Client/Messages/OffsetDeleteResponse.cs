@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using OffsetDeleteResponsePartition = Kafka.Client.Messages.OffsetDeleteResponse.OffsetDeleteResponseTopic.OffsetDeleteResponsePartition;
+using Kafka.Common.Protocol;
 using OffsetDeleteResponseTopic = Kafka.Client.Messages.OffsetDeleteResponse.OffsetDeleteResponseTopic;
+using OffsetDeleteResponsePartition = Kafka.Client.Messages.OffsetDeleteResponse.OffsetDeleteResponseTopic.OffsetDeleteResponsePartition;
 
 namespace Kafka.Client.Messages
 {
@@ -15,7 +16,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         int ThrottleTimeMsField,
         ImmutableArray<OffsetDeleteResponseTopic> TopicsField
-    )
+    ) : Response(47)
     {
         public static OffsetDeleteResponse Empty { get; } = new(
             default(short),

@@ -1,10 +1,11 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
+using Kafka.Common.Protocol;
 using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
+using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
 using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
-using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
 using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
 using PartitionData = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData;
 
@@ -22,7 +23,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         int SessionIdField,
         ImmutableArray<FetchableTopicResponse> ResponsesField
-    )
+    ) : Response(1)
     {
         public static FetchResponse Empty { get; } = new(
             default(int),
@@ -87,6 +88,20 @@ namespace Kafka.Client.Messages
                     default(IRecords)
                 );
                 /// <summary>
+                /// <param name="EndOffsetField"></param>
+                /// <param name="EpochField"></param>
+                /// </summary>
+                public sealed record SnapshotId (
+                    long EndOffsetField,
+                    int EpochField
+                )
+                {
+                    public static SnapshotId Empty { get; } = new(
+                        default(long),
+                        default(int)
+                    );
+                };
+                /// <summary>
                 /// <param name="EpochField"></param>
                 /// <param name="EndOffsetField"></param>
                 /// </summary>
@@ -111,20 +126,6 @@ namespace Kafka.Client.Messages
                 {
                     public static LeaderIdAndEpoch Empty { get; } = new(
                         default(int),
-                        default(int)
-                    );
-                };
-                /// <summary>
-                /// <param name="EndOffsetField"></param>
-                /// <param name="EpochField"></param>
-                /// </summary>
-                public sealed record SnapshotId (
-                    long EndOffsetField,
-                    int EpochField
-                )
-                {
-                    public static SnapshotId Empty { get; } = new(
-                        default(long),
                         default(int)
                     );
                 };

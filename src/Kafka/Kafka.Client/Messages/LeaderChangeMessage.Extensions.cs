@@ -8,25 +8,24 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class LeaderChangeMessageSerde
     {
-        private static readonly Func<Stream, LeaderChangeMessage>[] READ_VERSIONS = {
-            b => ReadV00(b),
+        private static readonly DecodeDelegate<LeaderChangeMessage>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
         };
-        private static readonly Action<Stream, LeaderChangeMessage>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<LeaderChangeMessage>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
         };
-        public static LeaderChangeMessage Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static LeaderChangeMessage Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, LeaderChangeMessage message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static LeaderChangeMessage ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, LeaderChangeMessage message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static LeaderChangeMessage ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var versionField = Decoder.ReadInt16(buffer);
-            var leaderIdField = Decoder.ReadInt32(buffer);
-            var votersField = Decoder.ReadCompactArray<Voter>(buffer, b => VoterSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Voters'");
-            var grantingVotersField = Decoder.ReadCompactArray<Voter>(buffer, b => VoterSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'GrantingVoters'");
-            _ = Decoder.ReadVarUInt32(buffer);
+            var versionField = Decoder.ReadInt16(ref buffer);
+            var leaderIdField = Decoder.ReadInt32(ref buffer);
+            var votersField = Decoder.ReadCompactArray<Voter>(ref buffer, (ref ReadOnlyMemory<byte> b) => VoterSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Voters'");
+            var grantingVotersField = Decoder.ReadCompactArray<Voter>(ref buffer, (ref ReadOnlyMemory<byte> b) => VoterSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'GrantingVoters'");
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 versionField,
                 leaderIdField,
@@ -34,28 +33,30 @@ namespace Kafka.Client.Messages
                 grantingVotersField
             );
         }
-        private static void WriteV00(Stream buffer, LeaderChangeMessage message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, LeaderChangeMessage message)
         {
-            Encoder.WriteInt16(buffer, message.VersionField);
-            Encoder.WriteInt32(buffer, message.LeaderIdField);
-            Encoder.WriteCompactArray<Voter>(buffer, message.VotersField, (b, i) => VoterSerde.WriteV00(b, i));
-            Encoder.WriteCompactArray<Voter>(buffer, message.GrantingVotersField, (b, i) => VoterSerde.WriteV00(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt16(buffer, message.VersionField);
+            buffer = Encoder.WriteInt32(buffer, message.LeaderIdField);
+            buffer = Encoder.WriteCompactArray<Voter>(buffer, message.VotersField, (b, i) => VoterSerde.WriteV00(b, i));
+            buffer = Encoder.WriteCompactArray<Voter>(buffer, message.GrantingVotersField, (b, i) => VoterSerde.WriteV00(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class VoterSerde
         {
-            public static Voter ReadV00(Stream buffer)
+            public static Voter ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var voterIdField = Decoder.ReadInt32(buffer);
-                _ = Decoder.ReadVarUInt32(buffer);
+                var voterIdField = Decoder.ReadInt32(ref buffer);
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     voterIdField
                 );
             }
-            public static void WriteV00(Stream buffer, Voter message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, Voter message)
             {
-                Encoder.WriteInt32(buffer, message.VoterIdField);
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteInt32(buffer, message.VoterIdField);
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
         }
     }

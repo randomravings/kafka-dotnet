@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TopicData = Kafka.Client.Messages.EndQuorumEpochRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.EndQuorumEpochRequest.TopicData.PartitionData;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record EndQuorumEpochRequest (
         string? ClusterIdField,
         ImmutableArray<TopicData> TopicsField
-    )
+    ) : Request(54)
     {
         public static EndQuorumEpochRequest Empty { get; } = new(
             default(string?),

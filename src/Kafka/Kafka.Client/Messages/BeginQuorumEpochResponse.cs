@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TopicData = Kafka.Client.Messages.BeginQuorumEpochResponse.TopicData;
 using PartitionData = Kafka.Client.Messages.BeginQuorumEpochResponse.TopicData.PartitionData;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record BeginQuorumEpochResponse (
         short ErrorCodeField,
         ImmutableArray<TopicData> TopicsField
-    )
+    ) : Response(53)
     {
         public static BeginQuorumEpochResponse Empty { get; } = new(
             default(short),

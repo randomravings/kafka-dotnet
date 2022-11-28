@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using CreatableRenewers = Kafka.Client.Messages.CreateDelegationTokenRequest.CreatableRenewers;
 
 namespace Kafka.Client.Messages
@@ -16,7 +17,7 @@ namespace Kafka.Client.Messages
         string? OwnerPrincipalNameField,
         ImmutableArray<CreatableRenewers> RenewersField,
         long MaxLifetimeMsField
-    )
+    ) : Request(38)
     {
         public static CreateDelegationTokenRequest Empty { get; } = new(
             default(string?),

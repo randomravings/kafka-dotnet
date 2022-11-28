@@ -1,7 +1,9 @@
-﻿namespace Kafka.Common.Serialization
+﻿using System.Collections.Immutable;
+
+namespace Kafka.Common.Serialization
 {
     public interface ISerializer<T>
     {
-        byte[]? Write(T value);
+        ImmutableArray<byte>? Write(T value);
     }
 }

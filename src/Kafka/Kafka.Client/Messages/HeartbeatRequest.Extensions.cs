@@ -6,31 +6,30 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class HeartbeatRequestSerde
     {
-        private static readonly Func<Stream, HeartbeatRequest>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
-            b => ReadV03(b),
-            b => ReadV04(b),
+        private static readonly DecodeDelegate<HeartbeatRequest>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
         };
-        private static readonly Action<Stream, HeartbeatRequest>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<HeartbeatRequest>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
             (b, m) => WriteV03(b, m),
             (b, m) => WriteV04(b, m),
         };
-        public static HeartbeatRequest Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static HeartbeatRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, HeartbeatRequest message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static HeartbeatRequest ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, HeartbeatRequest message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static HeartbeatRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var groupIdField = Decoder.ReadString(buffer);
-            var generationIdField = Decoder.ReadInt32(buffer);
-            var memberIdField = Decoder.ReadString(buffer);
+            var groupIdField = Decoder.ReadString(ref buffer);
+            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var memberIdField = Decoder.ReadString(ref buffer);
             var groupInstanceIdField = default(string?);
             return new(
                 groupIdField,
@@ -39,17 +38,18 @@ namespace Kafka.Client.Messages
                 groupInstanceIdField
             );
         }
-        private static void WriteV00(Stream buffer, HeartbeatRequest message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, HeartbeatRequest message)
         {
-            Encoder.WriteString(buffer, message.GroupIdField);
-            Encoder.WriteInt32(buffer, message.GenerationIdField);
-            Encoder.WriteString(buffer, message.MemberIdField);
+            buffer = Encoder.WriteString(buffer, message.GroupIdField);
+            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            buffer = Encoder.WriteString(buffer, message.MemberIdField);
+            return buffer;
         }
-        private static HeartbeatRequest ReadV01(Stream buffer)
+        private static HeartbeatRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var groupIdField = Decoder.ReadString(buffer);
-            var generationIdField = Decoder.ReadInt32(buffer);
-            var memberIdField = Decoder.ReadString(buffer);
+            var groupIdField = Decoder.ReadString(ref buffer);
+            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var memberIdField = Decoder.ReadString(ref buffer);
             var groupInstanceIdField = default(string?);
             return new(
                 groupIdField,
@@ -58,17 +58,18 @@ namespace Kafka.Client.Messages
                 groupInstanceIdField
             );
         }
-        private static void WriteV01(Stream buffer, HeartbeatRequest message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, HeartbeatRequest message)
         {
-            Encoder.WriteString(buffer, message.GroupIdField);
-            Encoder.WriteInt32(buffer, message.GenerationIdField);
-            Encoder.WriteString(buffer, message.MemberIdField);
+            buffer = Encoder.WriteString(buffer, message.GroupIdField);
+            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            buffer = Encoder.WriteString(buffer, message.MemberIdField);
+            return buffer;
         }
-        private static HeartbeatRequest ReadV02(Stream buffer)
+        private static HeartbeatRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
-            var groupIdField = Decoder.ReadString(buffer);
-            var generationIdField = Decoder.ReadInt32(buffer);
-            var memberIdField = Decoder.ReadString(buffer);
+            var groupIdField = Decoder.ReadString(ref buffer);
+            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var memberIdField = Decoder.ReadString(ref buffer);
             var groupInstanceIdField = default(string?);
             return new(
                 groupIdField,
@@ -77,18 +78,19 @@ namespace Kafka.Client.Messages
                 groupInstanceIdField
             );
         }
-        private static void WriteV02(Stream buffer, HeartbeatRequest message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, HeartbeatRequest message)
         {
-            Encoder.WriteString(buffer, message.GroupIdField);
-            Encoder.WriteInt32(buffer, message.GenerationIdField);
-            Encoder.WriteString(buffer, message.MemberIdField);
+            buffer = Encoder.WriteString(buffer, message.GroupIdField);
+            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            buffer = Encoder.WriteString(buffer, message.MemberIdField);
+            return buffer;
         }
-        private static HeartbeatRequest ReadV03(Stream buffer)
+        private static HeartbeatRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
         {
-            var groupIdField = Decoder.ReadString(buffer);
-            var generationIdField = Decoder.ReadInt32(buffer);
-            var memberIdField = Decoder.ReadString(buffer);
-            var groupInstanceIdField = Decoder.ReadNullableString(buffer);
+            var groupIdField = Decoder.ReadString(ref buffer);
+            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var memberIdField = Decoder.ReadString(ref buffer);
+            var groupInstanceIdField = Decoder.ReadNullableString(ref buffer);
             return new(
                 groupIdField,
                 generationIdField,
@@ -96,20 +98,21 @@ namespace Kafka.Client.Messages
                 groupInstanceIdField
             );
         }
-        private static void WriteV03(Stream buffer, HeartbeatRequest message)
+        private static Memory<byte> WriteV03(Memory<byte> buffer, HeartbeatRequest message)
         {
-            Encoder.WriteString(buffer, message.GroupIdField);
-            Encoder.WriteInt32(buffer, message.GenerationIdField);
-            Encoder.WriteString(buffer, message.MemberIdField);
-            Encoder.WriteNullableString(buffer, message.GroupInstanceIdField);
+            buffer = Encoder.WriteString(buffer, message.GroupIdField);
+            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            buffer = Encoder.WriteString(buffer, message.MemberIdField);
+            buffer = Encoder.WriteNullableString(buffer, message.GroupInstanceIdField);
+            return buffer;
         }
-        private static HeartbeatRequest ReadV04(Stream buffer)
+        private static HeartbeatRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
         {
-            var groupIdField = Decoder.ReadCompactString(buffer);
-            var generationIdField = Decoder.ReadInt32(buffer);
-            var memberIdField = Decoder.ReadCompactString(buffer);
-            var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var groupIdField = Decoder.ReadCompactString(ref buffer);
+            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var memberIdField = Decoder.ReadCompactString(ref buffer);
+            var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 groupIdField,
                 generationIdField,
@@ -117,13 +120,14 @@ namespace Kafka.Client.Messages
                 groupInstanceIdField
             );
         }
-        private static void WriteV04(Stream buffer, HeartbeatRequest message)
+        private static Memory<byte> WriteV04(Memory<byte> buffer, HeartbeatRequest message)
         {
-            Encoder.WriteCompactString(buffer, message.GroupIdField);
-            Encoder.WriteInt32(buffer, message.GenerationIdField);
-            Encoder.WriteCompactString(buffer, message.MemberIdField);
-            Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteCompactString(buffer, message.GroupIdField);
+            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
+            buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
     }
 }

@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DeletableGroupResult = Kafka.Client.Messages.DeleteGroupsResponse.DeletableGroupResult;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record DeleteGroupsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<DeletableGroupResult> ResultsField
-    )
+    ) : Response(42)
     {
         public static DeleteGroupsResponse Empty { get; } = new(
             default(int),

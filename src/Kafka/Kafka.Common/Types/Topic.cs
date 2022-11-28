@@ -9,57 +9,32 @@
         public static implicit operator Topic(string? name) => new(Guid.Empty, name);
         public static implicit operator Topic(Guid id) => new(id, null);
         public static bool operator <=(Topic a, Topic b) =>
-            a.Id.CompareTo(b.Id) switch
+            string.CompareOrdinal(a.Name, b.Name) switch
             {
-                -1 => true,
-                1 => false,
-                _ => string.CompareOrdinal(a.Name, b.Name) switch
-                {
-                    -1 => true,
-                    1 => false,
-                    _ => true,
-                }
+                0 => a.Id.CompareTo(b.Id) <= 0,
+                int c => c < 0
             }
-            
         ;
         public static bool operator >=(Topic a, Topic b) =>
-            a.Id.CompareTo(b.Id) switch
+            string.CompareOrdinal(a.Name, b.Name) switch
             {
-                -1 => false,
-                1 => true,
-                _ => string.CompareOrdinal(a.Name, b.Name) switch
-                {
-                    -1 => false,
-                    1 => true,
-                    _ => true,
-                }
+                0 => a.Id.CompareTo(b.Id) >= 0,
+                int c => c > 0
             }
         ;
         public static bool operator <(Topic a, Topic b) =>
-            a.Id.CompareTo(b.Id) switch
+            string.CompareOrdinal(a.Name, b.Name) switch
             {
-                -1 => true,
-                1 => false,
-                _ => string.CompareOrdinal(a.Name, b.Name) switch
-                {
-                    -1 => true,
-                    1 => false,
-                    _ => false,
-                }
+                0 => a.Id.CompareTo(b.Id) < 0,
+                int c => c < 0
             }
         ;
 
         public static bool operator >(Topic a, Topic b) =>
-            a.Id.CompareTo(b.Id) switch
+            string.CompareOrdinal(a.Name, b.Name) switch
             {
-                -1 => false,
-                1 => true,
-                _ => string.CompareOrdinal(a.Name, b.Name) switch
-                {
-                    -1 => false,
-                    1 => true,
-                    _ => false,
-                }
+                0 => a.Id.CompareTo(b.Id) > 0,
+                int c => c > 0
             }
         ;
     }

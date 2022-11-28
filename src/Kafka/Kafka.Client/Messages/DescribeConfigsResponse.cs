@@ -1,8 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using DescribeConfigsResourceResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult;
-using DescribeConfigsSynonym = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult.DescribeConfigsSynonym;
+using Kafka.Common.Protocol;
 using DescribeConfigsResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult;
+using DescribeConfigsSynonym = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult.DescribeConfigsSynonym;
+using DescribeConfigsResourceResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult;
 
 namespace Kafka.Client.Messages
 {
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
     public sealed record DescribeConfigsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<DescribeConfigsResult> ResultsField
-    )
+    ) : Response(32)
     {
         public static DescribeConfigsResponse Empty { get; } = new(
             default(int),

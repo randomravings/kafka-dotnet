@@ -8,28 +8,27 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class DescribeClusterResponseSerde
     {
-        private static readonly Func<Stream, DescribeClusterResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
+        private static readonly DecodeDelegate<DescribeClusterResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
         };
-        private static readonly Action<Stream, DescribeClusterResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<DescribeClusterResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
         };
-        public static DescribeClusterResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static DescribeClusterResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, DescribeClusterResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static DescribeClusterResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeClusterResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static DescribeClusterResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var errorMessageField = Decoder.ReadCompactNullableString(buffer);
-            var clusterIdField = Decoder.ReadCompactString(buffer);
-            var controllerIdField = Decoder.ReadInt32(buffer);
-            var brokersField = Decoder.ReadCompactArray<DescribeClusterBroker>(buffer, b => DescribeClusterBrokerSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Brokers'");
-            var clusterAuthorizedOperationsField = Decoder.ReadInt32(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
+            var clusterIdField = Decoder.ReadCompactString(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(ref buffer);
+            var brokersField = Decoder.ReadCompactArray<DescribeClusterBroker>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeClusterBrokerSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Brokers'");
+            var clusterAuthorizedOperationsField = Decoder.ReadInt32(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -40,26 +39,27 @@ namespace Kafka.Client.Messages
                 clusterAuthorizedOperationsField
             );
         }
-        private static void WriteV00(Stream buffer, DescribeClusterResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeClusterResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-            Encoder.WriteCompactString(buffer, message.ClusterIdField);
-            Encoder.WriteInt32(buffer, message.ControllerIdField);
-            Encoder.WriteCompactArray<DescribeClusterBroker>(buffer, message.BrokersField, (b, i) => DescribeClusterBrokerSerde.WriteV00(b, i));
-            Encoder.WriteInt32(buffer, message.ClusterAuthorizedOperationsField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
+            buffer = Encoder.WriteCompactString(buffer, message.ClusterIdField);
+            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
+            buffer = Encoder.WriteCompactArray<DescribeClusterBroker>(buffer, message.BrokersField, (b, i) => DescribeClusterBrokerSerde.WriteV00(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ClusterAuthorizedOperationsField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class DescribeClusterBrokerSerde
         {
-            public static DescribeClusterBroker ReadV00(Stream buffer)
+            public static DescribeClusterBroker ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var brokerIdField = Decoder.ReadInt32(buffer);
-                var hostField = Decoder.ReadCompactString(buffer);
-                var portField = Decoder.ReadInt32(buffer);
-                var rackField = Decoder.ReadCompactNullableString(buffer);
-                _ = Decoder.ReadVarUInt32(buffer);
+                var brokerIdField = Decoder.ReadInt32(ref buffer);
+                var hostField = Decoder.ReadCompactString(ref buffer);
+                var portField = Decoder.ReadInt32(ref buffer);
+                var rackField = Decoder.ReadCompactNullableString(ref buffer);
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     brokerIdField,
                     hostField,
@@ -67,13 +67,14 @@ namespace Kafka.Client.Messages
                     rackField
                 );
             }
-            public static void WriteV00(Stream buffer, DescribeClusterBroker message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, DescribeClusterBroker message)
             {
-                Encoder.WriteInt32(buffer, message.BrokerIdField);
-                Encoder.WriteCompactString(buffer, message.HostField);
-                Encoder.WriteInt32(buffer, message.PortField);
-                Encoder.WriteCompactNullableString(buffer, message.RackField);
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
+                buffer = Encoder.WriteCompactString(buffer, message.HostField);
+                buffer = Encoder.WriteInt32(buffer, message.PortField);
+                buffer = Encoder.WriteCompactNullableString(buffer, message.RackField);
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
         }
     }

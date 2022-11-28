@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         long ProducerIdField,
         short ProducerEpochField,
         bool CommittedField
-    )
+    ) : Request(26)
     {
         public static EndTxnRequest Empty { get; } = new(
             "",

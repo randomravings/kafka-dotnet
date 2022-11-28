@@ -9,8 +9,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(true, new byte[] { 0x01 })]
         public void TestReadBoolean(bool expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadBoolean(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadBoolean(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -21,8 +21,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(sbyte.MinValue, new byte[] { 0x80 })]
         public void TestReadInt8(sbyte expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadInt8(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadInt8(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -37,8 +37,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(short.MinValue, new byte[] { 0x80, 0x00 })]
         public void TestReadInt16(short expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadInt16(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadInt16(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -57,8 +57,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(int.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00 })]
         public void TestReadInt32(int expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadInt32(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadInt32(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -73,8 +73,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(uint.MaxValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF })]
         public void TestReadUInt32(uint expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadUInt32(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadUInt32(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -97,8 +97,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(long.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })]
         public void TestReadInt64(long expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadInt64(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadInt64(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -125,8 +125,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(int.MinValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F })]
         public void TestReadVarInt32(int expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadVarInt32(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadVarInt32(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -162,8 +162,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(4294967295U, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F })]
         public void TestReadVarUInt32(uint expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadVarUInt32(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadVarUInt32(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -212,8 +212,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(long.MinValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x01 })]
         public void TestReadVarInt64(long expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadVarInt64(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadVarInt64(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -223,8 +223,8 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestReadUUID(string expected, byte[] bytes)
         {
             Assert.That(Guid.TryParse(expected, out var expectedUuid), Is.True);
-            using var buf = new MemoryStream(bytes);
-            var actualUuid = Decoder.ReadUuid(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actualUuid = Decoder.ReadUuid(ref buffer);
             Assert.That(actualUuid, Is.EqualTo(expectedUuid));
         }
 
@@ -235,8 +235,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(double.MaxValue, new byte[] { 0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF })]
         public void TestReadFloat64(double expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadFloat64(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadFloat64(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -250,23 +250,23 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x00, 0x20, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestReadString(string expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadString(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadString(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
-        [TestCase("", new byte[] { 0x00 })]
-        [TestCase("A", new byte[] { 0x01, 0x41 })]
-        [TestCase("a", new byte[] { 0x01, 0x61 })]
-        [TestCase("a", new byte[] { 0x01, 0x61 })]
-        [TestCase("Hello World!", new byte[] { 0x0C, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64, 0x21 })]
-        [TestCase("ABCDEFGHIJKLMNOPQRSTUVWXYZ", new byte[] { 0x1A, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A })]
-        [TestCase("zyxwvutsrqponmlkjihgfedcba", new byte[] { 0x1A, 0x7A, 0x79, 0x78, 0x77, 0x76, 0x75, 0x74, 0x73, 0x72, 0x71, 0x70, 0x6F, 0x6E, 0x6D, 0x6C, 0x6B, 0x6A, 0x69, 0x68, 0x67, 0x66, 0x65, 0x64, 0x63, 0x62, 0x61 })]
-        [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x20, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
+        [TestCase("", new byte[] { 0x01 })]
+        [TestCase("A", new byte[] { 0x02, 0x41 })]
+        [TestCase("a", new byte[] { 0x02, 0x61 })]
+        [TestCase("a", new byte[] { 0x02, 0x61 })]
+        [TestCase("Hello World!", new byte[] { 0x0D, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64, 0x21 })]
+        [TestCase("ABCDEFGHIJKLMNOPQRSTUVWXYZ", new byte[] { 0x1B, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A })]
+        [TestCase("zyxwvutsrqponmlkjihgfedcba", new byte[] { 0x1B, 0x7A, 0x79, 0x78, 0x77, 0x76, 0x75, 0x74, 0x73, 0x72, 0x71, 0x70, 0x6F, 0x6E, 0x6D, 0x6C, 0x6B, 0x6A, 0x69, 0x68, 0x67, 0x66, 0x65, 0x64, 0x63, 0x62, 0x61 })]
+        [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x21, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestReadCompactString(string expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadCompactString(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadCompactString(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -281,23 +281,24 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x00, 0x20, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestReadNullableString(string? expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadNullableString(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadNullableString(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
         [TestCase(null, new byte[] { 0x00 })]
-        [TestCase("A", new byte[] { 0x01, 0x41 })]
-        [TestCase("a", new byte[] { 0x01, 0x61 })]
-        [TestCase("a", new byte[] { 0x01, 0x61 })]
-        [TestCase("Hello World!", new byte[] { 0x0C, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64, 0x21 })]
-        [TestCase("ABCDEFGHIJKLMNOPQRSTUVWXYZ", new byte[] { 0x1A, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A })]
-        [TestCase("zyxwvutsrqponmlkjihgfedcba", new byte[] { 0x1A, 0x7A, 0x79, 0x78, 0x77, 0x76, 0x75, 0x74, 0x73, 0x72, 0x71, 0x70, 0x6F, 0x6E, 0x6D, 0x6C, 0x6B, 0x6A, 0x69, 0x68, 0x67, 0x66, 0x65, 0x64, 0x63, 0x62, 0x61 })]
-        [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x20, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
+        [TestCase("", new byte[] { 0x01 })]
+        [TestCase("A", new byte[] { 0x02, 0x41 })]
+        [TestCase("a", new byte[] { 0x02, 0x61 })]
+        [TestCase("a", new byte[] { 0x02, 0x61 })]
+        [TestCase("Hello World!", new byte[] { 0x0D, 0x48, 0x65, 0x6C, 0x6C, 0x6F, 0x20, 0x57, 0x6F, 0x72, 0x6C, 0x64, 0x21 })]
+        [TestCase("ABCDEFGHIJKLMNOPQRSTUVWXYZ", new byte[] { 0x1B, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A })]
+        [TestCase("zyxwvutsrqponmlkjihgfedcba", new byte[] { 0x1B, 0x7A, 0x79, 0x78, 0x77, 0x76, 0x75, 0x74, 0x73, 0x72, 0x71, 0x70, 0x6F, 0x6E, 0x6D, 0x6C, 0x6B, 0x6A, 0x69, 0x68, 0x67, 0x66, 0x65, 0x64, 0x63, 0x62, 0x61 })]
+        [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x21, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestReadCompactNullableString(string? expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadCompactNullableString(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadCompactNullableString(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -306,8 +307,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x00, 0x00, 0x00, 0x02, 0x00, 0x1A })]
         public void TestReadBytes(byte[] expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadBytes(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadBytes(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -316,8 +317,8 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x02, 0x00, 0x1A })]
         public void TestReadCompactBytes(byte[] expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadCompactBytes(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadCompactBytes(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
@@ -327,18 +328,18 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x00, 0x00, 0x00, 0x02, 0x00, 0x1A })]
         public void TestReadNullableBytes(byte[]? expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadNullableBytes(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadNullableBytes(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
 
         [TestCase(null, new byte[] { 0x00 })]
-        [TestCase(new byte[] { 0x00 }, new byte[] { 0x01, 0x00 })]
-        [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x02, 0x00, 0x1A })]
+        [TestCase(new byte[] { 0x00 }, new byte[] { 0x02, 0x00 })]
+        [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x03, 0x00, 0x1A })]
         public void TestReadCompactNullableBytes(byte[]? expected, byte[] bytes)
         {
-            using var buf = new MemoryStream(bytes);
-            var actual = Decoder.ReadCompactNullableBytes(buf);
+            var buffer = (ReadOnlyMemory<byte>)bytes.AsMemory();
+            var actual = Decoder.ReadCompactNullableBytes(ref buffer);
             Assert.That(actual, Is.EqualTo(expected));
         }
     }

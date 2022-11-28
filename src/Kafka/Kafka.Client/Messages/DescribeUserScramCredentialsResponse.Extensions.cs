@@ -1,33 +1,32 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using DescribeUserScramCredentialsResult = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult;
 using CredentialInfo = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult.CredentialInfo;
+using DescribeUserScramCredentialsResult = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult;
 
 namespace Kafka.Client.Messages
 {
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class DescribeUserScramCredentialsResponseSerde
     {
-        private static readonly Func<Stream, DescribeUserScramCredentialsResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
+        private static readonly DecodeDelegate<DescribeUserScramCredentialsResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
         };
-        private static readonly Action<Stream, DescribeUserScramCredentialsResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<DescribeUserScramCredentialsResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
         };
-        public static DescribeUserScramCredentialsResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static DescribeUserScramCredentialsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, DescribeUserScramCredentialsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static DescribeUserScramCredentialsResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeUserScramCredentialsResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static DescribeUserScramCredentialsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var errorMessageField = Decoder.ReadCompactNullableString(buffer);
-            var resultsField = Decoder.ReadCompactArray<DescribeUserScramCredentialsResult>(buffer, b => DescribeUserScramCredentialsResultSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
+            var resultsField = Decoder.ReadCompactArray<DescribeUserScramCredentialsResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeUserScramCredentialsResultSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -35,23 +34,24 @@ namespace Kafka.Client.Messages
                 resultsField
             );
         }
-        private static void WriteV00(Stream buffer, DescribeUserScramCredentialsResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeUserScramCredentialsResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-            Encoder.WriteCompactArray<DescribeUserScramCredentialsResult>(buffer, message.ResultsField, (b, i) => DescribeUserScramCredentialsResultSerde.WriteV00(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
+            buffer = Encoder.WriteCompactArray<DescribeUserScramCredentialsResult>(buffer, message.ResultsField, (b, i) => DescribeUserScramCredentialsResultSerde.WriteV00(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class DescribeUserScramCredentialsResultSerde
         {
-            public static DescribeUserScramCredentialsResult ReadV00(Stream buffer)
+            public static DescribeUserScramCredentialsResult ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var userField = Decoder.ReadCompactString(buffer);
-                var errorCodeField = Decoder.ReadInt16(buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer);
-                var credentialInfosField = Decoder.ReadCompactArray<CredentialInfo>(buffer, b => CredentialInfoSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'CredentialInfos'");
-                _ = Decoder.ReadVarUInt32(buffer);
+                var userField = Decoder.ReadCompactString(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
+                var credentialInfosField = Decoder.ReadCompactArray<CredentialInfo>(ref buffer, (ref ReadOnlyMemory<byte> b) => CredentialInfoSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'CredentialInfos'");
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     userField,
                     errorCodeField,
@@ -59,31 +59,33 @@ namespace Kafka.Client.Messages
                     credentialInfosField
                 );
             }
-            public static void WriteV00(Stream buffer, DescribeUserScramCredentialsResult message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, DescribeUserScramCredentialsResult message)
             {
-                Encoder.WriteCompactString(buffer, message.UserField);
-                Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                Encoder.WriteCompactArray<CredentialInfo>(buffer, message.CredentialInfosField, (b, i) => CredentialInfoSerde.WriteV00(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.UserField);
+                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
+                buffer = Encoder.WriteCompactArray<CredentialInfo>(buffer, message.CredentialInfosField, (b, i) => CredentialInfoSerde.WriteV00(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
             private static class CredentialInfoSerde
             {
-                public static CredentialInfo ReadV00(Stream buffer)
+                public static CredentialInfo ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var mechanismField = Decoder.ReadInt8(buffer);
-                    var iterationsField = Decoder.ReadInt32(buffer);
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var mechanismField = Decoder.ReadInt8(ref buffer);
+                    var iterationsField = Decoder.ReadInt32(ref buffer);
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         mechanismField,
                         iterationsField
                     );
                 }
-                public static void WriteV00(Stream buffer, CredentialInfo message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, CredentialInfo message)
                 {
-                    Encoder.WriteInt8(buffer, message.MechanismField);
-                    Encoder.WriteInt32(buffer, message.IterationsField);
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteInt8(buffer, message.MechanismField);
+                    buffer = Encoder.WriteInt32(buffer, message.IterationsField);
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
             }
         }

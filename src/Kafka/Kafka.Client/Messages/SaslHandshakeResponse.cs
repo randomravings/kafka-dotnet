@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -11,7 +12,7 @@ namespace Kafka.Client.Messages
     public sealed record SaslHandshakeResponse (
         short ErrorCodeField,
         ImmutableArray<string> MechanismsField
-    )
+    ) : Response(17)
     {
         public static SaslHandshakeResponse Empty { get; } = new(
             default(short),

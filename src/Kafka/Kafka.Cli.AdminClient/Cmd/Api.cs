@@ -6,7 +6,7 @@ namespace Kafka.Cli.AdminClient.Cmd
 {
     internal static class Api
     {
-        public static async ValueTask<int> Versions(
+        public static async ValueTask<int> Parse(
             VerbApiVersions verb,
             CancellationToken cancellationToken
         )

@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DescribedDelegationTokenRenewer = Kafka.Client.Messages.DescribeDelegationTokenResponse.DescribedDelegationToken.DescribedDelegationTokenRenewer;
 using DescribedDelegationToken = Kafka.Client.Messages.DescribeDelegationTokenResponse.DescribedDelegationToken;
 
@@ -15,7 +16,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         ImmutableArray<DescribedDelegationToken> TokensField,
         int ThrottleTimeMsField
-    )
+    ) : Response(41)
     {
         public static DescribeDelegationTokenResponse Empty { get; } = new(
             default(short),
@@ -43,7 +44,7 @@ namespace Kafka.Client.Messages
             long ExpiryTimestampField,
             long MaxTimestampField,
             string TokenIdField,
-            byte[] HmacField,
+            ImmutableArray<byte> HmacField,
             ImmutableArray<DescribedDelegationTokenRenewer> RenewersField
         )
         {
@@ -56,7 +57,7 @@ namespace Kafka.Client.Messages
                 default(long),
                 default(long),
                 "",
-                System.Array.Empty<byte>(),
+                ImmutableArray<byte>.Empty,
                 ImmutableArray<DescribedDelegationTokenRenewer>.Empty
             );
             /// <summary>

@@ -1,25 +1,26 @@
-﻿using static Kafka.Client.Messages.DeleteTopicsRequest;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed class DeleteTopicsOptionsBuilder :
         ClientOptionsBuilder<DeleteTopicsOptionsBuilder, DeleteTopicsOptions>
     {
-        private readonly List<DeleteTopicState> _topics = new();
+        private readonly List<Guid> _topicIds = new();
         private readonly List<string> _topicNames = new();
         public DeleteTopicsOptionsBuilder(AdminClientConfig adminClientConfig)
             : base(adminClientConfig) { }
 
-        public DeleteTopicsOptionsBuilder Topic(Guid topicId, string? name = null)
+        public DeleteTopicsOptionsBuilder TopicId(Guid topicId)
         {
-            _topics.Add(new(name, topicId));
+            if (topicId != Guid.Empty)
+                _topicIds.Add(topicId);
             return this;
         }
 
         public DeleteTopicsOptionsBuilder TopicName(string name)
         {
-            _topicNames.Add(name);
+            if (!string.IsNullOrEmpty(name))
+                _topicNames.Add(name);
             return this;
         }
 
@@ -28,7 +29,7 @@ namespace Kafka.Client.Clients.Admin.Model
                 _timeoutMs,
                 _version,
                 _clientId,
-                _topics.ToImmutableArray(),
+                _topicIds.ToImmutableArray(),
                 _topicNames.ToImmutableArray()
             )
         ;

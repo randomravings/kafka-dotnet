@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
         int ThrottleTimeMsField,
         short ErrorCodeField,
         string? ErrorMessageField
-    )
+    ) : Response(64)
     {
         public static UnregisterBrokerResponse Empty { get; } = new(
             default(int),

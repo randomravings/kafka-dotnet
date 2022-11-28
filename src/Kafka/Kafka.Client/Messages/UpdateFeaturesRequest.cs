@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using FeatureUpdateKey = Kafka.Client.Messages.UpdateFeaturesRequest.FeatureUpdateKey;
 
 namespace Kafka.Client.Messages
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         int timeoutMsField,
         ImmutableArray<FeatureUpdateKey> FeatureUpdatesField,
         bool ValidateOnlyField
-    )
+    ) : Request(57)
     {
         public static UpdateFeaturesRequest Empty { get; } = new(
             default(int),

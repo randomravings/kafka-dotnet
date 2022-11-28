@@ -1,5 +1,4 @@
 ﻿using Kafka.Client.Clients.Admin.Model;
-using Kafka.Client.Messages;
 
 namespace Kafka.Client.Clients.Admin
 {
@@ -18,6 +17,11 @@ namespace Kafka.Client.Clients.Admin
 
         ValueTask<CreateTopicsResult> CreateTopics(
             CreateTopicsOptions options,
+            CancellationToken cancellationToken
+        );
+
+        ValueTask<DescribeTopicsResult> DescribeTopics(
+            DescribeTopicsOptions options,
             CancellationToken cancellationToken
         );
 

@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -10,7 +11,7 @@ namespace Kafka.Client.Messages
     public sealed record ApiVersionsRequest (
         string ClientSoftwareNameField,
         string ClientSoftwareVersionField
-    )
+    ) : Request(18)
     {
         public static ApiVersionsRequest Empty { get; } = new(
             "",

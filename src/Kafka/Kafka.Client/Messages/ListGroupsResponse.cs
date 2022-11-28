@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using ListedGroup = Kafka.Client.Messages.ListGroupsResponse.ListedGroup;
 
 namespace Kafka.Client.Messages
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<ListedGroup> GroupsField
-    )
+    ) : Response(16)
     {
         public static ListGroupsResponse Empty { get; } = new(
             default(int),

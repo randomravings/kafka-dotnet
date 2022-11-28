@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ValueData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.ValueData;
+using Kafka.Common.Protocol;
 using EntryData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData;
+using ValueData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.ValueData;
 using EntityData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.EntityData;
 
 namespace Kafka.Client.Messages
@@ -18,7 +19,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         string? ErrorMessageField,
         ImmutableArray<EntryData>? EntriesField
-    )
+    ) : Response(48)
     {
         public static DescribeClientQuotasResponse Empty { get; } = new(
             default(int),

@@ -9,18 +9,18 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class OffsetCommitResponseSerde
     {
-        private static readonly Func<Stream, OffsetCommitResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
-            b => ReadV03(b),
-            b => ReadV04(b),
-            b => ReadV05(b),
-            b => ReadV06(b),
-            b => ReadV07(b),
-            b => ReadV08(b),
+        private static readonly DecodeDelegate<OffsetCommitResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV07(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV08(ref b),
         };
-        private static readonly Action<Stream, OffsetCommitResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<OffsetCommitResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
@@ -31,396 +31,422 @@ namespace Kafka.Client.Messages
             (b, m) => WriteV07(b, m),
             (b, m) => WriteV08(b, m),
         };
-        public static OffsetCommitResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static OffsetCommitResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, OffsetCommitResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static OffsetCommitResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, OffsetCommitResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static OffsetCommitResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
             var throttleTimeMsField = default(int);
-            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(buffer, b => OffsetCommitResponseTopicSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponseTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV00(Stream buffer, OffsetCommitResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, OffsetCommitResponse message)
         {
-            Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV00(b, i));
+            buffer = Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV00(b, i));
+            return buffer;
         }
-        private static OffsetCommitResponse ReadV01(Stream buffer)
+        private static OffsetCommitResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
             var throttleTimeMsField = default(int);
-            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(buffer, b => OffsetCommitResponseTopicSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponseTopicSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV01(Stream buffer, OffsetCommitResponse message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, OffsetCommitResponse message)
         {
-            Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV01(b, i));
+            buffer = Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV01(b, i));
+            return buffer;
         }
-        private static OffsetCommitResponse ReadV02(Stream buffer)
+        private static OffsetCommitResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
             var throttleTimeMsField = default(int);
-            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(buffer, b => OffsetCommitResponseTopicSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponseTopicSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV02(Stream buffer, OffsetCommitResponse message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, OffsetCommitResponse message)
         {
-            Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV02(b, i));
+            buffer = Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV02(b, i));
+            return buffer;
         }
-        private static OffsetCommitResponse ReadV03(Stream buffer)
+        private static OffsetCommitResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(buffer, b => OffsetCommitResponseTopicSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponseTopicSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV03(Stream buffer, OffsetCommitResponse message)
+        private static Memory<byte> WriteV03(Memory<byte> buffer, OffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV03(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV03(b, i));
+            return buffer;
         }
-        private static OffsetCommitResponse ReadV04(Stream buffer)
+        private static OffsetCommitResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(buffer, b => OffsetCommitResponseTopicSerde.ReadV04(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponseTopicSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV04(Stream buffer, OffsetCommitResponse message)
+        private static Memory<byte> WriteV04(Memory<byte> buffer, OffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV04(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV04(b, i));
+            return buffer;
         }
-        private static OffsetCommitResponse ReadV05(Stream buffer)
+        private static OffsetCommitResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(buffer, b => OffsetCommitResponseTopicSerde.ReadV05(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponseTopicSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV05(Stream buffer, OffsetCommitResponse message)
+        private static Memory<byte> WriteV05(Memory<byte> buffer, OffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV05(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV05(b, i));
+            return buffer;
         }
-        private static OffsetCommitResponse ReadV06(Stream buffer)
+        private static OffsetCommitResponse ReadV06(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(buffer, b => OffsetCommitResponseTopicSerde.ReadV06(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponseTopicSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV06(Stream buffer, OffsetCommitResponse message)
+        private static Memory<byte> WriteV06(Memory<byte> buffer, OffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV06(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV06(b, i));
+            return buffer;
         }
-        private static OffsetCommitResponse ReadV07(Stream buffer)
+        private static OffsetCommitResponse ReadV07(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(buffer, b => OffsetCommitResponseTopicSerde.ReadV07(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<OffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponseTopicSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV07(Stream buffer, OffsetCommitResponse message)
+        private static Memory<byte> WriteV07(Memory<byte> buffer, OffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV07(b, i));
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV07(b, i));
+            return buffer;
         }
-        private static OffsetCommitResponse ReadV08(Stream buffer)
+        private static OffsetCommitResponse ReadV08(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadCompactArray<OffsetCommitResponseTopic>(buffer, b => OffsetCommitResponseTopicSerde.ReadV08(b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<OffsetCommitResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponseTopicSerde.ReadV08(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static void WriteV08(Stream buffer, OffsetCommitResponse message)
+        private static Memory<byte> WriteV08(Memory<byte> buffer, OffsetCommitResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteCompactArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV08(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteCompactArray<OffsetCommitResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetCommitResponseTopicSerde.WriteV08(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class OffsetCommitResponseTopicSerde
         {
-            public static OffsetCommitResponseTopic ReadV00(Stream buffer)
+            public static OffsetCommitResponseTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, b => OffsetCommitResponsePartitionSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponsePartitionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV00(Stream buffer, OffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, OffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV00(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV00(b, i));
+                return buffer;
             }
-            public static OffsetCommitResponseTopic ReadV01(Stream buffer)
+            public static OffsetCommitResponseTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, b => OffsetCommitResponsePartitionSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponsePartitionSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV01(Stream buffer, OffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV01(Memory<byte> buffer, OffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV01(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV01(b, i));
+                return buffer;
             }
-            public static OffsetCommitResponseTopic ReadV02(Stream buffer)
+            public static OffsetCommitResponseTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, b => OffsetCommitResponsePartitionSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponsePartitionSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV02(Stream buffer, OffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV02(Memory<byte> buffer, OffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV02(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV02(b, i));
+                return buffer;
             }
-            public static OffsetCommitResponseTopic ReadV03(Stream buffer)
+            public static OffsetCommitResponseTopic ReadV03(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, b => OffsetCommitResponsePartitionSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponsePartitionSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV03(Stream buffer, OffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV03(Memory<byte> buffer, OffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV03(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV03(b, i));
+                return buffer;
             }
-            public static OffsetCommitResponseTopic ReadV04(Stream buffer)
+            public static OffsetCommitResponseTopic ReadV04(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, b => OffsetCommitResponsePartitionSerde.ReadV04(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponsePartitionSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV04(Stream buffer, OffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV04(Memory<byte> buffer, OffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV04(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV04(b, i));
+                return buffer;
             }
-            public static OffsetCommitResponseTopic ReadV05(Stream buffer)
+            public static OffsetCommitResponseTopic ReadV05(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, b => OffsetCommitResponsePartitionSerde.ReadV05(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponsePartitionSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV05(Stream buffer, OffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV05(Memory<byte> buffer, OffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV05(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV05(b, i));
+                return buffer;
             }
-            public static OffsetCommitResponseTopic ReadV06(Stream buffer)
+            public static OffsetCommitResponseTopic ReadV06(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, b => OffsetCommitResponsePartitionSerde.ReadV06(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponsePartitionSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV06(Stream buffer, OffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV06(Memory<byte> buffer, OffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV06(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV06(b, i));
+                return buffer;
             }
-            public static OffsetCommitResponseTopic ReadV07(Stream buffer)
+            public static OffsetCommitResponseTopic ReadV07(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadString(buffer);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, b => OffsetCommitResponsePartitionSerde.ReadV07(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(ref buffer);
+                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponsePartitionSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV07(Stream buffer, OffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV07(Memory<byte> buffer, OffsetCommitResponseTopic message)
             {
-                Encoder.WriteString(buffer, message.NameField);
-                Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV07(b, i));
+                buffer = Encoder.WriteString(buffer, message.NameField);
+                buffer = Encoder.WriteArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV07(b, i));
+                return buffer;
             }
-            public static OffsetCommitResponseTopic ReadV08(Stream buffer)
+            public static OffsetCommitResponseTopic ReadV08(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadCompactString(buffer);
-                var partitionsField = Decoder.ReadCompactArray<OffsetCommitResponsePartition>(buffer, b => OffsetCommitResponsePartitionSerde.ReadV08(b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(buffer);
+                var nameField = Decoder.ReadCompactString(ref buffer);
+                var partitionsField = Decoder.ReadCompactArray<OffsetCommitResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetCommitResponsePartitionSerde.ReadV08(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static void WriteV08(Stream buffer, OffsetCommitResponseTopic message)
+            public static Memory<byte> WriteV08(Memory<byte> buffer, OffsetCommitResponseTopic message)
             {
-                Encoder.WriteCompactString(buffer, message.NameField);
-                Encoder.WriteCompactArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV08(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.NameField);
+                buffer = Encoder.WriteCompactArray<OffsetCommitResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetCommitResponsePartitionSerde.WriteV08(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
             private static class OffsetCommitResponsePartitionSerde
             {
-                public static OffsetCommitResponsePartition ReadV00(Stream buffer)
+                public static OffsetCommitResponsePartition ReadV00(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV00(Stream buffer, OffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV00(Memory<byte> buffer, OffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static OffsetCommitResponsePartition ReadV01(Stream buffer)
+                public static OffsetCommitResponsePartition ReadV01(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV01(Stream buffer, OffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV01(Memory<byte> buffer, OffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static OffsetCommitResponsePartition ReadV02(Stream buffer)
+                public static OffsetCommitResponsePartition ReadV02(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV02(Stream buffer, OffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV02(Memory<byte> buffer, OffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static OffsetCommitResponsePartition ReadV03(Stream buffer)
+                public static OffsetCommitResponsePartition ReadV03(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV03(Stream buffer, OffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV03(Memory<byte> buffer, OffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static OffsetCommitResponsePartition ReadV04(Stream buffer)
+                public static OffsetCommitResponsePartition ReadV04(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV04(Stream buffer, OffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV04(Memory<byte> buffer, OffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static OffsetCommitResponsePartition ReadV05(Stream buffer)
+                public static OffsetCommitResponsePartition ReadV05(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV05(Stream buffer, OffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV05(Memory<byte> buffer, OffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static OffsetCommitResponsePartition ReadV06(Stream buffer)
+                public static OffsetCommitResponsePartition ReadV06(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV06(Stream buffer, OffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV06(Memory<byte> buffer, OffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static OffsetCommitResponsePartition ReadV07(Stream buffer)
+                public static OffsetCommitResponsePartition ReadV07(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV07(Stream buffer, OffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV07(Memory<byte> buffer, OffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    return buffer;
                 }
-                public static OffsetCommitResponsePartition ReadV08(Stream buffer)
+                public static OffsetCommitResponsePartition ReadV08(ref ReadOnlyMemory<byte> buffer)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer);
-                    var errorCodeField = Decoder.ReadInt16(buffer);
-                    _ = Decoder.ReadVarUInt32(buffer);
+                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    _ = Decoder.ReadVarUInt32(ref buffer);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static void WriteV08(Stream buffer, OffsetCommitResponsePartition message)
+                public static Memory<byte> WriteV08(Memory<byte> buffer, OffsetCommitResponsePartition message)
                 {
-                    Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    Encoder.WriteVarUInt32(buffer, 0);
+                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
+                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+                    buffer = Encoder.WriteVarUInt32(buffer, 0);
+                    return buffer;
                 }
             }
         }

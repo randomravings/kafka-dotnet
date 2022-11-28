@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using MemberResponse = Kafka.Client.Messages.LeaveGroupResponse.MemberResponse;
 
 namespace Kafka.Client.Messages
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<MemberResponse> MembersField
-    )
+    ) : Response(13)
     {
         public static LeaveGroupResponse Empty { get; } = new(
             default(int),

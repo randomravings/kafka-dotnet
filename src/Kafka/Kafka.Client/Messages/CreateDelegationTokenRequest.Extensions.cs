@@ -8,30 +8,29 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class CreateDelegationTokenRequestSerde
     {
-        private static readonly Func<Stream, CreateDelegationTokenRequest>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
-            b => ReadV03(b),
+        private static readonly DecodeDelegate<CreateDelegationTokenRequest>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
         };
-        private static readonly Action<Stream, CreateDelegationTokenRequest>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<CreateDelegationTokenRequest>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
             (b, m) => WriteV03(b, m),
         };
-        public static CreateDelegationTokenRequest Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static CreateDelegationTokenRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, CreateDelegationTokenRequest message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static CreateDelegationTokenRequest ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, CreateDelegationTokenRequest message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static CreateDelegationTokenRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
             var ownerPrincipalTypeField = default(string?);
             var ownerPrincipalNameField = default(string?);
-            var renewersField = Decoder.ReadArray<CreatableRenewers>(buffer, b => CreatableRenewersSerde.ReadV00(b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
-            var maxLifetimeMsField = Decoder.ReadInt64(buffer);
+            var renewersField = Decoder.ReadArray<CreatableRenewers>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatableRenewersSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+            var maxLifetimeMsField = Decoder.ReadInt64(ref buffer);
             return new(
                 ownerPrincipalTypeField,
                 ownerPrincipalNameField,
@@ -39,17 +38,18 @@ namespace Kafka.Client.Messages
                 maxLifetimeMsField
             );
         }
-        private static void WriteV00(Stream buffer, CreateDelegationTokenRequest message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, CreateDelegationTokenRequest message)
         {
-            Encoder.WriteArray<CreatableRenewers>(buffer, message.RenewersField, (b, i) => CreatableRenewersSerde.WriteV00(b, i));
-            Encoder.WriteInt64(buffer, message.MaxLifetimeMsField);
+            buffer = Encoder.WriteArray<CreatableRenewers>(buffer, message.RenewersField, (b, i) => CreatableRenewersSerde.WriteV00(b, i));
+            buffer = Encoder.WriteInt64(buffer, message.MaxLifetimeMsField);
+            return buffer;
         }
-        private static CreateDelegationTokenRequest ReadV01(Stream buffer)
+        private static CreateDelegationTokenRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
             var ownerPrincipalTypeField = default(string?);
             var ownerPrincipalNameField = default(string?);
-            var renewersField = Decoder.ReadArray<CreatableRenewers>(buffer, b => CreatableRenewersSerde.ReadV01(b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
-            var maxLifetimeMsField = Decoder.ReadInt64(buffer);
+            var renewersField = Decoder.ReadArray<CreatableRenewers>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatableRenewersSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+            var maxLifetimeMsField = Decoder.ReadInt64(ref buffer);
             return new(
                 ownerPrincipalTypeField,
                 ownerPrincipalNameField,
@@ -57,18 +57,19 @@ namespace Kafka.Client.Messages
                 maxLifetimeMsField
             );
         }
-        private static void WriteV01(Stream buffer, CreateDelegationTokenRequest message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, CreateDelegationTokenRequest message)
         {
-            Encoder.WriteArray<CreatableRenewers>(buffer, message.RenewersField, (b, i) => CreatableRenewersSerde.WriteV01(b, i));
-            Encoder.WriteInt64(buffer, message.MaxLifetimeMsField);
+            buffer = Encoder.WriteArray<CreatableRenewers>(buffer, message.RenewersField, (b, i) => CreatableRenewersSerde.WriteV01(b, i));
+            buffer = Encoder.WriteInt64(buffer, message.MaxLifetimeMsField);
+            return buffer;
         }
-        private static CreateDelegationTokenRequest ReadV02(Stream buffer)
+        private static CreateDelegationTokenRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
             var ownerPrincipalTypeField = default(string?);
             var ownerPrincipalNameField = default(string?);
-            var renewersField = Decoder.ReadCompactArray<CreatableRenewers>(buffer, b => CreatableRenewersSerde.ReadV02(b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
-            var maxLifetimeMsField = Decoder.ReadInt64(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var renewersField = Decoder.ReadCompactArray<CreatableRenewers>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatableRenewersSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+            var maxLifetimeMsField = Decoder.ReadInt64(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 ownerPrincipalTypeField,
                 ownerPrincipalNameField,
@@ -76,19 +77,20 @@ namespace Kafka.Client.Messages
                 maxLifetimeMsField
             );
         }
-        private static void WriteV02(Stream buffer, CreateDelegationTokenRequest message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, CreateDelegationTokenRequest message)
         {
-            Encoder.WriteCompactArray<CreatableRenewers>(buffer, message.RenewersField, (b, i) => CreatableRenewersSerde.WriteV02(b, i));
-            Encoder.WriteInt64(buffer, message.MaxLifetimeMsField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteCompactArray<CreatableRenewers>(buffer, message.RenewersField, (b, i) => CreatableRenewersSerde.WriteV02(b, i));
+            buffer = Encoder.WriteInt64(buffer, message.MaxLifetimeMsField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
-        private static CreateDelegationTokenRequest ReadV03(Stream buffer)
+        private static CreateDelegationTokenRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
         {
-            var ownerPrincipalTypeField = Decoder.ReadCompactNullableString(buffer);
-            var ownerPrincipalNameField = Decoder.ReadCompactNullableString(buffer);
-            var renewersField = Decoder.ReadCompactArray<CreatableRenewers>(buffer, b => CreatableRenewersSerde.ReadV03(b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
-            var maxLifetimeMsField = Decoder.ReadInt64(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var ownerPrincipalTypeField = Decoder.ReadCompactNullableString(ref buffer);
+            var ownerPrincipalNameField = Decoder.ReadCompactNullableString(ref buffer);
+            var renewersField = Decoder.ReadCompactArray<CreatableRenewers>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatableRenewersSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+            var maxLifetimeMsField = Decoder.ReadInt64(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 ownerPrincipalTypeField,
                 ownerPrincipalNameField,
@@ -96,75 +98,80 @@ namespace Kafka.Client.Messages
                 maxLifetimeMsField
             );
         }
-        private static void WriteV03(Stream buffer, CreateDelegationTokenRequest message)
+        private static Memory<byte> WriteV03(Memory<byte> buffer, CreateDelegationTokenRequest message)
         {
-            Encoder.WriteCompactNullableString(buffer, message.OwnerPrincipalTypeField);
-            Encoder.WriteCompactNullableString(buffer, message.OwnerPrincipalNameField);
-            Encoder.WriteCompactArray<CreatableRenewers>(buffer, message.RenewersField, (b, i) => CreatableRenewersSerde.WriteV03(b, i));
-            Encoder.WriteInt64(buffer, message.MaxLifetimeMsField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteCompactNullableString(buffer, message.OwnerPrincipalTypeField);
+            buffer = Encoder.WriteCompactNullableString(buffer, message.OwnerPrincipalNameField);
+            buffer = Encoder.WriteCompactArray<CreatableRenewers>(buffer, message.RenewersField, (b, i) => CreatableRenewersSerde.WriteV03(b, i));
+            buffer = Encoder.WriteInt64(buffer, message.MaxLifetimeMsField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class CreatableRenewersSerde
         {
-            public static CreatableRenewers ReadV00(Stream buffer)
+            public static CreatableRenewers ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var principalTypeField = Decoder.ReadString(buffer);
-                var principalNameField = Decoder.ReadString(buffer);
+                var principalTypeField = Decoder.ReadString(ref buffer);
+                var principalNameField = Decoder.ReadString(ref buffer);
                 return new(
                     principalTypeField,
                     principalNameField
                 );
             }
-            public static void WriteV00(Stream buffer, CreatableRenewers message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, CreatableRenewers message)
             {
-                Encoder.WriteString(buffer, message.PrincipalTypeField);
-                Encoder.WriteString(buffer, message.PrincipalNameField);
+                buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
+                buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
+                return buffer;
             }
-            public static CreatableRenewers ReadV01(Stream buffer)
+            public static CreatableRenewers ReadV01(ref ReadOnlyMemory<byte> buffer)
             {
-                var principalTypeField = Decoder.ReadString(buffer);
-                var principalNameField = Decoder.ReadString(buffer);
+                var principalTypeField = Decoder.ReadString(ref buffer);
+                var principalNameField = Decoder.ReadString(ref buffer);
                 return new(
                     principalTypeField,
                     principalNameField
                 );
             }
-            public static void WriteV01(Stream buffer, CreatableRenewers message)
+            public static Memory<byte> WriteV01(Memory<byte> buffer, CreatableRenewers message)
             {
-                Encoder.WriteString(buffer, message.PrincipalTypeField);
-                Encoder.WriteString(buffer, message.PrincipalNameField);
+                buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
+                buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
+                return buffer;
             }
-            public static CreatableRenewers ReadV02(Stream buffer)
+            public static CreatableRenewers ReadV02(ref ReadOnlyMemory<byte> buffer)
             {
-                var principalTypeField = Decoder.ReadCompactString(buffer);
-                var principalNameField = Decoder.ReadCompactString(buffer);
-                _ = Decoder.ReadVarUInt32(buffer);
+                var principalTypeField = Decoder.ReadCompactString(ref buffer);
+                var principalNameField = Decoder.ReadCompactString(ref buffer);
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     principalTypeField,
                     principalNameField
                 );
             }
-            public static void WriteV02(Stream buffer, CreatableRenewers message)
+            public static Memory<byte> WriteV02(Memory<byte> buffer, CreatableRenewers message)
             {
-                Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-                Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
+                buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
-            public static CreatableRenewers ReadV03(Stream buffer)
+            public static CreatableRenewers ReadV03(ref ReadOnlyMemory<byte> buffer)
             {
-                var principalTypeField = Decoder.ReadCompactString(buffer);
-                var principalNameField = Decoder.ReadCompactString(buffer);
-                _ = Decoder.ReadVarUInt32(buffer);
+                var principalTypeField = Decoder.ReadCompactString(ref buffer);
+                var principalNameField = Decoder.ReadCompactString(ref buffer);
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     principalTypeField,
                     principalNameField
                 );
             }
-            public static void WriteV03(Stream buffer, CreatableRenewers message)
+            public static Memory<byte> WriteV03(Memory<byte> buffer, CreatableRenewers message)
             {
-                Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-                Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
+                buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
         }
     }

@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TransactionState = Kafka.Client.Messages.ListTransactionsResponse.TransactionState;
 
 namespace Kafka.Client.Messages
@@ -16,7 +17,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         ImmutableArray<string> UnknownStateFiltersField,
         ImmutableArray<TransactionState> TransactionStatesField
-    )
+    ) : Response(66)
     {
         public static ListTransactionsResponse Empty { get; } = new(
             default(int),

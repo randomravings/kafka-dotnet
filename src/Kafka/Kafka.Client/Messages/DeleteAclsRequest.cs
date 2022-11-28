@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DeleteAclsFilter = Kafka.Client.Messages.DeleteAclsRequest.DeleteAclsFilter;
 
 namespace Kafka.Client.Messages
@@ -10,7 +11,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DeleteAclsRequest (
         ImmutableArray<DeleteAclsFilter> FiltersField
-    )
+    ) : Request(31)
     {
         public static DeleteAclsRequest Empty { get; } = new(
             ImmutableArray<DeleteAclsFilter>.Empty

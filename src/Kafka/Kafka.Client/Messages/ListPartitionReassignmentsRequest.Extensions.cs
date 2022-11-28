@@ -8,51 +8,52 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class ListPartitionReassignmentsRequestSerde
     {
-        private static readonly Func<Stream, ListPartitionReassignmentsRequest>[] READ_VERSIONS = {
-            b => ReadV00(b),
+        private static readonly DecodeDelegate<ListPartitionReassignmentsRequest>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
         };
-        private static readonly Action<Stream, ListPartitionReassignmentsRequest>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<ListPartitionReassignmentsRequest>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
         };
-        public static ListPartitionReassignmentsRequest Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static ListPartitionReassignmentsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, ListPartitionReassignmentsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static ListPartitionReassignmentsRequest ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, ListPartitionReassignmentsRequest message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static ListPartitionReassignmentsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var timeoutMsField = Decoder.ReadInt32(buffer);
-            var topicsField = Decoder.ReadCompactArray<ListPartitionReassignmentsTopics>(buffer, b => ListPartitionReassignmentsTopicsSerde.ReadV00(b));
-            _ = Decoder.ReadVarUInt32(buffer);
+            var timeoutMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<ListPartitionReassignmentsTopics>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListPartitionReassignmentsTopicsSerde.ReadV00(ref b));
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 timeoutMsField,
                 topicsField
             );
         }
-        private static void WriteV00(Stream buffer, ListPartitionReassignmentsRequest message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, ListPartitionReassignmentsRequest message)
         {
-            Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            Encoder.WriteCompactArray<ListPartitionReassignmentsTopics>(buffer, message.TopicsField, (b, i) => ListPartitionReassignmentsTopicsSerde.WriteV00(b, i));
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
+            buffer = Encoder.WriteCompactArray<ListPartitionReassignmentsTopics>(buffer, message.TopicsField, (b, i) => ListPartitionReassignmentsTopicsSerde.WriteV00(b, i));
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
         private static class ListPartitionReassignmentsTopicsSerde
         {
-            public static ListPartitionReassignmentsTopics ReadV00(Stream buffer)
+            public static ListPartitionReassignmentsTopics ReadV00(ref ReadOnlyMemory<byte> buffer)
             {
-                var nameField = Decoder.ReadCompactString(buffer);
-                var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, b => Decoder.ReadInt32(b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
-                _ = Decoder.ReadVarUInt32(buffer);
+                var nameField = Decoder.ReadCompactString(ref buffer);
+                var partitionIndexesField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                _ = Decoder.ReadVarUInt32(ref buffer);
                 return new(
                     nameField,
                     partitionIndexesField
                 );
             }
-            public static void WriteV00(Stream buffer, ListPartitionReassignmentsTopics message)
+            public static Memory<byte> WriteV00(Memory<byte> buffer, ListPartitionReassignmentsTopics message)
             {
-                Encoder.WriteCompactString(buffer, message.NameField);
-                Encoder.WriteCompactArray<int>(buffer, message.PartitionIndexesField, (b, i) => Encoder.WriteInt32(b, i));
-                Encoder.WriteVarUInt32(buffer, 0);
+                buffer = Encoder.WriteCompactString(buffer, message.NameField);
+                buffer = Encoder.WriteCompactArray<int>(buffer, message.PartitionIndexesField, (b, i) => Encoder.WriteInt32(b, i));
+                buffer = Encoder.WriteVarUInt32(buffer, 0);
+                return buffer;
             }
         }
     }

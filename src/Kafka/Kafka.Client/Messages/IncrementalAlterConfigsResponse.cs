@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using AlterConfigsResourceResponse = Kafka.Client.Messages.IncrementalAlterConfigsResponse.AlterConfigsResourceResponse;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record IncrementalAlterConfigsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<AlterConfigsResourceResponse> ResponsesField
-    )
+    ) : Response(44)
     {
         public static IncrementalAlterConfigsResponse Empty { get; } = new(
             default(int),

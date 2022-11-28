@@ -3,7 +3,9 @@ using Kafka.Client.Server;
 using Kafka.Common.Encoding;
 using Kafka.Common.Network;
 using Kafka.Common.Network.Tcp;
+using Kafka.Common.Protocol;
 using Kafka.Common.Types;
+using Kafka.Common.Types.Comparison;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients
@@ -12,15 +14,14 @@ namespace Kafka.Client.Clients
         IClient
         where TConfig : notnull, ClientConfig
     {
-        private const short MAJOR_KAFKA_VERSION = 3;
         private const short REQUEST_HEADER_VERSION = 2;
         private const short RESPONSE_HEADER_VERSION = 1;
         private int _coorelationIds = 0;
         private bool _disposed;
         private readonly ITransport _transport;
-        protected Cluster _cluster = Cluster.Empty;
         protected readonly TConfig _config;
-        private ImmutableSortedDictionary<short, ApiVersion> _apiVersions = ImmutableSortedDictionary<short, ApiVersion>.Empty;
+        protected ImmutableSortedDictionary<short, ApiVersion> _apiVersions = ImmutableSortedDictionary<short, ApiVersion>.Empty;
+        protected Cluster _cluster = Cluster.Empty;
 
         protected Client(
             TConfig config
@@ -31,112 +32,36 @@ namespace Kafka.Client.Clients
             _transport = new PlaintextTransport(host, port);
         }
 
-        protected async ValueTask RefreshMetadata(CancellationToken cancellationToken)
+        protected async ValueTask EnsureConnection(CancellationToken cancellationToken)
         {
-            _cluster = await GetCluster(cancellationToken);
-        }
-
-        protected async ValueTask<ImmutableSortedDictionary<short, ApiVersion>> GetApiVersions(
-            short version,
-            CancellationToken cancellationToken
-        )
-        {
-            if (!_transport.IsConnected)
-            {
-                await _transport.Connect(cancellationToken);
-                await _transport.Handshake(cancellationToken);
-            }
-            var request = new ApiVersionsRequest(
-                ".Net Client",
-                "1.0.0"
-            );
-            var correlationId = Interlocked.Increment(ref _coorelationIds);
-            var requestHeader = new RequestHeader(
-                Api.ApiVersions,
-                version,
-                correlationId,
-                "me.org"
-            );
-            var requestBuffer = new MemoryStream
-            {
-                Position = 4
-            };
-            RequestHeaderSerde.Write(requestBuffer, 1, requestHeader);
-            ApiVersionsRequestSerde.Write(requestBuffer, version, request);
-            requestBuffer.Position = 0;
-            Encoder.WriteInt32(requestBuffer, (int)(requestBuffer.Length - 4));
-            var responseBuffer = await _transport.HandleRequest(requestBuffer, cancellationToken);
-            responseBuffer.Position = 0;
-            var responseLength = Decoder.ReadInt32(responseBuffer);
-            responseBuffer.SetLength(responseLength + 4);
-            var responseHeader = ResponseHeaderSerde.Read(responseBuffer, 0);
-            if (responseHeader.CorrelationIdField != requestHeader.CorrelationIdField)
-                throw new Exception($"Correlation Id mismath - Request: {requestHeader.CorrelationIdField} - Response: {responseHeader.CorrelationIdField}");
-            var response = ApiVersionsResponseSerde.Read(responseBuffer, version);
-            return response
-                .ApiKeysField
-                .Select(r => new ApiVersion(
-                    r.ApiKeyField,
-                    new(
-                        r.MinVersionField,
-                        r.MaxVersionField
-                    )
-                ))
-                .ToImmutableSortedDictionary(
-                    k => (short)k.Api,
-                    v => v
-                )
-            ;
+            if (_transport.IsConnected)
+                return;
+            await _transport.Connect(cancellationToken);
+            await _transport.Handshake(cancellationToken);
+            _apiVersions = await GetApiVersions(cancellationToken);
+            _cluster = await GetCluster(_apiVersions[Api.Metadata].Version.Max, cancellationToken);
         }
 
         protected async ValueTask<TResponse> HandleRequest<TRequest, TResponse>(
-            short apiKey,
             TRequest request,
-            Action<MemoryStream, short, TRequest> requestWriter,
-            Func<MemoryStream, short, TResponse> responseReader,
+            EncodeVersionDelegate<TRequest> requestWriter,
+            DecodeVersionDelegate<TResponse> responseReader,
             short? versionOverride,
             CancellationToken cancellationToken
         )
+            where TRequest : notnull, Request
+            where TResponse : notnull, Response
         {
-            if(!_transport.IsConnected)
-            {
-                await _transport.Connect(cancellationToken);
-                await _transport.Handshake(cancellationToken);
-            }
-            if (_apiVersions.Count == 0)
-                _apiVersions = await GetApiVersions(1, cancellationToken);
-            var correlationId = Interlocked.Increment(ref _coorelationIds);
-            var apiVersions = _apiVersions[apiKey];
-            var version = apiVersions.Version.Max;
-            if(versionOverride.HasValue)
-            {
-                if (versionOverride.Value < apiVersions.Version.Min || versionOverride.Value > apiVersions.Version.Max)
-                    throw new Exception("Value override out of range.");
-                version = versionOverride.Value;
-            }
-            var requestHeader = new RequestHeader(
-                apiKey,
-                version,
-                correlationId,
-                "me.org"
+            await EnsureConnection(cancellationToken);
+            return await ExecuteRequest(
+                request,
+                requestWriter,
+                responseReader,
+                REQUEST_HEADER_VERSION,
+                RESPONSE_HEADER_VERSION,
+                versionOverride,
+                cancellationToken
             );
-            var requestBuffer = new MemoryStream
-            {
-                Position = 4
-            };
-            RequestHeaderSerde.Write(requestBuffer, REQUEST_HEADER_VERSION, requestHeader);
-            requestWriter(requestBuffer, version, request);
-            requestBuffer.Position = 0;
-            Encoder.WriteInt32(requestBuffer, (int)(requestBuffer.Length - 4));
-            var responseBuffer = await _transport.HandleRequest(requestBuffer, cancellationToken);
-            responseBuffer.Position = 0;
-            var responseLength = Decoder.ReadInt32(responseBuffer);
-            responseBuffer.SetLength(responseLength + 4);
-            var responseHeader = ResponseHeaderSerde.Read(responseBuffer, RESPONSE_HEADER_VERSION);
-            if (responseHeader.CorrelationIdField != requestHeader.CorrelationIdField)
-                throw new Exception($"Correlation Id mismath - Request: {requestHeader.CorrelationIdField} - Response: {responseHeader.CorrelationIdField}");
-            var response = responseReader(responseBuffer, version);
-            return response;
         }
 
         protected virtual void Dispose(bool disposing)
@@ -157,9 +82,120 @@ namespace Kafka.Client.Clients
             GC.SuppressFinalize(this);
         }
 
-        private async ValueTask<Cluster> GetCluster(CancellationToken cancellationToken)
+        private async ValueTask<TResponse> ExecuteRequest<TRequest, TResponse>(
+            TRequest request,
+            EncodeVersionDelegate<TRequest> requestWriter,
+            DecodeVersionDelegate<TResponse> responseReader,
+            short headerRequestVersion,
+            short headerResponseVersion,
+            short? apiVersion,
+            CancellationToken cancellationToken
+        )
+            where TRequest : notnull, Request
+            where TResponse : notnull, Response
         {
-            return await new ValueTask<Cluster>(Cluster.Empty);
+            var correlationId = Interlocked.Increment(ref _coorelationIds);
+            var version = apiVersion.HasValue ?
+                apiVersion.Value :
+                _apiVersions[request.Api].Version.Max
+            ;
+            var requestHeader = new RequestHeader(
+                request.Api,
+                version,
+                correlationId,
+                _config.ClientId
+            );
+            var requestBuffer = new byte[1024 * 1024].AsMemory();
+            var requestSlice = requestBuffer;
+            requestSlice = RequestHeaderSerde.Write(requestSlice, headerRequestVersion, requestHeader);
+            requestSlice = requestWriter(requestSlice, version, request);
+            var len = requestBuffer.Length - requestSlice.Length;
+            var responseBuffer = await _transport.HandleRequest(requestBuffer[0..len], cancellationToken);
+            var responseHeader = ResponseHeaderSerde.Read(ref responseBuffer, headerResponseVersion);
+            if (responseHeader.CorrelationIdField != requestHeader.CorrelationIdField)
+                throw new Exception($"Correlation Id mismath - Request: {requestHeader.CorrelationIdField} - Response: {responseHeader.CorrelationIdField}");
+            var response = responseReader(ref responseBuffer, version);
+            return response;
+        }
+
+        private async ValueTask<ImmutableSortedDictionary<short, ApiVersion>> GetApiVersions(
+            CancellationToken cancellationToken
+        )
+        {
+            var request = new ApiVersionsRequest(
+                ".Net Client",
+                "1.0.0"
+            );
+            var response = await ExecuteRequest(
+                request,
+                (s, v, r) => ApiVersionsRequestSerde.Write(s, v, r),
+                (ref ReadOnlyMemory<byte> s, short v) => ApiVersionsResponseSerde.Read(ref s, v),
+                1,
+                0,
+                1,
+                cancellationToken
+            );
+            return response
+                .ApiKeysField
+                .Select(r => new ApiVersion(
+                    r.ApiKeyField,
+                    new(
+                        r.MinVersionField,
+                        r.MaxVersionField
+                    )
+                ))
+                .ToImmutableSortedDictionary(
+                    k => (short)k.Api,
+                    v => v
+                )
+            ;
+        }
+
+        private async ValueTask<Cluster> GetCluster(
+            short version,
+            CancellationToken cancellationToken
+        )
+        {
+            var request = new MetadataRequest(
+                (version == 0 ? null : ImmutableArray<MetadataRequest.MetadataRequestTopic>.Empty),
+                false,
+                true,
+                false
+            );
+            var response = await ExecuteRequest(
+                request,
+                (s, v, r) => MetadataRequestSerde.Write(s, v, r),
+                (ref ReadOnlyMemory<byte> s, short v) => MetadataResponseSerde.Read(ref s, v),
+                REQUEST_HEADER_VERSION,
+                RESPONSE_HEADER_VERSION,
+                null,
+                cancellationToken
+            );
+            var nodes = response.BrokersField.Select(
+                    r => new ClusterNode(
+                        new(r.NodeIdField),
+                        $"{r.NodeIdField}",
+                        r.HostField,
+                        r.PortField,
+                        $"{r.RackField}"
+                    )
+                )
+                .ToImmutableSortedDictionary(
+                    k => k.Id,
+                    v => v,
+                    ClusterNodeIdCompare.Instance
+                )
+            ;
+            return new(
+                response.ClusterIdField ?? "",
+                nodes[new(response.ControllerIdField)],
+                nodes,
+                ImmutableSortedSet<Topic>.Empty,
+                ImmutableSortedSet<Topic>.Empty,
+                ImmutableSortedSet<Topic>.Empty,
+                ImmutableSortedDictionary<Topic, ImmutableArray<PartitionMetadata>>.Empty,
+                ImmutableSortedDictionary<string, Guid>.Empty
+            );
         }
 
         private static IEnumerable<(string Host, int Port)> ParseBoostrap(string bootstrapServers) =>

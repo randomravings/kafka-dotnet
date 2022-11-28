@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using static Kafka.Client.Messages.DeleteTopicsRequest;
 
 namespace Kafka.Client.Clients.Admin.Model
 {
@@ -7,27 +6,16 @@ namespace Kafka.Client.Clients.Admin.Model
         int TimeoutMs,
         short? ApiVersion,
         string ClientId,
-        ImmutableArray<DeleteTopicState> TopicsField,
-        ImmutableArray<string> TopicNamesField
+        ImmutableArray<Guid> TopicIds,
+        ImmutableArray<string> TopicNames
     ) : ClientOptions(TimeoutMs, ApiVersion, ClientId)
     {
         public static DeleteTopicsOptions Empty { get; } = new(
             -1,
             0,
             "",
-            ImmutableArray<DeleteTopicState>.Empty,
+            ImmutableArray<Guid>.Empty,
             ImmutableArray<string>.Empty
         );
-
-        public record DeleteTopic(
-            string? Name,
-            Guid TopicId
-        )
-        {
-            public static DeleteTopic Empty { get; } = new(
-                null,
-                Guid.Empty
-            );
-        }
     };
 }

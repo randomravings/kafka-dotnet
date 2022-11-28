@@ -6,17 +6,17 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class UpdateMetadataResponseSerde
     {
-        private static readonly Func<Stream, UpdateMetadataResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
-            b => ReadV02(b),
-            b => ReadV03(b),
-            b => ReadV04(b),
-            b => ReadV05(b),
-            b => ReadV06(b),
-            b => ReadV07(b),
+        private static readonly DecodeDelegate<UpdateMetadataResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV07(ref b),
         };
-        private static readonly Action<Stream, UpdateMetadataResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<UpdateMetadataResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
             (b, m) => WriteV02(b, m),
@@ -26,103 +26,110 @@ namespace Kafka.Client.Messages
             (b, m) => WriteV06(b, m),
             (b, m) => WriteV07(b, m),
         };
-        public static UpdateMetadataResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static UpdateMetadataResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, UpdateMetadataResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static UpdateMetadataResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, UpdateMetadataResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static UpdateMetadataResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
             return new(
                 errorCodeField
             );
         }
-        private static void WriteV00(Stream buffer, UpdateMetadataResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, UpdateMetadataResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            return buffer;
         }
-        private static UpdateMetadataResponse ReadV01(Stream buffer)
+        private static UpdateMetadataResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
             return new(
                 errorCodeField
             );
         }
-        private static void WriteV01(Stream buffer, UpdateMetadataResponse message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, UpdateMetadataResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            return buffer;
         }
-        private static UpdateMetadataResponse ReadV02(Stream buffer)
+        private static UpdateMetadataResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
             return new(
                 errorCodeField
             );
         }
-        private static void WriteV02(Stream buffer, UpdateMetadataResponse message)
+        private static Memory<byte> WriteV02(Memory<byte> buffer, UpdateMetadataResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            return buffer;
         }
-        private static UpdateMetadataResponse ReadV03(Stream buffer)
+        private static UpdateMetadataResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
             return new(
                 errorCodeField
             );
         }
-        private static void WriteV03(Stream buffer, UpdateMetadataResponse message)
+        private static Memory<byte> WriteV03(Memory<byte> buffer, UpdateMetadataResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            return buffer;
         }
-        private static UpdateMetadataResponse ReadV04(Stream buffer)
+        private static UpdateMetadataResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
             return new(
                 errorCodeField
             );
         }
-        private static void WriteV04(Stream buffer, UpdateMetadataResponse message)
+        private static Memory<byte> WriteV04(Memory<byte> buffer, UpdateMetadataResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            return buffer;
         }
-        private static UpdateMetadataResponse ReadV05(Stream buffer)
+        private static UpdateMetadataResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
             return new(
                 errorCodeField
             );
         }
-        private static void WriteV05(Stream buffer, UpdateMetadataResponse message)
+        private static Memory<byte> WriteV05(Memory<byte> buffer, UpdateMetadataResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            return buffer;
         }
-        private static UpdateMetadataResponse ReadV06(Stream buffer)
+        private static UpdateMetadataResponse ReadV06(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 errorCodeField
             );
         }
-        private static void WriteV06(Stream buffer, UpdateMetadataResponse message)
+        private static Memory<byte> WriteV06(Memory<byte> buffer, UpdateMetadataResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
-        private static UpdateMetadataResponse ReadV07(Stream buffer)
+        private static UpdateMetadataResponse ReadV07(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 errorCodeField
             );
         }
-        private static void WriteV07(Stream buffer, UpdateMetadataResponse message)
+        private static Memory<byte> WriteV07(Memory<byte> buffer, UpdateMetadataResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
     }
 }

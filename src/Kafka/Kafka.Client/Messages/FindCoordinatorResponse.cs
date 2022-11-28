@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using Coordinator = Kafka.Client.Messages.FindCoordinatorResponse.Coordinator;
 
 namespace Kafka.Client.Messages
@@ -22,7 +23,7 @@ namespace Kafka.Client.Messages
         string HostField,
         int PortField,
         ImmutableArray<Coordinator> CoordinatorsField
-    )
+    ) : Response(10)
     {
         public static FindCoordinatorResponse Empty { get; } = new(
             default(int),

@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using RemainingPartition = Kafka.Client.Messages.ControlledShutdownResponse.RemainingPartition;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record ControlledShutdownResponse (
         short ErrorCodeField,
         ImmutableArray<RemainingPartition> RemainingPartitionsField
-    )
+    ) : Response(7)
     {
         public static ControlledShutdownResponse Empty { get; } = new(
             default(short),

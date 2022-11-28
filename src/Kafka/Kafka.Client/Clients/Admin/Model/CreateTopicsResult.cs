@@ -6,16 +6,16 @@ using static Kafka.Client.Clients.Admin.Model.CreateTopicsResult;
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record CreateTopicsResult(
-        ImmutableSortedDictionary<Topic, CreateTopicResult> CreatedTopics,
+        ImmutableSortedDictionary<Topic, CreatedTopicResult> CreatedTopics,
         ImmutableSortedDictionary<Topic, ApiException> ErrorTopics
     )
     {
-        public static CreateTopicsResult Empty { get; } = new(
-            ImmutableSortedDictionary<Topic, CreateTopicResult>.Empty,
+        public static Model.CreateTopicsResult Empty { get; } = new(
+            ImmutableSortedDictionary<Topic, CreatedTopicResult>.Empty,
             ImmutableSortedDictionary<Topic, ApiException>.Empty
         );
 
-        public sealed record CreateTopicResult(
+        public sealed record CreatedTopicResult(
             Topic Topic,
             int NumPartitions,
             int ReplicationFactor,

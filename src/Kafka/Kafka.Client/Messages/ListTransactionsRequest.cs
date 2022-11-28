@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -11,7 +12,7 @@ namespace Kafka.Client.Messages
     public sealed record ListTransactionsRequest (
         ImmutableArray<string> StateFiltersField,
         ImmutableArray<long> ProducerIdFiltersField
-    )
+    ) : Request(66)
     {
         public static ListTransactionsRequest Empty { get; } = new(
             ImmutableArray<string>.Empty,

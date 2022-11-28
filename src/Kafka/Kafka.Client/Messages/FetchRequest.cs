@@ -1,8 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
+using ForgottenTopic = Kafka.Client.Messages.FetchRequest.ForgottenTopic;
 using FetchTopic = Kafka.Client.Messages.FetchRequest.FetchTopic;
 using FetchPartition = Kafka.Client.Messages.FetchRequest.FetchTopic.FetchPartition;
-using ForgottenTopic = Kafka.Client.Messages.FetchRequest.ForgottenTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -32,7 +33,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<FetchTopic> TopicsField,
         ImmutableArray<ForgottenTopic> ForgottenTopicsDataField,
         string RackIdField
-    )
+    ) : Request(1)
     {
         public static FetchRequest Empty { get; } = new(
             default(string?),
@@ -47,6 +48,23 @@ namespace Kafka.Client.Messages
             ImmutableArray<ForgottenTopic>.Empty,
             ""
         );
+        /// <summary>
+        /// <param name="TopicField">The topic name.</param>
+        /// <param name="TopicIdField">The unique topic ID</param>
+        /// <param name="PartitionsField">The partitions indexes to forget.</param>
+        /// </summary>
+        public sealed record ForgottenTopic (
+            string TopicField,
+            Guid TopicIdField,
+            ImmutableArray<int> PartitionsField
+        )
+        {
+            public static ForgottenTopic Empty { get; } = new(
+                "",
+                default(Guid),
+                ImmutableArray<int>.Empty
+            );
+        };
         /// <summary>
         /// <param name="TopicField">The name of the topic to fetch.</param>
         /// <param name="TopicIdField">The unique topic ID</param>
@@ -89,23 +107,6 @@ namespace Kafka.Client.Messages
                     default(int)
                 );
             };
-        };
-        /// <summary>
-        /// <param name="TopicField">The topic name.</param>
-        /// <param name="TopicIdField">The unique topic ID</param>
-        /// <param name="PartitionsField">The partitions indexes to forget.</param>
-        /// </summary>
-        public sealed record ForgottenTopic (
-            string TopicField,
-            Guid TopicIdField,
-            ImmutableArray<int> PartitionsField
-        )
-        {
-            public static ForgottenTopic Empty { get; } = new(
-                "",
-                default(Guid),
-                ImmutableArray<int>.Empty
-            );
         };
     };
 }

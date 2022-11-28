@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DeletableTopicResult = Kafka.Client.Messages.DeleteTopicsResponse.DeletableTopicResult;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record DeleteTopicsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<DeletableTopicResult> ResponsesField
-    )
+    ) : Response(20)
     {
         public static DeleteTopicsResponse Empty { get; } = new(
             default(int),

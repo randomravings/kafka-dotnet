@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TopicData = Kafka.Client.Messages.VoteRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.VoteRequest.TopicData.PartitionData;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record VoteRequest (
         string? ClusterIdField,
         ImmutableArray<TopicData> TopicsField
-    )
+    ) : Request(52)
     {
         public static VoteRequest Empty { get; } = new(
             default(string?),

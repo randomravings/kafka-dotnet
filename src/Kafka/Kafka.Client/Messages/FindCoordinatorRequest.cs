@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
         string KeyField,
         sbyte KeyTypeField,
         ImmutableArray<string> CoordinatorKeysField
-    )
+    ) : Request(10)
     {
         public static FindCoordinatorRequest Empty { get; } = new(
             "",

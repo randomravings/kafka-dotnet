@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TopicData = Kafka.Client.Messages.AlterPartitionResponse.TopicData;
 using PartitionData = Kafka.Client.Messages.AlterPartitionResponse.TopicData.PartitionData;
 
@@ -15,7 +16,7 @@ namespace Kafka.Client.Messages
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<TopicData> TopicsField
-    )
+    ) : Response(56)
     {
         public static AlterPartitionResponse Empty { get; } = new(
             default(int),

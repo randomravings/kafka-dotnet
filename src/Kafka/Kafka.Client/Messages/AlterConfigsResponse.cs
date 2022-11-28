@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using AlterConfigsResourceResponse = Kafka.Client.Messages.AlterConfigsResponse.AlterConfigsResourceResponse;
 
 namespace Kafka.Client.Messages
@@ -12,7 +13,7 @@ namespace Kafka.Client.Messages
     public sealed record AlterConfigsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<AlterConfigsResourceResponse> ResponsesField
-    )
+    ) : Response(33)
     {
         public static AlterConfigsResponse Empty { get; } = new(
             default(int),

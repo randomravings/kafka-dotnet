@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using AddPartitionsToTxnTopic = Kafka.Client.Messages.AddPartitionsToTxnRequest.AddPartitionsToTxnTopic;
 
 namespace Kafka.Client.Messages
@@ -16,7 +17,7 @@ namespace Kafka.Client.Messages
         long ProducerIdField,
         short ProducerEpochField,
         ImmutableArray<AddPartitionsToTxnTopic> TopicsField
-    )
+    ) : Request(24)
     {
         public static AddPartitionsToTxnRequest Empty { get; } = new(
             "",

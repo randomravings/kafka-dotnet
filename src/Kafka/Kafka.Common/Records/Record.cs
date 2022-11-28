@@ -47,8 +47,8 @@ namespace Kafka.Common.Records
         [property: Serialization(SerializationType.Int16, 1)] Attributes Attributes,
         [property: Serialization(SerializationType.VarInt64, 2)] long TimestampDelta,
         [property: Serialization(SerializationType.VarInt32, 3)] int OffsetDelta,
-        [property: Serialization(SerializationType.CompactBytes, 4)] byte[]? Key,
-        [property: Serialization(SerializationType.CompactBytes, 5)] byte[]? Value,
+        [property: Serialization(SerializationType.CompactBytes, 4)] ImmutableArray<byte>? Key,
+        [property: Serialization(SerializationType.CompactBytes, 5)] ImmutableArray<byte>? Value,
         [property: Serialization(SerializationType.Array, 0)] ImmutableArray<RecordHeader> Headers
     ) : IRecord
     {
@@ -66,9 +66,9 @@ namespace Kafka.Common.Records
 
         long IRecord.Timestamp => BaseTimestamp + TimestampDelta;
 
-        byte[]? IRecord.Key => Key;
+        ImmutableArray<byte>? IRecord.Key => Key;
 
-        byte[]? IRecord.Value => Value;
+        ImmutableArray<byte>? IRecord.Value => Value;
 
         long IRecord.TimestampDelta => TimestampDelta;
 

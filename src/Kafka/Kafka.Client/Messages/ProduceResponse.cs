@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using PartitionProduceResponse = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse;
 using TopicProduceResponse = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse;
 using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
     public sealed record ProduceResponse (
         ImmutableArray<TopicProduceResponse> ResponsesField,
         int ThrottleTimeMsField
-    )
+    ) : Response(0)
     {
         public static ProduceResponse Empty { get; } = new(
             ImmutableArray<TopicProduceResponse>.Empty,

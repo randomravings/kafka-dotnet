@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DescribableLogDirTopic = Kafka.Client.Messages.DescribeLogDirsRequest.DescribableLogDirTopic;
 
 namespace Kafka.Client.Messages
@@ -10,7 +11,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DescribeLogDirsRequest (
         ImmutableArray<DescribableLogDirTopic>? TopicsField
-    )
+    ) : Request(35)
     {
         public static DescribeLogDirsRequest Empty { get; } = new(
             default(ImmutableArray<DescribableLogDirTopic>?)

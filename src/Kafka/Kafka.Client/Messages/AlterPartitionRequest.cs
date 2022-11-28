@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TopicData = Kafka.Client.Messages.AlterPartitionRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.AlterPartitionRequest.TopicData.PartitionData;
 
@@ -15,7 +16,7 @@ namespace Kafka.Client.Messages
         int BrokerIdField,
         long BrokerEpochField,
         ImmutableArray<TopicData> TopicsField
-    )
+    ) : Request(56)
     {
         public static AlterPartitionRequest Empty { get; } = new(
             default(int),

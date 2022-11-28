@@ -28,11 +28,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(int.MinValue)]
         public void TestVarInt32Serde(int value)
         {
-            using var buf = new MemoryStream(32);
-            Encoder.WriteVarInt32(buf, value);
-            buf.Flush();
-            buf.Position = 0;
-            var actual = Decoder.ReadVarInt32(buf);
+            var writeBuffer = new byte[20].AsMemory();
+            var readBuffer = (ReadOnlyMemory<byte>)writeBuffer;
+            Encoder.WriteVarInt32(writeBuffer, value);
+            var actual = Decoder.ReadVarInt32(ref readBuffer);
             Assert.That(actual, Is.EqualTo(value));
         }
 
@@ -51,11 +50,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(uint.MaxValue)]
         public void TestVarUInt32Serde(uint value)
         {
-            using var buf = new MemoryStream(32);
-            Encoder.WriteVarUInt32(buf, value);
-            buf.Flush();
-            buf.Position = 0;
-            var actual = Decoder.ReadVarUInt32(buf);
+            var writeBuffer = new byte[20].AsMemory();
+            var readBuffer = (ReadOnlyMemory<byte>)writeBuffer;
+            Encoder.WriteVarUInt32(writeBuffer, value);
+            var actual = Decoder.ReadVarUInt32(ref readBuffer);
             Assert.That(actual, Is.EqualTo(value));
         }
 
@@ -104,11 +102,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(long.MinValue)]
         public void TestVarInt64Serde(long value)
         {
-            using var buf = new MemoryStream(32);
-            Encoder.WriteVarInt64(buf, value);
-            buf.Flush();
-            buf.Position = 0;
-            var actual = Decoder.ReadVarInt64(buf);
+            var writeBuffer = new byte[20].AsMemory();
+            var readBuffer = (ReadOnlyMemory<byte>)writeBuffer;
+            Encoder.WriteVarInt64(writeBuffer, value);
+            var actual = Decoder.ReadVarInt64(ref readBuffer);
             Assert.That(actual, Is.EqualTo(value));
         }
     }

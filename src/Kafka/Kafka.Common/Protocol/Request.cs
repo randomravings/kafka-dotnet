@@ -1,8 +1,6 @@
 ﻿namespace Kafka.Common.Protocol
 {
-    public record Request<TRequestHeader, TRequest>(
-        int Size,
-        TRequestHeader Header,
-        TRequest Body
+    public abstract record Request(
+        short Api
     );
 }

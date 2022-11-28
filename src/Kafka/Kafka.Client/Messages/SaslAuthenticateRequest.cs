@@ -1,4 +1,6 @@
 using System.CodeDom.Compiler;
+using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -7,11 +9,11 @@ namespace Kafka.Client.Messages
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record SaslAuthenticateRequest (
-        byte[] AuthBytesField
-    )
+        ImmutableArray<byte> AuthBytesField
+    ) : Request(36)
     {
         public static SaslAuthenticateRequest Empty { get; } = new(
-            System.Array.Empty<byte>()
+            ImmutableArray<byte>.Empty
         );
     };
 }

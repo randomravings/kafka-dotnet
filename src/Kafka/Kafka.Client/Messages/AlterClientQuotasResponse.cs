@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using EntryData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData;
 using EntityData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData.EntityData;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record AlterClientQuotasResponse (
         int ThrottleTimeMsField,
         ImmutableArray<EntryData> EntriesField
-    )
+    ) : Response(49)
     {
         public static AlterClientQuotasResponse Empty { get; } = new(
             default(int),

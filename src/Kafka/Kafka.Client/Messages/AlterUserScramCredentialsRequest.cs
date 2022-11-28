@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using ScramCredentialDeletion = Kafka.Client.Messages.AlterUserScramCredentialsRequest.ScramCredentialDeletion;
 using ScramCredentialUpsertion = Kafka.Client.Messages.AlterUserScramCredentialsRequest.ScramCredentialUpsertion;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record AlterUserScramCredentialsRequest (
         ImmutableArray<ScramCredentialDeletion> DeletionsField,
         ImmutableArray<ScramCredentialUpsertion> UpsertionsField
-    )
+    ) : Request(51)
     {
         public static AlterUserScramCredentialsRequest Empty { get; } = new(
             ImmutableArray<ScramCredentialDeletion>.Empty,
@@ -44,16 +45,16 @@ namespace Kafka.Client.Messages
             string NameField,
             sbyte MechanismField,
             int IterationsField,
-            byte[] SaltField,
-            byte[] SaltedPasswordField
+            ImmutableArray<byte> SaltField,
+            ImmutableArray<byte> SaltedPasswordField
         )
         {
             public static ScramCredentialUpsertion Empty { get; } = new(
                 "",
                 default(sbyte),
                 default(int),
-                System.Array.Empty<byte>(),
-                System.Array.Empty<byte>()
+                ImmutableArray<byte>.Empty,
+                ImmutableArray<byte>.Empty
             );
         };
     };

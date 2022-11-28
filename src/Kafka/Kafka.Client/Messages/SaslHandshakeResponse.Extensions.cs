@@ -7,47 +7,48 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class SaslHandshakeResponseSerde
     {
-        private static readonly Func<Stream, SaslHandshakeResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
-            b => ReadV01(b),
+        private static readonly DecodeDelegate<SaslHandshakeResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
         };
-        private static readonly Action<Stream, SaslHandshakeResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<SaslHandshakeResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
             (b, m) => WriteV01(b, m),
         };
-        public static SaslHandshakeResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static SaslHandshakeResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, SaslHandshakeResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static SaslHandshakeResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, SaslHandshakeResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static SaslHandshakeResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var mechanismsField = Decoder.ReadArray<string>(buffer, b => Decoder.ReadCompactString(b)) ?? throw new NullReferenceException("Null not allowed for 'Mechanisms'");
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var mechanismsField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Mechanisms'");
             return new(
                 errorCodeField,
                 mechanismsField
             );
         }
-        private static void WriteV00(Stream buffer, SaslHandshakeResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, SaslHandshakeResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteArray<string>(buffer, message.MechanismsField, (b, i) => Encoder.WriteCompactString(b, i));
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteArray<string>(buffer, message.MechanismsField, (b, i) => Encoder.WriteCompactString(b, i));
+            return buffer;
         }
-        private static SaslHandshakeResponse ReadV01(Stream buffer)
+        private static SaslHandshakeResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
         {
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var mechanismsField = Decoder.ReadArray<string>(buffer, b => Decoder.ReadCompactString(b)) ?? throw new NullReferenceException("Null not allowed for 'Mechanisms'");
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var mechanismsField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Mechanisms'");
             return new(
                 errorCodeField,
                 mechanismsField
             );
         }
-        private static void WriteV01(Stream buffer, SaslHandshakeResponse message)
+        private static Memory<byte> WriteV01(Memory<byte> buffer, SaslHandshakeResponse message)
         {
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteArray<string>(buffer, message.MechanismsField, (b, i) => Encoder.WriteCompactString(b, i));
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteArray<string>(buffer, message.MechanismsField, (b, i) => Encoder.WriteCompactString(b, i));
+            return buffer;
         }
     }
 }

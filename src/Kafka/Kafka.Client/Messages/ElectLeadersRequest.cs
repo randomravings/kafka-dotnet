@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TopicPartitions = Kafka.Client.Messages.ElectLeadersRequest.TopicPartitions;
 
 namespace Kafka.Client.Messages
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         sbyte ElectionTypeField,
         ImmutableArray<TopicPartitions>? TopicPartitionsField,
         int TimeoutMsField
-    )
+    ) : Request(43)
     {
         public static ElectLeadersRequest Empty { get; } = new(
             default(sbyte),

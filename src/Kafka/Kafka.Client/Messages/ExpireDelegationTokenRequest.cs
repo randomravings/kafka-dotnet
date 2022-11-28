@@ -1,4 +1,6 @@
 using System.CodeDom.Compiler;
+using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -8,12 +10,12 @@ namespace Kafka.Client.Messages
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record ExpireDelegationTokenRequest (
-        byte[] HmacField,
+        ImmutableArray<byte> HmacField,
         long ExpiryTimePeriodMsField
-    )
+    ) : Request(40)
     {
         public static ExpireDelegationTokenRequest Empty { get; } = new(
-            System.Array.Empty<byte>(),
+            ImmutableArray<byte>.Empty,
             default(long)
         );
     };

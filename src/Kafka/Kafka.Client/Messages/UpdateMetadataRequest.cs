@@ -1,9 +1,10 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using UpdateMetadataBroker = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker;
-using UpdateMetadataEndpoint = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker.UpdateMetadataEndpoint;
 using UpdateMetadataTopicState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataTopicState;
 using UpdateMetadataPartitionState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataPartitionState;
+using UpdateMetadataEndpoint = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker.UpdateMetadataEndpoint;
 
 namespace Kafka.Client.Messages
 {
@@ -23,7 +24,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<UpdateMetadataPartitionState> UngroupedPartitionStatesField,
         ImmutableArray<UpdateMetadataTopicState> TopicStatesField,
         ImmutableArray<UpdateMetadataBroker> LiveBrokersField
-    )
+    ) : Request(6)
     {
         public static UpdateMetadataRequest Empty { get; } = new(
             default(int),

@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         int TransactionTimeoutMsField,
         long ProducerIdField,
         short ProducerEpochField
-    )
+    ) : Request(22)
     {
         public static InitProducerIdRequest Empty { get; } = new(
             default(string?),

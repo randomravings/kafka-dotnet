@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TopicData = Kafka.Client.Messages.VoteResponse.TopicData;
 using PartitionData = Kafka.Client.Messages.VoteResponse.TopicData.PartitionData;
 
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record VoteResponse (
         short ErrorCodeField,
         ImmutableArray<TopicData> TopicsField
-    )
+    ) : Response(52)
     {
         public static VoteResponse Empty { get; } = new(
             default(short),

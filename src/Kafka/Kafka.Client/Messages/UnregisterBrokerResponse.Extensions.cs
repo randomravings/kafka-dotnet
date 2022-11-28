@@ -6,36 +6,36 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class UnregisterBrokerResponseSerde
     {
-        private static readonly Func<Stream, UnregisterBrokerResponse>[] READ_VERSIONS = {
-            b => ReadV00(b),
+        private static readonly DecodeDelegate<UnregisterBrokerResponse>[] READ_VERSIONS = {
+            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
         };
-        private static readonly Action<Stream, UnregisterBrokerResponse>[] WRITE_VERSIONS = {
+        private static readonly EncodeDelegate<UnregisterBrokerResponse>[] WRITE_VERSIONS = {
             (b, m) => WriteV00(b, m),
         };
-        public static UnregisterBrokerResponse Read(Stream buffer, short version) =>
-            READ_VERSIONS[version](buffer)
+        public static UnregisterBrokerResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
+            READ_VERSIONS[version](ref buffer)
         ;
-        public static void Write(Stream buffer, short version, UnregisterBrokerResponse message) =>
-            WRITE_VERSIONS[version](buffer, message)
-        ;
-        private static UnregisterBrokerResponse ReadV00(Stream buffer)
+        public static Memory<byte> Write(Memory<byte> buffer, short version, UnregisterBrokerResponse message) =>
+            WRITE_VERSIONS[version](buffer, message);
+        private static UnregisterBrokerResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer);
-            var errorCodeField = Decoder.ReadInt16(buffer);
-            var errorMessageField = Decoder.ReadCompactNullableString(buffer);
-            _ = Decoder.ReadVarUInt32(buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
+            _ = Decoder.ReadVarUInt32(ref buffer);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 errorMessageField
             );
         }
-        private static void WriteV00(Stream buffer, UnregisterBrokerResponse message)
+        private static Memory<byte> WriteV00(Memory<byte> buffer, UnregisterBrokerResponse message)
         {
-            Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-            Encoder.WriteVarUInt32(buffer, 0);
+            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
+            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
+            buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
+            buffer = Encoder.WriteVarUInt32(buffer, 0);
+            return buffer;
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -16,7 +17,7 @@ namespace Kafka.Client.Messages
         long CurrentMetadataOffsetField,
         bool WantFenceField,
         bool WantShutDownField
-    )
+    ) : Request(63)
     {
         public static BrokerHeartbeatRequest Empty { get; } = new(
             default(int),

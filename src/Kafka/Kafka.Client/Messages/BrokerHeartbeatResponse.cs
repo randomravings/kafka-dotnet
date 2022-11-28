@@ -1,4 +1,5 @@
 using System.CodeDom.Compiler;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -16,7 +17,7 @@ namespace Kafka.Client.Messages
         bool IsCaughtUpField,
         bool IsFencedField,
         bool ShouldShutDownField
-    )
+    ) : Response(63)
     {
         public static BrokerHeartbeatResponse Empty { get; } = new(
             default(int),

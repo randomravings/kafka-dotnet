@@ -1,4 +1,6 @@
 using System.CodeDom.Compiler;
+using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -26,9 +28,9 @@ namespace Kafka.Client.Messages
         long ExpiryTimestampMsField,
         long MaxTimestampMsField,
         string TokenIdField,
-        byte[] HmacField,
+        ImmutableArray<byte> HmacField,
         int ThrottleTimeMsField
-    )
+    ) : Response(38)
     {
         public static CreateDelegationTokenResponse Empty { get; } = new(
             default(short),
@@ -40,7 +42,7 @@ namespace Kafka.Client.Messages
             default(long),
             default(long),
             "",
-            System.Array.Empty<byte>(),
+            ImmutableArray<byte>.Empty,
             default(int)
         );
     };

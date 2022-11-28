@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using DescribeConfigsResource = Kafka.Client.Messages.DescribeConfigsRequest.DescribeConfigsResource;
 
 namespace Kafka.Client.Messages
@@ -14,7 +15,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<DescribeConfigsResource> ResourcesField,
         bool IncludeSynonymsField,
         bool IncludeDocumentationField
-    )
+    ) : Request(32)
     {
         public static DescribeConfigsRequest Empty { get; } = new(
             ImmutableArray<DescribeConfigsResource>.Empty,

@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using CreatePartitionsTopic = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic;
+using Kafka.Common.Protocol;
 using CreatePartitionsAssignment = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic.CreatePartitionsAssignment;
+using CreatePartitionsTopic = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -15,7 +16,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<CreatePartitionsTopic> TopicsField,
         int TimeoutMsField,
         bool ValidateOnlyField
-    )
+    ) : Request(37)
     {
         public static CreatePartitionsRequest Empty { get; } = new(
             ImmutableArray<CreatePartitionsTopic>.Empty,

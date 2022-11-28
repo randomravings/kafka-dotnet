@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using OffsetCommitRequestPartition = Kafka.Client.Messages.OffsetCommitRequest.OffsetCommitRequestTopic.OffsetCommitRequestPartition;
+using Kafka.Common.Protocol;
 using OffsetCommitRequestTopic = Kafka.Client.Messages.OffsetCommitRequest.OffsetCommitRequestTopic;
+using OffsetCommitRequestPartition = Kafka.Client.Messages.OffsetCommitRequest.OffsetCommitRequestTopic.OffsetCommitRequestPartition;
 
 namespace Kafka.Client.Messages
 {
@@ -21,7 +22,7 @@ namespace Kafka.Client.Messages
         string? GroupInstanceIdField,
         long RetentionTimeMsField,
         ImmutableArray<OffsetCommitRequestTopic> TopicsField
-    )
+    ) : Request(8)
     {
         public static OffsetCommitRequest Empty { get; } = new(
             "",

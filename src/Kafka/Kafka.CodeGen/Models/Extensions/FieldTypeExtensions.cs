@@ -26,7 +26,7 @@
                 "uuid" => "Guid",
                 "float64" => "double",
                 "string" => "string",
-                "bytes" => "byte[]",
+                "bytes" => "ImmutableArray<byte>",
                 var s => s
             }
         ;

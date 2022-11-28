@@ -1,4 +1,6 @@
 using System.CodeDom.Compiler;
+using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -12,14 +14,14 @@ namespace Kafka.Client.Messages
     public sealed record SaslAuthenticateResponse (
         short ErrorCodeField,
         string? ErrorMessageField,
-        byte[] AuthBytesField,
+        ImmutableArray<byte> AuthBytesField,
         long SessionLifetimeMsField
-    )
+    ) : Response(36)
     {
         public static SaslAuthenticateResponse Empty { get; } = new(
             default(short),
             default(string?),
-            System.Array.Empty<byte>(),
+            ImmutableArray<byte>.Empty,
             default(long)
         );
     };

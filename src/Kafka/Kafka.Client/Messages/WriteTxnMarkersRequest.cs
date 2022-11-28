@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using WritableTxnMarkerTopic = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker.WritableTxnMarkerTopic;
 using WritableTxnMarker = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker;
 
@@ -11,7 +12,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record WriteTxnMarkersRequest (
         ImmutableArray<WritableTxnMarker> MarkersField
-    )
+    ) : Request(27)
     {
         public static WriteTxnMarkersRequest Empty { get; } = new(
             ImmutableArray<WritableTxnMarker>.Empty

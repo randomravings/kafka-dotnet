@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using TopicPartition = Kafka.Client.Messages.ConsumerProtocolSubscription.TopicPartition;
 
 namespace Kafka.Client.Messages
@@ -12,13 +13,13 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record ConsumerProtocolSubscription (
         ImmutableArray<string> TopicsField,
-        byte[]? UserDataField,
+        ImmutableArray<byte>? UserDataField,
         ImmutableArray<TopicPartition> OwnedPartitionsField
     )
     {
         public static ConsumerProtocolSubscription Empty { get; } = new(
             ImmutableArray<string>.Empty,
-            default(byte[]?),
+            default(ImmutableArray<byte>?),
             ImmutableArray<TopicPartition>.Empty
         );
         /// <summary>

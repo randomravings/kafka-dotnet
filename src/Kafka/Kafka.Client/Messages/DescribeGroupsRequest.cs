@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
 {
@@ -11,7 +12,7 @@ namespace Kafka.Client.Messages
     public sealed record DescribeGroupsRequest (
         ImmutableArray<string> GroupsField,
         bool IncludeAuthorizedOperationsField
-    )
+    ) : Request(15)
     {
         public static DescribeGroupsRequest Empty { get; } = new(
             ImmutableArray<string>.Empty,

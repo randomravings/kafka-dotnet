@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using JoinGroupResponseMember = Kafka.Client.Messages.JoinGroupResponse.JoinGroupResponseMember;
 
 namespace Kafka.Client.Messages
@@ -26,7 +27,7 @@ namespace Kafka.Client.Messages
         bool SkipAssignmentField,
         string MemberIdField,
         ImmutableArray<JoinGroupResponseMember> MembersField
-    )
+    ) : Response(11)
     {
         public static JoinGroupResponse Empty { get; } = new(
             default(int),
@@ -47,13 +48,13 @@ namespace Kafka.Client.Messages
         public sealed record JoinGroupResponseMember (
             string MemberIdField,
             string? GroupInstanceIdField,
-            byte[] MetadataField
+            ImmutableArray<byte> MetadataField
         )
         {
             public static JoinGroupResponseMember Empty { get; } = new(
                 "",
                 default(string?),
-                System.Array.Empty<byte>()
+                ImmutableArray<byte>.Empty
             );
         };
     };

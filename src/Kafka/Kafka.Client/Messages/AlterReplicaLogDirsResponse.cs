@@ -1,7 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using AlterReplicaLogDirTopicResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult;
+using Kafka.Common.Protocol;
 using AlterReplicaLogDirPartitionResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult.AlterReplicaLogDirPartitionResult;
+using AlterReplicaLogDirTopicResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult;
 
 namespace Kafka.Client.Messages
 {
@@ -13,7 +14,7 @@ namespace Kafka.Client.Messages
     public sealed record AlterReplicaLogDirsResponse (
         int ThrottleTimeMsField,
         ImmutableArray<AlterReplicaLogDirTopicResult> ResultsField
-    )
+    ) : Response(34)
     {
         public static AlterReplicaLogDirsResponse Empty { get; } = new(
             default(int),

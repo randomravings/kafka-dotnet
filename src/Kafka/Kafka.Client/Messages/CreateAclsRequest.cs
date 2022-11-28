@@ -1,5 +1,6 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using Kafka.Common.Protocol;
 using AclCreation = Kafka.Client.Messages.CreateAclsRequest.AclCreation;
 
 namespace Kafka.Client.Messages
@@ -10,7 +11,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record CreateAclsRequest (
         ImmutableArray<AclCreation> CreationsField
-    )
+    ) : Request(30)
     {
         public static CreateAclsRequest Empty { get; } = new(
             ImmutableArray<AclCreation>.Empty
