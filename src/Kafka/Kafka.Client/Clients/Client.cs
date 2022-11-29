@@ -39,7 +39,7 @@ namespace Kafka.Client.Clients
             await _transport.Connect(cancellationToken);
             await _transport.Handshake(cancellationToken);
             _apiVersions = await GetApiVersions(cancellationToken);
-            _cluster = await GetCluster(_apiVersions[Api.Metadata].Version.Max, cancellationToken);
+            _cluster = await GetCluster(_apiVersions[ApiKey.Metadata].Version.Max, cancellationToken);
         }
 
         protected async ValueTask<TResponse> HandleRequest<TRequest, TResponse>(

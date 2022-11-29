@@ -1,29 +1,17 @@
 ﻿using Kafka.Common.Types;
-using System.Runtime.Serialization;
 
 namespace Kafka.Common.Exceptions
 {
     public class ApiException : Exception
     {
-        public ApiException()
+        public ApiException(Error error) :
+            base(error.Message)
         {
-            ErrorCode = ErrorCode.UNKNOWN_SERVER_ERROR;
-        }
-
-        public ApiException(ErrorCode errorCode, string? message) : base(message)
-        {
-            ErrorCode = errorCode;
-        }
-
-        public ApiException(ErrorCode errorCode, string? message, Exception? innerException) : base(message, innerException)
-        {
-            ErrorCode = errorCode;
-        }
-
-        protected ApiException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+            ErrorCode = error.ErrorCode;
+            Retriable = error.Retriable;
         }
 
         public ErrorCode ErrorCode { get; init; }
+        public bool Retriable { get; init; }
     }
 }

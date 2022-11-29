@@ -4,11 +4,11 @@ using System.Collections.Immutable;
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record ApiVersionsResult(
-        ImmutableSortedDictionary<Api, ApiVersion> ApiVersions
+        ImmutableSortedDictionary<ApiKey, ApiVersion> ApiVersions
     )
     {
         public static ApiVersionsResult Empty { get; } = new(
-            ImmutableSortedDictionary<Api, ApiVersion>.Empty
+            ImmutableSortedDictionary<ApiKey, ApiVersion>.Empty
         );
     };
 }

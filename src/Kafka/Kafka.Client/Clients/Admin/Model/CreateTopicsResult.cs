@@ -7,12 +7,12 @@ namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record CreateTopicsResult(
         ImmutableSortedDictionary<Topic, CreatedTopicResult> CreatedTopics,
-        ImmutableSortedDictionary<Topic, ApiException> ErrorTopics
+        ImmutableSortedDictionary<Topic, Error> ErrorTopics
     )
     {
         public static Model.CreateTopicsResult Empty { get; } = new(
             ImmutableSortedDictionary<Topic, CreatedTopicResult>.Empty,
-            ImmutableSortedDictionary<Topic, ApiException>.Empty
+            ImmutableSortedDictionary<Topic, Error>.Empty
         );
 
         public sealed record CreatedTopicResult(

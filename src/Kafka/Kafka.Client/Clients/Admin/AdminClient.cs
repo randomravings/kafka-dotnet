@@ -1,5 +1,6 @@
 ﻿using Kafka.Client.Clients.Admin.Model;
 using Kafka.Client.Messages;
+using Kafka.Common;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Types;
 using Kafka.Common.Types.Comparison;
@@ -24,7 +25,7 @@ namespace Kafka.Client.Clients.Admin
             return new(
                 _apiVersions
                 .ToImmutableSortedDictionary(
-                    k => new Api(k.Key),
+                    k => new ApiKey(k.Key),
                     v => v.Value
                 )
             );
@@ -120,10 +121,7 @@ namespace Kafka.Client.Clients.Admin
                 .Where(r => r.ErrorCodeField != 0)
                 .ToImmutableSortedDictionary(
                     k => new Topic(k.TopicIdField, k.NameField),
-                    v => new ApiException(
-                        (ErrorCode)v.ErrorCodeField,
-                        v.ErrorMessageField
-                    )
+                    v => Errors.Translate(v.ErrorCodeField)
                 )
             ;
             return new CreateTopicsResult(
@@ -177,10 +175,7 @@ namespace Kafka.Client.Clients.Admin
                 .Where(r => r.ErrorCodeField != 0)
                 .ToImmutableSortedDictionary(
                     k => new Topic(k.TopicIdField, k.NameField),
-                    v => new ApiException(
-                        (ErrorCode)v.ErrorCodeField,
-                        v.ErrorMessageField
-                    )
+                    v => Errors.Translate(v.ErrorCodeField)
                 )
             ;
             return new(

@@ -1,7 +1,7 @@
 ﻿namespace Kafka.Common.Types
 {
     public readonly record struct ApiVersion(
-        Api Api,
+        ApiKey Api,
         Version Version
     );
 }

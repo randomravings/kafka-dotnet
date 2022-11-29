@@ -27,7 +27,7 @@ namespace Kafka.CodeGen.Serialization
             JsonSerializer serializer
         )
         {
-            var apiKey = Api.None;
+            var apiKey = ApiKey.None;
             var type = "";
             var listeners = Array.Empty<string>();
             var name = "";
@@ -43,7 +43,7 @@ namespace Kafka.CodeGen.Serialization
                         switch (reader.Value)
                         {
                             case "apiKey":
-                                apiKey = (Api)(reader.ReadAsInt32() ?? -1);
+                                apiKey = (ApiKey)(reader.ReadAsInt32() ?? -1);
                                 break;
                             case "type":
                                 type = reader.ReadAsString() ?? "";

@@ -5,7 +5,7 @@ using Version = Kafka.Common.Types.Version;
 namespace Kafka.CodeGen.Models
 {
     public sealed record ApiRequestMessage(
-        Api ApiKey,
+        ApiKey ApiKey,
         string[] Listeners,
         string Name,
         Version ValidVersions,

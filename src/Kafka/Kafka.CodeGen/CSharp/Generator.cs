@@ -145,10 +145,10 @@ namespace Kafka.CodeGen.CSharp
             switch (message)
             {
                 case ApiRequestMessage a:
-                    await writer.WriteLineAsync($"    ) : {nameof(Request)}({a.ApiKey.Key})");
+                    await writer.WriteLineAsync($"    ) : {nameof(Request)}({a.ApiKey.Value})");
                     break;
                 case ApiResponseMessage a:
-                    await writer.WriteLineAsync($"    ) : {nameof(Response)}({a.ApiKey.Key})");
+                    await writer.WriteLineAsync($"    ) : {nameof(Response)}({a.ApiKey.Value})");
                     break;
                 default:
                     await writer.WriteLineAsync($"    )");
