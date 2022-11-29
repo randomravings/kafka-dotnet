@@ -11,18 +11,17 @@ namespace Kafka.Common.Records
         IRecordBatchBuilder
     {
         private readonly sbyte _magic = 2;
-
         private long _baseOffset = 0;
         private int _batchLength = 0;
         private int _partitionLeaderEpoch = 0;
-        private Attributes Attributes = Attributes.None;
-        private int LastOffsetDelta = 0;
-        private long BaseTimestamp = 0;
-        private long MaxTimestamp = 0;
-        private long ProducerId = 0;
-        private short ProducerEpoch = 0;
-        private int BaseSequence = 0;
-        private ImmutableArray<IRecord>.Builder _recordBuilder = ImmutableArray.CreateBuilder<IRecord>();
+        private Attributes _attributes = Attributes.None;
+        private int _lastOffsetDelta = 0;
+        private long _baseTimestamp = 0;
+        private long _maxTimestamp = 0;
+        private long _producerId = 0;
+        private short _producerEpoch = 0;
+        private int _baseSequence = 0;
+        private ImmutableArray<IRecord>.Builder _records = ImmutableArray.CreateBuilder<IRecord>();
 
         private RecordBatchBuilder() { }
 
@@ -31,7 +30,21 @@ namespace Kafka.Common.Records
         IRecords IRecordBatchBuilder.Build()
         {
 
-            throw new NotImplementedException();
+            return new RecordBatch(
+                _baseOffset,
+                _batchLength,
+                _partitionLeaderEpoch,
+                _magic,
+                0,
+                _attributes,
+                _lastOffsetDelta,
+                _baseTimestamp,
+                _maxTimestamp,
+                _producerId,
+                _producerEpoch,
+                _baseSequence,
+                _records.ToImmutable()
+            );
         }
     }
 }
