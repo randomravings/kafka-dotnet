@@ -16,6 +16,7 @@ namespace Kafka.Client.Messages
         public static DeleteAclsRequest Empty { get; } = new(
             ImmutableArray<DeleteAclsFilter>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ResourceTypeFilterField">The resource type.</param>
         /// <param name="ResourceNameFilterField">The resource name.</param>

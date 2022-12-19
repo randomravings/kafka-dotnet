@@ -1,5 +1,5 @@
 ﻿using Kafka.Client.Server;
-using System.Collections.Immutable;
+using Kafka.Common.Types;
 
 namespace Kafka.Client.Clients.Producer
 {
@@ -8,8 +8,8 @@ namespace Kafka.Client.Clients.Producer
     {
         private DefaultPartitioner() { }
         public static DefaultPartitioner Instance { get; } = new();
-        public async ValueTask<int> Select(Cluster cluster, string topic, ImmutableArray<byte>? keyBytes) =>
-            await new ValueTask<int>(-1);
+        public async ValueTask<int> Select(Cluster cluster, TopicName topic, byte[]? keyBytes) =>
+            await new ValueTask<int>(0);
         public void Close() { }
     }
 }

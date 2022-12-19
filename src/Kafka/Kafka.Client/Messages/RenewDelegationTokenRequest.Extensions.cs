@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Messages
 {
@@ -8,66 +7,67 @@ namespace Kafka.Client.Messages
     public static class RenewDelegationTokenRequestSerde
     {
         private static readonly DecodeDelegate<RenewDelegationTokenRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
         };
         private static readonly EncodeDelegate<RenewDelegationTokenRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
         };
-        public static RenewDelegationTokenRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static RenewDelegationTokenRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, RenewDelegationTokenRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static RenewDelegationTokenRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, RenewDelegationTokenRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static RenewDelegationTokenRequest ReadV00(byte[] buffer, ref int index)
         {
-            var hmacField = Decoder.ReadBytes(ref buffer);
-            var renewPeriodMsField = Decoder.ReadInt64(ref buffer);
+            var hmacField = Decoder.ReadBytes(buffer, ref index);
+            var renewPeriodMsField = Decoder.ReadInt64(buffer, ref index);
             return new(
                 hmacField,
                 renewPeriodMsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, RenewDelegationTokenRequest message)
+        private static int WriteV00(byte[] buffer, int index, RenewDelegationTokenRequest message)
         {
-            buffer = Encoder.WriteBytes(buffer, message.HmacField);
-            buffer = Encoder.WriteInt64(buffer, message.RenewPeriodMsField);
-            return buffer;
+            index = Encoder.WriteBytes(buffer, index, message.HmacField);
+            index = Encoder.WriteInt64(buffer, index, message.RenewPeriodMsField);
+            return index;
         }
-        private static RenewDelegationTokenRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static RenewDelegationTokenRequest ReadV01(byte[] buffer, ref int index)
         {
-            var hmacField = Decoder.ReadBytes(ref buffer);
-            var renewPeriodMsField = Decoder.ReadInt64(ref buffer);
+            var hmacField = Decoder.ReadBytes(buffer, ref index);
+            var renewPeriodMsField = Decoder.ReadInt64(buffer, ref index);
             return new(
                 hmacField,
                 renewPeriodMsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, RenewDelegationTokenRequest message)
+        private static int WriteV01(byte[] buffer, int index, RenewDelegationTokenRequest message)
         {
-            buffer = Encoder.WriteBytes(buffer, message.HmacField);
-            buffer = Encoder.WriteInt64(buffer, message.RenewPeriodMsField);
-            return buffer;
+            index = Encoder.WriteBytes(buffer, index, message.HmacField);
+            index = Encoder.WriteInt64(buffer, index, message.RenewPeriodMsField);
+            return index;
         }
-        private static RenewDelegationTokenRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static RenewDelegationTokenRequest ReadV02(byte[] buffer, ref int index)
         {
-            var hmacField = Decoder.ReadCompactBytes(ref buffer);
-            var renewPeriodMsField = Decoder.ReadInt64(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var hmacField = Decoder.ReadCompactBytes(buffer, ref index);
+            var renewPeriodMsField = Decoder.ReadInt64(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 hmacField,
                 renewPeriodMsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, RenewDelegationTokenRequest message)
+        private static int WriteV02(byte[] buffer, int index, RenewDelegationTokenRequest message)
         {
-            buffer = Encoder.WriteCompactBytes(buffer, message.HmacField);
-            buffer = Encoder.WriteInt64(buffer, message.RenewPeriodMsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactBytes(buffer, index, message.HmacField);
+            index = Encoder.WriteInt64(buffer, index, message.RenewPeriodMsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

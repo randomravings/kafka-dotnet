@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<TransactionState>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="ErrorCodeField"></param>
         /// <param name="TransactionalIdField"></param>

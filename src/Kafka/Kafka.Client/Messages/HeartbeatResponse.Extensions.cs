@@ -7,99 +7,100 @@ namespace Kafka.Client.Messages
     public static class HeartbeatResponseSerde
     {
         private static readonly DecodeDelegate<HeartbeatResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
         };
         private static readonly EncodeDelegate<HeartbeatResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
         };
-        public static HeartbeatResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static HeartbeatResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, HeartbeatResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static HeartbeatResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, HeartbeatResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static HeartbeatResponse ReadV00(byte[] buffer, ref int index)
         {
             var throttleTimeMsField = default(int);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, HeartbeatResponse message)
+        private static int WriteV00(byte[] buffer, int index, HeartbeatResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            return index;
         }
-        private static HeartbeatResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static HeartbeatResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, HeartbeatResponse message)
+        private static int WriteV01(byte[] buffer, int index, HeartbeatResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            return index;
         }
-        private static HeartbeatResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static HeartbeatResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, HeartbeatResponse message)
+        private static int WriteV02(byte[] buffer, int index, HeartbeatResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            return index;
         }
-        private static HeartbeatResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static HeartbeatResponse ReadV03(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, HeartbeatResponse message)
+        private static int WriteV03(byte[] buffer, int index, HeartbeatResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            return index;
         }
-        private static HeartbeatResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static HeartbeatResponse ReadV04(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, HeartbeatResponse message)
+        private static int WriteV04(byte[] buffer, int index, HeartbeatResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

@@ -9,171 +9,172 @@ namespace Kafka.Client.Messages
     public static class DeleteTopicsRequestSerde
     {
         private static readonly DecodeDelegate<DeleteTopicsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
+            ReadV06,
         };
         private static readonly EncodeDelegate<DeleteTopicsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
-            (b, m) => WriteV06(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
+            WriteV06,
         };
-        public static DeleteTopicsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DeleteTopicsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DeleteTopicsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DeleteTopicsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DeleteTopicsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DeleteTopicsRequest ReadV00(byte[] buffer, ref int index)
         {
             var topicsField = ImmutableArray<DeleteTopicState>.Empty;
-            var topicNamesField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
+            var topicNamesField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 topicsField,
                 topicNamesField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DeleteTopicsRequest message)
+        private static int WriteV00(byte[] buffer, int index, DeleteTopicsRequest message)
         {
-            buffer = Encoder.WriteArray<string>(buffer, message.TopicNamesField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            return buffer;
+            index = Encoder.WriteArray<string>(buffer, index, message.TopicNamesField, Encoder.WriteCompactString);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            return index;
         }
-        private static DeleteTopicsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsRequest ReadV01(byte[] buffer, ref int index)
         {
             var topicsField = ImmutableArray<DeleteTopicState>.Empty;
-            var topicNamesField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
+            var topicNamesField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 topicsField,
                 topicNamesField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DeleteTopicsRequest message)
+        private static int WriteV01(byte[] buffer, int index, DeleteTopicsRequest message)
         {
-            buffer = Encoder.WriteArray<string>(buffer, message.TopicNamesField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            return buffer;
+            index = Encoder.WriteArray<string>(buffer, index, message.TopicNamesField, Encoder.WriteCompactString);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            return index;
         }
-        private static DeleteTopicsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsRequest ReadV02(byte[] buffer, ref int index)
         {
             var topicsField = ImmutableArray<DeleteTopicState>.Empty;
-            var topicNamesField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
+            var topicNamesField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 topicsField,
                 topicNamesField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, DeleteTopicsRequest message)
+        private static int WriteV02(byte[] buffer, int index, DeleteTopicsRequest message)
         {
-            buffer = Encoder.WriteArray<string>(buffer, message.TopicNamesField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            return buffer;
+            index = Encoder.WriteArray<string>(buffer, index, message.TopicNamesField, Encoder.WriteCompactString);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            return index;
         }
-        private static DeleteTopicsRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsRequest ReadV03(byte[] buffer, ref int index)
         {
             var topicsField = ImmutableArray<DeleteTopicState>.Empty;
-            var topicNamesField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
+            var topicNamesField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 topicsField,
                 topicNamesField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, DeleteTopicsRequest message)
+        private static int WriteV03(byte[] buffer, int index, DeleteTopicsRequest message)
         {
-            buffer = Encoder.WriteArray<string>(buffer, message.TopicNamesField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            return buffer;
+            index = Encoder.WriteArray<string>(buffer, index, message.TopicNamesField, Encoder.WriteCompactString);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            return index;
         }
-        private static DeleteTopicsRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsRequest ReadV04(byte[] buffer, ref int index)
         {
             var topicsField = ImmutableArray<DeleteTopicState>.Empty;
-            var topicNamesField = Decoder.ReadCompactArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicNamesField = Decoder.ReadCompactArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 topicNamesField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, DeleteTopicsRequest message)
+        private static int WriteV04(byte[] buffer, int index, DeleteTopicsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<string>(buffer, message.TopicNamesField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<string>(buffer, index, message.TopicNamesField, Encoder.WriteCompactString);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static DeleteTopicsRequest ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsRequest ReadV05(byte[] buffer, ref int index)
         {
             var topicsField = ImmutableArray<DeleteTopicState>.Empty;
-            var topicNamesField = Decoder.ReadCompactArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicNamesField = Decoder.ReadCompactArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'TopicNames'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 topicNamesField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, DeleteTopicsRequest message)
+        private static int WriteV05(byte[] buffer, int index, DeleteTopicsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<string>(buffer, message.TopicNamesField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<string>(buffer, index, message.TopicNamesField, Encoder.WriteCompactString);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static DeleteTopicsRequest ReadV06(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsRequest ReadV06(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<DeleteTopicState>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteTopicStateSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadCompactArray<DeleteTopicState>(buffer, ref index, DeleteTopicStateSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             var topicNamesField = ImmutableArray<string>.Empty;
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 topicNamesField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV06(Memory<byte> buffer, DeleteTopicsRequest message)
+        private static int WriteV06(byte[] buffer, int index, DeleteTopicsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DeleteTopicState>(buffer, message.TopicsField, (b, i) => DeleteTopicStateSerde.WriteV06(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DeleteTopicState>(buffer, index, message.TopicsField, DeleteTopicStateSerde.WriteV06);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class DeleteTopicStateSerde
         {
-            public static DeleteTopicState ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static DeleteTopicState ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactNullableString(ref buffer);
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     topicIdField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, DeleteTopicState message)
+            public static int WriteV06(byte[] buffer, int index, DeleteTopicState message)
             {
-                buffer = Encoder.WriteCompactNullableString(buffer, message.NameField);
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactNullableString(buffer, index, message.NameField);
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using OngoingPartitionReassignment = Kafka.Client.Messages.ListPartitionReassignmentsResponse.OngoingTopicReassignment.OngoingPartitionReassignment;
 using OngoingTopicReassignment = Kafka.Client.Messages.ListPartitionReassignmentsResponse.OngoingTopicReassignment;
 
@@ -10,23 +9,24 @@ namespace Kafka.Client.Messages
     public static class ListPartitionReassignmentsResponseSerde
     {
         private static readonly DecodeDelegate<ListPartitionReassignmentsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<ListPartitionReassignmentsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static ListPartitionReassignmentsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ListPartitionReassignmentsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ListPartitionReassignmentsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ListPartitionReassignmentsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ListPartitionReassignmentsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ListPartitionReassignmentsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-            var topicsField = Decoder.ReadCompactArray<OngoingTopicReassignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => OngoingTopicReassignmentSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var topicsField = Decoder.ReadCompactArray<OngoingTopicReassignment>(buffer, ref index, OngoingTopicReassignmentSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -34,43 +34,43 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ListPartitionReassignmentsResponse message)
+        private static int WriteV00(byte[] buffer, int index, ListPartitionReassignmentsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteCompactArray<OngoingTopicReassignment>(buffer, message.TopicsField, (b, i) => OngoingTopicReassignmentSerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteCompactArray<OngoingTopicReassignment>(buffer, index, message.TopicsField, OngoingTopicReassignmentSerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class OngoingTopicReassignmentSerde
         {
-            public static OngoingTopicReassignment ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static OngoingTopicReassignment ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<OngoingPartitionReassignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => OngoingPartitionReassignmentSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<OngoingPartitionReassignment>(buffer, ref index, OngoingPartitionReassignmentSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, OngoingTopicReassignment message)
+            public static int WriteV00(byte[] buffer, int index, OngoingTopicReassignment message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteCompactArray<OngoingPartitionReassignment>(buffer, message.PartitionsField, (b, i) => OngoingPartitionReassignmentSerde.WriteV00(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<OngoingPartitionReassignment>(buffer, index, message.PartitionsField, OngoingPartitionReassignmentSerde.WriteV00);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class OngoingPartitionReassignmentSerde
             {
-                public static OngoingPartitionReassignment ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static OngoingPartitionReassignment ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var replicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                    var addingReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
-                    var removingReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var replicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                    var addingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
+                    var removingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
                         replicasField,
@@ -78,14 +78,14 @@ namespace Kafka.Client.Messages
                         removingReplicasField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, OngoingPartitionReassignment message)
+                public static int WriteV00(byte[] buffer, int index, OngoingPartitionReassignment message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteCompactArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                    buffer = Encoder.WriteCompactArray<int>(buffer, message.AddingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                    buffer = Encoder.WriteCompactArray<int>(buffer, message.RemovingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                    index = Encoder.WriteCompactArray<int>(buffer, index, message.AddingReplicasField, Encoder.WriteInt32);
+                    index = Encoder.WriteCompactArray<int>(buffer, index, message.RemovingReplicasField, Encoder.WriteInt32);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

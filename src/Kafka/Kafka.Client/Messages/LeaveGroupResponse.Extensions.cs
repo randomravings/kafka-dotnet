@@ -9,30 +9,31 @@ namespace Kafka.Client.Messages
     public static class LeaveGroupResponseSerde
     {
         private static readonly DecodeDelegate<LeaveGroupResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
         };
         private static readonly EncodeDelegate<LeaveGroupResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
         };
-        public static LeaveGroupResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static LeaveGroupResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, LeaveGroupResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static LeaveGroupResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, LeaveGroupResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static LeaveGroupResponse ReadV00(byte[] buffer, ref int index)
         {
             var throttleTimeMsField = default(int);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var membersField = ImmutableArray<MemberResponse>.Empty;
             return new(
                 throttleTimeMsField,
@@ -40,15 +41,15 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, LeaveGroupResponse message)
+        private static int WriteV00(byte[] buffer, int index, LeaveGroupResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            return index;
         }
-        private static LeaveGroupResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static LeaveGroupResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var membersField = ImmutableArray<MemberResponse>.Empty;
             return new(
                 throttleTimeMsField,
@@ -56,16 +57,16 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, LeaveGroupResponse message)
+        private static int WriteV01(byte[] buffer, int index, LeaveGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            return index;
         }
-        private static LeaveGroupResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static LeaveGroupResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var membersField = ImmutableArray<MemberResponse>.Empty;
             return new(
                 throttleTimeMsField,
@@ -73,129 +74,129 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, LeaveGroupResponse message)
+        private static int WriteV02(byte[] buffer, int index, LeaveGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            return index;
         }
-        private static LeaveGroupResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static LeaveGroupResponse ReadV03(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var membersField = Decoder.ReadArray<MemberResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => MemberResponseSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var membersField = Decoder.ReadArray<MemberResponse>(buffer, ref index, MemberResponseSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Members'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 membersField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, LeaveGroupResponse message)
+        private static int WriteV03(byte[] buffer, int index, LeaveGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<MemberResponse>(buffer, message.MembersField, (b, i) => MemberResponseSerde.WriteV03(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<MemberResponse>(buffer, index, message.MembersField, MemberResponseSerde.WriteV03);
+            return index;
         }
-        private static LeaveGroupResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static LeaveGroupResponse ReadV04(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var membersField = Decoder.ReadCompactArray<MemberResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => MemberResponseSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var membersField = Decoder.ReadCompactArray<MemberResponse>(buffer, ref index, MemberResponseSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 membersField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, LeaveGroupResponse message)
+        private static int WriteV04(byte[] buffer, int index, LeaveGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<MemberResponse>(buffer, message.MembersField, (b, i) => MemberResponseSerde.WriteV04(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<MemberResponse>(buffer, index, message.MembersField, MemberResponseSerde.WriteV04);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static LeaveGroupResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static LeaveGroupResponse ReadV05(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var membersField = Decoder.ReadCompactArray<MemberResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => MemberResponseSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var membersField = Decoder.ReadCompactArray<MemberResponse>(buffer, ref index, MemberResponseSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 membersField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, LeaveGroupResponse message)
+        private static int WriteV05(byte[] buffer, int index, LeaveGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<MemberResponse>(buffer, message.MembersField, (b, i) => MemberResponseSerde.WriteV05(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<MemberResponse>(buffer, index, message.MembersField, MemberResponseSerde.WriteV05);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class MemberResponseSerde
         {
-            public static MemberResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static MemberResponse ReadV03(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
-                var groupInstanceIdField = Decoder.ReadNullableString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
+                var groupInstanceIdField = Decoder.ReadNullableString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, MemberResponse message)
+            public static int WriteV03(byte[] buffer, int index, MemberResponse message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteNullableString(buffer, message.GroupInstanceIdField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteNullableString(buffer, index, message.GroupInstanceIdField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static MemberResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static MemberResponse ReadV04(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(ref buffer);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, MemberResponse message)
+            public static int WriteV04(byte[] buffer, int index, MemberResponse message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static MemberResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static MemberResponse ReadV05(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(ref buffer);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, MemberResponse message)
+            public static int WriteV05(byte[] buffer, int index, MemberResponse message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

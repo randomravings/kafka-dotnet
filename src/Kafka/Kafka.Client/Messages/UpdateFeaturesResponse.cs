@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
             default(string?),
             ImmutableArray<UpdatableFeatureResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="FeatureField">The name of the finalized feature.</param>
         /// <param name="ErrorCodeField">The feature update error code or `0` if the feature update succeeded.</param>

@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<Voter>.Empty,
             ImmutableArray<Voter>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="VoterIdField"></param>
         /// </summary>

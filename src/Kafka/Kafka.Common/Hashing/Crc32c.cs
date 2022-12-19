@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+﻿using Kafka.Common.Types;
 
 namespace Kafka.Common.Hashing
 {
@@ -76,50 +76,12 @@ namespace Kafka.Common.Hashing
         };
 
         /// <summary>
-        /// Update CRC from array without a prior value.
-        /// </summary>
-        /// <param name="bytes">Byte Array to compute from.</param>
-        /// <returns></returns>
-        public static uint Update(byte[] bytes) =>
-            Update(bytes.AsSpan())
-        ;
-
-        /// <summary>
-        /// Update CRC from array without a prior value.
-        /// </summary>
-        /// <param name="bytes">Byte Array to compute from.</param>
-        /// <returns></returns>
-        public static uint Update(ImmutableArray<byte> bytes) =>
-            Update(bytes.AsSpan())
-        ;
-
-        /// <summary>
-        /// Update CRC from span without a prior value.
+        /// Update CRC from span with a prior value.
         /// </summary>
         /// <param name="bytes">Span to compute from.</param>
         /// <returns></returns>
-        public static uint Update(ReadOnlySpan<byte> bytes) =>
-            Update(0U, bytes)
-        ;
-
-        /// <summary>
-        /// Update CRC from array with a prior value.
-        /// </summary>
-        /// <param name="crc">Prior value.</param>
-        /// <param name="bytes">Byte Array to compute from.</param>
-        /// <returns></returns>
-        public static uint Update(uint crc, byte[] bytes) =>
-            Update(crc, bytes.AsSpan())
-        ;
-
-        /// <summary>
-        /// Update CRC from array with a prior value.
-        /// </summary>
-        /// <param name="crc">Prior value.</param>
-        /// <param name="bytes">Byte Array to compute from.</param>
-        /// <returns></returns>
-        public static uint Update(uint crc, ImmutableArray<byte> bytes) =>
-            Update(crc, bytes.AsSpan())
+        public static uint Update(byte[] bytes) =>
+            Update(0, bytes, 0, bytes.Length)
         ;
 
         /// <summary>
@@ -128,11 +90,34 @@ namespace Kafka.Common.Hashing
         /// <param name="crc">Prior value.</param>
         /// <param name="bytes">Span to compute from.</param>
         /// <returns></returns>
-        public static uint Update(uint crc, ReadOnlySpan<byte> bytes)
+        public static uint Update(uint crc, byte[] bytes) =>
+            Update(crc, bytes, 0, bytes.Length)
+        ;
+
+        /// <summary>
+        /// Update CRC from span with a prior value.
+        /// </summary>
+        /// <param name="bytes">Span to compute from.</param>
+        /// <param name="index"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static uint Update(byte[] bytes, int index, int length) =>
+            Update(0U, bytes, index, length)
+        ;
+
+        /// <summary>
+        /// Update CRC from span with a prior value.
+        /// </summary>
+        /// <param name="crc">Prior value.</param>
+        /// <param name="bytes">Span to compute from.</param>
+        /// <param name="index"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static uint Update(uint crc, byte[] bytes, int index, int length)
         {
-            var len = bytes.Length;
             var c = crc ^ 0xffffffffU;
-            for (int n = 0; n < len; n++)
+            var l = index + length;
+            for (int n = index; n < l; n++)
                 c = CRC_TABLE[(c ^ bytes[n]) & 0xff] ^ (c >> 8);
             return c ^ 0xffffffffU;
         }

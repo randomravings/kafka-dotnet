@@ -23,6 +23,7 @@ namespace Kafka.Client.Messages
             default(long),
             ImmutableArray<TopicData>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="TopicNameField">The name of the topic to alter ISRs for</param>
         /// <param name="TopicIdField">The ID of the topic to alter ISRs for</param>

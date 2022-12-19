@@ -34,6 +34,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<DescribeClusterBroker>.Empty,
             default(int)
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="BrokerIdField">The broker ID.</param>
         /// <param name="HostField">The broker hostname.</param>

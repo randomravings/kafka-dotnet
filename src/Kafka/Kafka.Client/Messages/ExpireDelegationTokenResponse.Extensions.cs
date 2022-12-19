@@ -7,75 +7,76 @@ namespace Kafka.Client.Messages
     public static class ExpireDelegationTokenResponseSerde
     {
         private static readonly DecodeDelegate<ExpireDelegationTokenResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
         };
         private static readonly EncodeDelegate<ExpireDelegationTokenResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
         };
-        public static ExpireDelegationTokenResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ExpireDelegationTokenResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ExpireDelegationTokenResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ExpireDelegationTokenResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ExpireDelegationTokenResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ExpireDelegationTokenResponse ReadV00(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var expiryTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var expiryTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 expiryTimestampMsField,
                 throttleTimeMsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ExpireDelegationTokenResponse message)
+        private static int WriteV00(byte[] buffer, int index, ExpireDelegationTokenResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampMsField);
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt64(buffer, index, message.ExpiryTimestampMsField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            return index;
         }
-        private static ExpireDelegationTokenResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static ExpireDelegationTokenResponse ReadV01(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var expiryTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var expiryTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 expiryTimestampMsField,
                 throttleTimeMsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, ExpireDelegationTokenResponse message)
+        private static int WriteV01(byte[] buffer, int index, ExpireDelegationTokenResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampMsField);
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt64(buffer, index, message.ExpiryTimestampMsField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            return index;
         }
-        private static ExpireDelegationTokenResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static ExpireDelegationTokenResponse ReadV02(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var expiryTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var expiryTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 expiryTimestampMsField,
                 throttleTimeMsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, ExpireDelegationTokenResponse message)
+        private static int WriteV02(byte[] buffer, int index, ExpireDelegationTokenResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampMsField);
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt64(buffer, index, message.ExpiryTimestampMsField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

@@ -1,15 +1,16 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
 using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
-using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
+using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
 using StopReplicaTopicState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState;
+using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 
 namespace Kafka.Client.Messages
 {
     /// <summary>
     /// <param name="ControllerIdField">The controller id.</param>
+    /// <param name="KRaftControllerIdField">The KRaft controller id, used during migration. See KIP-866</param>
     /// <param name="ControllerEpochField">The controller epoch.</param>
     /// <param name="BrokerEpochField">The broker epoch.</param>
     /// <param name="DeletePartitionsField">Whether these partitions should be deleted.</param>
@@ -20,6 +21,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record StopReplicaRequest (
         int ControllerIdField,
+        int KRaftControllerIdField,
         int ControllerEpochField,
         long BrokerEpochField,
         bool DeletePartitionsField,
@@ -31,12 +33,14 @@ namespace Kafka.Client.Messages
         public static StopReplicaRequest Empty { get; } = new(
             default(int),
             default(int),
+            default(int),
             default(long),
             default(bool),
             ImmutableArray<StopReplicaPartitionV0>.Empty,
             ImmutableArray<StopReplicaTopicV1>.Empty,
             ImmutableArray<StopReplicaTopicState>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionIndexField">The partition index.</param>
@@ -49,20 +53,6 @@ namespace Kafka.Client.Messages
             public static StopReplicaPartitionV0 Empty { get; } = new(
                 "",
                 default(int)
-            );
-        };
-        /// <summary>
-        /// <param name="NameField">The topic name.</param>
-        /// <param name="PartitionIndexesField">The partition indexes.</param>
-        /// </summary>
-        public sealed record StopReplicaTopicV1 (
-            string NameField,
-            ImmutableArray<int> PartitionIndexesField
-        )
-        {
-            public static StopReplicaTopicV1 Empty { get; } = new(
-                "",
-                ImmutableArray<int>.Empty
             );
         };
         /// <summary>
@@ -95,6 +85,20 @@ namespace Kafka.Client.Messages
                     default(bool)
                 );
             };
+        };
+        /// <summary>
+        /// <param name="NameField">The topic name.</param>
+        /// <param name="PartitionIndexesField">The partition indexes.</param>
+        /// </summary>
+        public sealed record StopReplicaTopicV1 (
+            string NameField,
+            ImmutableArray<int> PartitionIndexesField
+        )
+        {
+            public static StopReplicaTopicV1 Empty { get; } = new(
+                "",
+                ImmutableArray<int>.Empty
+            );
         };
     };
 }

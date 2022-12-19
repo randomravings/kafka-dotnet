@@ -22,6 +22,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<FeatureUpdateKey>.Empty,
             default(bool)
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="FeatureField">The name of the finalized feature to be updated.</param>
         /// <param name="MaxVersionLevelField">The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature.</param>

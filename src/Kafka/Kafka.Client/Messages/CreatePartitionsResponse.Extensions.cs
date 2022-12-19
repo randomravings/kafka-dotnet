@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using CreatePartitionsTopicResult = Kafka.Client.Messages.CreatePartitionsResponse.CreatePartitionsTopicResult;
 
 namespace Kafka.Client.Messages
@@ -9,163 +8,164 @@ namespace Kafka.Client.Messages
     public static class CreatePartitionsResponseSerde
     {
         private static readonly DecodeDelegate<CreatePartitionsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<CreatePartitionsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static CreatePartitionsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static CreatePartitionsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, CreatePartitionsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static CreatePartitionsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, CreatePartitionsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static CreatePartitionsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadArray<CreatePartitionsTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsTopicResultSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadArray<CreatePartitionsTopicResult>(buffer, ref index, CreatePartitionsTopicResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Results'");
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, CreatePartitionsResponse message)
+        private static int WriteV00(byte[] buffer, int index, CreatePartitionsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<CreatePartitionsTopicResult>(buffer, message.ResultsField, (b, i) => CreatePartitionsTopicResultSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<CreatePartitionsTopicResult>(buffer, index, message.ResultsField, CreatePartitionsTopicResultSerde.WriteV00);
+            return index;
         }
-        private static CreatePartitionsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static CreatePartitionsResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadArray<CreatePartitionsTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsTopicResultSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadArray<CreatePartitionsTopicResult>(buffer, ref index, CreatePartitionsTopicResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Results'");
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, CreatePartitionsResponse message)
+        private static int WriteV01(byte[] buffer, int index, CreatePartitionsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<CreatePartitionsTopicResult>(buffer, message.ResultsField, (b, i) => CreatePartitionsTopicResultSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<CreatePartitionsTopicResult>(buffer, index, message.ResultsField, CreatePartitionsTopicResultSerde.WriteV01);
+            return index;
         }
-        private static CreatePartitionsResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static CreatePartitionsResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadCompactArray<CreatePartitionsTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsTopicResultSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadCompactArray<CreatePartitionsTopicResult>(buffer, ref index, CreatePartitionsTopicResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, CreatePartitionsResponse message)
+        private static int WriteV02(byte[] buffer, int index, CreatePartitionsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<CreatePartitionsTopicResult>(buffer, message.ResultsField, (b, i) => CreatePartitionsTopicResultSerde.WriteV02(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<CreatePartitionsTopicResult>(buffer, index, message.ResultsField, CreatePartitionsTopicResultSerde.WriteV02);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static CreatePartitionsResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static CreatePartitionsResponse ReadV03(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadCompactArray<CreatePartitionsTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsTopicResultSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadCompactArray<CreatePartitionsTopicResult>(buffer, ref index, CreatePartitionsTopicResultSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, CreatePartitionsResponse message)
+        private static int WriteV03(byte[] buffer, int index, CreatePartitionsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<CreatePartitionsTopicResult>(buffer, message.ResultsField, (b, i) => CreatePartitionsTopicResultSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<CreatePartitionsTopicResult>(buffer, index, message.ResultsField, CreatePartitionsTopicResultSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class CreatePartitionsTopicResultSerde
         {
-            public static CreatePartitionsTopicResult ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static CreatePartitionsTopicResult ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadNullableString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
                     nameField,
                     errorCodeField,
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, CreatePartitionsTopicResult message)
+            public static int WriteV00(byte[] buffer, int index, CreatePartitionsTopicResult message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteNullableString(buffer, message.ErrorMessageField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteNullableString(buffer, index, message.ErrorMessageField);
+                return index;
             }
-            public static CreatePartitionsTopicResult ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static CreatePartitionsTopicResult ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadNullableString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
                     nameField,
                     errorCodeField,
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, CreatePartitionsTopicResult message)
+            public static int WriteV01(byte[] buffer, int index, CreatePartitionsTopicResult message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteNullableString(buffer, message.ErrorMessageField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteNullableString(buffer, index, message.ErrorMessageField);
+                return index;
             }
-            public static CreatePartitionsTopicResult ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static CreatePartitionsTopicResult ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     errorCodeField,
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, CreatePartitionsTopicResult message)
+            public static int WriteV02(byte[] buffer, int index, CreatePartitionsTopicResult message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static CreatePartitionsTopicResult ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static CreatePartitionsTopicResult ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     errorCodeField,
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, CreatePartitionsTopicResult message)
+            public static int WriteV03(byte[] buffer, int index, CreatePartitionsTopicResult message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

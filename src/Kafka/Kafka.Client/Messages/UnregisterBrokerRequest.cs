@@ -14,5 +14,6 @@ namespace Kafka.Client.Messages
         public static UnregisterBrokerRequest Empty { get; } = new(
             default(int)
         );
+        public static short FlexibleVersion { get; } = 0;
     };
 }

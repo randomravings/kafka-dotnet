@@ -16,6 +16,7 @@ namespace Kafka.Client.Messages
         public static DescribeProducersRequest Empty { get; } = new(
             ImmutableArray<TopicRequest>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionIndexesField">The indexes of the partitions to list producers for.</param>

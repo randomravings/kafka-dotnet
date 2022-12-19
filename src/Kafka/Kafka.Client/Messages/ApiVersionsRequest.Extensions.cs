@@ -7,23 +7,24 @@ namespace Kafka.Client.Messages
     public static class ApiVersionsRequestSerde
     {
         private static readonly DecodeDelegate<ApiVersionsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<ApiVersionsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static ApiVersionsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ApiVersionsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ApiVersionsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ApiVersionsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ApiVersionsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ApiVersionsRequest ReadV00(byte[] buffer, ref int index)
         {
             var clientSoftwareNameField = "";
             var clientSoftwareVersionField = "";
@@ -32,11 +33,11 @@ namespace Kafka.Client.Messages
                 clientSoftwareVersionField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ApiVersionsRequest message)
+        private static int WriteV00(byte[] buffer, int index, ApiVersionsRequest message)
         {
-            return buffer;
+            return index;
         }
-        private static ApiVersionsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static ApiVersionsRequest ReadV01(byte[] buffer, ref int index)
         {
             var clientSoftwareNameField = "";
             var clientSoftwareVersionField = "";
@@ -45,11 +46,11 @@ namespace Kafka.Client.Messages
                 clientSoftwareVersionField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, ApiVersionsRequest message)
+        private static int WriteV01(byte[] buffer, int index, ApiVersionsRequest message)
         {
-            return buffer;
+            return index;
         }
-        private static ApiVersionsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static ApiVersionsRequest ReadV02(byte[] buffer, ref int index)
         {
             var clientSoftwareNameField = "";
             var clientSoftwareVersionField = "";
@@ -58,26 +59,26 @@ namespace Kafka.Client.Messages
                 clientSoftwareVersionField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, ApiVersionsRequest message)
+        private static int WriteV02(byte[] buffer, int index, ApiVersionsRequest message)
         {
-            return buffer;
+            return index;
         }
-        private static ApiVersionsRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static ApiVersionsRequest ReadV03(byte[] buffer, ref int index)
         {
-            var clientSoftwareNameField = Decoder.ReadCompactString(ref buffer);
-            var clientSoftwareVersionField = Decoder.ReadCompactString(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var clientSoftwareNameField = Decoder.ReadCompactString(buffer, ref index);
+            var clientSoftwareVersionField = Decoder.ReadCompactString(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 clientSoftwareNameField,
                 clientSoftwareVersionField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, ApiVersionsRequest message)
+        private static int WriteV03(byte[] buffer, int index, ApiVersionsRequest message)
         {
-            buffer = Encoder.WriteCompactString(buffer, message.ClientSoftwareNameField);
-            buffer = Encoder.WriteCompactString(buffer, message.ClientSoftwareVersionField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactString(buffer, index, message.ClientSoftwareNameField);
+            index = Encoder.WriteCompactString(buffer, index, message.ClientSoftwareVersionField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

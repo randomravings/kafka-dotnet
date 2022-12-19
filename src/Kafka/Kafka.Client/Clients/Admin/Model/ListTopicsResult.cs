@@ -4,11 +4,11 @@ using System.Collections.Immutable;
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record ListTopicsResult(
-        ImmutableSortedSet<TopicListing> Topics
+        ImmutableArray<Topic> Topics
     )
     {
         public static ListTopicsResult Empty { get; } = new(
-            ImmutableSortedSet<TopicListing>.Empty
+            ImmutableArray<Topic>.Empty
         );
     };
 }

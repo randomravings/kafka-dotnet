@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using LeaderAndIsrTopicError = Kafka.Client.Messages.LeaderAndIsrResponse.LeaderAndIsrTopicError;
 using LeaderAndIsrPartitionError = Kafka.Client.Messages.LeaderAndIsrResponse.LeaderAndIsrPartitionError;
+using LeaderAndIsrTopicError = Kafka.Client.Messages.LeaderAndIsrResponse.LeaderAndIsrTopicError;
 
 namespace Kafka.Client.Messages
 {
@@ -23,20 +23,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<LeaderAndIsrPartitionError>.Empty,
             ImmutableArray<LeaderAndIsrTopicError>.Empty
         );
-        /// <summary>
-        /// <param name="TopicIdField">The unique topic ID</param>
-        /// <param name="PartitionErrorsField">Each partition.</param>
-        /// </summary>
-        public sealed record LeaderAndIsrTopicError (
-            Guid TopicIdField,
-            ImmutableArray<LeaderAndIsrPartitionError> PartitionErrorsField
-        )
-        {
-            public static LeaderAndIsrTopicError Empty { get; } = new(
-                default(Guid),
-                ImmutableArray<LeaderAndIsrPartitionError>.Empty
-            );
-        };
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionIndexField">The partition index.</param>
@@ -52,6 +39,20 @@ namespace Kafka.Client.Messages
                 "",
                 default(int),
                 default(short)
+            );
+        };
+        /// <summary>
+        /// <param name="TopicIdField">The unique topic ID</param>
+        /// <param name="PartitionErrorsField">Each partition.</param>
+        /// </summary>
+        public sealed record LeaderAndIsrTopicError (
+            Guid TopicIdField,
+            ImmutableArray<LeaderAndIsrPartitionError> PartitionErrorsField
+        )
+        {
+            public static LeaderAndIsrTopicError Empty { get; } = new(
+                default(Guid),
+                ImmutableArray<LeaderAndIsrPartitionError>.Empty
             );
         };
     };

@@ -40,6 +40,7 @@ namespace Kafka.Client.Messages
             "",
             ImmutableArray<JoinGroupResponseMember>.Empty
         );
+        public static short FlexibleVersion { get; } = 6;
         /// <summary>
         /// <param name="MemberIdField">The group member ID.</param>
         /// <param name="GroupInstanceIdField">The unique identifier of the consumer instance provided by end user.</param>
@@ -48,13 +49,13 @@ namespace Kafka.Client.Messages
         public sealed record JoinGroupResponseMember (
             string MemberIdField,
             string? GroupInstanceIdField,
-            ImmutableArray<byte> MetadataField
+            ReadOnlyMemory<byte> MetadataField
         )
         {
             public static JoinGroupResponseMember Empty { get; } = new(
                 "",
                 default(string?),
-                ImmutableArray<byte>.Empty
+                Array.Empty<byte>()
             );
         };
     };

@@ -7,23 +7,24 @@ namespace Kafka.Client.Messages
     public static class AllocateProducerIdsResponseSerde
     {
         private static readonly DecodeDelegate<AllocateProducerIdsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<AllocateProducerIdsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static AllocateProducerIdsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static AllocateProducerIdsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, AllocateProducerIdsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static AllocateProducerIdsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, AllocateProducerIdsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static AllocateProducerIdsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var producerIdStartField = Decoder.ReadInt64(ref buffer);
-            var producerIdLenField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var producerIdStartField = Decoder.ReadInt64(buffer, ref index);
+            var producerIdLenField = Decoder.ReadInt32(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -31,14 +32,14 @@ namespace Kafka.Client.Messages
                 producerIdLenField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, AllocateProducerIdsResponse message)
+        private static int WriteV00(byte[] buffer, int index, AllocateProducerIdsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdStartField);
-            buffer = Encoder.WriteInt32(buffer, message.ProducerIdLenField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdStartField);
+            index = Encoder.WriteInt32(buffer, index, message.ProducerIdLenField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

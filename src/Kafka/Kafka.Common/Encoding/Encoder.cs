@@ -1,4 +1,6 @@
-﻿using Kafka.Common.Records;
+﻿using Kafka.Common.Hashing;
+using Kafka.Common.Records;
+using System;
 using System.Collections.Immutable;
 using System.Numerics;
 
@@ -6,263 +8,311 @@ namespace Kafka.Common.Encoding
 {
     public static class Encoder
     {
-        public static Memory<byte> WriteBoolean(Memory<byte> buffer, bool value)
+        public static int WriteBoolean(byte[] buffer, int index, bool value)
         {
-            buffer.Span[0] = ((byte)(value ? 1 : 0));
-            return buffer[1..];
+            buffer[index++] = ((byte)(value ? 1 : 0));
+            return index;
         }
 
-        public static Memory<byte> WriteInt8(Memory<byte> buffer, sbyte value)
+        public static int WriteInt8(byte[] buffer, int index, sbyte value)
         {
-            buffer.Span[0] = (byte)value;
-            return buffer[1..];
+            buffer[index++] = (byte)value;
+            return index;
         }
 
-        public static Memory<byte> WriteInt16(Memory<byte> buffer, short value) =>
-            WriteUInt16(buffer, (ushort)value)
+        public static int WriteInt16(byte[] buffer, int index, short value) =>
+            WriteUInt16(buffer, index, (ushort)value)
         ;
 
-        public static Memory<byte> WriteUInt16(Memory<byte> buffer, ushort value)
+        public static int WriteUInt16(byte[] buffer, int index, ushort value)
         {
-            buffer.Span[0] = (byte)((value >> 8) & 0xff);
-            buffer.Span[1] = (byte)((value >> 0) & 0xff);
-            return buffer[2..];
+            buffer[index++] = (byte)((value >> 8) & 0xff);
+            buffer[index++] = (byte)((value >> 0) & 0xff);
+            return index;
         }
 
-        public static Memory<byte> WriteInt32(Memory<byte> buffer, int value) =>
-            WriteUInt32(buffer, (uint)value)
+        public static int WriteInt32(byte[] buffer, int index, int value) =>
+            WriteUInt32(buffer, index, (uint)value)
         ;
 
-        public static Memory<byte> WriteUInt32(Memory<byte> buffer, uint value)
+        public static int WriteUInt32(byte[] buffer, int index, uint value)
         {
-            buffer.Span[0] = (byte)((value >> 24) & 0xff);
-            buffer.Span[1] = (byte)((value >> 16) & 0xff);
-            buffer.Span[2] = (byte)((value >> 8) & 0xff);
-            buffer.Span[3] = (byte)((value >> 0) & 0xff);
-            return buffer[4..];
+            buffer[index++] = (byte)((value >> 24) & 0xff);
+            buffer[index++] = (byte)((value >> 16) & 0xff);
+            buffer[index++] = (byte)((value >> 8) & 0xff);
+            buffer[index++] = (byte)((value >> 0) & 0xff);
+            return index;
         }
 
-        public static Memory<byte> WriteInt64(Memory<byte> buffer, long value) =>
-            WriteUInt64(buffer, (ulong)value)
+        public static int WriteInt64(byte[] buffer, int index, long value) =>
+            WriteUInt64(buffer, index, (ulong)value)
         ;
 
-        public static Memory<byte> WriteUInt64(Memory<byte> buffer, ulong value)
+        public static int WriteUInt64(byte[] buffer, int index, ulong value)
         {
-            buffer.Span[0] = (byte)((value >> 56) & 0xff);
-            buffer.Span[1] = (byte)((value >> 48) & 0xff);
-            buffer.Span[2] = (byte)((value >> 40) & 0xff);
-            buffer.Span[3] = (byte)((value >> 32) & 0xff);
-            buffer.Span[4] = (byte)((value >> 24) & 0xff);
-            buffer.Span[5] = (byte)((value >> 16) & 0xff);
-            buffer.Span[6] = (byte)((value >> 8) & 0xff);
-            buffer.Span[7] = (byte)((value >> 0) & 0xff);
-            return buffer[8..];
+            buffer[index++] = (byte)((value >> 56) & 0xff);
+            buffer[index++] = (byte)((value >> 48) & 0xff);
+            buffer[index++] = (byte)((value >> 40) & 0xff);
+            buffer[index++] = (byte)((value >> 32) & 0xff);
+            buffer[index++] = (byte)((value >> 24) & 0xff);
+            buffer[index++] = (byte)((value >> 16) & 0xff);
+            buffer[index++] = (byte)((value >> 8) & 0xff);
+            buffer[index++] = (byte)((value >> 0) & 0xff);
+            return index;
         }
 
-        public static Memory<byte> WriteVarInt16(Memory<byte> buffer, short value) =>
-            WriteVarUInt64(buffer, (ushort)((value << 1) ^ (value >> 15)))
+        public static int WriteVarInt16(byte[] buffer, int index, short value) =>
+            WriteVarUInt64(buffer, index, (ushort)((value << 1) ^ (value >> 15)))
         ;
 
-        public static Memory<byte> WriteVarUInt16(Memory<byte> buffer, ushort value) =>
-            WriteVarUInt64(buffer, value)
+        public static int WriteVarUInt16(byte[] buffer, int index, ushort value) =>
+            WriteVarUInt64(buffer, index, value)
         ;
 
-        public static Memory<byte> WriteVarInt32(Memory<byte> buffer, int value) =>
-            WriteVarUInt64(buffer, (uint)((value << 1) ^ (value >> 31)))
+        public static int WriteVarInt32(byte[] buffer, int index, int value) =>
+            WriteVarUInt64(buffer, index, (uint)((value << 1) ^ (value >> 31)))
         ;
 
-        public static Memory<byte> WriteVarUInt32(Memory<byte> buffer, uint value) =>
-            WriteVarUInt64(buffer, value)
+        public static int WriteVarUInt32(byte[] buffer, int index, uint value) =>
+            WriteVarUInt64(buffer, index, value)
         ;
 
-        public static Memory<byte> WriteVarInt64(Memory<byte> buffer, long value) =>
-            WriteVarUInt64(buffer, (ulong)((value << 1) ^ (value >> 63)))
+        public static int WriteVarInt64(byte[] buffer, int index, long value) =>
+            WriteVarUInt64(buffer, index, (ulong)((value << 1) ^ (value >> 63)))
         ;
 
-        public static Memory<byte> WriteVarUInt64(Memory<byte> buffer, ulong value)
+        public static int WriteVarUInt64(byte[] buffer, int index, ulong value)
         {
             var v = value;
             while ((v & 0xffffffffffffff80UL) != 0UL)
             {
-                buffer.Span[0] = (byte)((v & 0x7fUL) | 0x80UL);
-                buffer = buffer[1..];
+                buffer[index++] = (byte)((v & 0x7fUL) | 0x80UL);
                 v >>= 7;
             }
-            buffer.Span[0] = (byte)v;
-            return buffer[1..];
+            buffer[index++] = (byte)v;
+            return index;
         }
 
-        public static Memory<byte> WriteUuid(Memory<byte> buffer, Guid value)
+        public static int WriteUuid(byte[] buffer, int index, Guid value)
         {
             var bytes = value.ToByteArray();
-            bytes.CopyTo(buffer);
-            return buffer[bytes.Length..];
+            bytes.CopyTo(buffer, index);
+            return index + bytes.Length;
         }
 
-        public static Memory<byte> WriteFloat64(Memory<byte> buffer, double value)
+        public static int WriteFloat64(byte[] buffer, int index, double value)
         {
             var bits = BitConverter.DoubleToInt64Bits(value);
-            return WriteInt64(buffer, bits);
+            return WriteInt64(buffer, index, bits);
         }
 
-        public static Memory<byte> WriteString(Memory<byte> buffer, string value)
+        public static int WriteString(byte[] buffer, int index, string value)
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes(value);
-            buffer = WriteInt16(buffer, (short)bytes.Length);
-            bytes.CopyTo(buffer);
-            return buffer[bytes.Length..];
+            index = WriteInt16(buffer, index, (short)bytes.Length);
+            bytes.CopyTo(buffer, index);
+            return index + bytes.Length;
         }
 
-        public static Memory<byte> WriteCompactString(Memory<byte> buffer, string value)
+        public static int WriteCompactString(byte[] buffer, int index, string value)
         {
             var bytes = System.Text.Encoding.UTF8.GetBytes(value);
-            buffer = WriteVarUInt32(buffer, (uint)bytes.Length + 1);
-            bytes.CopyTo(buffer);
-            return buffer[bytes.Length..];
+            index = WriteVarUInt32(buffer, index, (uint)(bytes.Length + 1));
+            bytes.CopyTo(buffer, index);
+            return index + bytes.Length;
         }
 
-        public static Memory<byte> WriteNullableString(Memory<byte> buffer, string? value) =>
+        public static int WriteNullableString(byte[] buffer, int index, string? value) =>
             value switch
             {
-                null => WriteInt16(buffer, -1),
-                var v => WriteString(buffer, v)
+                null => WriteInt16(buffer, index, -1),
+                var v => WriteString(buffer, index, v)
             }
         ;
 
-        public static Memory<byte> WriteCompactNullableString(Memory<byte> buffer, string? value) =>
+        public static int WriteCompactNullableString(byte[] buffer, int index, string? value) =>
             value switch
             {
-                null => WriteVarUInt32(buffer, 0),
-                var v => WriteCompactString(buffer, v)
+                null => WriteVarUInt32(buffer, index, 0),
+                var v => WriteCompactString(buffer, index, v)
             }
         ;
 
-        public static Memory<byte> WriteBytes(Memory<byte> buffer, ImmutableArray<byte> value)
+        public static int WriteBytes(byte[] buffer, int index, ReadOnlyMemory<byte> value)
         {
-            buffer = WriteInt32(buffer, value.Length);
-            value.AsSpan().CopyTo(buffer.Span);
-            return buffer[value.Length..];
+            index = WriteInt32(buffer, index, value.Length);
+            foreach (var b in value.Span)
+                buffer[index++] = b;
+            return index;
         }
 
-        public static Memory<byte> WriteCompactBytes(Memory<byte> buffer, ImmutableArray<byte> value)
+        public static int WriteCompactBytes(byte[] buffer, int index, ReadOnlyMemory<byte> value)
         {
-            buffer = WriteVarUInt32(buffer, (uint)value.Length + 1);
-            value.AsSpan().CopyTo(buffer.Span);
-            return buffer[value.Length..];
+            index = WriteVarUInt32(buffer, index, (uint)(value.Length + 1));
+            foreach (var b in value.Span)
+                buffer[index++] = b;
+            return index;
         }
 
-        public static Memory<byte> WriteNullableBytes(Memory<byte> buffer, ImmutableArray<byte>? value) =>
+        public static int WriteNullableBytes(byte[] buffer, int index, ReadOnlyMemory<byte>? value) =>
             value switch
             {
-                null => WriteInt32(buffer, -1),
-                var v => WriteBytes(buffer, v.Value)
+                null => WriteInt32(buffer, index, -1),
+                var v => WriteBytes(buffer, index, v.Value)
             }
         ;
 
-        public static Memory<byte> WriteCompactNullableBytes(Memory<byte> buffer, ImmutableArray<byte>? value) =>
+        public static int WriteCompactNullableBytes(byte[] buffer, int index, ReadOnlyMemory<byte>? value) =>
             value switch
             {
-                null => WriteVarUInt32(buffer, 0),
-                var v => WriteCompactBytes(buffer, v.Value)
+                null => WriteVarUInt32(buffer, index, 0),
+                var v => WriteCompactBytes(buffer, index, v.Value)
             }
         ;
 
-        public static Memory<byte> WriteMessageSet(Memory<byte> buffer, IRecords? records)
+        public static int WriteMessageSet(byte[] buffer, int index, IRecords? records)
         {
             if (records == null)
-                return WriteInt32(buffer, -1);
+                return WriteInt32(buffer, index, -1);
             foreach (var record in records)
-                buffer = WriteMessage(buffer, record);
-            return buffer;
+                index = WriteMessage(buffer, index, record);
+            return index;
         }
 
-        private static Memory<byte> WriteMessage(Memory<byte> buffer, IRecord record)
+        private static int WriteMessage(byte[] buffer, int index, IRecord record)
         {
-            buffer = WriteInt64(buffer, record.Offset);
-            buffer = WriteInt32(buffer, record.SizeInBytes);
-            buffer = WriteInt32(buffer, record.Crc);
-            buffer = WriteInt8(buffer, record.Magic);
-            buffer = WriteInt16(buffer, (short)record.Attributes);
+            index = WriteInt64(buffer, index, record.Offset);
+            index = WriteInt32(buffer, index, record.SizeInBytes);
+            index = WriteInt32(buffer, index, record.Crc);
+            index = WriteInt8(buffer, index, record.Magic);
+            index = WriteInt16(buffer, index, (short)record.Attributes);
             if (record.Magic == 1)
-                buffer = WriteInt64(buffer, record.Timestamp);
-            buffer = WriteNullableBytes(buffer, record.Key);
-            buffer = WriteNullableBytes(buffer, record.Value);
-            return buffer;
+                index = WriteInt64(buffer, index, record.Timestamp);
+            index = WriteNullableBytes(buffer, index, record.Key);
+            index = WriteNullableBytes(buffer, index, record.Value);
+            return index;
         }
 
-        public static Memory<byte> WriteRecords(Memory<byte> buffer, IRecords? records) =>
-            records switch
-            {
-                null => WriteInt32(buffer, -1),
-                var v => WriteRecordsInternal(buffer, v)
-            }
-        ;
-
-        public static Memory<byte> WriteCompactRecords(Memory<byte> buffer, IRecords? records) =>
-            records switch
-            {
-                null => WriteVarUInt32(buffer, 0),
-                var v => WriteRecordsInternal(buffer, v),
-            }
-        ;
-
-        private static Memory<byte> WriteRecordsInternal(Memory<byte> buffer, IRecords records)
+        public static int WriteRecords(byte[] buffer, int index, IRecords? records)
         {
-            buffer = WriteInt64(buffer, records.Offset);
-            buffer = WriteInt32(buffer, records.Size);
-            buffer = WriteInt32(buffer, records.PartitionLeaderEpoch);
-            buffer = WriteInt8(buffer, records.Magic);
-            buffer = WriteInt32(buffer, records.Crc);
-            buffer = WriteInt16(buffer, (short)records.Attributes);
-            buffer = WriteInt32(buffer, records.LastOffsetDelta);
-            buffer = WriteInt64(buffer, records.BaseTimestamp);
-            buffer = WriteInt64(buffer, records.MaxTimestamp);
-            buffer = WriteInt64(buffer, records.ProducerId);
-            buffer = WriteInt16(buffer, records.ProducerEpoch);
-            buffer = WriteInt32(buffer, records.BaseSequence);
+            if (records == null)
+                return WriteInt32(buffer, index, -1);
+            var totalBytes = records.Size + 61;
+            index = WriteInt32(buffer, index, totalBytes);
+            var x = index;
+            index = WriteRecordsInternal(buffer, index, records);
+            var y = index - x;
+            return index;
+        }
+
+        public static int WriteCompactRecords(byte[] buffer, int index, IRecords? records)
+        {
+            if (records == null)
+                return WriteVarUInt32(buffer, index, 0);
+            var totalBytes = Convert.ToUInt32(records.Size + RECORDS_HEADER_SIZE);
+            index = WriteVarUInt32(buffer, index, totalBytes + 1);
+            index = WriteRecordsInternal(buffer, index, records);
+            return index;
+        }
+
+        private const int RECORDS_HEADER_SIZE = 61;
+        private const int RECORDS_LOG_OVERHEAD = 12;
+        private const int RECORDS_SIZE_PADDING = RECORDS_HEADER_SIZE - RECORDS_LOG_OVERHEAD;
+
+        private static int WriteRecordsInternal(byte[] buffer, int index, IRecords records)
+        {
+            // Write batch header.
+            index = WriteInt64(buffer, index, records.Offset);
+            index = WriteInt32(buffer, index, records.Size + RECORDS_SIZE_PADDING);
+            index = WriteInt32(buffer, index, records.PartitionLeaderEpoch);
+            index = WriteInt8(buffer, index, records.Magic);
+            var crcIndex = index;   // store crc index.
+            index += 4;             // reserve crc slot.
+            var crcStart = index;   // store crc compute start index.
+            index = WriteInt16(buffer, index, (short)records.Attributes);
+            index = WriteInt32(buffer, index, records.LastOffsetDelta);
+            index = WriteInt64(buffer, index, records.BaseTimestamp);
+            index = WriteInt64(buffer, index, records.MaxTimestamp);
+            index = WriteInt64(buffer, index, records.ProducerId);
+            index = WriteInt16(buffer, index, records.ProducerEpoch);
+            index = WriteInt32(buffer, index, records.BaseSequence);
+            index = WriteInt32(buffer, index, records.Count);
+
+            // Write records.
             foreach (var record in records)
-                buffer = WriteRecord(buffer, record);
-            return buffer;
+                index = WriteRecord(buffer, index, record);
+
+            // Compute and store crc.
+            var crc = Crc32c.Update(buffer, crcStart, index - crcStart);
+            WriteInt32(buffer, crcIndex, unchecked((int)crc));
+
+            return index;
         }
 
-        private static Memory<byte> WriteRecord(Memory<byte> buffer, IRecord record)
+        private static int WriteRecord(byte[] buffer, int index, IRecord record)
         {
-            buffer = WriteVarInt32(buffer, record.SizeInBytes);
-            buffer = WriteInt16(buffer, (short)record.Attributes);
-            buffer = WriteVarInt64(buffer, record.TimestampDelta);
-            buffer = WriteVarInt32(buffer, record.OffsetDelta);
-            buffer = WriteCompactNullableBytes(buffer, record.Key);
-            buffer = WriteCompactNullableBytes(buffer, record.Value);
+            // Write record header.
+            index = WriteVarInt32(buffer, index, record.SizeInBytes);
+            index = WriteInt8(buffer, index, 0);
+            index = WriteVarInt64(buffer, index, record.TimestampDelta);
+            index = WriteVarInt32(buffer, index, record.OffsetDelta);
+
+            // Write record key.
+            if(record.Key.HasValue)
+            {
+                index = WriteVarInt32(buffer, index, record.Key.Value.Length);
+                foreach (var b in record.Key.Value.Span)
+                    buffer[index++] = b;
+            }
+            else
+            {
+                index = WriteVarInt32(buffer, index, -1);
+            }
+
+            // Write record value.
+            if (record.Value.HasValue)
+            {
+                index = WriteVarInt32(buffer, index, record.Value.Value.Length);
+                foreach (var b in record.Value.Value.Span)
+                    buffer[index++] = b;
+            }
+            else
+            {
+                index = WriteVarInt32(buffer, index, -1);
+            }
+
+            // Write headers.
+            index = WriteVarInt32(buffer, index, record.Headers.Length);
             foreach (var header in record.Headers)
-                buffer = WriteRecordHeader(buffer, header);
-            return buffer;
+                index = WriteRecordHeader(buffer, index, header);
+            return index;
         }
 
-        private static Memory<byte> WriteRecordHeader(Memory<byte> buffer, RecordHeader header)
+        private static int WriteRecordHeader(byte[] buffer, int index, RecordHeader header)
         {
-            buffer = WriteCompactString(buffer, header.HeaderKey);
-            buffer = WriteCompactBytes(buffer, header.Value);
-            return buffer;
+            index = WriteCompactString(buffer, index, header.Key);
+            index = WriteCompactBytes(buffer, index, header.Value);
+            return index;
         }
 
-        public static Memory<byte> WriteArray<TItem>(Memory<byte> buffer, ImmutableArray<TItem>? array, EncodeDelegate<TItem> encodeItem)
-        {
-            if (array == null)
-                return WriteInt32(buffer, -1);
-            buffer = WriteInt32(buffer, array.Value.Length);
-            foreach (var item in array)
-                buffer = encodeItem(buffer, item);
-            return buffer;
-        }
-
-        public static Memory<byte> WriteCompactArray<TItem>(Memory<byte> buffer, ImmutableArray<TItem>? array, EncodeDelegate<TItem> encodeItem)
+        public static int WriteArray<TItem>(byte[] buffer, int index, ImmutableArray<TItem>? array, EncodeDelegate<TItem> encodeItem)
         {
             if (array == null)
-                return WriteVarUInt32(buffer, 0);
-            buffer = WriteVarUInt32(buffer, (uint)array.Value.Length + 1);
+                return WriteInt32(buffer, index, -1);
+            index = WriteInt32(buffer, index, array.Value.Length);
             foreach (var item in array)
-                buffer = encodeItem(buffer, item);
-            return buffer;
+                index = encodeItem(buffer, index, item);
+            return index;
+        }
+
+        public static int WriteCompactArray<TItem>(byte[] buffer, int index, ImmutableArray<TItem>? array, EncodeDelegate<TItem> encodeItem)
+        {
+            if (array == null)
+                return WriteVarUInt32(buffer, index, 0);
+            index = WriteVarUInt32(buffer, index, (uint)array.Value.Length + 1);
+            foreach (var item in array)
+                index = encodeItem(buffer, index, item);
+            return index;
         }
 
         public static void WriteInt32(Stream buffer, int value)

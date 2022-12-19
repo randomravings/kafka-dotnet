@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<AddPartitionsToTxnTopicResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 3;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="ResultsField">The results for each partition</param>

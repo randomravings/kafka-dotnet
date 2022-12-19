@@ -7,81 +7,82 @@ namespace Kafka.Client.Messages
     public static class ControlledShutdownRequestSerde
     {
         private static readonly DecodeDelegate<ControlledShutdownRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<ControlledShutdownRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static ControlledShutdownRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ControlledShutdownRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ControlledShutdownRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ControlledShutdownRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ControlledShutdownRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ControlledShutdownRequest ReadV00(byte[] buffer, ref int index)
         {
-            var brokerIdField = Decoder.ReadInt32(ref buffer);
+            var brokerIdField = Decoder.ReadInt32(buffer, ref index);
             var brokerEpochField = default(long);
             return new(
                 brokerIdField,
                 brokerEpochField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ControlledShutdownRequest message)
+        private static int WriteV00(byte[] buffer, int index, ControlledShutdownRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+            return index;
         }
-        private static ControlledShutdownRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static ControlledShutdownRequest ReadV01(byte[] buffer, ref int index)
         {
-            var brokerIdField = Decoder.ReadInt32(ref buffer);
+            var brokerIdField = Decoder.ReadInt32(buffer, ref index);
             var brokerEpochField = default(long);
             return new(
                 brokerIdField,
                 brokerEpochField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, ControlledShutdownRequest message)
+        private static int WriteV01(byte[] buffer, int index, ControlledShutdownRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+            return index;
         }
-        private static ControlledShutdownRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static ControlledShutdownRequest ReadV02(byte[] buffer, ref int index)
         {
-            var brokerIdField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
+            var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
             return new(
                 brokerIdField,
                 brokerEpochField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, ControlledShutdownRequest message)
+        private static int WriteV02(byte[] buffer, int index, ControlledShutdownRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            return index;
         }
-        private static ControlledShutdownRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static ControlledShutdownRequest ReadV03(byte[] buffer, ref int index)
         {
-            var brokerIdField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 brokerIdField,
                 brokerEpochField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, ControlledShutdownRequest message)
+        private static int WriteV03(byte[] buffer, int index, ControlledShutdownRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

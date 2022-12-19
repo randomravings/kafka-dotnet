@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using AclDescription = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource.AclDescription;
 using DescribeAclsResource = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource;
+using AclDescription = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource.AclDescription;
 
 namespace Kafka.Client.Messages
 {
@@ -26,6 +26,7 @@ namespace Kafka.Client.Messages
             default(string?),
             ImmutableArray<DescribeAclsResource>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ResourceTypeField">The resource type.</param>
         /// <param name="ResourceNameField">The resource name.</param>

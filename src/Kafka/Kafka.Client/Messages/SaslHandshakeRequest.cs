@@ -14,5 +14,6 @@ namespace Kafka.Client.Messages
         public static SaslHandshakeRequest Empty { get; } = new(
             ""
         );
+        public static short FlexibleVersion { get; } = 32767;
     };
 }

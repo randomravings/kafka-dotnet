@@ -7,29 +7,30 @@ namespace Kafka.Client.Messages
     public static class UnregisterBrokerRequestSerde
     {
         private static readonly DecodeDelegate<UnregisterBrokerRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<UnregisterBrokerRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static UnregisterBrokerRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static UnregisterBrokerRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, UnregisterBrokerRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static UnregisterBrokerRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, UnregisterBrokerRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static UnregisterBrokerRequest ReadV00(byte[] buffer, ref int index)
         {
-            var brokerIdField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 brokerIdField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, UnregisterBrokerRequest message)
+        private static int WriteV00(byte[] buffer, int index, UnregisterBrokerRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

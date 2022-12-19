@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using DeletableGroupResult = Kafka.Client.Messages.DeleteGroupsResponse.DeletableGroupResult;
 
 namespace Kafka.Client.Messages
@@ -9,115 +8,116 @@ namespace Kafka.Client.Messages
     public static class DeleteGroupsResponseSerde
     {
         private static readonly DecodeDelegate<DeleteGroupsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
         };
         private static readonly EncodeDelegate<DeleteGroupsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
         };
-        public static DeleteGroupsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DeleteGroupsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DeleteGroupsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DeleteGroupsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DeleteGroupsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DeleteGroupsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadArray<DeletableGroupResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableGroupResultSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadArray<DeletableGroupResult>(buffer, ref index, DeletableGroupResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Results'");
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DeleteGroupsResponse message)
+        private static int WriteV00(byte[] buffer, int index, DeleteGroupsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<DeletableGroupResult>(buffer, message.ResultsField, (b, i) => DeletableGroupResultSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<DeletableGroupResult>(buffer, index, message.ResultsField, DeletableGroupResultSerde.WriteV00);
+            return index;
         }
-        private static DeleteGroupsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteGroupsResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadArray<DeletableGroupResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableGroupResultSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadArray<DeletableGroupResult>(buffer, ref index, DeletableGroupResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Results'");
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DeleteGroupsResponse message)
+        private static int WriteV01(byte[] buffer, int index, DeleteGroupsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<DeletableGroupResult>(buffer, message.ResultsField, (b, i) => DeletableGroupResultSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<DeletableGroupResult>(buffer, index, message.ResultsField, DeletableGroupResultSerde.WriteV01);
+            return index;
         }
-        private static DeleteGroupsResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteGroupsResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadCompactArray<DeletableGroupResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableGroupResultSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadCompactArray<DeletableGroupResult>(buffer, ref index, DeletableGroupResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, DeleteGroupsResponse message)
+        private static int WriteV02(byte[] buffer, int index, DeleteGroupsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<DeletableGroupResult>(buffer, message.ResultsField, (b, i) => DeletableGroupResultSerde.WriteV02(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<DeletableGroupResult>(buffer, index, message.ResultsField, DeletableGroupResultSerde.WriteV02);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class DeletableGroupResultSerde
         {
-            public static DeletableGroupResult ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableGroupResult ReadV00(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var groupIdField = Decoder.ReadString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
                     groupIdField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, DeletableGroupResult message)
+            public static int WriteV00(byte[] buffer, int index, DeletableGroupResult message)
             {
-                buffer = Encoder.WriteString(buffer, message.GroupIdField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.GroupIdField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static DeletableGroupResult ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableGroupResult ReadV01(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var groupIdField = Decoder.ReadString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
                     groupIdField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, DeletableGroupResult message)
+            public static int WriteV01(byte[] buffer, int index, DeletableGroupResult message)
             {
-                buffer = Encoder.WriteString(buffer, message.GroupIdField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.GroupIdField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static DeletableGroupResult ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableGroupResult ReadV02(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadCompactString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     groupIdField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, DeletableGroupResult message)
+            public static int WriteV02(byte[] buffer, int index, DeletableGroupResult message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.GroupIdField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.GroupIdField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

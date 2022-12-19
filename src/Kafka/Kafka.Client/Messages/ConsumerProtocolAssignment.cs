@@ -12,13 +12,14 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record ConsumerProtocolAssignment (
         ImmutableArray<TopicPartition> AssignedPartitionsField,
-        ImmutableArray<byte>? UserDataField
+        ReadOnlyMemory<byte>? UserDataField
     )
     {
         public static ConsumerProtocolAssignment Empty { get; } = new(
             ImmutableArray<TopicPartition>.Empty,
-            default(ImmutableArray<byte>?)
+            default(ReadOnlyMemory<byte>?)
         );
+        public static short FlexibleVersion { get; } = 32767;
         /// <summary>
         /// <param name="TopicField"></param>
         /// <param name="PartitionsField"></param>

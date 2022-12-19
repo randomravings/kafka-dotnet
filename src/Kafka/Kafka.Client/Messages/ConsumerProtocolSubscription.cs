@@ -9,19 +9,23 @@ namespace Kafka.Client.Messages
     /// <param name="TopicsField"></param>
     /// <param name="UserDataField"></param>
     /// <param name="OwnedPartitionsField"></param>
+    /// <param name="GenerationIdField"></param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record ConsumerProtocolSubscription (
         ImmutableArray<string> TopicsField,
-        ImmutableArray<byte>? UserDataField,
-        ImmutableArray<TopicPartition> OwnedPartitionsField
+        ReadOnlyMemory<byte>? UserDataField,
+        ImmutableArray<TopicPartition> OwnedPartitionsField,
+        int GenerationIdField
     )
     {
         public static ConsumerProtocolSubscription Empty { get; } = new(
             ImmutableArray<string>.Empty,
-            default(ImmutableArray<byte>?),
-            ImmutableArray<TopicPartition>.Empty
+            default(ReadOnlyMemory<byte>?),
+            ImmutableArray<TopicPartition>.Empty,
+            default(int)
         );
+        public static short FlexibleVersion { get; } = 32767;
         /// <summary>
         /// <param name="TopicField"></param>
         /// <param name="PartitionsField"></param>

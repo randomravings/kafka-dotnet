@@ -1,16 +1,27 @@
 ﻿using Kafka.Common.Types;
 using System.Collections.Immutable;
+using static Kafka.Client.Clients.Admin.Model.DeleteTopicsResult;
 
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record DeleteTopicsResult(
-        ImmutableArray<Topic> DeletedTopics,
-        ImmutableSortedDictionary<Topic, Error> ErrorTopics
+        ImmutableArray<DeleteTopicResult> DeletedTopics,
+        ImmutableArray<DeleteTopicError> ErrorTopics
     )
     {
         public static DeleteTopicsResult Empty { get; } = new(
-            ImmutableArray<Topic>.Empty,
-            ImmutableSortedDictionary<Topic, Error>.Empty
+            ImmutableArray<DeleteTopicResult>.Empty,
+            ImmutableArray<DeleteTopicError>.Empty
+        );
+
+        public sealed record DeleteTopicResult(
+            TopicId Id,
+            TopicName Name
+        );
+
+        public sealed record DeleteTopicError(
+            TopicName Name,
+            Error Error
         );
     };
 }

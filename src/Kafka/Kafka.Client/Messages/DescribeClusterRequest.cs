@@ -14,5 +14,6 @@ namespace Kafka.Client.Messages
         public static DescribeClusterRequest Empty { get; } = new(
             default(bool)
         );
+        public static short FlexibleVersion { get; } = 0;
     };
 }

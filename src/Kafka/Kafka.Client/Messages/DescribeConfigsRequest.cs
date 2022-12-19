@@ -22,6 +22,7 @@ namespace Kafka.Client.Messages
             default(bool),
             default(bool)
         );
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="ResourceTypeField">The resource type.</param>
         /// <param name="ResourceNameField">The resource name.</param>

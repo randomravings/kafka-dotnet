@@ -1,14 +1,15 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using LeaderAndIsrLiveLeader = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrLiveLeader;
 using LeaderAndIsrPartitionState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrPartitionState;
 using LeaderAndIsrTopicState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrTopicState;
+using LeaderAndIsrLiveLeader = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrLiveLeader;
 
 namespace Kafka.Client.Messages
 {
     /// <summary>
     /// <param name="ControllerIdField">The current controller ID.</param>
+    /// <param name="KRaftControllerIdField">The KRaft controller id, used during migration. See KIP-866</param>
     /// <param name="ControllerEpochField">The current controller epoch.</param>
     /// <param name="BrokerEpochField">The current broker epoch.</param>
     /// <param name="TypeField">The type that indicates whether all topics are included in the request</param>
@@ -19,6 +20,7 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record LeaderAndIsrRequest (
         int ControllerIdField,
+        int KRaftControllerIdField,
         int ControllerEpochField,
         long BrokerEpochField,
         sbyte TypeField,
@@ -30,29 +32,14 @@ namespace Kafka.Client.Messages
         public static LeaderAndIsrRequest Empty { get; } = new(
             default(int),
             default(int),
+            default(int),
             default(long),
             default(sbyte),
             ImmutableArray<LeaderAndIsrPartitionState>.Empty,
             ImmutableArray<LeaderAndIsrTopicState>.Empty,
             ImmutableArray<LeaderAndIsrLiveLeader>.Empty
         );
-        /// <summary>
-        /// <param name="BrokerIdField">The leader's broker ID.</param>
-        /// <param name="HostNameField">The leader's hostname.</param>
-        /// <param name="PortField">The leader's port.</param>
-        /// </summary>
-        public sealed record LeaderAndIsrLiveLeader (
-            int BrokerIdField,
-            string HostNameField,
-            int PortField
-        )
-        {
-            public static LeaderAndIsrLiveLeader Empty { get; } = new(
-                default(int),
-                "",
-                default(int)
-            );
-        };
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="TopicNameField">The topic name.  This is only present in v0 or v1.</param>
         /// <param name="PartitionIndexField">The partition index.</param>
@@ -112,6 +99,23 @@ namespace Kafka.Client.Messages
                 "",
                 default(Guid),
                 ImmutableArray<LeaderAndIsrPartitionState>.Empty
+            );
+        };
+        /// <summary>
+        /// <param name="BrokerIdField">The leader's broker ID.</param>
+        /// <param name="HostNameField">The leader's hostname.</param>
+        /// <param name="PortField">The leader's port.</param>
+        /// </summary>
+        public sealed record LeaderAndIsrLiveLeader (
+            int BrokerIdField,
+            string HostNameField,
+            int PortField
+        )
+        {
+            public static LeaderAndIsrLiveLeader Empty { get; } = new(
+                default(int),
+                "",
+                default(int)
             );
         };
     };

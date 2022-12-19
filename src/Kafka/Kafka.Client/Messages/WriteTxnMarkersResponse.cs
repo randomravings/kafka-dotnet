@@ -2,8 +2,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 using WritableTxnMarkerResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult;
-using WritableTxnMarkerPartitionResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult.WritableTxnMarkerPartitionResult;
 using WritableTxnMarkerTopicResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult;
+using WritableTxnMarkerPartitionResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult.WritableTxnMarkerPartitionResult;
 
 namespace Kafka.Client.Messages
 {
@@ -18,6 +18,7 @@ namespace Kafka.Client.Messages
         public static WriteTxnMarkersResponse Empty { get; } = new(
             ImmutableArray<WritableTxnMarkerResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 1;
         /// <summary>
         /// <param name="ProducerIdField">The current producer ID in use by the transactional ID.</param>
         /// <param name="TopicsField">The results by topic.</param>

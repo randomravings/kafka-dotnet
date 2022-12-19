@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using WritableTxnMarkerTopic = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker.WritableTxnMarkerTopic;
 using WritableTxnMarker = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker;
+using WritableTxnMarkerTopic = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker.WritableTxnMarkerTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -17,6 +17,7 @@ namespace Kafka.Client.Messages
         public static WriteTxnMarkersRequest Empty { get; } = new(
             ImmutableArray<WritableTxnMarker>.Empty
         );
+        public static short FlexibleVersion { get; } = 1;
         /// <summary>
         /// <param name="ProducerIdField">The current producer ID.</param>
         /// <param name="ProducerEpochField">The current epoch associated with the producer ID.</param>

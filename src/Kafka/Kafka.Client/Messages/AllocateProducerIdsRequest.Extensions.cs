@@ -7,32 +7,33 @@ namespace Kafka.Client.Messages
     public static class AllocateProducerIdsRequestSerde
     {
         private static readonly DecodeDelegate<AllocateProducerIdsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<AllocateProducerIdsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static AllocateProducerIdsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static AllocateProducerIdsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, AllocateProducerIdsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static AllocateProducerIdsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, AllocateProducerIdsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static AllocateProducerIdsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var brokerIdField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 brokerIdField,
                 brokerEpochField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, AllocateProducerIdsRequest message)
+        private static int WriteV00(byte[] buffer, int index, AllocateProducerIdsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

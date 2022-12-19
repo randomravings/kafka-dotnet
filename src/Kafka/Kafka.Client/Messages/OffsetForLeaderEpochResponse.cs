@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<OffsetForLeaderTopicResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="TopicField">The topic name.</param>
         /// <param name="PartitionsField">Each partition in the topic we fetched offsets for.</param>

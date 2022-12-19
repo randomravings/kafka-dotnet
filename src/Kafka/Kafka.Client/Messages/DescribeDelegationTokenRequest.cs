@@ -16,6 +16,7 @@ namespace Kafka.Client.Messages
         public static DescribeDelegationTokenRequest Empty { get; } = new(
             default(ImmutableArray<DescribeDelegationTokenOwner>?)
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="PrincipalTypeField">The owner principal type.</param>
         /// <param name="PrincipalNameField">The owner principal name.</param>

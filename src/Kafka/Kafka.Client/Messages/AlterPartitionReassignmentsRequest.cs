@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<ReassignableTopic>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">The partitions to reassign.</param>

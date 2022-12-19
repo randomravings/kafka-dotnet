@@ -1,5 +1,4 @@
 ﻿using Kafka.Common.Types;
-using System.Collections.Immutable;
 using System.Runtime.Serialization;
 
 namespace Kafka.Common.Serialization
@@ -9,7 +8,7 @@ namespace Kafka.Common.Serialization
         public static IDeserializer<Ignore> Ignore { get; } = new IgnoreDeserializer();
         public static IDeserializer<Null> Null { get; } = new NullDeserializer();
         public static IDeserializer<int> Int32 { get; } = new Int32Deserializer();
-        public static IDeserializer<ImmutableArray<byte>> Bytes { get; } = new BytesDeserializer();
+        public static IDeserializer<byte[]> Bytes { get; } = new BytesDeserializer();
         public static IDeserializer<string> Utf8 { get; } = new Utf8Deserializer();
 
         /// <summary>
@@ -18,7 +17,7 @@ namespace Kafka.Common.Serialization
         private sealed class IgnoreDeserializer :
             IDeserializer<Ignore>
         {
-            Ignore IDeserializer<Ignore>.Read(ImmutableArray<byte>? data) =>
+            Ignore IDeserializer<Ignore>.Read(byte[]? buffer) =>
                 Types.Ignore.Value
             ;
         }
@@ -29,8 +28,8 @@ namespace Kafka.Common.Serialization
         private sealed class NullDeserializer :
             IDeserializer<Null>
         {
-            Null IDeserializer<Null>.Read(ImmutableArray<byte>? data) =>
-                data switch
+            Null IDeserializer<Null>.Read(byte[]? buffer) =>
+                buffer switch
                 {
                     null => Types.Null.Value,
                     _ => throw new SerializationException("Data was not null")
@@ -42,13 +41,13 @@ namespace Kafka.Common.Serialization
         /// Deserializer that reads bytes.
         /// </summary>
         private sealed class BytesDeserializer :
-            IDeserializer<ImmutableArray<byte>>
+            IDeserializer<byte[]>
         {
-            ImmutableArray<byte> IDeserializer<ImmutableArray<byte>>.Read(ImmutableArray<byte>? data) =>
-                Nullable.Bytes.Read(data) switch
+            byte[] IDeserializer<byte[]>.Read(byte[]? buffer) =>
+                Nullable.Bytes.Read(buffer) switch
                 {
                     null => throw NullEx(),
-                    var v => v.Value
+                    var v => v
                 }
             ;
         }
@@ -59,8 +58,8 @@ namespace Kafka.Common.Serialization
         private sealed class Int32Deserializer :
             IDeserializer<int>
         {
-            int IDeserializer<int>.Read(ImmutableArray<byte>? data) =>
-                Nullable.Int32.Read(data) switch
+            int IDeserializer<int>.Read(byte[]? buffer) =>
+                Nullable.Int32.Read(buffer) switch
                 {
                     null => throw NullEx(),
                     var v => v.Value
@@ -74,8 +73,8 @@ namespace Kafka.Common.Serialization
         private sealed class Utf8Deserializer :
             IDeserializer<string>
         {
-            string IDeserializer<string>.Read(ImmutableArray<byte>? data) =>
-                Nullable.Utf8.Read(data) switch
+            string IDeserializer<string>.Read(byte[]? buffer) =>
+                Nullable.Utf8.Read(buffer) switch
                 {
                     null => throw NullEx(),
                     var v => v
@@ -90,17 +89,17 @@ namespace Kafka.Common.Serialization
         public static class Nullable
         {
             public static IDeserializer<int?> Int32 { get; } = new Int32Deserializer();
-            public static IDeserializer<ImmutableArray<byte>?> Bytes { get; } = new BytesDeserializer();
+            public static IDeserializer<byte[]?> Bytes { get; } = new BytesDeserializer();
             public static IDeserializer<string?> Utf8 { get; } = new Utf8Deserializer();
 
             /// <summary>
             /// Deserializer that reads bytes.
             /// </summary>
             private sealed class BytesDeserializer :
-                IDeserializer<ImmutableArray<byte>?>
+                IDeserializer<byte[]?>
             {
-                ImmutableArray<byte>? IDeserializer<ImmutableArray<byte>?>.Read(ImmutableArray<byte>? data) =>
-                    data
+                byte[]? IDeserializer<byte[]?>.Read(byte[]? buffer) =>
+                    buffer
                 ;
             }
 
@@ -110,18 +109,17 @@ namespace Kafka.Common.Serialization
             private sealed class Int32Deserializer :
                 IDeserializer<int?>
             {
-                int? IDeserializer<int?>.Read(ImmutableArray<byte>? data)
+                int? IDeserializer<int?>.Read(byte[]? buffer)
                 {
-                    if (data == null)
+                    if (buffer == null)
                         return default;
-                    var array = data.Value;
-                    if (array.Length != 4)
-                        throw new SerializationException("Size of data received by IntegerDeserializer is not 4");
+                    if (buffer.Length != 4)
+                        throw new SerializationException("Size of buffer received by IntegerDeserializer is not 4");
                     int value = 0;
                     for (int i = 0; i < 4; i++)
                     {
                         value <<= 8;
-                        value |= array[i] & 0xff;
+                        value |= buffer[i] & 0xff;
                     }
                     return value;
                 }
@@ -133,11 +131,11 @@ namespace Kafka.Common.Serialization
             private sealed class Utf8Deserializer :
                 IDeserializer<string?>
             {
-                public string? Read(ImmutableArray<byte>? data)
+                public string? Read(byte[]? buffer)
                 {
-                    if (data == null)
+                    if (buffer == null)
                         return default;
-                    return System.Text.Encoding.UTF8.GetString(data.Value.AsSpan());
+                    return System.Text.Encoding.UTF8.GetString(buffer);
                 }
             }
         }

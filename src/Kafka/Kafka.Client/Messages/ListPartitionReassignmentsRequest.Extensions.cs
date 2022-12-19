@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using ListPartitionReassignmentsTopics = Kafka.Client.Messages.ListPartitionReassignmentsRequest.ListPartitionReassignmentsTopics;
 
 namespace Kafka.Client.Messages
@@ -9,51 +8,52 @@ namespace Kafka.Client.Messages
     public static class ListPartitionReassignmentsRequestSerde
     {
         private static readonly DecodeDelegate<ListPartitionReassignmentsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<ListPartitionReassignmentsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static ListPartitionReassignmentsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ListPartitionReassignmentsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ListPartitionReassignmentsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ListPartitionReassignmentsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ListPartitionReassignmentsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ListPartitionReassignmentsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            var topicsField = Decoder.ReadCompactArray<ListPartitionReassignmentsTopics>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListPartitionReassignmentsTopicsSerde.ReadV00(ref b));
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            var topicsField = Decoder.ReadCompactArray<ListPartitionReassignmentsTopics>(buffer, ref index, ListPartitionReassignmentsTopicsSerde.ReadV00);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 timeoutMsField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ListPartitionReassignmentsRequest message)
+        private static int WriteV00(byte[] buffer, int index, ListPartitionReassignmentsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            buffer = Encoder.WriteCompactArray<ListPartitionReassignmentsTopics>(buffer, message.TopicsField, (b, i) => ListPartitionReassignmentsTopicsSerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteCompactArray<ListPartitionReassignmentsTopics>(buffer, index, message.TopicsField, ListPartitionReassignmentsTopicsSerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class ListPartitionReassignmentsTopicsSerde
         {
-            public static ListPartitionReassignmentsTopics ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static ListPartitionReassignmentsTopics ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var partitionIndexesField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     partitionIndexesField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, ListPartitionReassignmentsTopics message)
+            public static int WriteV00(byte[] buffer, int index, ListPartitionReassignmentsTopics message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.PartitionIndexesField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

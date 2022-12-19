@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using LeaderAndIsrTopicError = Kafka.Client.Messages.LeaderAndIsrResponse.LeaderAndIsrTopicError;
 using LeaderAndIsrPartitionError = Kafka.Client.Messages.LeaderAndIsrResponse.LeaderAndIsrPartitionError;
+using LeaderAndIsrTopicError = Kafka.Client.Messages.LeaderAndIsrResponse.LeaderAndIsrTopicError;
 
 namespace Kafka.Client.Messages
 {
@@ -10,32 +10,35 @@ namespace Kafka.Client.Messages
     public static class LeaderAndIsrResponseSerde
     {
         private static readonly DecodeDelegate<LeaderAndIsrResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
+            ReadV06,
+            ReadV07,
         };
         private static readonly EncodeDelegate<LeaderAndIsrResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
-            (b, m) => WriteV06(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
+            WriteV06,
+            WriteV07,
         };
-        public static LeaderAndIsrResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static LeaderAndIsrResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, LeaderAndIsrResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static LeaderAndIsrResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, LeaderAndIsrResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static LeaderAndIsrResponse ReadV00(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var partitionErrorsField = Decoder.ReadArray<LeaderAndIsrPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionErrorSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadArray<LeaderAndIsrPartitionError>(buffer, ref index, LeaderAndIsrPartitionErrorSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
             var topicsField = ImmutableArray<LeaderAndIsrTopicError>.Empty;
             return new(
                 errorCodeField,
@@ -43,16 +46,16 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, LeaderAndIsrResponse message)
+        private static int WriteV00(byte[] buffer, int index, LeaderAndIsrResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<LeaderAndIsrPartitionError>(buffer, message.PartitionErrorsField, (b, i) => LeaderAndIsrPartitionErrorSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<LeaderAndIsrPartitionError>(buffer, index, message.PartitionErrorsField, LeaderAndIsrPartitionErrorSerde.WriteV00);
+            return index;
         }
-        private static LeaderAndIsrResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrResponse ReadV01(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var partitionErrorsField = Decoder.ReadArray<LeaderAndIsrPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionErrorSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadArray<LeaderAndIsrPartitionError>(buffer, ref index, LeaderAndIsrPartitionErrorSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
             var topicsField = ImmutableArray<LeaderAndIsrTopicError>.Empty;
             return new(
                 errorCodeField,
@@ -60,16 +63,16 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, LeaderAndIsrResponse message)
+        private static int WriteV01(byte[] buffer, int index, LeaderAndIsrResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<LeaderAndIsrPartitionError>(buffer, message.PartitionErrorsField, (b, i) => LeaderAndIsrPartitionErrorSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<LeaderAndIsrPartitionError>(buffer, index, message.PartitionErrorsField, LeaderAndIsrPartitionErrorSerde.WriteV01);
+            return index;
         }
-        private static LeaderAndIsrResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrResponse ReadV02(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var partitionErrorsField = Decoder.ReadArray<LeaderAndIsrPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionErrorSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadArray<LeaderAndIsrPartitionError>(buffer, ref index, LeaderAndIsrPartitionErrorSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
             var topicsField = ImmutableArray<LeaderAndIsrTopicError>.Empty;
             return new(
                 errorCodeField,
@@ -77,16 +80,16 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, LeaderAndIsrResponse message)
+        private static int WriteV02(byte[] buffer, int index, LeaderAndIsrResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<LeaderAndIsrPartitionError>(buffer, message.PartitionErrorsField, (b, i) => LeaderAndIsrPartitionErrorSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<LeaderAndIsrPartitionError>(buffer, index, message.PartitionErrorsField, LeaderAndIsrPartitionErrorSerde.WriteV02);
+            return index;
         }
-        private static LeaderAndIsrResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrResponse ReadV03(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var partitionErrorsField = Decoder.ReadArray<LeaderAndIsrPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionErrorSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadArray<LeaderAndIsrPartitionError>(buffer, ref index, LeaderAndIsrPartitionErrorSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
             var topicsField = ImmutableArray<LeaderAndIsrTopicError>.Empty;
             return new(
                 errorCodeField,
@@ -94,237 +97,292 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, LeaderAndIsrResponse message)
+        private static int WriteV03(byte[] buffer, int index, LeaderAndIsrResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<LeaderAndIsrPartitionError>(buffer, message.PartitionErrorsField, (b, i) => LeaderAndIsrPartitionErrorSerde.WriteV03(b, i));
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<LeaderAndIsrPartitionError>(buffer, index, message.PartitionErrorsField, LeaderAndIsrPartitionErrorSerde.WriteV03);
+            return index;
         }
-        private static LeaderAndIsrResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrResponse ReadV04(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var partitionErrorsField = Decoder.ReadCompactArray<LeaderAndIsrPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionErrorSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadCompactArray<LeaderAndIsrPartitionError>(buffer, ref index, LeaderAndIsrPartitionErrorSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
             var topicsField = ImmutableArray<LeaderAndIsrTopicError>.Empty;
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 partitionErrorsField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, LeaderAndIsrResponse message)
+        private static int WriteV04(byte[] buffer, int index, LeaderAndIsrResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<LeaderAndIsrPartitionError>(buffer, message.PartitionErrorsField, (b, i) => LeaderAndIsrPartitionErrorSerde.WriteV04(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<LeaderAndIsrPartitionError>(buffer, index, message.PartitionErrorsField, LeaderAndIsrPartitionErrorSerde.WriteV04);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static LeaderAndIsrResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrResponse ReadV05(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var partitionErrorsField = ImmutableArray<LeaderAndIsrPartitionError>.Empty;
-            var topicsField = Decoder.ReadCompactArray<LeaderAndIsrTopicError>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrTopicErrorSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<LeaderAndIsrTopicError>(buffer, ref index, LeaderAndIsrTopicErrorSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 partitionErrorsField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, LeaderAndIsrResponse message)
+        private static int WriteV05(byte[] buffer, int index, LeaderAndIsrResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<LeaderAndIsrTopicError>(buffer, message.TopicsField, (b, i) => LeaderAndIsrTopicErrorSerde.WriteV05(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<LeaderAndIsrTopicError>(buffer, index, message.TopicsField, LeaderAndIsrTopicErrorSerde.WriteV05);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static LeaderAndIsrResponse ReadV06(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrResponse ReadV06(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var partitionErrorsField = ImmutableArray<LeaderAndIsrPartitionError>.Empty;
-            var topicsField = Decoder.ReadCompactArray<LeaderAndIsrTopicError>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrTopicErrorSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<LeaderAndIsrTopicError>(buffer, ref index, LeaderAndIsrTopicErrorSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 partitionErrorsField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV06(Memory<byte> buffer, LeaderAndIsrResponse message)
+        private static int WriteV06(byte[] buffer, int index, LeaderAndIsrResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<LeaderAndIsrTopicError>(buffer, message.TopicsField, (b, i) => LeaderAndIsrTopicErrorSerde.WriteV06(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<LeaderAndIsrTopicError>(buffer, index, message.TopicsField, LeaderAndIsrTopicErrorSerde.WriteV06);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static class LeaderAndIsrTopicErrorSerde
+        private static LeaderAndIsrResponse ReadV07(byte[] buffer, ref int index)
         {
-            public static LeaderAndIsrTopicError ReadV05(ref ReadOnlyMemory<byte> buffer)
-            {
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                var partitionErrorsField = Decoder.ReadCompactArray<LeaderAndIsrPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionErrorSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
-                return new(
-                    topicIdField,
-                    partitionErrorsField
-                );
-            }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, LeaderAndIsrTopicError message)
-            {
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteCompactArray<LeaderAndIsrPartitionError>(buffer, message.PartitionErrorsField, (b, i) => LeaderAndIsrPartitionErrorSerde.WriteV05(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
-            }
-            public static LeaderAndIsrTopicError ReadV06(ref ReadOnlyMemory<byte> buffer)
-            {
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                var partitionErrorsField = Decoder.ReadCompactArray<LeaderAndIsrPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionErrorSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
-                return new(
-                    topicIdField,
-                    partitionErrorsField
-                );
-            }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, LeaderAndIsrTopicError message)
-            {
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteCompactArray<LeaderAndIsrPartitionError>(buffer, message.PartitionErrorsField, (b, i) => LeaderAndIsrPartitionErrorSerde.WriteV06(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
-            }
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = ImmutableArray<LeaderAndIsrPartitionError>.Empty;
+            var topicsField = Decoder.ReadCompactArray<LeaderAndIsrTopicError>(buffer, ref index, LeaderAndIsrTopicErrorSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
+            return new(
+                errorCodeField,
+                partitionErrorsField,
+                topicsField
+            );
+        }
+        private static int WriteV07(byte[] buffer, int index, LeaderAndIsrResponse message)
+        {
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<LeaderAndIsrTopicError>(buffer, index, message.TopicsField, LeaderAndIsrTopicErrorSerde.WriteV07);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class LeaderAndIsrPartitionErrorSerde
         {
-            public static LeaderAndIsrPartitionError ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionError ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, LeaderAndIsrPartitionError message)
+            public static int WriteV00(byte[] buffer, int index, LeaderAndIsrPartitionError message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static LeaderAndIsrPartitionError ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionError ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, LeaderAndIsrPartitionError message)
+            public static int WriteV01(byte[] buffer, int index, LeaderAndIsrPartitionError message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static LeaderAndIsrPartitionError ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionError ReadV02(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, LeaderAndIsrPartitionError message)
+            public static int WriteV02(byte[] buffer, int index, LeaderAndIsrPartitionError message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static LeaderAndIsrPartitionError ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionError ReadV03(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, LeaderAndIsrPartitionError message)
+            public static int WriteV03(byte[] buffer, int index, LeaderAndIsrPartitionError message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static LeaderAndIsrPartitionError ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionError ReadV04(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, LeaderAndIsrPartitionError message)
+            public static int WriteV04(byte[] buffer, int index, LeaderAndIsrPartitionError message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static LeaderAndIsrPartitionError ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionError ReadV05(byte[] buffer, ref int index)
             {
                 var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, LeaderAndIsrPartitionError message)
+            public static int WriteV05(byte[] buffer, int index, LeaderAndIsrPartitionError message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static LeaderAndIsrPartitionError ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionError ReadV06(byte[] buffer, ref int index)
             {
                 var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, LeaderAndIsrPartitionError message)
+            public static int WriteV06(byte[] buffer, int index, LeaderAndIsrPartitionError message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static LeaderAndIsrPartitionError ReadV07(byte[] buffer, ref int index)
+            {
+                var topicNameField = "";
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    errorCodeField
+                );
+            }
+            public static int WriteV07(byte[] buffer, int index, LeaderAndIsrPartitionError message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+        }
+        private static class LeaderAndIsrTopicErrorSerde
+        {
+            public static LeaderAndIsrTopicError ReadV05(byte[] buffer, ref int index)
+            {
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var partitionErrorsField = Decoder.ReadCompactArray<LeaderAndIsrPartitionError>(buffer, ref index, LeaderAndIsrPartitionErrorSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicIdField,
+                    partitionErrorsField
+                );
+            }
+            public static int WriteV05(byte[] buffer, int index, LeaderAndIsrTopicError message)
+            {
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactArray<LeaderAndIsrPartitionError>(buffer, index, message.PartitionErrorsField, LeaderAndIsrPartitionErrorSerde.WriteV05);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static LeaderAndIsrTopicError ReadV06(byte[] buffer, ref int index)
+            {
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var partitionErrorsField = Decoder.ReadCompactArray<LeaderAndIsrPartitionError>(buffer, ref index, LeaderAndIsrPartitionErrorSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicIdField,
+                    partitionErrorsField
+                );
+            }
+            public static int WriteV06(byte[] buffer, int index, LeaderAndIsrTopicError message)
+            {
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactArray<LeaderAndIsrPartitionError>(buffer, index, message.PartitionErrorsField, LeaderAndIsrPartitionErrorSerde.WriteV06);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static LeaderAndIsrTopicError ReadV07(byte[] buffer, ref int index)
+            {
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var partitionErrorsField = Decoder.ReadCompactArray<LeaderAndIsrPartitionError>(buffer, ref index, LeaderAndIsrPartitionErrorSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicIdField,
+                    partitionErrorsField
+                );
+            }
+            public static int WriteV07(byte[] buffer, int index, LeaderAndIsrTopicError message)
+            {
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactArray<LeaderAndIsrPartitionError>(buffer, index, message.PartitionErrorsField, LeaderAndIsrPartitionErrorSerde.WriteV07);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

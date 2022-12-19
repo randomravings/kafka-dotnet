@@ -1,8 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
-using CreatePartitionsAssignment = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic.CreatePartitionsAssignment;
 using CreatePartitionsTopic = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic;
+using CreatePartitionsAssignment = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic.CreatePartitionsAssignment;
 
 namespace Kafka.Client.Messages
 {
@@ -10,229 +9,230 @@ namespace Kafka.Client.Messages
     public static class CreatePartitionsRequestSerde
     {
         private static readonly DecodeDelegate<CreatePartitionsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<CreatePartitionsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static CreatePartitionsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static CreatePartitionsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, CreatePartitionsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static CreatePartitionsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, CreatePartitionsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static CreatePartitionsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<CreatePartitionsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
+            var topicsField = Decoder.ReadArray<CreatePartitionsTopic>(buffer, ref index, CreatePartitionsTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            var validateOnlyField = Decoder.ReadBoolean(buffer, ref index);
             return new(
                 topicsField,
                 timeoutMsField,
                 validateOnlyField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, CreatePartitionsRequest message)
+        private static int WriteV00(byte[] buffer, int index, CreatePartitionsRequest message)
         {
-            buffer = Encoder.WriteArray<CreatePartitionsTopic>(buffer, message.TopicsField, (b, i) => CreatePartitionsTopicSerde.WriteV00(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
-            return buffer;
+            index = Encoder.WriteArray<CreatePartitionsTopic>(buffer, index, message.TopicsField, CreatePartitionsTopicSerde.WriteV00);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            return index;
         }
-        private static CreatePartitionsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static CreatePartitionsRequest ReadV01(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<CreatePartitionsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsTopicSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
+            var topicsField = Decoder.ReadArray<CreatePartitionsTopic>(buffer, ref index, CreatePartitionsTopicSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            var validateOnlyField = Decoder.ReadBoolean(buffer, ref index);
             return new(
                 topicsField,
                 timeoutMsField,
                 validateOnlyField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, CreatePartitionsRequest message)
+        private static int WriteV01(byte[] buffer, int index, CreatePartitionsRequest message)
         {
-            buffer = Encoder.WriteArray<CreatePartitionsTopic>(buffer, message.TopicsField, (b, i) => CreatePartitionsTopicSerde.WriteV01(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
-            return buffer;
+            index = Encoder.WriteArray<CreatePartitionsTopic>(buffer, index, message.TopicsField, CreatePartitionsTopicSerde.WriteV01);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            return index;
         }
-        private static CreatePartitionsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static CreatePartitionsRequest ReadV02(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<CreatePartitionsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsTopicSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<CreatePartitionsTopic>(buffer, ref index, CreatePartitionsTopicSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            var validateOnlyField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 timeoutMsField,
                 validateOnlyField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, CreatePartitionsRequest message)
+        private static int WriteV02(byte[] buffer, int index, CreatePartitionsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<CreatePartitionsTopic>(buffer, message.TopicsField, (b, i) => CreatePartitionsTopicSerde.WriteV02(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<CreatePartitionsTopic>(buffer, index, message.TopicsField, CreatePartitionsTopicSerde.WriteV02);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static CreatePartitionsRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static CreatePartitionsRequest ReadV03(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<CreatePartitionsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsTopicSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<CreatePartitionsTopic>(buffer, ref index, CreatePartitionsTopicSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            var validateOnlyField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 timeoutMsField,
                 validateOnlyField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, CreatePartitionsRequest message)
+        private static int WriteV03(byte[] buffer, int index, CreatePartitionsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<CreatePartitionsTopic>(buffer, message.TopicsField, (b, i) => CreatePartitionsTopicSerde.WriteV03(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<CreatePartitionsTopic>(buffer, index, message.TopicsField, CreatePartitionsTopicSerde.WriteV03);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class CreatePartitionsTopicSerde
         {
-            public static CreatePartitionsTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static CreatePartitionsTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var countField = Decoder.ReadInt32(ref buffer);
-                var assignmentsField = Decoder.ReadArray<CreatePartitionsAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsAssignmentSerde.ReadV00(ref b));
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var countField = Decoder.ReadInt32(buffer, ref index);
+                var assignmentsField = Decoder.ReadArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV00);
                 return new(
                     nameField,
                     countField,
                     assignmentsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, CreatePartitionsTopic message)
+            public static int WriteV00(byte[] buffer, int index, CreatePartitionsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteInt32(buffer, message.CountField);
-                buffer = Encoder.WriteArray<CreatePartitionsAssignment>(buffer, message.AssignmentsField, (b, i) => CreatePartitionsAssignmentSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteInt32(buffer, index, message.CountField);
+                index = Encoder.WriteArray<CreatePartitionsAssignment>(buffer, index, message.AssignmentsField, CreatePartitionsAssignmentSerde.WriteV00);
+                return index;
             }
-            public static CreatePartitionsTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static CreatePartitionsTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var countField = Decoder.ReadInt32(ref buffer);
-                var assignmentsField = Decoder.ReadArray<CreatePartitionsAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsAssignmentSerde.ReadV01(ref b));
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var countField = Decoder.ReadInt32(buffer, ref index);
+                var assignmentsField = Decoder.ReadArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV01);
                 return new(
                     nameField,
                     countField,
                     assignmentsField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, CreatePartitionsTopic message)
+            public static int WriteV01(byte[] buffer, int index, CreatePartitionsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteInt32(buffer, message.CountField);
-                buffer = Encoder.WriteArray<CreatePartitionsAssignment>(buffer, message.AssignmentsField, (b, i) => CreatePartitionsAssignmentSerde.WriteV01(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteInt32(buffer, index, message.CountField);
+                index = Encoder.WriteArray<CreatePartitionsAssignment>(buffer, index, message.AssignmentsField, CreatePartitionsAssignmentSerde.WriteV01);
+                return index;
             }
-            public static CreatePartitionsTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static CreatePartitionsTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var countField = Decoder.ReadInt32(ref buffer);
-                var assignmentsField = Decoder.ReadCompactArray<CreatePartitionsAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsAssignmentSerde.ReadV02(ref b));
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var countField = Decoder.ReadInt32(buffer, ref index);
+                var assignmentsField = Decoder.ReadCompactArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV02);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     countField,
                     assignmentsField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, CreatePartitionsTopic message)
+            public static int WriteV02(byte[] buffer, int index, CreatePartitionsTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteInt32(buffer, message.CountField);
-                buffer = Encoder.WriteCompactArray<CreatePartitionsAssignment>(buffer, message.AssignmentsField, (b, i) => CreatePartitionsAssignmentSerde.WriteV02(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt32(buffer, index, message.CountField);
+                index = Encoder.WriteCompactArray<CreatePartitionsAssignment>(buffer, index, message.AssignmentsField, CreatePartitionsAssignmentSerde.WriteV02);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static CreatePartitionsTopic ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static CreatePartitionsTopic ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var countField = Decoder.ReadInt32(ref buffer);
-                var assignmentsField = Decoder.ReadCompactArray<CreatePartitionsAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => CreatePartitionsAssignmentSerde.ReadV03(ref b));
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var countField = Decoder.ReadInt32(buffer, ref index);
+                var assignmentsField = Decoder.ReadCompactArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV03);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     countField,
                     assignmentsField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, CreatePartitionsTopic message)
+            public static int WriteV03(byte[] buffer, int index, CreatePartitionsTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteInt32(buffer, message.CountField);
-                buffer = Encoder.WriteCompactArray<CreatePartitionsAssignment>(buffer, message.AssignmentsField, (b, i) => CreatePartitionsAssignmentSerde.WriteV03(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt32(buffer, index, message.CountField);
+                index = Encoder.WriteCompactArray<CreatePartitionsAssignment>(buffer, index, message.AssignmentsField, CreatePartitionsAssignmentSerde.WriteV03);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class CreatePartitionsAssignmentSerde
             {
-                public static CreatePartitionsAssignment ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static CreatePartitionsAssignment ReadV00(byte[] buffer, ref int index)
                 {
-                    var brokerIdsField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var brokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     return new(
                         brokerIdsField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, CreatePartitionsAssignment message)
+                public static int WriteV00(byte[] buffer, int index, CreatePartitionsAssignment message)
                 {
-                    buffer = Encoder.WriteArray<int>(buffer, message.BrokerIdsField, (b, i) => Encoder.WriteInt32(b, i));
-                    return buffer;
+                    index = Encoder.WriteArray<int>(buffer, index, message.BrokerIdsField, Encoder.WriteInt32);
+                    return index;
                 }
-                public static CreatePartitionsAssignment ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static CreatePartitionsAssignment ReadV01(byte[] buffer, ref int index)
                 {
-                    var brokerIdsField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var brokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     return new(
                         brokerIdsField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, CreatePartitionsAssignment message)
+                public static int WriteV01(byte[] buffer, int index, CreatePartitionsAssignment message)
                 {
-                    buffer = Encoder.WriteArray<int>(buffer, message.BrokerIdsField, (b, i) => Encoder.WriteInt32(b, i));
-                    return buffer;
+                    index = Encoder.WriteArray<int>(buffer, index, message.BrokerIdsField, Encoder.WriteInt32);
+                    return index;
                 }
-                public static CreatePartitionsAssignment ReadV02(ref ReadOnlyMemory<byte> buffer)
+                public static CreatePartitionsAssignment ReadV02(byte[] buffer, ref int index)
                 {
-                    var brokerIdsField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var brokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         brokerIdsField
                     );
                 }
-                public static Memory<byte> WriteV02(Memory<byte> buffer, CreatePartitionsAssignment message)
+                public static int WriteV02(byte[] buffer, int index, CreatePartitionsAssignment message)
                 {
-                    buffer = Encoder.WriteCompactArray<int>(buffer, message.BrokerIdsField, (b, i) => Encoder.WriteInt32(b, i));
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteCompactArray<int>(buffer, index, message.BrokerIdsField, Encoder.WriteInt32);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
-                public static CreatePartitionsAssignment ReadV03(ref ReadOnlyMemory<byte> buffer)
+                public static CreatePartitionsAssignment ReadV03(byte[] buffer, ref int index)
                 {
-                    var brokerIdsField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var brokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         brokerIdsField
                     );
                 }
-                public static Memory<byte> WriteV03(Memory<byte> buffer, CreatePartitionsAssignment message)
+                public static int WriteV03(byte[] buffer, int index, CreatePartitionsAssignment message)
                 {
-                    buffer = Encoder.WriteCompactArray<int>(buffer, message.BrokerIdsField, (b, i) => Encoder.WriteInt32(b, i));
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteCompactArray<int>(buffer, index, message.BrokerIdsField, Encoder.WriteInt32);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

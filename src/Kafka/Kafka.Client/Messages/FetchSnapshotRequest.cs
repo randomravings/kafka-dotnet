@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
+using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot;
 using SnapshotId = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot.PartitionSnapshot.SnapshotId;
 using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot.PartitionSnapshot;
-using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot;
 
 namespace Kafka.Client.Messages
 {
@@ -27,6 +27,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<TopicSnapshot>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The name of the topic to fetch</param>
         /// <param name="PartitionsField">The partitions to fetch</param>

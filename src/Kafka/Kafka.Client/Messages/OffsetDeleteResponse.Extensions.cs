@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using OffsetDeleteResponseTopic = Kafka.Client.Messages.OffsetDeleteResponse.OffsetDeleteResponseTopic;
 using OffsetDeleteResponsePartition = Kafka.Client.Messages.OffsetDeleteResponse.OffsetDeleteResponseTopic.OffsetDeleteResponsePartition;
 
@@ -10,67 +9,68 @@ namespace Kafka.Client.Messages
     public static class OffsetDeleteResponseSerde
     {
         private static readonly DecodeDelegate<OffsetDeleteResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<OffsetDeleteResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static OffsetDeleteResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static OffsetDeleteResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, OffsetDeleteResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static OffsetDeleteResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, OffsetDeleteResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static OffsetDeleteResponse ReadV00(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var topicsField = Decoder.ReadArray<OffsetDeleteResponseTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetDeleteResponseTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var topicsField = Decoder.ReadArray<OffsetDeleteResponseTopic>(buffer, ref index, OffsetDeleteResponseTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 errorCodeField,
                 throttleTimeMsField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, OffsetDeleteResponse message)
+        private static int WriteV00(byte[] buffer, int index, OffsetDeleteResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<OffsetDeleteResponseTopic>(buffer, message.TopicsField, (b, i) => OffsetDeleteResponseTopicSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<OffsetDeleteResponseTopic>(buffer, index, message.TopicsField, OffsetDeleteResponseTopicSerde.WriteV00);
+            return index;
         }
         private static class OffsetDeleteResponseTopicSerde
         {
-            public static OffsetDeleteResponseTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static OffsetDeleteResponseTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<OffsetDeleteResponsePartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => OffsetDeleteResponsePartitionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<OffsetDeleteResponsePartition>(buffer, ref index, OffsetDeleteResponsePartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, OffsetDeleteResponseTopic message)
+            public static int WriteV00(byte[] buffer, int index, OffsetDeleteResponseTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<OffsetDeleteResponsePartition>(buffer, message.PartitionsField, (b, i) => OffsetDeleteResponsePartitionSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<OffsetDeleteResponsePartition>(buffer, index, message.PartitionsField, OffsetDeleteResponsePartitionSerde.WriteV00);
+                return index;
             }
             private static class OffsetDeleteResponsePartitionSerde
             {
-                public static OffsetDeleteResponsePartition ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static OffsetDeleteResponsePartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, OffsetDeleteResponsePartition message)
+                public static int WriteV00(byte[] buffer, int index, OffsetDeleteResponsePartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                    return index;
                 }
             }
         }

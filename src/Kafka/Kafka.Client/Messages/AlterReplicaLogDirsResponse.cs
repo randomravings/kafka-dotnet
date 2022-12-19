@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using AlterReplicaLogDirPartitionResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult.AlterReplicaLogDirPartitionResult;
 using AlterReplicaLogDirTopicResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult;
+using AlterReplicaLogDirPartitionResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult.AlterReplicaLogDirPartitionResult;
 
 namespace Kafka.Client.Messages
 {
@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<AlterReplicaLogDirTopicResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="TopicNameField">The name of the topic.</param>
         /// <param name="PartitionsField">The results for each partition.</param>

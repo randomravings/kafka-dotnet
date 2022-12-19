@@ -1,6 +1,5 @@
 ﻿using Kafka.Common.Attributes;
 using Kafka.Common.Hashing;
-using System.Collections.Immutable;
 
 namespace Kafka.Common.Records
 {
@@ -12,8 +11,8 @@ namespace Kafka.Common.Records
         [property: Serialization(SerializationType.Int8, 3)] sbyte MagicByte,
         [property: Serialization(SerializationType.Int8, 4)] Attributes Attributes,
         [property: Serialization(SerializationType.Int64, 5)] long Timestamp,
-        [property: Serialization(SerializationType.Bytes, 6)] ImmutableArray<byte>? Key,
-        [property: Serialization(SerializationType.Bytes, 7)] ImmutableArray<byte>? Value
+        [property: Serialization(SerializationType.Bytes, 6)] ReadOnlyMemory<byte>? Key,
+        [property: Serialization(SerializationType.Bytes, 7)] ReadOnlyMemory<byte>? Value
     ) : IRecord
     {
         int IRecord.Sequence => Sequence;
@@ -28,9 +27,9 @@ namespace Kafka.Common.Records
 
         long IRecord.Timestamp => Timestamp;
 
-        ImmutableArray<byte>? IRecord.Key => Key;
+        ReadOnlyMemory<byte>? IRecord.Key => Key;
 
-        ImmutableArray<byte>? IRecord.Value => Value;
+        ReadOnlyMemory<byte>? IRecord.Value => Value;
 
         long IRecord.TimestampDelta => 0;
 
@@ -44,33 +43,29 @@ namespace Kafka.Common.Records
 
         void IRecord.EnsureValid()
         {
-            var pos = 0;
             var crc = 0U;
-            var bytes = new byte[21].AsMemory();
-            var slice = bytes;
+            var offset = 0;
+            var pos = 0;
+            var bytes = new byte[21];
             // CRC magic byte, attributes and timestamp.
-            slice = Encoding.Encoder.WriteInt8(slice, MagicByte);
-            slice = Encoding.Encoder.WriteInt32(slice, (int)Attributes);
+            pos = Encoding.Encoder.WriteInt8(bytes, pos, MagicByte);
+            pos = Encoding.Encoder.WriteInt32(bytes, pos, (int)Attributes);
             if(MagicByte > 0)
-                slice = Encoding.Encoder.WriteInt64(slice, Timestamp);
-            var len = bytes.Length - slice.Length - pos;
-            crc = Crc32.Update(crc, bytes[pos..len].Span);
-            pos += len;
+                pos = Encoding.Encoder.WriteInt64(bytes, pos, Timestamp);
+            crc = Crc32.Update(crc, bytes, offset, pos);
+            offset = pos;
             // CRC Key
             if (Key != null)
             {
-                slice = Encoding.Encoder.WriteInt32(slice, Key.Value.Length);
-                len = bytes.Length - slice.Length - pos;
-                crc = Crc32.Update(crc, bytes[pos..len].Span);
-                pos += len;
-                crc = Crc32.Update(crc, Key.Value);
+                pos = Encoding.Encoder.WriteInt32(bytes, pos, Key.Value.Length);
+                crc = Crc32.Update(crc, bytes, offset, pos);
+                offset = pos;
             }
             // CRC Value
             if (Value != null)
             {
-                Encoding.Encoder.WriteInt32(bytes, Value.Value.Length);
-                len = bytes.Length - slice.Length - pos;
-                crc = Crc32.Update(crc, bytes[pos..len].Span);
+                Encoding.Encoder.WriteInt32(bytes, pos, Value.Value.Length);
+                crc = Crc32.Update(crc, bytes, offset, pos);
             }
             // Throw if not valid.
             if (crc != Crc)

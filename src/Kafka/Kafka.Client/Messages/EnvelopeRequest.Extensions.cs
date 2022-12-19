@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Messages
 {
@@ -8,35 +7,36 @@ namespace Kafka.Client.Messages
     public static class EnvelopeRequestSerde
     {
         private static readonly DecodeDelegate<EnvelopeRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<EnvelopeRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static EnvelopeRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static EnvelopeRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, EnvelopeRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static EnvelopeRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, EnvelopeRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static EnvelopeRequest ReadV00(byte[] buffer, ref int index)
         {
-            var requestDataField = Decoder.ReadCompactBytes(ref buffer);
-            var requestPrincipalField = Decoder.ReadCompactNullableBytes(ref buffer);
-            var clientHostAddressField = Decoder.ReadCompactBytes(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var requestDataField = Decoder.ReadCompactBytes(buffer, ref index);
+            var requestPrincipalField = Decoder.ReadCompactNullableBytes(buffer, ref index);
+            var clientHostAddressField = Decoder.ReadCompactBytes(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 requestDataField,
                 requestPrincipalField,
                 clientHostAddressField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, EnvelopeRequest message)
+        private static int WriteV00(byte[] buffer, int index, EnvelopeRequest message)
         {
-            buffer = Encoder.WriteCompactBytes(buffer, message.RequestDataField);
-            buffer = Encoder.WriteCompactNullableBytes(buffer, message.RequestPrincipalField);
-            buffer = Encoder.WriteCompactBytes(buffer, message.ClientHostAddressField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactBytes(buffer, index, message.RequestDataField);
+            index = Encoder.WriteCompactNullableBytes(buffer, index, message.RequestPrincipalField);
+            index = Encoder.WriteCompactBytes(buffer, index, message.ClientHostAddressField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

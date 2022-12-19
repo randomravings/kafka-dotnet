@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 
-namespace Kafka.Cli.AdminClient.Options
+namespace Kafka.Cli.Options
 {
     public abstract class OptionsBaseTopic
         : OptionsBase

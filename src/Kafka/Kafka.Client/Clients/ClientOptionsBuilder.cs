@@ -24,9 +24,9 @@ namespace Kafka.Client.Clients
         /// If the range is outside said range an exception will be thrown by the client.
         /// If not set, the version selection is deferred to the client.
         /// </summary>
-        /// <param name="version">Desired version to be used.</param>
+        /// <param name="version">Desired version to be used. -1 defaults to latest supported version.</param>
         /// <returns>Instance of <typeparamref name="TOptinsBuilder"/></returns>
-        TOptinsBuilder Version(short? version);
+        TOptinsBuilder Version(short version);
         /// <summary>
         /// Sets the client id for the request.
         /// If not set the value will be taken from 'client.id' in client config.
@@ -53,7 +53,7 @@ namespace Kafka.Client.Clients
     {
         protected readonly AdminClientConfig _adminClientConfig;
         protected int _timeoutMs = 0;
-        protected short? _version = null;
+        protected short _version = -1;
         protected string _clientId = "";
         protected ClientOptionsBuilder(AdminClientConfig adminClientConfig)
         {
@@ -70,7 +70,7 @@ namespace Kafka.Client.Clients
         }
 
         /// <inheritdoc/>
-        public TOptinsBuilder Version(short? version)
+        public TOptinsBuilder Version(short version)
         {
             _version = version;
             return (TOptinsBuilder)this;

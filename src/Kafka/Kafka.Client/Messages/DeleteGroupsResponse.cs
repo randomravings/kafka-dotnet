@@ -19,6 +19,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<DeletableGroupResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="GroupIdField">The group id</param>
         /// <param name="ErrorCodeField">The deletion error, or 0 if the deletion succeeded.</param>

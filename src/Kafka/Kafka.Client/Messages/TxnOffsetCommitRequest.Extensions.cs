@@ -1,8 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
-using TxnOffsetCommitRequestPartition = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic.TxnOffsetCommitRequestPartition;
 using TxnOffsetCommitRequestTopic = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic;
+using TxnOffsetCommitRequestPartition = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic.TxnOffsetCommitRequestPartition;
 
 namespace Kafka.Client.Messages
 {
@@ -10,32 +9,33 @@ namespace Kafka.Client.Messages
     public static class TxnOffsetCommitRequestSerde
     {
         private static readonly DecodeDelegate<TxnOffsetCommitRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<TxnOffsetCommitRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static TxnOffsetCommitRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static TxnOffsetCommitRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, TxnOffsetCommitRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static TxnOffsetCommitRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, TxnOffsetCommitRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static TxnOffsetCommitRequest ReadV00(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadString(ref buffer);
-            var groupIdField = Decoder.ReadString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
+            var transactionalIdField = Decoder.ReadString(buffer, ref index);
+            var groupIdField = Decoder.ReadString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
             var generationIdField = default(int);
             var memberIdField = "";
             var groupInstanceIdField = default(string?);
-            var topicsField = Decoder.ReadArray<TxnOffsetCommitRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitRequestTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadArray<TxnOffsetCommitRequestTopic>(buffer, ref index, TxnOffsetCommitRequestTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 transactionalIdField,
                 groupIdField,
@@ -47,25 +47,25 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, TxnOffsetCommitRequest message)
+        private static int WriteV00(byte[] buffer, int index, TxnOffsetCommitRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteArray<TxnOffsetCommitRequestTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitRequestTopicSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteArray<TxnOffsetCommitRequestTopic>(buffer, index, message.TopicsField, TxnOffsetCommitRequestTopicSerde.WriteV00);
+            return index;
         }
-        private static TxnOffsetCommitRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static TxnOffsetCommitRequest ReadV01(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadString(ref buffer);
-            var groupIdField = Decoder.ReadString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
+            var transactionalIdField = Decoder.ReadString(buffer, ref index);
+            var groupIdField = Decoder.ReadString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
             var generationIdField = default(int);
             var memberIdField = "";
             var groupInstanceIdField = default(string?);
-            var topicsField = Decoder.ReadArray<TxnOffsetCommitRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitRequestTopicSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadArray<TxnOffsetCommitRequestTopic>(buffer, ref index, TxnOffsetCommitRequestTopicSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 transactionalIdField,
                 groupIdField,
@@ -77,25 +77,25 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, TxnOffsetCommitRequest message)
+        private static int WriteV01(byte[] buffer, int index, TxnOffsetCommitRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteArray<TxnOffsetCommitRequestTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitRequestTopicSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteArray<TxnOffsetCommitRequestTopic>(buffer, index, message.TopicsField, TxnOffsetCommitRequestTopicSerde.WriteV01);
+            return index;
         }
-        private static TxnOffsetCommitRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static TxnOffsetCommitRequest ReadV02(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadString(ref buffer);
-            var groupIdField = Decoder.ReadString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
+            var transactionalIdField = Decoder.ReadString(buffer, ref index);
+            var groupIdField = Decoder.ReadString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
             var generationIdField = default(int);
             var memberIdField = "";
             var groupInstanceIdField = default(string?);
-            var topicsField = Decoder.ReadArray<TxnOffsetCommitRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitRequestTopicSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadArray<TxnOffsetCommitRequestTopic>(buffer, ref index, TxnOffsetCommitRequestTopicSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 transactionalIdField,
                 groupIdField,
@@ -107,26 +107,26 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, TxnOffsetCommitRequest message)
+        private static int WriteV02(byte[] buffer, int index, TxnOffsetCommitRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteArray<TxnOffsetCommitRequestTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitRequestTopicSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteArray<TxnOffsetCommitRequestTopic>(buffer, index, message.TopicsField, TxnOffsetCommitRequestTopicSerde.WriteV02);
+            return index;
         }
-        private static TxnOffsetCommitRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static TxnOffsetCommitRequest ReadV03(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadCompactString(ref buffer);
-            var groupIdField = Decoder.ReadCompactString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var memberIdField = Decoder.ReadCompactString(ref buffer);
-            var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
-            var topicsField = Decoder.ReadCompactArray<TxnOffsetCommitRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitRequestTopicSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var transactionalIdField = Decoder.ReadCompactString(buffer, ref index);
+            var groupIdField = Decoder.ReadCompactString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+            var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var topicsField = Decoder.ReadCompactArray<TxnOffsetCommitRequestTopic>(buffer, ref index, TxnOffsetCommitRequestTopicSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 transactionalIdField,
                 groupIdField,
@@ -138,91 +138,91 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, TxnOffsetCommitRequest message)
+        private static int WriteV03(byte[] buffer, int index, TxnOffsetCommitRequest message)
         {
-            buffer = Encoder.WriteCompactString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteCompactString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-            buffer = Encoder.WriteCompactArray<TxnOffsetCommitRequestTopic>(buffer, message.TopicsField, (b, i) => TxnOffsetCommitRequestTopicSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteCompactString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
+            index = Encoder.WriteCompactArray<TxnOffsetCommitRequestTopic>(buffer, index, message.TopicsField, TxnOffsetCommitRequestTopicSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class TxnOffsetCommitRequestTopicSerde
         {
-            public static TxnOffsetCommitRequestTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static TxnOffsetCommitRequestTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<TxnOffsetCommitRequestPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitRequestPartitionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<TxnOffsetCommitRequestPartition>(buffer, ref index, TxnOffsetCommitRequestPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, TxnOffsetCommitRequestTopic message)
+            public static int WriteV00(byte[] buffer, int index, TxnOffsetCommitRequestTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<TxnOffsetCommitRequestPartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitRequestPartitionSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<TxnOffsetCommitRequestPartition>(buffer, index, message.PartitionsField, TxnOffsetCommitRequestPartitionSerde.WriteV00);
+                return index;
             }
-            public static TxnOffsetCommitRequestTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static TxnOffsetCommitRequestTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<TxnOffsetCommitRequestPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitRequestPartitionSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<TxnOffsetCommitRequestPartition>(buffer, ref index, TxnOffsetCommitRequestPartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, TxnOffsetCommitRequestTopic message)
+            public static int WriteV01(byte[] buffer, int index, TxnOffsetCommitRequestTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<TxnOffsetCommitRequestPartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitRequestPartitionSerde.WriteV01(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<TxnOffsetCommitRequestPartition>(buffer, index, message.PartitionsField, TxnOffsetCommitRequestPartitionSerde.WriteV01);
+                return index;
             }
-            public static TxnOffsetCommitRequestTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static TxnOffsetCommitRequestTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<TxnOffsetCommitRequestPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitRequestPartitionSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<TxnOffsetCommitRequestPartition>(buffer, ref index, TxnOffsetCommitRequestPartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, TxnOffsetCommitRequestTopic message)
+            public static int WriteV02(byte[] buffer, int index, TxnOffsetCommitRequestTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<TxnOffsetCommitRequestPartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitRequestPartitionSerde.WriteV02(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<TxnOffsetCommitRequestPartition>(buffer, index, message.PartitionsField, TxnOffsetCommitRequestPartitionSerde.WriteV02);
+                return index;
             }
-            public static TxnOffsetCommitRequestTopic ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static TxnOffsetCommitRequestTopic ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<TxnOffsetCommitRequestPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => TxnOffsetCommitRequestPartitionSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<TxnOffsetCommitRequestPartition>(buffer, ref index, TxnOffsetCommitRequestPartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, TxnOffsetCommitRequestTopic message)
+            public static int WriteV03(byte[] buffer, int index, TxnOffsetCommitRequestTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteCompactArray<TxnOffsetCommitRequestPartition>(buffer, message.PartitionsField, (b, i) => TxnOffsetCommitRequestPartitionSerde.WriteV03(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<TxnOffsetCommitRequestPartition>(buffer, index, message.PartitionsField, TxnOffsetCommitRequestPartitionSerde.WriteV03);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class TxnOffsetCommitRequestPartitionSerde
             {
-                public static TxnOffsetCommitRequestPartition ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static TxnOffsetCommitRequestPartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var committedOffsetField = Decoder.ReadInt64(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var committedOffsetField = Decoder.ReadInt64(buffer, ref index);
                     var committedLeaderEpochField = default(int);
-                    var committedMetadataField = Decoder.ReadNullableString(ref buffer);
+                    var committedMetadataField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
                         partitionIndexField,
                         committedOffsetField,
@@ -230,19 +230,19 @@ namespace Kafka.Client.Messages
                         committedMetadataField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, TxnOffsetCommitRequestPartition message)
+                public static int WriteV00(byte[] buffer, int index, TxnOffsetCommitRequestPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.CommittedOffsetField);
-                    buffer = Encoder.WriteNullableString(buffer, message.CommittedMetadataField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.CommittedOffsetField);
+                    index = Encoder.WriteNullableString(buffer, index, message.CommittedMetadataField);
+                    return index;
                 }
-                public static TxnOffsetCommitRequestPartition ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static TxnOffsetCommitRequestPartition ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var committedOffsetField = Decoder.ReadInt64(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var committedOffsetField = Decoder.ReadInt64(buffer, ref index);
                     var committedLeaderEpochField = default(int);
-                    var committedMetadataField = Decoder.ReadNullableString(ref buffer);
+                    var committedMetadataField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
                         partitionIndexField,
                         committedOffsetField,
@@ -250,19 +250,19 @@ namespace Kafka.Client.Messages
                         committedMetadataField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, TxnOffsetCommitRequestPartition message)
+                public static int WriteV01(byte[] buffer, int index, TxnOffsetCommitRequestPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.CommittedOffsetField);
-                    buffer = Encoder.WriteNullableString(buffer, message.CommittedMetadataField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.CommittedOffsetField);
+                    index = Encoder.WriteNullableString(buffer, index, message.CommittedMetadataField);
+                    return index;
                 }
-                public static TxnOffsetCommitRequestPartition ReadV02(ref ReadOnlyMemory<byte> buffer)
+                public static TxnOffsetCommitRequestPartition ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var committedOffsetField = Decoder.ReadInt64(ref buffer);
-                    var committedLeaderEpochField = Decoder.ReadInt32(ref buffer);
-                    var committedMetadataField = Decoder.ReadNullableString(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var committedOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var committedLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var committedMetadataField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
                         partitionIndexField,
                         committedOffsetField,
@@ -270,21 +270,21 @@ namespace Kafka.Client.Messages
                         committedMetadataField
                     );
                 }
-                public static Memory<byte> WriteV02(Memory<byte> buffer, TxnOffsetCommitRequestPartition message)
+                public static int WriteV02(byte[] buffer, int index, TxnOffsetCommitRequestPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.CommittedOffsetField);
-                    buffer = Encoder.WriteInt32(buffer, message.CommittedLeaderEpochField);
-                    buffer = Encoder.WriteNullableString(buffer, message.CommittedMetadataField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.CommittedOffsetField);
+                    index = Encoder.WriteInt32(buffer, index, message.CommittedLeaderEpochField);
+                    index = Encoder.WriteNullableString(buffer, index, message.CommittedMetadataField);
+                    return index;
                 }
-                public static TxnOffsetCommitRequestPartition ReadV03(ref ReadOnlyMemory<byte> buffer)
+                public static TxnOffsetCommitRequestPartition ReadV03(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var committedOffsetField = Decoder.ReadInt64(ref buffer);
-                    var committedLeaderEpochField = Decoder.ReadInt32(ref buffer);
-                    var committedMetadataField = Decoder.ReadCompactNullableString(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var committedOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var committedLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var committedMetadataField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
                         committedOffsetField,
@@ -292,14 +292,14 @@ namespace Kafka.Client.Messages
                         committedMetadataField
                     );
                 }
-                public static Memory<byte> WriteV03(Memory<byte> buffer, TxnOffsetCommitRequestPartition message)
+                public static int WriteV03(byte[] buffer, int index, TxnOffsetCommitRequestPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.CommittedOffsetField);
-                    buffer = Encoder.WriteInt32(buffer, message.CommittedLeaderEpochField);
-                    buffer = Encoder.WriteCompactNullableString(buffer, message.CommittedMetadataField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.CommittedOffsetField);
+                    index = Encoder.WriteInt32(buffer, index, message.CommittedLeaderEpochField);
+                    index = Encoder.WriteCompactNullableString(buffer, index, message.CommittedMetadataField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

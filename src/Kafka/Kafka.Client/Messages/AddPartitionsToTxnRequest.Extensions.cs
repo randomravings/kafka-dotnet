@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using AddPartitionsToTxnTopic = Kafka.Client.Messages.AddPartitionsToTxnRequest.AddPartitionsToTxnTopic;
 
 namespace Kafka.Client.Messages
@@ -9,28 +8,29 @@ namespace Kafka.Client.Messages
     public static class AddPartitionsToTxnRequestSerde
     {
         private static readonly DecodeDelegate<AddPartitionsToTxnRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<AddPartitionsToTxnRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static AddPartitionsToTxnRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static AddPartitionsToTxnRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, AddPartitionsToTxnRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static AddPartitionsToTxnRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, AddPartitionsToTxnRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static AddPartitionsToTxnRequest ReadV00(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
-            var topicsField = Decoder.ReadArray<AddPartitionsToTxnTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => AddPartitionsToTxnTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var transactionalIdField = Decoder.ReadString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+            var topicsField = Decoder.ReadArray<AddPartitionsToTxnTopic>(buffer, ref index, AddPartitionsToTxnTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 transactionalIdField,
                 producerIdField,
@@ -38,20 +38,20 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, AddPartitionsToTxnRequest message)
+        private static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteArray<AddPartitionsToTxnTopic>(buffer, message.TopicsField, (b, i) => AddPartitionsToTxnTopicSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteArray<AddPartitionsToTxnTopic>(buffer, index, message.TopicsField, AddPartitionsToTxnTopicSerde.WriteV00);
+            return index;
         }
-        private static AddPartitionsToTxnRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static AddPartitionsToTxnRequest ReadV01(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
-            var topicsField = Decoder.ReadArray<AddPartitionsToTxnTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => AddPartitionsToTxnTopicSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var transactionalIdField = Decoder.ReadString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+            var topicsField = Decoder.ReadArray<AddPartitionsToTxnTopic>(buffer, ref index, AddPartitionsToTxnTopicSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 transactionalIdField,
                 producerIdField,
@@ -59,20 +59,20 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, AddPartitionsToTxnRequest message)
+        private static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteArray<AddPartitionsToTxnTopic>(buffer, message.TopicsField, (b, i) => AddPartitionsToTxnTopicSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteArray<AddPartitionsToTxnTopic>(buffer, index, message.TopicsField, AddPartitionsToTxnTopicSerde.WriteV01);
+            return index;
         }
-        private static AddPartitionsToTxnRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static AddPartitionsToTxnRequest ReadV02(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
-            var topicsField = Decoder.ReadArray<AddPartitionsToTxnTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => AddPartitionsToTxnTopicSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var transactionalIdField = Decoder.ReadString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+            var topicsField = Decoder.ReadArray<AddPartitionsToTxnTopic>(buffer, ref index, AddPartitionsToTxnTopicSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 transactionalIdField,
                 producerIdField,
@@ -80,21 +80,21 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, AddPartitionsToTxnRequest message)
+        private static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteArray<AddPartitionsToTxnTopic>(buffer, message.TopicsField, (b, i) => AddPartitionsToTxnTopicSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteArray<AddPartitionsToTxnTopic>(buffer, index, message.TopicsField, AddPartitionsToTxnTopicSerde.WriteV02);
+            return index;
         }
-        private static AddPartitionsToTxnRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static AddPartitionsToTxnRequest ReadV03(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadCompactString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
-            var topicsField = Decoder.ReadCompactArray<AddPartitionsToTxnTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => AddPartitionsToTxnTopicSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var transactionalIdField = Decoder.ReadCompactString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+            var topicsField = Decoder.ReadCompactArray<AddPartitionsToTxnTopic>(buffer, ref index, AddPartitionsToTxnTopicSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 transactionalIdField,
                 producerIdField,
@@ -102,78 +102,78 @@ namespace Kafka.Client.Messages
                 topicsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, AddPartitionsToTxnRequest message)
+        private static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnRequest message)
         {
-            buffer = Encoder.WriteCompactString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteCompactArray<AddPartitionsToTxnTopic>(buffer, message.TopicsField, (b, i) => AddPartitionsToTxnTopicSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteCompactArray<AddPartitionsToTxnTopic>(buffer, index, message.TopicsField, AddPartitionsToTxnTopicSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class AddPartitionsToTxnTopicSerde
         {
-            public static AddPartitionsToTxnTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static AddPartitionsToTxnTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, AddPartitionsToTxnTopic message)
+            public static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
             }
-            public static AddPartitionsToTxnTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static AddPartitionsToTxnTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, AddPartitionsToTxnTopic message)
+            public static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
             }
-            public static AddPartitionsToTxnTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static AddPartitionsToTxnTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, AddPartitionsToTxnTopic message)
+            public static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
             }
-            public static AddPartitionsToTxnTopic ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static AddPartitionsToTxnTopic ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, AddPartitionsToTxnTopic message)
+            public static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

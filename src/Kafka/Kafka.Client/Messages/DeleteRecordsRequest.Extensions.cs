@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using DeleteRecordsPartition = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic.DeleteRecordsPartition;
 using DeleteRecordsTopic = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic;
 
@@ -10,164 +9,165 @@ namespace Kafka.Client.Messages
     public static class DeleteRecordsRequestSerde
     {
         private static readonly DecodeDelegate<DeleteRecordsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
         };
         private static readonly EncodeDelegate<DeleteRecordsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
         };
-        public static DeleteRecordsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DeleteRecordsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DeleteRecordsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DeleteRecordsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DeleteRecordsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DeleteRecordsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<DeleteRecordsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteRecordsTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<DeleteRecordsTopic>(buffer, ref index, DeleteRecordsTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 topicsField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DeleteRecordsRequest message)
+        private static int WriteV00(byte[] buffer, int index, DeleteRecordsRequest message)
         {
-            buffer = Encoder.WriteArray<DeleteRecordsTopic>(buffer, message.TopicsField, (b, i) => DeleteRecordsTopicSerde.WriteV00(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            return buffer;
+            index = Encoder.WriteArray<DeleteRecordsTopic>(buffer, index, message.TopicsField, DeleteRecordsTopicSerde.WriteV00);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            return index;
         }
-        private static DeleteRecordsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteRecordsRequest ReadV01(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<DeleteRecordsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteRecordsTopicSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
+            var topicsField = Decoder.ReadArray<DeleteRecordsTopic>(buffer, ref index, DeleteRecordsTopicSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 topicsField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DeleteRecordsRequest message)
+        private static int WriteV01(byte[] buffer, int index, DeleteRecordsRequest message)
         {
-            buffer = Encoder.WriteArray<DeleteRecordsTopic>(buffer, message.TopicsField, (b, i) => DeleteRecordsTopicSerde.WriteV01(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            return buffer;
+            index = Encoder.WriteArray<DeleteRecordsTopic>(buffer, index, message.TopicsField, DeleteRecordsTopicSerde.WriteV01);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            return index;
         }
-        private static DeleteRecordsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteRecordsRequest ReadV02(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<DeleteRecordsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteRecordsTopicSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<DeleteRecordsTopic>(buffer, ref index, DeleteRecordsTopicSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 timeoutMsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, DeleteRecordsRequest message)
+        private static int WriteV02(byte[] buffer, int index, DeleteRecordsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DeleteRecordsTopic>(buffer, message.TopicsField, (b, i) => DeleteRecordsTopicSerde.WriteV02(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.TimeoutMsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DeleteRecordsTopic>(buffer, index, message.TopicsField, DeleteRecordsTopicSerde.WriteV02);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class DeleteRecordsTopicSerde
         {
-            public static DeleteRecordsTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static DeleteRecordsTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<DeleteRecordsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteRecordsPartitionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<DeleteRecordsPartition>(buffer, ref index, DeleteRecordsPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, DeleteRecordsTopic message)
+            public static int WriteV00(byte[] buffer, int index, DeleteRecordsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<DeleteRecordsPartition>(buffer, message.PartitionsField, (b, i) => DeleteRecordsPartitionSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<DeleteRecordsPartition>(buffer, index, message.PartitionsField, DeleteRecordsPartitionSerde.WriteV00);
+                return index;
             }
-            public static DeleteRecordsTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static DeleteRecordsTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<DeleteRecordsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteRecordsPartitionSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<DeleteRecordsPartition>(buffer, ref index, DeleteRecordsPartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, DeleteRecordsTopic message)
+            public static int WriteV01(byte[] buffer, int index, DeleteRecordsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<DeleteRecordsPartition>(buffer, message.PartitionsField, (b, i) => DeleteRecordsPartitionSerde.WriteV01(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<DeleteRecordsPartition>(buffer, index, message.PartitionsField, DeleteRecordsPartitionSerde.WriteV01);
+                return index;
             }
-            public static DeleteRecordsTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static DeleteRecordsTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<DeleteRecordsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteRecordsPartitionSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<DeleteRecordsPartition>(buffer, ref index, DeleteRecordsPartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, DeleteRecordsTopic message)
+            public static int WriteV02(byte[] buffer, int index, DeleteRecordsTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteCompactArray<DeleteRecordsPartition>(buffer, message.PartitionsField, (b, i) => DeleteRecordsPartitionSerde.WriteV02(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<DeleteRecordsPartition>(buffer, index, message.PartitionsField, DeleteRecordsPartitionSerde.WriteV02);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class DeleteRecordsPartitionSerde
             {
-                public static DeleteRecordsPartition ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static DeleteRecordsPartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var offsetField = Decoder.ReadInt64(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var offsetField = Decoder.ReadInt64(buffer, ref index);
                     return new(
                         partitionIndexField,
                         offsetField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, DeleteRecordsPartition message)
+                public static int WriteV00(byte[] buffer, int index, DeleteRecordsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.OffsetField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.OffsetField);
+                    return index;
                 }
-                public static DeleteRecordsPartition ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static DeleteRecordsPartition ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var offsetField = Decoder.ReadInt64(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var offsetField = Decoder.ReadInt64(buffer, ref index);
                     return new(
                         partitionIndexField,
                         offsetField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, DeleteRecordsPartition message)
+                public static int WriteV01(byte[] buffer, int index, DeleteRecordsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.OffsetField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.OffsetField);
+                    return index;
                 }
-                public static DeleteRecordsPartition ReadV02(ref ReadOnlyMemory<byte> buffer)
+                public static DeleteRecordsPartition ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var offsetField = Decoder.ReadInt64(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var offsetField = Decoder.ReadInt64(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
                         offsetField
                     );
                 }
-                public static Memory<byte> WriteV02(Memory<byte> buffer, DeleteRecordsPartition message)
+                public static int WriteV02(byte[] buffer, int index, DeleteRecordsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.OffsetField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.OffsetField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

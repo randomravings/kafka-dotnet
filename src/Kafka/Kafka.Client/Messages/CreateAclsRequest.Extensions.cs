@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using AclCreation = Kafka.Client.Messages.CreateAclsRequest.AclCreation;
 
 namespace Kafka.Client.Messages
@@ -9,85 +8,86 @@ namespace Kafka.Client.Messages
     public static class CreateAclsRequestSerde
     {
         private static readonly DecodeDelegate<CreateAclsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<CreateAclsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static CreateAclsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static CreateAclsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, CreateAclsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static CreateAclsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, CreateAclsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static CreateAclsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var creationsField = Decoder.ReadArray<AclCreation>(ref buffer, (ref ReadOnlyMemory<byte> b) => AclCreationSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Creations'");
+            var creationsField = Decoder.ReadArray<AclCreation>(buffer, ref index, AclCreationSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Creations'");
             return new(
                 creationsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, CreateAclsRequest message)
+        private static int WriteV00(byte[] buffer, int index, CreateAclsRequest message)
         {
-            buffer = Encoder.WriteArray<AclCreation>(buffer, message.CreationsField, (b, i) => AclCreationSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteArray<AclCreation>(buffer, index, message.CreationsField, AclCreationSerde.WriteV00);
+            return index;
         }
-        private static CreateAclsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static CreateAclsRequest ReadV01(byte[] buffer, ref int index)
         {
-            var creationsField = Decoder.ReadArray<AclCreation>(ref buffer, (ref ReadOnlyMemory<byte> b) => AclCreationSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Creations'");
+            var creationsField = Decoder.ReadArray<AclCreation>(buffer, ref index, AclCreationSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Creations'");
             return new(
                 creationsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, CreateAclsRequest message)
+        private static int WriteV01(byte[] buffer, int index, CreateAclsRequest message)
         {
-            buffer = Encoder.WriteArray<AclCreation>(buffer, message.CreationsField, (b, i) => AclCreationSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteArray<AclCreation>(buffer, index, message.CreationsField, AclCreationSerde.WriteV01);
+            return index;
         }
-        private static CreateAclsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static CreateAclsRequest ReadV02(byte[] buffer, ref int index)
         {
-            var creationsField = Decoder.ReadCompactArray<AclCreation>(ref buffer, (ref ReadOnlyMemory<byte> b) => AclCreationSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Creations'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var creationsField = Decoder.ReadCompactArray<AclCreation>(buffer, ref index, AclCreationSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Creations'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 creationsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, CreateAclsRequest message)
+        private static int WriteV02(byte[] buffer, int index, CreateAclsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<AclCreation>(buffer, message.CreationsField, (b, i) => AclCreationSerde.WriteV02(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<AclCreation>(buffer, index, message.CreationsField, AclCreationSerde.WriteV02);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static CreateAclsRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static CreateAclsRequest ReadV03(byte[] buffer, ref int index)
         {
-            var creationsField = Decoder.ReadCompactArray<AclCreation>(ref buffer, (ref ReadOnlyMemory<byte> b) => AclCreationSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Creations'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var creationsField = Decoder.ReadCompactArray<AclCreation>(buffer, ref index, AclCreationSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Creations'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 creationsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, CreateAclsRequest message)
+        private static int WriteV03(byte[] buffer, int index, CreateAclsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<AclCreation>(buffer, message.CreationsField, (b, i) => AclCreationSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<AclCreation>(buffer, index, message.CreationsField, AclCreationSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class AclCreationSerde
         {
-            public static AclCreation ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static AclCreation ReadV00(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadString(ref buffer);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadString(buffer, ref index);
                 var resourcePatternTypeField = default(sbyte);
-                var principalField = Decoder.ReadString(ref buffer);
-                var hostField = Decoder.ReadString(ref buffer);
-                var operationField = Decoder.ReadInt8(ref buffer);
-                var permissionTypeField = Decoder.ReadInt8(ref buffer);
+                var principalField = Decoder.ReadString(buffer, ref index);
+                var hostField = Decoder.ReadString(buffer, ref index);
+                var operationField = Decoder.ReadInt8(buffer, ref index);
+                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 return new(
                     resourceTypeField,
                     resourceNameField,
@@ -98,25 +98,25 @@ namespace Kafka.Client.Messages
                     permissionTypeField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, AclCreation message)
+            public static int WriteV00(byte[] buffer, int index, AclCreation message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteString(buffer, message.PrincipalField);
-                buffer = Encoder.WriteString(buffer, message.HostField);
-                buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteString(buffer, index, message.PrincipalField);
+                index = Encoder.WriteString(buffer, index, message.HostField);
+                index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                return index;
             }
-            public static AclCreation ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static AclCreation ReadV01(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadString(ref buffer);
-                var resourcePatternTypeField = Decoder.ReadInt8(ref buffer);
-                var principalField = Decoder.ReadString(ref buffer);
-                var hostField = Decoder.ReadString(ref buffer);
-                var operationField = Decoder.ReadInt8(ref buffer);
-                var permissionTypeField = Decoder.ReadInt8(ref buffer);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadString(buffer, ref index);
+                var resourcePatternTypeField = Decoder.ReadInt8(buffer, ref index);
+                var principalField = Decoder.ReadString(buffer, ref index);
+                var hostField = Decoder.ReadString(buffer, ref index);
+                var operationField = Decoder.ReadInt8(buffer, ref index);
+                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 return new(
                     resourceTypeField,
                     resourceNameField,
@@ -127,27 +127,27 @@ namespace Kafka.Client.Messages
                     permissionTypeField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, AclCreation message)
+            public static int WriteV01(byte[] buffer, int index, AclCreation message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteInt8(buffer, message.ResourcePatternTypeField);
-                buffer = Encoder.WriteString(buffer, message.PrincipalField);
-                buffer = Encoder.WriteString(buffer, message.HostField);
-                buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteInt8(buffer, index, message.ResourcePatternTypeField);
+                index = Encoder.WriteString(buffer, index, message.PrincipalField);
+                index = Encoder.WriteString(buffer, index, message.HostField);
+                index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                return index;
             }
-            public static AclCreation ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static AclCreation ReadV02(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadCompactString(ref buffer);
-                var resourcePatternTypeField = Decoder.ReadInt8(ref buffer);
-                var principalField = Decoder.ReadCompactString(ref buffer);
-                var hostField = Decoder.ReadCompactString(ref buffer);
-                var operationField = Decoder.ReadInt8(ref buffer);
-                var permissionTypeField = Decoder.ReadInt8(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var resourcePatternTypeField = Decoder.ReadInt8(buffer, ref index);
+                var principalField = Decoder.ReadCompactString(buffer, ref index);
+                var hostField = Decoder.ReadCompactString(buffer, ref index);
+                var operationField = Decoder.ReadInt8(buffer, ref index);
+                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     resourceTypeField,
                     resourceNameField,
@@ -158,28 +158,28 @@ namespace Kafka.Client.Messages
                     permissionTypeField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, AclCreation message)
+            public static int WriteV02(byte[] buffer, int index, AclCreation message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteInt8(buffer, message.ResourcePatternTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.PrincipalField);
-                buffer = Encoder.WriteCompactString(buffer, message.HostField);
-                buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteInt8(buffer, index, message.ResourcePatternTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.PrincipalField);
+                index = Encoder.WriteCompactString(buffer, index, message.HostField);
+                index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static AclCreation ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static AclCreation ReadV03(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadCompactString(ref buffer);
-                var resourcePatternTypeField = Decoder.ReadInt8(ref buffer);
-                var principalField = Decoder.ReadCompactString(ref buffer);
-                var hostField = Decoder.ReadCompactString(ref buffer);
-                var operationField = Decoder.ReadInt8(ref buffer);
-                var permissionTypeField = Decoder.ReadInt8(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var resourcePatternTypeField = Decoder.ReadInt8(buffer, ref index);
+                var principalField = Decoder.ReadCompactString(buffer, ref index);
+                var hostField = Decoder.ReadCompactString(buffer, ref index);
+                var operationField = Decoder.ReadInt8(buffer, ref index);
+                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     resourceTypeField,
                     resourceNameField,
@@ -190,17 +190,17 @@ namespace Kafka.Client.Messages
                     permissionTypeField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, AclCreation message)
+            public static int WriteV03(byte[] buffer, int index, AclCreation message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteInt8(buffer, message.ResourcePatternTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.PrincipalField);
-                buffer = Encoder.WriteCompactString(buffer, message.HostField);
-                buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteInt8(buffer, index, message.ResourcePatternTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.PrincipalField);
+                index = Encoder.WriteCompactString(buffer, index, message.HostField);
+                index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

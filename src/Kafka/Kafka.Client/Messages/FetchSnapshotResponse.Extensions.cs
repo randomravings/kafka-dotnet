@@ -1,11 +1,10 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using Kafka.Common.Records;
-using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
-using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
 using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
+using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
+using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
 
 namespace Kafka.Client.Messages
 {
@@ -13,67 +12,68 @@ namespace Kafka.Client.Messages
     public static class FetchSnapshotResponseSerde
     {
         private static readonly DecodeDelegate<FetchSnapshotResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<FetchSnapshotResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static FetchSnapshotResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static FetchSnapshotResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, FetchSnapshotResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static FetchSnapshotResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, FetchSnapshotResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static FetchSnapshotResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var topicsField = Decoder.ReadCompactArray<TopicSnapshot>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicSnapshotSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var topicsField = Decoder.ReadCompactArray<TopicSnapshot>(buffer, ref index, TopicSnapshotSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, FetchSnapshotResponse message)
+        private static int WriteV00(byte[] buffer, int index, FetchSnapshotResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<TopicSnapshot>(buffer, message.TopicsField, (b, i) => TopicSnapshotSerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<TopicSnapshot>(buffer, index, message.TopicsField, TopicSnapshotSerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class TopicSnapshotSerde
         {
-            public static TopicSnapshot ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static TopicSnapshot ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<PartitionSnapshot>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionSnapshotSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<PartitionSnapshot>(buffer, ref index, PartitionSnapshotSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, TopicSnapshot message)
+            public static int WriteV00(byte[] buffer, int index, TopicSnapshot message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteCompactArray<PartitionSnapshot>(buffer, message.PartitionsField, (b, i) => PartitionSnapshotSerde.WriteV00(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<PartitionSnapshot>(buffer, index, message.PartitionsField, PartitionSnapshotSerde.WriteV00);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class PartitionSnapshotSerde
             {
-                public static PartitionSnapshot ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static PartitionSnapshot ReadV00(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(ref buffer);
-                    var errorCodeField = Decoder.ReadInt16(ref buffer);
-                    var snapshotIdField = SnapshotIdSerde.ReadV00(ref buffer);
+                    var indexField = Decoder.ReadInt32(buffer, ref index);
+                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var snapshotIdField = SnapshotIdSerde.ReadV00(buffer, ref index);
                     var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var sizeField = Decoder.ReadInt64(ref buffer);
-                    var positionField = Decoder.ReadInt64(ref buffer);
-                    var unalignedRecordsField = Decoder.ReadRecords(ref buffer) ?? RecordBatch.Empty;
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var sizeField = Decoder.ReadInt64(buffer, ref index);
+                    var positionField = Decoder.ReadInt64(buffer, ref index);
+                    var unalignedRecordsField = Decoder.ReadRecords(buffer, ref index) ?? RecordBatch.Empty;
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         indexField,
                         errorCodeField,
@@ -84,56 +84,56 @@ namespace Kafka.Client.Messages
                         unalignedRecordsField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, PartitionSnapshot message)
+                public static int WriteV00(byte[] buffer, int index, PartitionSnapshot message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.IndexField);
-                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    buffer = SnapshotIdSerde.WriteV00(buffer, message.SnapshotIdField);
-                    buffer = LeaderIdAndEpochSerde.WriteV00(buffer, message.CurrentLeaderField);
-                    buffer = Encoder.WriteInt64(buffer, message.SizeField);
-                    buffer = Encoder.WriteInt64(buffer, message.PositionField);
-                    buffer = Encoder.WriteCompactRecords(buffer, message.UnalignedRecordsField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.IndexField);
+                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                    index = SnapshotIdSerde.WriteV00(buffer, index, message.SnapshotIdField);
+                    index = LeaderIdAndEpochSerde.WriteV00(buffer, index, message.CurrentLeaderField);
+                    index = Encoder.WriteInt64(buffer, index, message.SizeField);
+                    index = Encoder.WriteInt64(buffer, index, message.PositionField);
+                    index = Encoder.WriteCompactRecords(buffer, index, message.UnalignedRecordsField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
                 private static class SnapshotIdSerde
                 {
-                    public static SnapshotId ReadV00(ref ReadOnlyMemory<byte> buffer)
+                    public static SnapshotId ReadV00(byte[] buffer, ref int index)
                     {
-                        var endOffsetField = Decoder.ReadInt64(ref buffer);
-                        var epochField = Decoder.ReadInt32(ref buffer);
-                        _ = Decoder.ReadVarUInt32(ref buffer);
+                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var epochField = Decoder.ReadInt32(buffer, ref index);
+                        _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
                             endOffsetField,
                             epochField
                         );
                     }
-                    public static Memory<byte> WriteV00(Memory<byte> buffer, SnapshotId message)
+                    public static int WriteV00(byte[] buffer, int index, SnapshotId message)
                     {
-                        buffer = Encoder.WriteInt64(buffer, message.EndOffsetField);
-                        buffer = Encoder.WriteInt32(buffer, message.EpochField);
-                        buffer = Encoder.WriteVarUInt32(buffer, 0);
-                        return buffer;
+                        index = Encoder.WriteInt64(buffer, index, message.EndOffsetField);
+                        index = Encoder.WriteInt32(buffer, index, message.EpochField);
+                        index = Encoder.WriteVarUInt32(buffer, index, 0);
+                        return index;
                     }
                 }
                 private static class LeaderIdAndEpochSerde
                 {
-                    public static LeaderIdAndEpoch ReadV00(ref ReadOnlyMemory<byte> buffer)
+                    public static LeaderIdAndEpoch ReadV00(byte[] buffer, ref int index)
                     {
-                        var leaderIdField = Decoder.ReadInt32(ref buffer);
-                        var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                        _ = Decoder.ReadVarUInt32(ref buffer);
+                        var leaderIdField = Decoder.ReadInt32(buffer, ref index);
+                        var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                        _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
                             leaderIdField,
                             leaderEpochField
                         );
                     }
-                    public static Memory<byte> WriteV00(Memory<byte> buffer, LeaderIdAndEpoch message)
+                    public static int WriteV00(byte[] buffer, int index, LeaderIdAndEpoch message)
                     {
-                        buffer = Encoder.WriteInt32(buffer, message.LeaderIdField);
-                        buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                        buffer = Encoder.WriteVarUInt32(buffer, 0);
-                        return buffer;
+                        index = Encoder.WriteInt32(buffer, index, message.LeaderIdField);
+                        index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                        index = Encoder.WriteVarUInt32(buffer, index, 0);
+                        return index;
                     }
                 }
             }

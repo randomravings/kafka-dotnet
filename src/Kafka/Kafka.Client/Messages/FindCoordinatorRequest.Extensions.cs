@@ -8,27 +8,28 @@ namespace Kafka.Client.Messages
     public static class FindCoordinatorRequestSerde
     {
         private static readonly DecodeDelegate<FindCoordinatorRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
         };
         private static readonly EncodeDelegate<FindCoordinatorRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
         };
-        public static FindCoordinatorRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static FindCoordinatorRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, FindCoordinatorRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static FindCoordinatorRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, FindCoordinatorRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static FindCoordinatorRequest ReadV00(byte[] buffer, ref int index)
         {
-            var keyField = Decoder.ReadString(ref buffer);
+            var keyField = Decoder.ReadString(buffer, ref index);
             var keyTypeField = default(sbyte);
             var coordinatorKeysField = ImmutableArray<string>.Empty;
             return new(
@@ -37,15 +38,15 @@ namespace Kafka.Client.Messages
                 coordinatorKeysField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, FindCoordinatorRequest message)
+        private static int WriteV00(byte[] buffer, int index, FindCoordinatorRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.KeyField);
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.KeyField);
+            return index;
         }
-        private static FindCoordinatorRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static FindCoordinatorRequest ReadV01(byte[] buffer, ref int index)
         {
-            var keyField = Decoder.ReadString(ref buffer);
-            var keyTypeField = Decoder.ReadInt8(ref buffer);
+            var keyField = Decoder.ReadString(buffer, ref index);
+            var keyTypeField = Decoder.ReadInt8(buffer, ref index);
             var coordinatorKeysField = ImmutableArray<string>.Empty;
             return new(
                 keyField,
@@ -53,16 +54,16 @@ namespace Kafka.Client.Messages
                 coordinatorKeysField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, FindCoordinatorRequest message)
+        private static int WriteV01(byte[] buffer, int index, FindCoordinatorRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.KeyField);
-            buffer = Encoder.WriteInt8(buffer, message.KeyTypeField);
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.KeyField);
+            index = Encoder.WriteInt8(buffer, index, message.KeyTypeField);
+            return index;
         }
-        private static FindCoordinatorRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static FindCoordinatorRequest ReadV02(byte[] buffer, ref int index)
         {
-            var keyField = Decoder.ReadString(ref buffer);
-            var keyTypeField = Decoder.ReadInt8(ref buffer);
+            var keyField = Decoder.ReadString(buffer, ref index);
+            var keyTypeField = Decoder.ReadInt8(buffer, ref index);
             var coordinatorKeysField = ImmutableArray<string>.Empty;
             return new(
                 keyField,
@@ -70,49 +71,49 @@ namespace Kafka.Client.Messages
                 coordinatorKeysField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, FindCoordinatorRequest message)
+        private static int WriteV02(byte[] buffer, int index, FindCoordinatorRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.KeyField);
-            buffer = Encoder.WriteInt8(buffer, message.KeyTypeField);
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.KeyField);
+            index = Encoder.WriteInt8(buffer, index, message.KeyTypeField);
+            return index;
         }
-        private static FindCoordinatorRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static FindCoordinatorRequest ReadV03(byte[] buffer, ref int index)
         {
-            var keyField = Decoder.ReadCompactString(ref buffer);
-            var keyTypeField = Decoder.ReadInt8(ref buffer);
+            var keyField = Decoder.ReadCompactString(buffer, ref index);
+            var keyTypeField = Decoder.ReadInt8(buffer, ref index);
             var coordinatorKeysField = ImmutableArray<string>.Empty;
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 keyField,
                 keyTypeField,
                 coordinatorKeysField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, FindCoordinatorRequest message)
+        private static int WriteV03(byte[] buffer, int index, FindCoordinatorRequest message)
         {
-            buffer = Encoder.WriteCompactString(buffer, message.KeyField);
-            buffer = Encoder.WriteInt8(buffer, message.KeyTypeField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactString(buffer, index, message.KeyField);
+            index = Encoder.WriteInt8(buffer, index, message.KeyTypeField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static FindCoordinatorRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static FindCoordinatorRequest ReadV04(byte[] buffer, ref int index)
         {
             var keyField = "";
-            var keyTypeField = Decoder.ReadInt8(ref buffer);
-            var coordinatorKeysField = Decoder.ReadCompactArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'CoordinatorKeys'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var keyTypeField = Decoder.ReadInt8(buffer, ref index);
+            var coordinatorKeysField = Decoder.ReadCompactArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'CoordinatorKeys'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 keyField,
                 keyTypeField,
                 coordinatorKeysField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, FindCoordinatorRequest message)
+        private static int WriteV04(byte[] buffer, int index, FindCoordinatorRequest message)
         {
-            buffer = Encoder.WriteInt8(buffer, message.KeyTypeField);
-            buffer = Encoder.WriteCompactArray<string>(buffer, message.CoordinatorKeysField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt8(buffer, index, message.KeyTypeField);
+            index = Encoder.WriteCompactArray<string>(buffer, index, message.CoordinatorKeysField, Encoder.WriteCompactString);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

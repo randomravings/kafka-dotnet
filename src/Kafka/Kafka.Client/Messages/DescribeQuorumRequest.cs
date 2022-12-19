@@ -17,6 +17,7 @@ namespace Kafka.Client.Messages
         public static DescribeQuorumRequest Empty { get; } = new(
             ImmutableArray<TopicData>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionsField"></param>

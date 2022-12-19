@@ -14,5 +14,6 @@ namespace Kafka.Client.Messages
         public static UpdateMetadataResponse Empty { get; } = new(
             default(short)
         );
+        public static short FlexibleVersion { get; } = 6;
     };
 }

@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using UserName = Kafka.Client.Messages.DescribeUserScramCredentialsRequest.UserName;
 
 namespace Kafka.Client.Messages
@@ -9,45 +8,46 @@ namespace Kafka.Client.Messages
     public static class DescribeUserScramCredentialsRequestSerde
     {
         private static readonly DecodeDelegate<DescribeUserScramCredentialsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<DescribeUserScramCredentialsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static DescribeUserScramCredentialsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DescribeUserScramCredentialsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeUserScramCredentialsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DescribeUserScramCredentialsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DescribeUserScramCredentialsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DescribeUserScramCredentialsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var usersField = Decoder.ReadCompactArray<UserName>(ref buffer, (ref ReadOnlyMemory<byte> b) => UserNameSerde.ReadV00(ref b));
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var usersField = Decoder.ReadCompactArray<UserName>(buffer, ref index, UserNameSerde.ReadV00);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 usersField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeUserScramCredentialsRequest message)
+        private static int WriteV00(byte[] buffer, int index, DescribeUserScramCredentialsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<UserName>(buffer, message.UsersField, (b, i) => UserNameSerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<UserName>(buffer, index, message.UsersField, UserNameSerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class UserNameSerde
         {
-            public static UserName ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static UserName ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, UserName message)
+            public static int WriteV00(byte[] buffer, int index, UserName message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

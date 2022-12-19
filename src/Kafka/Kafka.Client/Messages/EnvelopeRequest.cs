@@ -1,5 +1,4 @@
 using System.CodeDom.Compiler;
-using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
@@ -11,15 +10,16 @@ namespace Kafka.Client.Messages
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record EnvelopeRequest (
-        ImmutableArray<byte> RequestDataField,
-        ImmutableArray<byte>? RequestPrincipalField,
-        ImmutableArray<byte> ClientHostAddressField
+        ReadOnlyMemory<byte> RequestDataField,
+        ReadOnlyMemory<byte>? RequestPrincipalField,
+        ReadOnlyMemory<byte> ClientHostAddressField
     ) : Request(58)
     {
         public static EnvelopeRequest Empty { get; } = new(
-            ImmutableArray<byte>.Empty,
-            default(ImmutableArray<byte>?),
-            ImmutableArray<byte>.Empty
+            Array.Empty<byte>(),
+            default(ReadOnlyMemory<byte>?),
+            Array.Empty<byte>()
         );
+        public static short FlexibleVersion { get; } = 0;
     };
 }

@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using LeaderAndIsrLiveLeader = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrLiveLeader;
 using LeaderAndIsrPartitionState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrPartitionState;
 using LeaderAndIsrTopicState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrTopicState;
+using LeaderAndIsrLiveLeader = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrLiveLeader;
 
 namespace Kafka.Client.Messages
 {
@@ -11,39 +11,44 @@ namespace Kafka.Client.Messages
     public static class LeaderAndIsrRequestSerde
     {
         private static readonly DecodeDelegate<LeaderAndIsrRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
+            ReadV06,
+            ReadV07,
         };
         private static readonly EncodeDelegate<LeaderAndIsrRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
-            (b, m) => WriteV06(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
+            WriteV06,
+            WriteV07,
         };
-        public static LeaderAndIsrRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static LeaderAndIsrRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, LeaderAndIsrRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static LeaderAndIsrRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, LeaderAndIsrRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static LeaderAndIsrRequest ReadV00(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
             var brokerEpochField = default(long);
             var typeField = default(sbyte);
-            var ungroupedPartitionStatesField = Decoder.ReadArray<LeaderAndIsrPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionStateSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
+            var ungroupedPartitionStatesField = Decoder.ReadArray<LeaderAndIsrPartitionState>(buffer, ref index, LeaderAndIsrPartitionStateSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
             var topicStatesField = ImmutableArray<LeaderAndIsrTopicState>.Empty;
-            var liveLeadersField = Decoder.ReadArray<LeaderAndIsrLiveLeader>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrLiveLeaderSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
+            var liveLeadersField = Decoder.ReadArray<LeaderAndIsrLiveLeader>(buffer, ref index, LeaderAndIsrLiveLeaderSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 typeField,
@@ -52,25 +57,27 @@ namespace Kafka.Client.Messages
                 liveLeadersField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, LeaderAndIsrRequest message)
+        private static int WriteV00(byte[] buffer, int index, LeaderAndIsrRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteArray<LeaderAndIsrPartitionState>(buffer, message.UngroupedPartitionStatesField, (b, i) => LeaderAndIsrPartitionStateSerde.WriteV00(b, i));
-            buffer = Encoder.WriteArray<LeaderAndIsrLiveLeader>(buffer, message.LiveLeadersField, (b, i) => LeaderAndIsrLiveLeaderSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteArray<LeaderAndIsrPartitionState>(buffer, index, message.UngroupedPartitionStatesField, LeaderAndIsrPartitionStateSerde.WriteV00);
+            index = Encoder.WriteArray<LeaderAndIsrLiveLeader>(buffer, index, message.LiveLeadersField, LeaderAndIsrLiveLeaderSerde.WriteV00);
+            return index;
         }
-        private static LeaderAndIsrRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrRequest ReadV01(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
             var brokerEpochField = default(long);
             var typeField = default(sbyte);
-            var ungroupedPartitionStatesField = Decoder.ReadArray<LeaderAndIsrPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionStateSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
+            var ungroupedPartitionStatesField = Decoder.ReadArray<LeaderAndIsrPartitionState>(buffer, ref index, LeaderAndIsrPartitionStateSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
             var topicStatesField = ImmutableArray<LeaderAndIsrTopicState>.Empty;
-            var liveLeadersField = Decoder.ReadArray<LeaderAndIsrLiveLeader>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrLiveLeaderSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
+            var liveLeadersField = Decoder.ReadArray<LeaderAndIsrLiveLeader>(buffer, ref index, LeaderAndIsrLiveLeaderSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 typeField,
@@ -79,25 +86,27 @@ namespace Kafka.Client.Messages
                 liveLeadersField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, LeaderAndIsrRequest message)
+        private static int WriteV01(byte[] buffer, int index, LeaderAndIsrRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteArray<LeaderAndIsrPartitionState>(buffer, message.UngroupedPartitionStatesField, (b, i) => LeaderAndIsrPartitionStateSerde.WriteV01(b, i));
-            buffer = Encoder.WriteArray<LeaderAndIsrLiveLeader>(buffer, message.LiveLeadersField, (b, i) => LeaderAndIsrLiveLeaderSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteArray<LeaderAndIsrPartitionState>(buffer, index, message.UngroupedPartitionStatesField, LeaderAndIsrPartitionStateSerde.WriteV01);
+            index = Encoder.WriteArray<LeaderAndIsrLiveLeader>(buffer, index, message.LiveLeadersField, LeaderAndIsrLiveLeaderSerde.WriteV01);
+            return index;
         }
-        private static LeaderAndIsrRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrRequest ReadV02(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
             var typeField = default(sbyte);
             var ungroupedPartitionStatesField = ImmutableArray<LeaderAndIsrPartitionState>.Empty;
-            var topicStatesField = Decoder.ReadArray<LeaderAndIsrTopicState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrTopicStateSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
-            var liveLeadersField = Decoder.ReadArray<LeaderAndIsrLiveLeader>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrLiveLeaderSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
+            var topicStatesField = Decoder.ReadArray<LeaderAndIsrTopicState>(buffer, ref index, LeaderAndIsrTopicStateSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveLeadersField = Decoder.ReadArray<LeaderAndIsrLiveLeader>(buffer, ref index, LeaderAndIsrLiveLeaderSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 typeField,
@@ -106,26 +115,28 @@ namespace Kafka.Client.Messages
                 liveLeadersField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, LeaderAndIsrRequest message)
+        private static int WriteV02(byte[] buffer, int index, LeaderAndIsrRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteArray<LeaderAndIsrTopicState>(buffer, message.TopicStatesField, (b, i) => LeaderAndIsrTopicStateSerde.WriteV02(b, i));
-            buffer = Encoder.WriteArray<LeaderAndIsrLiveLeader>(buffer, message.LiveLeadersField, (b, i) => LeaderAndIsrLiveLeaderSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteArray<LeaderAndIsrTopicState>(buffer, index, message.TopicStatesField, LeaderAndIsrTopicStateSerde.WriteV02);
+            index = Encoder.WriteArray<LeaderAndIsrLiveLeader>(buffer, index, message.LiveLeadersField, LeaderAndIsrLiveLeaderSerde.WriteV02);
+            return index;
         }
-        private static LeaderAndIsrRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrRequest ReadV03(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
             var typeField = default(sbyte);
             var ungroupedPartitionStatesField = ImmutableArray<LeaderAndIsrPartitionState>.Empty;
-            var topicStatesField = Decoder.ReadArray<LeaderAndIsrTopicState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrTopicStateSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
-            var liveLeadersField = Decoder.ReadArray<LeaderAndIsrLiveLeader>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrLiveLeaderSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
+            var topicStatesField = Decoder.ReadArray<LeaderAndIsrTopicState>(buffer, ref index, LeaderAndIsrTopicStateSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveLeadersField = Decoder.ReadArray<LeaderAndIsrLiveLeader>(buffer, ref index, LeaderAndIsrLiveLeaderSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 typeField,
@@ -134,27 +145,29 @@ namespace Kafka.Client.Messages
                 liveLeadersField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, LeaderAndIsrRequest message)
+        private static int WriteV03(byte[] buffer, int index, LeaderAndIsrRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteArray<LeaderAndIsrTopicState>(buffer, message.TopicStatesField, (b, i) => LeaderAndIsrTopicStateSerde.WriteV03(b, i));
-            buffer = Encoder.WriteArray<LeaderAndIsrLiveLeader>(buffer, message.LiveLeadersField, (b, i) => LeaderAndIsrLiveLeaderSerde.WriteV03(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteArray<LeaderAndIsrTopicState>(buffer, index, message.TopicStatesField, LeaderAndIsrTopicStateSerde.WriteV03);
+            index = Encoder.WriteArray<LeaderAndIsrLiveLeader>(buffer, index, message.LiveLeadersField, LeaderAndIsrLiveLeaderSerde.WriteV03);
+            return index;
         }
-        private static LeaderAndIsrRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrRequest ReadV04(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
             var typeField = default(sbyte);
             var ungroupedPartitionStatesField = ImmutableArray<LeaderAndIsrPartitionState>.Empty;
-            var topicStatesField = Decoder.ReadCompactArray<LeaderAndIsrTopicState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrTopicStateSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
-            var liveLeadersField = Decoder.ReadCompactArray<LeaderAndIsrLiveLeader>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrLiveLeaderSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicStatesField = Decoder.ReadCompactArray<LeaderAndIsrTopicState>(buffer, ref index, LeaderAndIsrTopicStateSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveLeadersField = Decoder.ReadCompactArray<LeaderAndIsrLiveLeader>(buffer, ref index, LeaderAndIsrLiveLeaderSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 typeField,
@@ -163,28 +176,30 @@ namespace Kafka.Client.Messages
                 liveLeadersField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, LeaderAndIsrRequest message)
+        private static int WriteV04(byte[] buffer, int index, LeaderAndIsrRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteCompactArray<LeaderAndIsrTopicState>(buffer, message.TopicStatesField, (b, i) => LeaderAndIsrTopicStateSerde.WriteV04(b, i));
-            buffer = Encoder.WriteCompactArray<LeaderAndIsrLiveLeader>(buffer, message.LiveLeadersField, (b, i) => LeaderAndIsrLiveLeaderSerde.WriteV04(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteCompactArray<LeaderAndIsrTopicState>(buffer, index, message.TopicStatesField, LeaderAndIsrTopicStateSerde.WriteV04);
+            index = Encoder.WriteCompactArray<LeaderAndIsrLiveLeader>(buffer, index, message.LiveLeadersField, LeaderAndIsrLiveLeaderSerde.WriteV04);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static LeaderAndIsrRequest ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrRequest ReadV05(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
-            var typeField = Decoder.ReadInt8(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
+            var typeField = Decoder.ReadInt8(buffer, ref index);
             var ungroupedPartitionStatesField = ImmutableArray<LeaderAndIsrPartitionState>.Empty;
-            var topicStatesField = Decoder.ReadCompactArray<LeaderAndIsrTopicState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrTopicStateSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
-            var liveLeadersField = Decoder.ReadCompactArray<LeaderAndIsrLiveLeader>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrLiveLeaderSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicStatesField = Decoder.ReadCompactArray<LeaderAndIsrTopicState>(buffer, ref index, LeaderAndIsrTopicStateSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveLeadersField = Decoder.ReadCompactArray<LeaderAndIsrLiveLeader>(buffer, ref index, LeaderAndIsrLiveLeaderSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 typeField,
@@ -193,29 +208,31 @@ namespace Kafka.Client.Messages
                 liveLeadersField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, LeaderAndIsrRequest message)
+        private static int WriteV05(byte[] buffer, int index, LeaderAndIsrRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteInt8(buffer, message.TypeField);
-            buffer = Encoder.WriteCompactArray<LeaderAndIsrTopicState>(buffer, message.TopicStatesField, (b, i) => LeaderAndIsrTopicStateSerde.WriteV05(b, i));
-            buffer = Encoder.WriteCompactArray<LeaderAndIsrLiveLeader>(buffer, message.LiveLeadersField, (b, i) => LeaderAndIsrLiveLeaderSerde.WriteV05(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteInt8(buffer, index, message.TypeField);
+            index = Encoder.WriteCompactArray<LeaderAndIsrTopicState>(buffer, index, message.TopicStatesField, LeaderAndIsrTopicStateSerde.WriteV05);
+            index = Encoder.WriteCompactArray<LeaderAndIsrLiveLeader>(buffer, index, message.LiveLeadersField, LeaderAndIsrLiveLeaderSerde.WriteV05);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static LeaderAndIsrRequest ReadV06(ref ReadOnlyMemory<byte> buffer)
+        private static LeaderAndIsrRequest ReadV06(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
-            var typeField = Decoder.ReadInt8(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
+            var typeField = Decoder.ReadInt8(buffer, ref index);
             var ungroupedPartitionStatesField = ImmutableArray<LeaderAndIsrPartitionState>.Empty;
-            var topicStatesField = Decoder.ReadCompactArray<LeaderAndIsrTopicState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrTopicStateSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
-            var liveLeadersField = Decoder.ReadCompactArray<LeaderAndIsrLiveLeader>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrLiveLeaderSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicStatesField = Decoder.ReadCompactArray<LeaderAndIsrTopicState>(buffer, ref index, LeaderAndIsrTopicStateSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveLeadersField = Decoder.ReadCompactArray<LeaderAndIsrLiveLeader>(buffer, ref index, LeaderAndIsrLiveLeaderSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 typeField,
@@ -224,164 +241,63 @@ namespace Kafka.Client.Messages
                 liveLeadersField
             );
         }
-        private static Memory<byte> WriteV06(Memory<byte> buffer, LeaderAndIsrRequest message)
+        private static int WriteV06(byte[] buffer, int index, LeaderAndIsrRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteInt8(buffer, message.TypeField);
-            buffer = Encoder.WriteCompactArray<LeaderAndIsrTopicState>(buffer, message.TopicStatesField, (b, i) => LeaderAndIsrTopicStateSerde.WriteV06(b, i));
-            buffer = Encoder.WriteCompactArray<LeaderAndIsrLiveLeader>(buffer, message.LiveLeadersField, (b, i) => LeaderAndIsrLiveLeaderSerde.WriteV06(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteInt8(buffer, index, message.TypeField);
+            index = Encoder.WriteCompactArray<LeaderAndIsrTopicState>(buffer, index, message.TopicStatesField, LeaderAndIsrTopicStateSerde.WriteV06);
+            index = Encoder.WriteCompactArray<LeaderAndIsrLiveLeader>(buffer, index, message.LiveLeadersField, LeaderAndIsrLiveLeaderSerde.WriteV06);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static class LeaderAndIsrLiveLeaderSerde
+        private static LeaderAndIsrRequest ReadV07(byte[] buffer, ref int index)
         {
-            public static LeaderAndIsrLiveLeader ReadV00(ref ReadOnlyMemory<byte> buffer)
-            {
-                var brokerIdField = Decoder.ReadInt32(ref buffer);
-                var hostNameField = Decoder.ReadString(ref buffer);
-                var portField = Decoder.ReadInt32(ref buffer);
-                return new(
-                    brokerIdField,
-                    hostNameField,
-                    portField
-                );
-            }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, LeaderAndIsrLiveLeader message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-                buffer = Encoder.WriteString(buffer, message.HostNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PortField);
-                return buffer;
-            }
-            public static LeaderAndIsrLiveLeader ReadV01(ref ReadOnlyMemory<byte> buffer)
-            {
-                var brokerIdField = Decoder.ReadInt32(ref buffer);
-                var hostNameField = Decoder.ReadString(ref buffer);
-                var portField = Decoder.ReadInt32(ref buffer);
-                return new(
-                    brokerIdField,
-                    hostNameField,
-                    portField
-                );
-            }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, LeaderAndIsrLiveLeader message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-                buffer = Encoder.WriteString(buffer, message.HostNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PortField);
-                return buffer;
-            }
-            public static LeaderAndIsrLiveLeader ReadV02(ref ReadOnlyMemory<byte> buffer)
-            {
-                var brokerIdField = Decoder.ReadInt32(ref buffer);
-                var hostNameField = Decoder.ReadString(ref buffer);
-                var portField = Decoder.ReadInt32(ref buffer);
-                return new(
-                    brokerIdField,
-                    hostNameField,
-                    portField
-                );
-            }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, LeaderAndIsrLiveLeader message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-                buffer = Encoder.WriteString(buffer, message.HostNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PortField);
-                return buffer;
-            }
-            public static LeaderAndIsrLiveLeader ReadV03(ref ReadOnlyMemory<byte> buffer)
-            {
-                var brokerIdField = Decoder.ReadInt32(ref buffer);
-                var hostNameField = Decoder.ReadString(ref buffer);
-                var portField = Decoder.ReadInt32(ref buffer);
-                return new(
-                    brokerIdField,
-                    hostNameField,
-                    portField
-                );
-            }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, LeaderAndIsrLiveLeader message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-                buffer = Encoder.WriteString(buffer, message.HostNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PortField);
-                return buffer;
-            }
-            public static LeaderAndIsrLiveLeader ReadV04(ref ReadOnlyMemory<byte> buffer)
-            {
-                var brokerIdField = Decoder.ReadInt32(ref buffer);
-                var hostNameField = Decoder.ReadCompactString(ref buffer);
-                var portField = Decoder.ReadInt32(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
-                return new(
-                    brokerIdField,
-                    hostNameField,
-                    portField
-                );
-            }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, LeaderAndIsrLiveLeader message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-                buffer = Encoder.WriteCompactString(buffer, message.HostNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PortField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
-            }
-            public static LeaderAndIsrLiveLeader ReadV05(ref ReadOnlyMemory<byte> buffer)
-            {
-                var brokerIdField = Decoder.ReadInt32(ref buffer);
-                var hostNameField = Decoder.ReadCompactString(ref buffer);
-                var portField = Decoder.ReadInt32(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
-                return new(
-                    brokerIdField,
-                    hostNameField,
-                    portField
-                );
-            }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, LeaderAndIsrLiveLeader message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-                buffer = Encoder.WriteCompactString(buffer, message.HostNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PortField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
-            }
-            public static LeaderAndIsrLiveLeader ReadV06(ref ReadOnlyMemory<byte> buffer)
-            {
-                var brokerIdField = Decoder.ReadInt32(ref buffer);
-                var hostNameField = Decoder.ReadCompactString(ref buffer);
-                var portField = Decoder.ReadInt32(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
-                return new(
-                    brokerIdField,
-                    hostNameField,
-                    portField
-                );
-            }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, LeaderAndIsrLiveLeader message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.BrokerIdField);
-                buffer = Encoder.WriteCompactString(buffer, message.HostNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PortField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
-            }
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
+            var typeField = Decoder.ReadInt8(buffer, ref index);
+            var ungroupedPartitionStatesField = ImmutableArray<LeaderAndIsrPartitionState>.Empty;
+            var topicStatesField = Decoder.ReadCompactArray<LeaderAndIsrTopicState>(buffer, ref index, LeaderAndIsrTopicStateSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveLeadersField = Decoder.ReadCompactArray<LeaderAndIsrLiveLeader>(buffer, ref index, LeaderAndIsrLiveLeaderSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'LiveLeaders'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
+            return new(
+                controllerIdField,
+                kRaftControllerIdField,
+                controllerEpochField,
+                brokerEpochField,
+                typeField,
+                ungroupedPartitionStatesField,
+                topicStatesField,
+                liveLeadersField
+            );
+        }
+        private static int WriteV07(byte[] buffer, int index, LeaderAndIsrRequest message)
+        {
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.KRaftControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteInt8(buffer, index, message.TypeField);
+            index = Encoder.WriteCompactArray<LeaderAndIsrTopicState>(buffer, index, message.TopicStatesField, LeaderAndIsrTopicStateSerde.WriteV07);
+            index = Encoder.WriteCompactArray<LeaderAndIsrLiveLeader>(buffer, index, message.LiveLeadersField, LeaderAndIsrLiveLeaderSerde.WriteV07);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class LeaderAndIsrPartitionStateSerde
         {
-            public static LeaderAndIsrPartitionState ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionState ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var partitionEpochField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
                 var addingReplicasField = ImmutableArray<int>.Empty;
                 var removingReplicasField = ImmutableArray<int>.Empty;
                 var isNewField = default(bool);
@@ -401,31 +317,31 @@ namespace Kafka.Client.Messages
                     leaderRecoveryStateField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, LeaderAndIsrPartitionState message)
+            public static int WriteV00(byte[] buffer, int index, LeaderAndIsrPartitionState message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.PartitionEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                return index;
             }
-            public static LeaderAndIsrPartitionState ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionState ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var partitionEpochField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
                 var addingReplicasField = ImmutableArray<int>.Empty;
                 var removingReplicasField = ImmutableArray<int>.Empty;
-                var isNewField = Decoder.ReadBoolean(ref buffer);
+                var isNewField = Decoder.ReadBoolean(buffer, ref index);
                 var leaderRecoveryStateField = default(sbyte);
                 return new(
                     topicNameField,
@@ -442,32 +358,32 @@ namespace Kafka.Client.Messages
                     leaderRecoveryStateField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, LeaderAndIsrPartitionState message)
+            public static int WriteV01(byte[] buffer, int index, LeaderAndIsrPartitionState message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.PartitionEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteBoolean(buffer, message.IsNewField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteBoolean(buffer, index, message.IsNewField);
+                return index;
             }
-            public static LeaderAndIsrPartitionState ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionState ReadV02(byte[] buffer, ref int index)
             {
                 var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var partitionEpochField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
                 var addingReplicasField = ImmutableArray<int>.Empty;
                 var removingReplicasField = ImmutableArray<int>.Empty;
-                var isNewField = Decoder.ReadBoolean(ref buffer);
+                var isNewField = Decoder.ReadBoolean(buffer, ref index);
                 var leaderRecoveryStateField = default(sbyte);
                 return new(
                     topicNameField,
@@ -484,31 +400,31 @@ namespace Kafka.Client.Messages
                     leaderRecoveryStateField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, LeaderAndIsrPartitionState message)
+            public static int WriteV02(byte[] buffer, int index, LeaderAndIsrPartitionState message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.PartitionEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteBoolean(buffer, message.IsNewField);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteBoolean(buffer, index, message.IsNewField);
+                return index;
             }
-            public static LeaderAndIsrPartitionState ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionState ReadV03(byte[] buffer, ref int index)
             {
                 var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var partitionEpochField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var addingReplicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
-                var removingReplicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
-                var isNewField = Decoder.ReadBoolean(ref buffer);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var addingReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
+                var removingReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
+                var isNewField = Decoder.ReadBoolean(buffer, ref index);
                 var leaderRecoveryStateField = default(sbyte);
                 return new(
                     topicNameField,
@@ -525,35 +441,35 @@ namespace Kafka.Client.Messages
                     leaderRecoveryStateField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, LeaderAndIsrPartitionState message)
+            public static int WriteV03(byte[] buffer, int index, LeaderAndIsrPartitionState message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.PartitionEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteArray<int>(buffer, message.AddingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteArray<int>(buffer, message.RemovingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteBoolean(buffer, message.IsNewField);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteArray<int>(buffer, index, message.AddingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteArray<int>(buffer, index, message.RemovingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteBoolean(buffer, index, message.IsNewField);
+                return index;
             }
-            public static LeaderAndIsrPartitionState ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionState ReadV04(byte[] buffer, ref int index)
             {
                 var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var partitionEpochField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var addingReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
-                var removingReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
-                var isNewField = Decoder.ReadBoolean(ref buffer);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var addingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
+                var removingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
+                var isNewField = Decoder.ReadBoolean(buffer, ref index);
                 var leaderRecoveryStateField = default(sbyte);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
@@ -569,36 +485,36 @@ namespace Kafka.Client.Messages
                     leaderRecoveryStateField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, LeaderAndIsrPartitionState message)
+            public static int WriteV04(byte[] buffer, int index, LeaderAndIsrPartitionState message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.PartitionEpochField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.AddingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.RemovingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteBoolean(buffer, message.IsNewField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.AddingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.RemovingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteBoolean(buffer, index, message.IsNewField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static LeaderAndIsrPartitionState ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionState ReadV05(byte[] buffer, ref int index)
             {
                 var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var partitionEpochField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var addingReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
-                var removingReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
-                var isNewField = Decoder.ReadBoolean(ref buffer);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var addingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
+                var removingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
+                var isNewField = Decoder.ReadBoolean(buffer, ref index);
                 var leaderRecoveryStateField = default(sbyte);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
@@ -614,36 +530,36 @@ namespace Kafka.Client.Messages
                     leaderRecoveryStateField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, LeaderAndIsrPartitionState message)
+            public static int WriteV05(byte[] buffer, int index, LeaderAndIsrPartitionState message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.PartitionEpochField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.AddingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.RemovingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteBoolean(buffer, message.IsNewField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.AddingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.RemovingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteBoolean(buffer, index, message.IsNewField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static LeaderAndIsrPartitionState ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrPartitionState ReadV06(byte[] buffer, ref int index)
             {
                 var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var partitionEpochField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var addingReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
-                var removingReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
-                var isNewField = Decoder.ReadBoolean(ref buffer);
-                var leaderRecoveryStateField = Decoder.ReadInt8(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var addingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
+                var removingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
+                var isNewField = Decoder.ReadBoolean(buffer, ref index);
+                var leaderRecoveryStateField = Decoder.ReadInt8(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
@@ -659,117 +575,338 @@ namespace Kafka.Client.Messages
                     leaderRecoveryStateField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, LeaderAndIsrPartitionState message)
+            public static int WriteV06(byte[] buffer, int index, LeaderAndIsrPartitionState message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.PartitionEpochField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.AddingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.RemovingReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteBoolean(buffer, message.IsNewField);
-                buffer = Encoder.WriteInt8(buffer, message.LeaderRecoveryStateField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.AddingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.RemovingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteBoolean(buffer, index, message.IsNewField);
+                index = Encoder.WriteInt8(buffer, index, message.LeaderRecoveryStateField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static LeaderAndIsrPartitionState ReadV07(byte[] buffer, ref int index)
+            {
+                var topicNameField = "";
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var addingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'AddingReplicas'");
+                var removingReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'RemovingReplicas'");
+                var isNewField = Decoder.ReadBoolean(buffer, ref index);
+                var leaderRecoveryStateField = Decoder.ReadInt8(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    partitionEpochField,
+                    replicasField,
+                    addingReplicasField,
+                    removingReplicasField,
+                    isNewField,
+                    leaderRecoveryStateField
+                );
+            }
+            public static int WriteV07(byte[] buffer, int index, LeaderAndIsrPartitionState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.AddingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.RemovingReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteBoolean(buffer, index, message.IsNewField);
+                index = Encoder.WriteInt8(buffer, index, message.LeaderRecoveryStateField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
         private static class LeaderAndIsrTopicStateSerde
         {
-            public static LeaderAndIsrTopicState ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrTopicState ReadV02(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
+                var topicNameField = Decoder.ReadString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var partitionStatesField = Decoder.ReadArray<LeaderAndIsrPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionStateSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                var partitionStatesField = Decoder.ReadArray<LeaderAndIsrPartitionState>(buffer, ref index, LeaderAndIsrPartitionStateSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
                 return new(
                     topicNameField,
                     topicIdField,
                     partitionStatesField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, LeaderAndIsrTopicState message)
+            public static int WriteV02(byte[] buffer, int index, LeaderAndIsrTopicState message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteArray<LeaderAndIsrPartitionState>(buffer, message.PartitionStatesField, (b, i) => LeaderAndIsrPartitionStateSerde.WriteV02(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteArray<LeaderAndIsrPartitionState>(buffer, index, message.PartitionStatesField, LeaderAndIsrPartitionStateSerde.WriteV02);
+                return index;
             }
-            public static LeaderAndIsrTopicState ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrTopicState ReadV03(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
+                var topicNameField = Decoder.ReadString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var partitionStatesField = Decoder.ReadArray<LeaderAndIsrPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionStateSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                var partitionStatesField = Decoder.ReadArray<LeaderAndIsrPartitionState>(buffer, ref index, LeaderAndIsrPartitionStateSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
                 return new(
                     topicNameField,
                     topicIdField,
                     partitionStatesField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, LeaderAndIsrTopicState message)
+            public static int WriteV03(byte[] buffer, int index, LeaderAndIsrTopicState message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteArray<LeaderAndIsrPartitionState>(buffer, message.PartitionStatesField, (b, i) => LeaderAndIsrPartitionStateSerde.WriteV03(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteArray<LeaderAndIsrPartitionState>(buffer, index, message.PartitionStatesField, LeaderAndIsrPartitionStateSerde.WriteV03);
+                return index;
             }
-            public static LeaderAndIsrTopicState ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrTopicState ReadV04(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var partitionStatesField = Decoder.ReadCompactArray<LeaderAndIsrPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionStateSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var partitionStatesField = Decoder.ReadCompactArray<LeaderAndIsrPartitionState>(buffer, ref index, LeaderAndIsrPartitionStateSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     topicIdField,
                     partitionStatesField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, LeaderAndIsrTopicState message)
+            public static int WriteV04(byte[] buffer, int index, LeaderAndIsrTopicState message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteCompactArray<LeaderAndIsrPartitionState>(buffer, message.PartitionStatesField, (b, i) => LeaderAndIsrPartitionStateSerde.WriteV04(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteCompactArray<LeaderAndIsrPartitionState>(buffer, index, message.PartitionStatesField, LeaderAndIsrPartitionStateSerde.WriteV04);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static LeaderAndIsrTopicState ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrTopicState ReadV05(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                var partitionStatesField = Decoder.ReadCompactArray<LeaderAndIsrPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionStateSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var partitionStatesField = Decoder.ReadCompactArray<LeaderAndIsrPartitionState>(buffer, ref index, LeaderAndIsrPartitionStateSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     topicIdField,
                     partitionStatesField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, LeaderAndIsrTopicState message)
+            public static int WriteV05(byte[] buffer, int index, LeaderAndIsrTopicState message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteCompactArray<LeaderAndIsrPartitionState>(buffer, message.PartitionStatesField, (b, i) => LeaderAndIsrPartitionStateSerde.WriteV05(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactArray<LeaderAndIsrPartitionState>(buffer, index, message.PartitionStatesField, LeaderAndIsrPartitionStateSerde.WriteV05);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static LeaderAndIsrTopicState ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static LeaderAndIsrTopicState ReadV06(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                var partitionStatesField = Decoder.ReadCompactArray<LeaderAndIsrPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => LeaderAndIsrPartitionStateSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var partitionStatesField = Decoder.ReadCompactArray<LeaderAndIsrPartitionState>(buffer, ref index, LeaderAndIsrPartitionStateSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     topicIdField,
                     partitionStatesField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, LeaderAndIsrTopicState message)
+            public static int WriteV06(byte[] buffer, int index, LeaderAndIsrTopicState message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteCompactArray<LeaderAndIsrPartitionState>(buffer, message.PartitionStatesField, (b, i) => LeaderAndIsrPartitionStateSerde.WriteV06(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactArray<LeaderAndIsrPartitionState>(buffer, index, message.PartitionStatesField, LeaderAndIsrPartitionStateSerde.WriteV06);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static LeaderAndIsrTopicState ReadV07(byte[] buffer, ref int index)
+            {
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var partitionStatesField = Decoder.ReadCompactArray<LeaderAndIsrPartitionState>(buffer, ref index, LeaderAndIsrPartitionStateSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicNameField,
+                    topicIdField,
+                    partitionStatesField
+                );
+            }
+            public static int WriteV07(byte[] buffer, int index, LeaderAndIsrTopicState message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactArray<LeaderAndIsrPartitionState>(buffer, index, message.PartitionStatesField, LeaderAndIsrPartitionStateSerde.WriteV07);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+        }
+        private static class LeaderAndIsrLiveLeaderSerde
+        {
+            public static LeaderAndIsrLiveLeader ReadV00(byte[] buffer, ref int index)
+            {
+                var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+                var hostNameField = Decoder.ReadString(buffer, ref index);
+                var portField = Decoder.ReadInt32(buffer, ref index);
+                return new(
+                    brokerIdField,
+                    hostNameField,
+                    portField
+                );
+            }
+            public static int WriteV00(byte[] buffer, int index, LeaderAndIsrLiveLeader message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+                index = Encoder.WriteString(buffer, index, message.HostNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PortField);
+                return index;
+            }
+            public static LeaderAndIsrLiveLeader ReadV01(byte[] buffer, ref int index)
+            {
+                var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+                var hostNameField = Decoder.ReadString(buffer, ref index);
+                var portField = Decoder.ReadInt32(buffer, ref index);
+                return new(
+                    brokerIdField,
+                    hostNameField,
+                    portField
+                );
+            }
+            public static int WriteV01(byte[] buffer, int index, LeaderAndIsrLiveLeader message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+                index = Encoder.WriteString(buffer, index, message.HostNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PortField);
+                return index;
+            }
+            public static LeaderAndIsrLiveLeader ReadV02(byte[] buffer, ref int index)
+            {
+                var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+                var hostNameField = Decoder.ReadString(buffer, ref index);
+                var portField = Decoder.ReadInt32(buffer, ref index);
+                return new(
+                    brokerIdField,
+                    hostNameField,
+                    portField
+                );
+            }
+            public static int WriteV02(byte[] buffer, int index, LeaderAndIsrLiveLeader message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+                index = Encoder.WriteString(buffer, index, message.HostNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PortField);
+                return index;
+            }
+            public static LeaderAndIsrLiveLeader ReadV03(byte[] buffer, ref int index)
+            {
+                var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+                var hostNameField = Decoder.ReadString(buffer, ref index);
+                var portField = Decoder.ReadInt32(buffer, ref index);
+                return new(
+                    brokerIdField,
+                    hostNameField,
+                    portField
+                );
+            }
+            public static int WriteV03(byte[] buffer, int index, LeaderAndIsrLiveLeader message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+                index = Encoder.WriteString(buffer, index, message.HostNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PortField);
+                return index;
+            }
+            public static LeaderAndIsrLiveLeader ReadV04(byte[] buffer, ref int index)
+            {
+                var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+                var hostNameField = Decoder.ReadCompactString(buffer, ref index);
+                var portField = Decoder.ReadInt32(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    brokerIdField,
+                    hostNameField,
+                    portField
+                );
+            }
+            public static int WriteV04(byte[] buffer, int index, LeaderAndIsrLiveLeader message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+                index = Encoder.WriteCompactString(buffer, index, message.HostNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PortField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static LeaderAndIsrLiveLeader ReadV05(byte[] buffer, ref int index)
+            {
+                var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+                var hostNameField = Decoder.ReadCompactString(buffer, ref index);
+                var portField = Decoder.ReadInt32(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    brokerIdField,
+                    hostNameField,
+                    portField
+                );
+            }
+            public static int WriteV05(byte[] buffer, int index, LeaderAndIsrLiveLeader message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+                index = Encoder.WriteCompactString(buffer, index, message.HostNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PortField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static LeaderAndIsrLiveLeader ReadV06(byte[] buffer, ref int index)
+            {
+                var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+                var hostNameField = Decoder.ReadCompactString(buffer, ref index);
+                var portField = Decoder.ReadInt32(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    brokerIdField,
+                    hostNameField,
+                    portField
+                );
+            }
+            public static int WriteV06(byte[] buffer, int index, LeaderAndIsrLiveLeader message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+                index = Encoder.WriteCompactString(buffer, index, message.HostNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PortField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static LeaderAndIsrLiveLeader ReadV07(byte[] buffer, ref int index)
+            {
+                var brokerIdField = Decoder.ReadInt32(buffer, ref index);
+                var hostNameField = Decoder.ReadCompactString(buffer, ref index);
+                var portField = Decoder.ReadInt32(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    brokerIdField,
+                    hostNameField,
+                    portField
+                );
+            }
+            public static int WriteV07(byte[] buffer, int index, LeaderAndIsrLiveLeader message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.BrokerIdField);
+                index = Encoder.WriteCompactString(buffer, index, message.HostNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PortField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

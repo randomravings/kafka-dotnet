@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using JoinGroupResponseMember = Kafka.Client.Messages.JoinGroupResponse.JoinGroupResponseMember;
 
 namespace Kafka.Client.Messages
@@ -9,45 +8,46 @@ namespace Kafka.Client.Messages
     public static class JoinGroupResponseSerde
     {
         private static readonly DecodeDelegate<JoinGroupResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV07(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV08(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV09(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
+            ReadV06,
+            ReadV07,
+            ReadV08,
+            ReadV09,
         };
         private static readonly EncodeDelegate<JoinGroupResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
-            (b, m) => WriteV06(b, m),
-            (b, m) => WriteV07(b, m),
-            (b, m) => WriteV08(b, m),
-            (b, m) => WriteV09(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
+            WriteV06,
+            WriteV07,
+            WriteV08,
+            WriteV09,
         };
-        public static JoinGroupResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static JoinGroupResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, JoinGroupResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static JoinGroupResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, JoinGroupResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static JoinGroupResponse ReadV00(byte[] buffer, ref int index)
         {
             var throttleTimeMsField = default(int);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
             var protocolTypeField = default(string?);
-            var protocolNameField = Decoder.ReadString(ref buffer);
-            var leaderField = Decoder.ReadString(ref buffer);
+            var protocolNameField = Decoder.ReadString(buffer, ref index);
+            var leaderField = Decoder.ReadString(buffer, ref index);
             var skipAssignmentField = default(bool);
-            var memberIdField = Decoder.ReadString(ref buffer);
-            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            var memberIdField = Decoder.ReadString(buffer, ref index);
+            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Members'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -60,29 +60,29 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV00(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
             if (message.ProtocolNameField == null)
                 throw new ArgumentNullException(nameof(message.ProtocolNameField));
-            buffer = Encoder.WriteString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteString(buffer, message.LeaderField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteString(buffer, index, message.LeaderField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV00);
+            return index;
         }
-        private static JoinGroupResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static JoinGroupResponse ReadV01(byte[] buffer, ref int index)
         {
             var throttleTimeMsField = default(int);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
             var protocolTypeField = default(string?);
-            var protocolNameField = Decoder.ReadString(ref buffer);
-            var leaderField = Decoder.ReadString(ref buffer);
+            var protocolNameField = Decoder.ReadString(buffer, ref index);
+            var leaderField = Decoder.ReadString(buffer, ref index);
             var skipAssignmentField = default(bool);
-            var memberIdField = Decoder.ReadString(ref buffer);
-            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            var memberIdField = Decoder.ReadString(buffer, ref index);
+            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Members'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -95,29 +95,29 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV01(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
             if (message.ProtocolNameField == null)
                 throw new ArgumentNullException(nameof(message.ProtocolNameField));
-            buffer = Encoder.WriteString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteString(buffer, message.LeaderField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteString(buffer, index, message.LeaderField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV01);
+            return index;
         }
-        private static JoinGroupResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static JoinGroupResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
             var protocolTypeField = default(string?);
-            var protocolNameField = Decoder.ReadString(ref buffer);
-            var leaderField = Decoder.ReadString(ref buffer);
+            var protocolNameField = Decoder.ReadString(buffer, ref index);
+            var leaderField = Decoder.ReadString(buffer, ref index);
             var skipAssignmentField = default(bool);
-            var memberIdField = Decoder.ReadString(ref buffer);
-            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            var memberIdField = Decoder.ReadString(buffer, ref index);
+            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Members'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -130,30 +130,30 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV02(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
             if (message.ProtocolNameField == null)
                 throw new ArgumentNullException(nameof(message.ProtocolNameField));
-            buffer = Encoder.WriteString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteString(buffer, message.LeaderField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteString(buffer, index, message.LeaderField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV02);
+            return index;
         }
-        private static JoinGroupResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static JoinGroupResponse ReadV03(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
             var protocolTypeField = default(string?);
-            var protocolNameField = Decoder.ReadString(ref buffer);
-            var leaderField = Decoder.ReadString(ref buffer);
+            var protocolNameField = Decoder.ReadString(buffer, ref index);
+            var leaderField = Decoder.ReadString(buffer, ref index);
             var skipAssignmentField = default(bool);
-            var memberIdField = Decoder.ReadString(ref buffer);
-            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            var memberIdField = Decoder.ReadString(buffer, ref index);
+            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Members'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -166,30 +166,30 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV03(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
             if (message.ProtocolNameField == null)
                 throw new ArgumentNullException(nameof(message.ProtocolNameField));
-            buffer = Encoder.WriteString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteString(buffer, message.LeaderField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV03(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteString(buffer, index, message.LeaderField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV03);
+            return index;
         }
-        private static JoinGroupResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static JoinGroupResponse ReadV04(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
             var protocolTypeField = default(string?);
-            var protocolNameField = Decoder.ReadString(ref buffer);
-            var leaderField = Decoder.ReadString(ref buffer);
+            var protocolNameField = Decoder.ReadString(buffer, ref index);
+            var leaderField = Decoder.ReadString(buffer, ref index);
             var skipAssignmentField = default(bool);
-            var memberIdField = Decoder.ReadString(ref buffer);
-            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            var memberIdField = Decoder.ReadString(buffer, ref index);
+            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Members'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -202,30 +202,30 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV04(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
             if (message.ProtocolNameField == null)
                 throw new ArgumentNullException(nameof(message.ProtocolNameField));
-            buffer = Encoder.WriteString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteString(buffer, message.LeaderField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV04(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteString(buffer, index, message.LeaderField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV04);
+            return index;
         }
-        private static JoinGroupResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static JoinGroupResponse ReadV05(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
             var protocolTypeField = default(string?);
-            var protocolNameField = Decoder.ReadString(ref buffer);
-            var leaderField = Decoder.ReadString(ref buffer);
+            var protocolNameField = Decoder.ReadString(buffer, ref index);
+            var leaderField = Decoder.ReadString(buffer, ref index);
             var skipAssignmentField = default(bool);
-            var memberIdField = Decoder.ReadString(ref buffer);
-            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            var memberIdField = Decoder.ReadString(buffer, ref index);
+            var membersField = Decoder.ReadArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Members'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -238,31 +238,31 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV05(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
             if (message.ProtocolNameField == null)
                 throw new ArgumentNullException(nameof(message.ProtocolNameField));
-            buffer = Encoder.WriteString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteString(buffer, message.LeaderField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV05(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteString(buffer, index, message.LeaderField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV05);
+            return index;
         }
-        private static JoinGroupResponse ReadV06(ref ReadOnlyMemory<byte> buffer)
+        private static JoinGroupResponse ReadV06(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
             var protocolTypeField = default(string?);
-            var protocolNameField = Decoder.ReadCompactString(ref buffer);
-            var leaderField = Decoder.ReadCompactString(ref buffer);
+            var protocolNameField = Decoder.ReadCompactString(buffer, ref index);
+            var leaderField = Decoder.ReadCompactString(buffer, ref index);
             var skipAssignmentField = default(bool);
-            var memberIdField = Decoder.ReadCompactString(ref buffer);
-            var membersField = Decoder.ReadCompactArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+            var membersField = Decoder.ReadCompactArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -275,32 +275,32 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV06(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV06(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
             if (message.ProtocolNameField == null)
                 throw new ArgumentNullException(nameof(message.ProtocolNameField));
-            buffer = Encoder.WriteCompactString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteCompactString(buffer, message.LeaderField);
-            buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteCompactArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV06(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteCompactString(buffer, index, message.LeaderField);
+            index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteCompactArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV06);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static JoinGroupResponse ReadV07(ref ReadOnlyMemory<byte> buffer)
+        private static JoinGroupResponse ReadV07(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var protocolTypeField = Decoder.ReadCompactNullableString(ref buffer);
-            var protocolNameField = Decoder.ReadCompactNullableString(ref buffer);
-            var leaderField = Decoder.ReadCompactString(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var protocolTypeField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var protocolNameField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var leaderField = Decoder.ReadCompactString(buffer, ref index);
             var skipAssignmentField = default(bool);
-            var memberIdField = Decoder.ReadCompactString(ref buffer);
-            var membersField = Decoder.ReadCompactArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+            var membersField = Decoder.ReadCompactArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -313,31 +313,31 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV07(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV07(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolTypeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteCompactString(buffer, message.LeaderField);
-            buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteCompactArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV07(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolTypeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteCompactString(buffer, index, message.LeaderField);
+            index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteCompactArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV07);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static JoinGroupResponse ReadV08(ref ReadOnlyMemory<byte> buffer)
+        private static JoinGroupResponse ReadV08(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var protocolTypeField = Decoder.ReadCompactNullableString(ref buffer);
-            var protocolNameField = Decoder.ReadCompactNullableString(ref buffer);
-            var leaderField = Decoder.ReadCompactString(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var protocolTypeField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var protocolNameField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var leaderField = Decoder.ReadCompactString(buffer, ref index);
             var skipAssignmentField = default(bool);
-            var memberIdField = Decoder.ReadCompactString(ref buffer);
-            var membersField = Decoder.ReadCompactArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV08(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+            var membersField = Decoder.ReadCompactArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -350,31 +350,31 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV08(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV08(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolTypeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteCompactString(buffer, message.LeaderField);
-            buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteCompactArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV08(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolTypeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteCompactString(buffer, index, message.LeaderField);
+            index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteCompactArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV08);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static JoinGroupResponse ReadV09(ref ReadOnlyMemory<byte> buffer)
+        private static JoinGroupResponse ReadV09(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var protocolTypeField = Decoder.ReadCompactNullableString(ref buffer);
-            var protocolNameField = Decoder.ReadCompactNullableString(ref buffer);
-            var leaderField = Decoder.ReadCompactString(ref buffer);
-            var skipAssignmentField = Decoder.ReadBoolean(ref buffer);
-            var memberIdField = Decoder.ReadCompactString(ref buffer);
-            var membersField = Decoder.ReadCompactArray<JoinGroupResponseMember>(ref buffer, (ref ReadOnlyMemory<byte> b) => JoinGroupResponseMemberSerde.ReadV09(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var protocolTypeField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var protocolNameField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var leaderField = Decoder.ReadCompactString(buffer, ref index);
+            var skipAssignmentField = Decoder.ReadBoolean(buffer, ref index);
+            var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+            var membersField = Decoder.ReadCompactArray<JoinGroupResponseMember>(buffer, ref index, JoinGroupResponseMemberSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -387,204 +387,204 @@ namespace Kafka.Client.Messages
                 membersField
             );
         }
-        private static Memory<byte> WriteV09(Memory<byte> buffer, JoinGroupResponse message)
+        private static int WriteV09(byte[] buffer, int index, JoinGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolTypeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteCompactString(buffer, message.LeaderField);
-            buffer = Encoder.WriteBoolean(buffer, message.SkipAssignmentField);
-            buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteCompactArray<JoinGroupResponseMember>(buffer, message.MembersField, (b, i) => JoinGroupResponseMemberSerde.WriteV09(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolTypeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteCompactString(buffer, index, message.LeaderField);
+            index = Encoder.WriteBoolean(buffer, index, message.SkipAssignmentField);
+            index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteCompactArray<JoinGroupResponseMember>(buffer, index, message.MembersField, JoinGroupResponseMemberSerde.WriteV09);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class JoinGroupResponseMemberSerde
         {
-            public static JoinGroupResponseMember ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV00(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
                 var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(ref buffer);
+                var metadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV00(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteBytes(buffer, message.MetadataField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteBytes(buffer, index, message.MetadataField);
+                return index;
             }
-            public static JoinGroupResponseMember ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV01(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
                 var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(ref buffer);
+                var metadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV01(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteBytes(buffer, message.MetadataField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteBytes(buffer, index, message.MetadataField);
+                return index;
             }
-            public static JoinGroupResponseMember ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV02(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
                 var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(ref buffer);
+                var metadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV02(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteBytes(buffer, message.MetadataField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteBytes(buffer, index, message.MetadataField);
+                return index;
             }
-            public static JoinGroupResponseMember ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV03(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
                 var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(ref buffer);
+                var metadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV03(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteBytes(buffer, message.MetadataField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteBytes(buffer, index, message.MetadataField);
+                return index;
             }
-            public static JoinGroupResponseMember ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV04(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
                 var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(ref buffer);
+                var metadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV04(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteBytes(buffer, message.MetadataField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteBytes(buffer, index, message.MetadataField);
+                return index;
             }
-            public static JoinGroupResponseMember ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV05(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
-                var groupInstanceIdField = Decoder.ReadNullableString(ref buffer);
-                var metadataField = Decoder.ReadBytes(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
+                var groupInstanceIdField = Decoder.ReadNullableString(buffer, ref index);
+                var metadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV05(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteNullableString(buffer, message.GroupInstanceIdField);
-                buffer = Encoder.WriteBytes(buffer, message.MetadataField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteNullableString(buffer, index, message.GroupInstanceIdField);
+                index = Encoder.WriteBytes(buffer, index, message.MetadataField);
+                return index;
             }
-            public static JoinGroupResponseMember ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV06(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(ref buffer);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
-                var metadataField = Decoder.ReadCompactBytes(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV06(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-                buffer = Encoder.WriteCompactBytes(buffer, message.MetadataField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
+                index = Encoder.WriteCompactBytes(buffer, index, message.MetadataField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static JoinGroupResponseMember ReadV07(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV07(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(ref buffer);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
-                var metadataField = Decoder.ReadCompactBytes(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV07(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV07(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-                buffer = Encoder.WriteCompactBytes(buffer, message.MetadataField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
+                index = Encoder.WriteCompactBytes(buffer, index, message.MetadataField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static JoinGroupResponseMember ReadV08(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV08(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(ref buffer);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
-                var metadataField = Decoder.ReadCompactBytes(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV08(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV08(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-                buffer = Encoder.WriteCompactBytes(buffer, message.MetadataField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
+                index = Encoder.WriteCompactBytes(buffer, index, message.MetadataField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static JoinGroupResponseMember ReadV09(ref ReadOnlyMemory<byte> buffer)
+            public static JoinGroupResponseMember ReadV09(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(ref buffer);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
-                var metadataField = Decoder.ReadCompactBytes(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField
                 );
             }
-            public static Memory<byte> WriteV09(Memory<byte> buffer, JoinGroupResponseMember message)
+            public static int WriteV09(byte[] buffer, int index, JoinGroupResponseMember message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-                buffer = Encoder.WriteCompactBytes(buffer, message.MetadataField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
+                index = Encoder.WriteCompactBytes(buffer, index, message.MetadataField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

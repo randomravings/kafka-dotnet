@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using TopicRequest = Kafka.Client.Messages.DescribeProducersRequest.TopicRequest;
 
 namespace Kafka.Client.Messages
@@ -9,48 +8,49 @@ namespace Kafka.Client.Messages
     public static class DescribeProducersRequestSerde
     {
         private static readonly DecodeDelegate<DescribeProducersRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<DescribeProducersRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static DescribeProducersRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DescribeProducersRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeProducersRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DescribeProducersRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DescribeProducersRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DescribeProducersRequest ReadV00(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<TopicRequest>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicRequestSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<TopicRequest>(buffer, ref index, TopicRequestSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeProducersRequest message)
+        private static int WriteV00(byte[] buffer, int index, DescribeProducersRequest message)
         {
-            buffer = Encoder.WriteCompactArray<TopicRequest>(buffer, message.TopicsField, (b, i) => TopicRequestSerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<TopicRequest>(buffer, index, message.TopicsField, TopicRequestSerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class TopicRequestSerde
         {
-            public static TopicRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static TopicRequest ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var partitionIndexesField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     partitionIndexesField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, TopicRequest message)
+            public static int WriteV00(byte[] buffer, int index, TopicRequest message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.PartitionIndexesField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

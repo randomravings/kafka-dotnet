@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Messages
 {
@@ -8,33 +7,34 @@ namespace Kafka.Client.Messages
     public static class SyncGroupResponseSerde
     {
         private static readonly DecodeDelegate<SyncGroupResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
         };
         private static readonly EncodeDelegate<SyncGroupResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
         };
-        public static SyncGroupResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static SyncGroupResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, SyncGroupResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static SyncGroupResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, SyncGroupResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static SyncGroupResponse ReadV00(byte[] buffer, ref int index)
         {
             var throttleTimeMsField = default(int);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = Decoder.ReadBytes(ref buffer);
+            var assignmentField = Decoder.ReadBytes(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -43,19 +43,19 @@ namespace Kafka.Client.Messages
                 assignmentField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, SyncGroupResponse message)
+        private static int WriteV00(byte[] buffer, int index, SyncGroupResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteBytes(buffer, message.AssignmentField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteBytes(buffer, index, message.AssignmentField);
+            return index;
         }
-        private static SyncGroupResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = Decoder.ReadBytes(ref buffer);
+            var assignmentField = Decoder.ReadBytes(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -64,20 +64,20 @@ namespace Kafka.Client.Messages
                 assignmentField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, SyncGroupResponse message)
+        private static int WriteV01(byte[] buffer, int index, SyncGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteBytes(buffer, message.AssignmentField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteBytes(buffer, index, message.AssignmentField);
+            return index;
         }
-        private static SyncGroupResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = Decoder.ReadBytes(ref buffer);
+            var assignmentField = Decoder.ReadBytes(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -86,20 +86,20 @@ namespace Kafka.Client.Messages
                 assignmentField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, SyncGroupResponse message)
+        private static int WriteV02(byte[] buffer, int index, SyncGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteBytes(buffer, message.AssignmentField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteBytes(buffer, index, message.AssignmentField);
+            return index;
         }
-        private static SyncGroupResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupResponse ReadV03(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = Decoder.ReadBytes(ref buffer);
+            var assignmentField = Decoder.ReadBytes(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -108,21 +108,21 @@ namespace Kafka.Client.Messages
                 assignmentField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, SyncGroupResponse message)
+        private static int WriteV03(byte[] buffer, int index, SyncGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteBytes(buffer, message.AssignmentField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteBytes(buffer, index, message.AssignmentField);
+            return index;
         }
-        private static SyncGroupResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupResponse ReadV04(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = Decoder.ReadCompactBytes(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var assignmentField = Decoder.ReadCompactBytes(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -131,22 +131,22 @@ namespace Kafka.Client.Messages
                 assignmentField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, SyncGroupResponse message)
+        private static int WriteV04(byte[] buffer, int index, SyncGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactBytes(buffer, message.AssignmentField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactBytes(buffer, index, message.AssignmentField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static SyncGroupResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupResponse ReadV05(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var protocolTypeField = Decoder.ReadCompactNullableString(ref buffer);
-            var protocolNameField = Decoder.ReadCompactNullableString(ref buffer);
-            var assignmentField = Decoder.ReadCompactBytes(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var protocolTypeField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var protocolNameField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var assignmentField = Decoder.ReadCompactBytes(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -155,15 +155,15 @@ namespace Kafka.Client.Messages
                 assignmentField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, SyncGroupResponse message)
+        private static int WriteV05(byte[] buffer, int index, SyncGroupResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolTypeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteCompactBytes(buffer, message.AssignmentField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolTypeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteCompactBytes(buffer, index, message.AssignmentField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

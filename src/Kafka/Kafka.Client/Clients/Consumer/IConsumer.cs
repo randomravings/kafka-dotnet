@@ -3,10 +3,8 @@ using Kafka.Common.Types;
 
 namespace Kafka.Client.Clients.Consumer
 {
-    internal interface IConsumer<TKey, TValue> :
+    public interface IConsumer<TKey, TValue> :
         IClient
-        where TKey : notnull
-        where TValue : notnull
     {
         ValueTask<ConsumeResult<TKey, TValue>> Poll(CancellationToken token = default);
         ValueTask Subscribe(string topic, CancellationToken token = default);
@@ -15,4 +13,8 @@ namespace Kafka.Client.Clients.Consumer
         ValueTask UnAssign(TopicPartitionOffset topicPartitionOffset, CancellationToken token = default);
         ValueTask UnAssign(TopicPartitionOffsets topicPartitionOffsets, CancellationToken token = default);
     }
+
+    public interface IConsumer<TValue> :
+        IConsumer<Ignore, TValue>
+    { }
 }

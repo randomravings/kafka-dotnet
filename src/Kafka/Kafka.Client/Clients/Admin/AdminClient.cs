@@ -1,7 +1,6 @@
 ﻿using Kafka.Client.Clients.Admin.Model;
 using Kafka.Client.Messages;
 using Kafka.Common;
-using Kafka.Common.Exceptions;
 using Kafka.Common.Types;
 using Kafka.Common.Types.Comparison;
 using System.Collections.Immutable;
@@ -44,18 +43,19 @@ namespace Kafka.Client.Clients.Admin
             );
             var response = await HandleRequest(
                 request,
-                (s, v, r) => MetadataRequestSerde.Write(s, v, r),
-                (ref ReadOnlyMemory<byte> s, short v) => MetadataResponseSerde.Read(ref s, v),
+                MetadataRequestSerde.Write,
+                MetadataResponseSerde.Read,
                 options.ApiVersion,
+                ProduceRequest.FlexibleVersion,
                 cancellationToken
             );
             var topics = response
                 .TopicsField
                 .Where(r => options.IncludeInternal || r.IsInternalField == false)
-                .Select(r => new TopicListing(new(r.TopicIdField, r.NameField), r.IsInternalField))
-                .ToImmutableSortedSet(
-                    TopicListingCompare.Instance
-                )
+                .Select(r => new Topic(r.TopicIdField, r.NameField, r.IsInternalField))
+                .OrderBy(r => r.Name)
+                .ThenBy(r => r.Id)
+                .ToImmutableArray()
             ;
             return new(topics);
         }
@@ -90,17 +90,19 @@ namespace Kafka.Client.Clients.Admin
             );
             var response = await HandleRequest(
                 request,
-                (s, v, r) => CreateTopicsRequestSerde.Write(s, v, r),
-                (ref ReadOnlyMemory<byte> s, short v) => CreateTopicsResponseSerde.Read(ref s, v),
+                CreateTopicsRequestSerde.Write,
+                CreateTopicsResponseSerde.Read,
                 options.ApiVersion,
+                CreateTopicsRequest.FlexibleVersion,
                 cancellationToken
             );
             var createdTopics = response
                 .TopicsField
                 .Where(r => r.ErrorCodeField == 0)
                 .Select(
-                    r => new CreateTopicsResult.CreatedTopicResult(
-                        new(r.TopicIdField, r.NameField),
+                    r => new CreateTopicsResult.CreateTopicResult(
+                        r.TopicIdField,
+                        r.NameField,
                         r.NumPartitionsField,
                         r.ReplicationFactorField,
                         r.ConfigsField.HasValue ?
@@ -111,18 +113,18 @@ namespace Kafka.Client.Clients.Admin
                             ImmutableSortedDictionary<string, string?>.Empty
                     )
                 )
-                .ToImmutableSortedDictionary(
-                    k => k.Topic,
-                    v => v
-                )
+                .ToImmutableArray()
             ;
             var errorTopics = response
                 .TopicsField
                 .Where(r => r.ErrorCodeField != 0)
-                .ToImmutableSortedDictionary(
-                    k => new Topic(k.TopicIdField, k.NameField),
-                    v => Errors.Translate(v.ErrorCodeField)
+                .Select(
+                    r => new CreateTopicsResult.CreateTopicError(
+                        r.NameField,
+                        Errors.Translate(r.ErrorCodeField)
+                    )
                 )
+                .ToImmutableArray()
             ;
             return new CreateTopicsResult(
                 createdTopics,
@@ -157,26 +159,33 @@ namespace Kafka.Client.Clients.Admin
             );
             var response = await HandleRequest(
                 request,
-                (s, v, r) => DeleteTopicsRequestSerde.Write(s, v, r),
-                (ref ReadOnlyMemory<byte> s, short v) => DeleteTopicsResponseSerde.Read(ref s, v),
+                DeleteTopicsRequestSerde.Write,
+                DeleteTopicsResponseSerde.Read,
                 options.ApiVersion,
+                CreateTopicsRequest.FlexibleVersion,
                 cancellationToken
             );
             var deletedTopics = response
                 .ResponsesField
                 .Where(r => r.ErrorCodeField == 0)
                 .Select(
-                    r => new Topic(r.TopicIdField, r.NameField)
+                    r => new DeleteTopicsResult.DeleteTopicResult(
+                        r.TopicIdField,
+                        r.NameField
+                    )
                 )
                 .ToImmutableArray()
             ;
             var errorTopics = response
                 .ResponsesField
                 .Where(r => r.ErrorCodeField != 0)
-                .ToImmutableSortedDictionary(
-                    k => new Topic(k.TopicIdField, k.NameField),
-                    v => Errors.Translate(v.ErrorCodeField)
+                .Select(
+                    r => new DeleteTopicsResult.DeleteTopicError(
+                        r.NameField,
+                        Errors.Translate(r.ErrorCodeField)
+                    )
                 )
+                .ToImmutableArray()
             ;
             return new(
                 deletedTopics,
@@ -214,9 +223,10 @@ namespace Kafka.Client.Clients.Admin
             );
             var response = await HandleRequest(
                 request,
-                (s, v, r) => MetadataRequestSerde.Write(s, v, r),
-                (ref ReadOnlyMemory<byte> s, short v) => MetadataResponseSerde.Read(ref s, v),
+                MetadataRequestSerde.Write,
+                MetadataResponseSerde.Read,
                 options.ApiVersion,
+                MetadataRequest.FlexibleVersion,
                 cancellationToken
             );
             return new(
@@ -241,9 +251,9 @@ namespace Kafka.Client.Clients.Admin
                     )
                 )
                 .ToImmutableSortedDictionary(
-                    k => new Topic(k.TopicId, k.Name),
+                    k => new TopicName(k.Name),
                     v => v,
-                    TopicCompare.Instance
+                    TopicNameCompare.Instance
                 )
             );
         }

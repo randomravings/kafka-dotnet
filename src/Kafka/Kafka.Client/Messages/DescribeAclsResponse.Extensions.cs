@@ -1,8 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
-using AclDescription = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource.AclDescription;
 using DescribeAclsResource = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource;
+using AclDescription = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource.AclDescription;
 
 namespace Kafka.Client.Messages
 {
@@ -10,28 +9,29 @@ namespace Kafka.Client.Messages
     public static class DescribeAclsResponseSerde
     {
         private static readonly DecodeDelegate<DescribeAclsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<DescribeAclsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static DescribeAclsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DescribeAclsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeAclsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DescribeAclsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DescribeAclsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DescribeAclsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadNullableString(ref buffer);
-            var resourcesField = Decoder.ReadArray<DescribeAclsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeAclsResourceSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+            var resourcesField = Decoder.ReadArray<DescribeAclsResource>(buffer, ref index, DescribeAclsResourceSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -39,20 +39,20 @@ namespace Kafka.Client.Messages
                 resourcesField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeAclsResponse message)
+        private static int WriteV00(byte[] buffer, int index, DescribeAclsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteArray<DescribeAclsResource>(buffer, message.ResourcesField, (b, i) => DescribeAclsResourceSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteArray<DescribeAclsResource>(buffer, index, message.ResourcesField, DescribeAclsResourceSerde.WriteV00);
+            return index;
         }
-        private static DescribeAclsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeAclsResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadNullableString(ref buffer);
-            var resourcesField = Decoder.ReadArray<DescribeAclsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeAclsResourceSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+            var resourcesField = Decoder.ReadArray<DescribeAclsResource>(buffer, ref index, DescribeAclsResourceSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -60,21 +60,21 @@ namespace Kafka.Client.Messages
                 resourcesField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DescribeAclsResponse message)
+        private static int WriteV01(byte[] buffer, int index, DescribeAclsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteArray<DescribeAclsResource>(buffer, message.ResourcesField, (b, i) => DescribeAclsResourceSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteArray<DescribeAclsResource>(buffer, index, message.ResourcesField, DescribeAclsResourceSerde.WriteV01);
+            return index;
         }
-        private static DescribeAclsResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeAclsResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-            var resourcesField = Decoder.ReadCompactArray<DescribeAclsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeAclsResourceSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var resourcesField = Decoder.ReadCompactArray<DescribeAclsResource>(buffer, ref index, DescribeAclsResourceSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -82,22 +82,22 @@ namespace Kafka.Client.Messages
                 resourcesField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, DescribeAclsResponse message)
+        private static int WriteV02(byte[] buffer, int index, DescribeAclsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteCompactArray<DescribeAclsResource>(buffer, message.ResourcesField, (b, i) => DescribeAclsResourceSerde.WriteV02(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteCompactArray<DescribeAclsResource>(buffer, index, message.ResourcesField, DescribeAclsResourceSerde.WriteV02);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static DescribeAclsResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeAclsResponse ReadV03(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-            var resourcesField = Decoder.ReadCompactArray<DescribeAclsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeAclsResourceSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var resourcesField = Decoder.ReadCompactArray<DescribeAclsResource>(buffer, ref index, DescribeAclsResourceSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -105,23 +105,23 @@ namespace Kafka.Client.Messages
                 resourcesField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, DescribeAclsResponse message)
+        private static int WriteV03(byte[] buffer, int index, DescribeAclsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteCompactArray<DescribeAclsResource>(buffer, message.ResourcesField, (b, i) => DescribeAclsResourceSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteCompactArray<DescribeAclsResource>(buffer, index, message.ResourcesField, DescribeAclsResourceSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class DescribeAclsResourceSerde
         {
-            public static DescribeAclsResource ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeAclsResource ReadV00(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadString(ref buffer);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadString(buffer, ref index);
                 var patternTypeField = default(sbyte);
-                var aclsField = Decoder.ReadArray<AclDescription>(ref buffer, (ref ReadOnlyMemory<byte> b) => AclDescriptionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Acls'");
+                var aclsField = Decoder.ReadArray<AclDescription>(buffer, ref index, AclDescriptionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Acls'");
                 return new(
                     resourceTypeField,
                     resourceNameField,
@@ -129,19 +129,19 @@ namespace Kafka.Client.Messages
                     aclsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, DescribeAclsResource message)
+            public static int WriteV00(byte[] buffer, int index, DescribeAclsResource message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteArray<AclDescription>(buffer, message.AclsField, (b, i) => AclDescriptionSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteArray<AclDescription>(buffer, index, message.AclsField, AclDescriptionSerde.WriteV00);
+                return index;
             }
-            public static DescribeAclsResource ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeAclsResource ReadV01(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadString(ref buffer);
-                var patternTypeField = Decoder.ReadInt8(ref buffer);
-                var aclsField = Decoder.ReadArray<AclDescription>(ref buffer, (ref ReadOnlyMemory<byte> b) => AclDescriptionSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Acls'");
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadString(buffer, ref index);
+                var patternTypeField = Decoder.ReadInt8(buffer, ref index);
+                var aclsField = Decoder.ReadArray<AclDescription>(buffer, ref index, AclDescriptionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Acls'");
                 return new(
                     resourceTypeField,
                     resourceNameField,
@@ -149,21 +149,21 @@ namespace Kafka.Client.Messages
                     aclsField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, DescribeAclsResource message)
+            public static int WriteV01(byte[] buffer, int index, DescribeAclsResource message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteInt8(buffer, message.PatternTypeField);
-                buffer = Encoder.WriteArray<AclDescription>(buffer, message.AclsField, (b, i) => AclDescriptionSerde.WriteV01(b, i));
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteInt8(buffer, index, message.PatternTypeField);
+                index = Encoder.WriteArray<AclDescription>(buffer, index, message.AclsField, AclDescriptionSerde.WriteV01);
+                return index;
             }
-            public static DescribeAclsResource ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeAclsResource ReadV02(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadCompactString(ref buffer);
-                var patternTypeField = Decoder.ReadInt8(ref buffer);
-                var aclsField = Decoder.ReadCompactArray<AclDescription>(ref buffer, (ref ReadOnlyMemory<byte> b) => AclDescriptionSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Acls'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var patternTypeField = Decoder.ReadInt8(buffer, ref index);
+                var aclsField = Decoder.ReadCompactArray<AclDescription>(buffer, ref index, AclDescriptionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Acls'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     resourceTypeField,
                     resourceNameField,
@@ -171,22 +171,22 @@ namespace Kafka.Client.Messages
                     aclsField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, DescribeAclsResource message)
+            public static int WriteV02(byte[] buffer, int index, DescribeAclsResource message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteInt8(buffer, message.PatternTypeField);
-                buffer = Encoder.WriteCompactArray<AclDescription>(buffer, message.AclsField, (b, i) => AclDescriptionSerde.WriteV02(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteInt8(buffer, index, message.PatternTypeField);
+                index = Encoder.WriteCompactArray<AclDescription>(buffer, index, message.AclsField, AclDescriptionSerde.WriteV02);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static DescribeAclsResource ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeAclsResource ReadV03(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadCompactString(ref buffer);
-                var patternTypeField = Decoder.ReadInt8(ref buffer);
-                var aclsField = Decoder.ReadCompactArray<AclDescription>(ref buffer, (ref ReadOnlyMemory<byte> b) => AclDescriptionSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Acls'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var patternTypeField = Decoder.ReadInt8(buffer, ref index);
+                var aclsField = Decoder.ReadCompactArray<AclDescription>(buffer, ref index, AclDescriptionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Acls'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     resourceTypeField,
                     resourceNameField,
@@ -194,23 +194,23 @@ namespace Kafka.Client.Messages
                     aclsField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, DescribeAclsResource message)
+            public static int WriteV03(byte[] buffer, int index, DescribeAclsResource message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteInt8(buffer, message.PatternTypeField);
-                buffer = Encoder.WriteCompactArray<AclDescription>(buffer, message.AclsField, (b, i) => AclDescriptionSerde.WriteV03(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteInt8(buffer, index, message.PatternTypeField);
+                index = Encoder.WriteCompactArray<AclDescription>(buffer, index, message.AclsField, AclDescriptionSerde.WriteV03);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class AclDescriptionSerde
             {
-                public static AclDescription ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static AclDescription ReadV00(byte[] buffer, ref int index)
                 {
-                    var principalField = Decoder.ReadString(ref buffer);
-                    var hostField = Decoder.ReadString(ref buffer);
-                    var operationField = Decoder.ReadInt8(ref buffer);
-                    var permissionTypeField = Decoder.ReadInt8(ref buffer);
+                    var principalField = Decoder.ReadString(buffer, ref index);
+                    var hostField = Decoder.ReadString(buffer, ref index);
+                    var operationField = Decoder.ReadInt8(buffer, ref index);
+                    var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
                     return new(
                         principalField,
                         hostField,
@@ -218,20 +218,20 @@ namespace Kafka.Client.Messages
                         permissionTypeField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, AclDescription message)
+                public static int WriteV00(byte[] buffer, int index, AclDescription message)
                 {
-                    buffer = Encoder.WriteString(buffer, message.PrincipalField);
-                    buffer = Encoder.WriteString(buffer, message.HostField);
-                    buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                    buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                    return buffer;
+                    index = Encoder.WriteString(buffer, index, message.PrincipalField);
+                    index = Encoder.WriteString(buffer, index, message.HostField);
+                    index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                    index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                    return index;
                 }
-                public static AclDescription ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static AclDescription ReadV01(byte[] buffer, ref int index)
                 {
-                    var principalField = Decoder.ReadString(ref buffer);
-                    var hostField = Decoder.ReadString(ref buffer);
-                    var operationField = Decoder.ReadInt8(ref buffer);
-                    var permissionTypeField = Decoder.ReadInt8(ref buffer);
+                    var principalField = Decoder.ReadString(buffer, ref index);
+                    var hostField = Decoder.ReadString(buffer, ref index);
+                    var operationField = Decoder.ReadInt8(buffer, ref index);
+                    var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
                     return new(
                         principalField,
                         hostField,
@@ -239,21 +239,21 @@ namespace Kafka.Client.Messages
                         permissionTypeField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, AclDescription message)
+                public static int WriteV01(byte[] buffer, int index, AclDescription message)
                 {
-                    buffer = Encoder.WriteString(buffer, message.PrincipalField);
-                    buffer = Encoder.WriteString(buffer, message.HostField);
-                    buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                    buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                    return buffer;
+                    index = Encoder.WriteString(buffer, index, message.PrincipalField);
+                    index = Encoder.WriteString(buffer, index, message.HostField);
+                    index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                    index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                    return index;
                 }
-                public static AclDescription ReadV02(ref ReadOnlyMemory<byte> buffer)
+                public static AclDescription ReadV02(byte[] buffer, ref int index)
                 {
-                    var principalField = Decoder.ReadCompactString(ref buffer);
-                    var hostField = Decoder.ReadCompactString(ref buffer);
-                    var operationField = Decoder.ReadInt8(ref buffer);
-                    var permissionTypeField = Decoder.ReadInt8(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var principalField = Decoder.ReadCompactString(buffer, ref index);
+                    var hostField = Decoder.ReadCompactString(buffer, ref index);
+                    var operationField = Decoder.ReadInt8(buffer, ref index);
+                    var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         principalField,
                         hostField,
@@ -261,22 +261,22 @@ namespace Kafka.Client.Messages
                         permissionTypeField
                     );
                 }
-                public static Memory<byte> WriteV02(Memory<byte> buffer, AclDescription message)
+                public static int WriteV02(byte[] buffer, int index, AclDescription message)
                 {
-                    buffer = Encoder.WriteCompactString(buffer, message.PrincipalField);
-                    buffer = Encoder.WriteCompactString(buffer, message.HostField);
-                    buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                    buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteCompactString(buffer, index, message.PrincipalField);
+                    index = Encoder.WriteCompactString(buffer, index, message.HostField);
+                    index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                    index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
-                public static AclDescription ReadV03(ref ReadOnlyMemory<byte> buffer)
+                public static AclDescription ReadV03(byte[] buffer, ref int index)
                 {
-                    var principalField = Decoder.ReadCompactString(ref buffer);
-                    var hostField = Decoder.ReadCompactString(ref buffer);
-                    var operationField = Decoder.ReadInt8(ref buffer);
-                    var permissionTypeField = Decoder.ReadInt8(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var principalField = Decoder.ReadCompactString(buffer, ref index);
+                    var hostField = Decoder.ReadCompactString(buffer, ref index);
+                    var operationField = Decoder.ReadInt8(buffer, ref index);
+                    var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         principalField,
                         hostField,
@@ -284,14 +284,14 @@ namespace Kafka.Client.Messages
                         permissionTypeField
                     );
                 }
-                public static Memory<byte> WriteV03(Memory<byte> buffer, AclDescription message)
+                public static int WriteV03(byte[] buffer, int index, AclDescription message)
                 {
-                    buffer = Encoder.WriteCompactString(buffer, message.PrincipalField);
-                    buffer = Encoder.WriteCompactString(buffer, message.HostField);
-                    buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                    buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteCompactString(buffer, index, message.PrincipalField);
+                    index = Encoder.WriteCompactString(buffer, index, message.HostField);
+                    index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                    index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

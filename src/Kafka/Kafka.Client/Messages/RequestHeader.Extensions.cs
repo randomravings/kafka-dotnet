@@ -6,26 +6,29 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class RequestHeaderSerde
     {
-        private static readonly DecodeDelegate<RequestHeader>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+        private delegate RequestHeader DecodeDelegate(byte[] buffer, ref int index, bool flexible);
+        private delegate int EncodeDelegate(byte[] buffer, int offset, RequestHeader item, bool flexible);
+        private static readonly DecodeDelegate[] READ_VERSIONS = {
+            ReadV00,
+            ReadV01,
+            ReadV02,
         };
-        private static readonly EncodeDelegate<RequestHeader>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
+        private static readonly EncodeDelegate[] WRITE_VERSIONS = {
+            WriteV00,
+            WriteV01,
+            WriteV02,
         };
-        public static RequestHeader Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static RequestHeader Read(byte[] buffer, ref int index, short version, bool flexible) =>
+            READ_VERSIONS[version](buffer, ref index, flexible)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, RequestHeader message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static RequestHeader ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, RequestHeader message, short version, bool flexible) =>
+            WRITE_VERSIONS[version](buffer, index, message,flexible)
+        ;
+        private static RequestHeader ReadV00(byte[] buffer, ref int index, bool flexible)
         {
-            var requestApiKeyField = Decoder.ReadInt16(ref buffer);
-            var requestApiVersionField = Decoder.ReadInt16(ref buffer);
-            var correlationIdField = Decoder.ReadInt32(ref buffer);
+            var requestApiKeyField = Decoder.ReadInt16(buffer, ref index);
+            var requestApiVersionField = Decoder.ReadInt16(buffer, ref index);
+            var correlationIdField = Decoder.ReadInt32(buffer, ref index);
             var clientIdField = default(string?);
             return new(
                 requestApiKeyField,
@@ -34,19 +37,19 @@ namespace Kafka.Client.Messages
                 clientIdField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, RequestHeader message)
+        private static int WriteV00(byte[] buffer, int index, RequestHeader message, bool flexible)
         {
-            buffer = Encoder.WriteInt16(buffer, message.RequestApiKeyField);
-            buffer = Encoder.WriteInt16(buffer, message.RequestApiVersionField);
-            buffer = Encoder.WriteInt32(buffer, message.CorrelationIdField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.RequestApiKeyField);
+            index = Encoder.WriteInt16(buffer, index, message.RequestApiVersionField);
+            index = Encoder.WriteInt32(buffer, index, message.CorrelationIdField);
+            return index;
         }
-        private static RequestHeader ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static RequestHeader ReadV01(byte[] buffer, ref int index, bool flexible)
         {
-            var requestApiKeyField = Decoder.ReadInt16(ref buffer);
-            var requestApiVersionField = Decoder.ReadInt16(ref buffer);
-            var correlationIdField = Decoder.ReadInt32(ref buffer);
-            var clientIdField = Decoder.ReadNullableString(ref buffer);
+            var requestApiKeyField = Decoder.ReadInt16(buffer, ref index);
+            var requestApiVersionField = Decoder.ReadInt16(buffer, ref index);
+            var correlationIdField = Decoder.ReadInt32(buffer, ref index);
+            var clientIdField = Decoder.ReadNullableString(buffer, ref index);
             return new(
                 requestApiKeyField,
                 requestApiVersionField,
@@ -54,21 +57,22 @@ namespace Kafka.Client.Messages
                 clientIdField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, RequestHeader message)
+        private static int WriteV01(byte[] buffer, int index, RequestHeader message, bool flexible)
         {
-            buffer = Encoder.WriteInt16(buffer, message.RequestApiKeyField);
-            buffer = Encoder.WriteInt16(buffer, message.RequestApiVersionField);
-            buffer = Encoder.WriteInt32(buffer, message.CorrelationIdField);
-            buffer = Encoder.WriteNullableString(buffer, message.ClientIdField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.RequestApiKeyField);
+            index = Encoder.WriteInt16(buffer, index, message.RequestApiVersionField);
+            index = Encoder.WriteInt32(buffer, index, message.CorrelationIdField);
+            index = Encoder.WriteNullableString(buffer, index, message.ClientIdField);
+            return index;
         }
-        private static RequestHeader ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static RequestHeader ReadV02(byte[] buffer, ref int index, bool flexible)
         {
-            var requestApiKeyField = Decoder.ReadInt16(ref buffer);
-            var requestApiVersionField = Decoder.ReadInt16(ref buffer);
-            var correlationIdField = Decoder.ReadInt32(ref buffer);
-            var clientIdField = Decoder.ReadNullableString(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var requestApiKeyField = Decoder.ReadInt16(buffer, ref index);
+            var requestApiVersionField = Decoder.ReadInt16(buffer, ref index);
+            var correlationIdField = Decoder.ReadInt32(buffer, ref index);
+            var clientIdField = Decoder.ReadNullableString(buffer, ref index);
+            if (flexible)
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 requestApiKeyField,
                 requestApiVersionField,
@@ -76,14 +80,15 @@ namespace Kafka.Client.Messages
                 clientIdField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, RequestHeader message)
+        private static int WriteV02(byte[] buffer, int index, RequestHeader message, bool flexible)
         {
-            buffer = Encoder.WriteInt16(buffer, message.RequestApiKeyField);
-            buffer = Encoder.WriteInt16(buffer, message.RequestApiVersionField);
-            buffer = Encoder.WriteInt32(buffer, message.CorrelationIdField);
-            buffer = Encoder.WriteNullableString(buffer, message.ClientIdField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.RequestApiKeyField);
+            index = Encoder.WriteInt16(buffer, index, message.RequestApiVersionField);
+            index = Encoder.WriteInt32(buffer, index, message.CorrelationIdField);
+            index = Encoder.WriteNullableString(buffer, index, message.ClientIdField);
+            if (flexible)
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

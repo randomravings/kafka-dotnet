@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Messages
 {
@@ -8,35 +7,36 @@ namespace Kafka.Client.Messages
     public static class CreateDelegationTokenResponseSerde
     {
         private static readonly DecodeDelegate<CreateDelegationTokenResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<CreateDelegationTokenResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static CreateDelegationTokenResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static CreateDelegationTokenResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, CreateDelegationTokenResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static CreateDelegationTokenResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, CreateDelegationTokenResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static CreateDelegationTokenResponse ReadV00(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var principalTypeField = Decoder.ReadString(ref buffer);
-            var principalNameField = Decoder.ReadString(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var principalTypeField = Decoder.ReadString(buffer, ref index);
+            var principalNameField = Decoder.ReadString(buffer, ref index);
             var tokenRequesterPrincipalTypeField = "";
             var tokenRequesterPrincipalNameField = "";
-            var issueTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var expiryTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var maxTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var tokenIdField = Decoder.ReadString(ref buffer);
-            var hmacField = Decoder.ReadBytes(ref buffer);
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var issueTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var expiryTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var maxTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var tokenIdField = Decoder.ReadString(buffer, ref index);
+            var hmacField = Decoder.ReadBytes(buffer, ref index);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 principalTypeField,
@@ -51,32 +51,32 @@ namespace Kafka.Client.Messages
                 throttleTimeMsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, CreateDelegationTokenResponse message)
+        private static int WriteV00(byte[] buffer, int index, CreateDelegationTokenResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
-            buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
-            buffer = Encoder.WriteInt64(buffer, message.IssueTimestampMsField);
-            buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampMsField);
-            buffer = Encoder.WriteInt64(buffer, message.MaxTimestampMsField);
-            buffer = Encoder.WriteString(buffer, message.TokenIdField);
-            buffer = Encoder.WriteBytes(buffer, message.HmacField);
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteString(buffer, index, message.PrincipalTypeField);
+            index = Encoder.WriteString(buffer, index, message.PrincipalNameField);
+            index = Encoder.WriteInt64(buffer, index, message.IssueTimestampMsField);
+            index = Encoder.WriteInt64(buffer, index, message.ExpiryTimestampMsField);
+            index = Encoder.WriteInt64(buffer, index, message.MaxTimestampMsField);
+            index = Encoder.WriteString(buffer, index, message.TokenIdField);
+            index = Encoder.WriteBytes(buffer, index, message.HmacField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            return index;
         }
-        private static CreateDelegationTokenResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static CreateDelegationTokenResponse ReadV01(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var principalTypeField = Decoder.ReadString(ref buffer);
-            var principalNameField = Decoder.ReadString(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var principalTypeField = Decoder.ReadString(buffer, ref index);
+            var principalNameField = Decoder.ReadString(buffer, ref index);
             var tokenRequesterPrincipalTypeField = "";
             var tokenRequesterPrincipalNameField = "";
-            var issueTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var expiryTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var maxTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var tokenIdField = Decoder.ReadString(ref buffer);
-            var hmacField = Decoder.ReadBytes(ref buffer);
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var issueTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var expiryTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var maxTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var tokenIdField = Decoder.ReadString(buffer, ref index);
+            var hmacField = Decoder.ReadBytes(buffer, ref index);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 principalTypeField,
@@ -91,33 +91,33 @@ namespace Kafka.Client.Messages
                 throttleTimeMsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, CreateDelegationTokenResponse message)
+        private static int WriteV01(byte[] buffer, int index, CreateDelegationTokenResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
-            buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
-            buffer = Encoder.WriteInt64(buffer, message.IssueTimestampMsField);
-            buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampMsField);
-            buffer = Encoder.WriteInt64(buffer, message.MaxTimestampMsField);
-            buffer = Encoder.WriteString(buffer, message.TokenIdField);
-            buffer = Encoder.WriteBytes(buffer, message.HmacField);
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteString(buffer, index, message.PrincipalTypeField);
+            index = Encoder.WriteString(buffer, index, message.PrincipalNameField);
+            index = Encoder.WriteInt64(buffer, index, message.IssueTimestampMsField);
+            index = Encoder.WriteInt64(buffer, index, message.ExpiryTimestampMsField);
+            index = Encoder.WriteInt64(buffer, index, message.MaxTimestampMsField);
+            index = Encoder.WriteString(buffer, index, message.TokenIdField);
+            index = Encoder.WriteBytes(buffer, index, message.HmacField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            return index;
         }
-        private static CreateDelegationTokenResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static CreateDelegationTokenResponse ReadV02(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var principalTypeField = Decoder.ReadCompactString(ref buffer);
-            var principalNameField = Decoder.ReadCompactString(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
+            var principalNameField = Decoder.ReadCompactString(buffer, ref index);
             var tokenRequesterPrincipalTypeField = "";
             var tokenRequesterPrincipalNameField = "";
-            var issueTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var expiryTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var maxTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var tokenIdField = Decoder.ReadCompactString(ref buffer);
-            var hmacField = Decoder.ReadCompactBytes(ref buffer);
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var issueTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var expiryTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var maxTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var tokenIdField = Decoder.ReadCompactString(buffer, ref index);
+            var hmacField = Decoder.ReadCompactBytes(buffer, ref index);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 principalTypeField,
@@ -132,34 +132,34 @@ namespace Kafka.Client.Messages
                 throttleTimeMsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, CreateDelegationTokenResponse message)
+        private static int WriteV02(byte[] buffer, int index, CreateDelegationTokenResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-            buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-            buffer = Encoder.WriteInt64(buffer, message.IssueTimestampMsField);
-            buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampMsField);
-            buffer = Encoder.WriteInt64(buffer, message.MaxTimestampMsField);
-            buffer = Encoder.WriteCompactString(buffer, message.TokenIdField);
-            buffer = Encoder.WriteCompactBytes(buffer, message.HmacField);
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactString(buffer, index, message.PrincipalTypeField);
+            index = Encoder.WriteCompactString(buffer, index, message.PrincipalNameField);
+            index = Encoder.WriteInt64(buffer, index, message.IssueTimestampMsField);
+            index = Encoder.WriteInt64(buffer, index, message.ExpiryTimestampMsField);
+            index = Encoder.WriteInt64(buffer, index, message.MaxTimestampMsField);
+            index = Encoder.WriteCompactString(buffer, index, message.TokenIdField);
+            index = Encoder.WriteCompactBytes(buffer, index, message.HmacField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static CreateDelegationTokenResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static CreateDelegationTokenResponse ReadV03(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var principalTypeField = Decoder.ReadCompactString(ref buffer);
-            var principalNameField = Decoder.ReadCompactString(ref buffer);
-            var tokenRequesterPrincipalTypeField = Decoder.ReadCompactString(ref buffer);
-            var tokenRequesterPrincipalNameField = Decoder.ReadCompactString(ref buffer);
-            var issueTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var expiryTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var maxTimestampMsField = Decoder.ReadInt64(ref buffer);
-            var tokenIdField = Decoder.ReadCompactString(ref buffer);
-            var hmacField = Decoder.ReadCompactBytes(ref buffer);
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
+            var principalNameField = Decoder.ReadCompactString(buffer, ref index);
+            var tokenRequesterPrincipalTypeField = Decoder.ReadCompactString(buffer, ref index);
+            var tokenRequesterPrincipalNameField = Decoder.ReadCompactString(buffer, ref index);
+            var issueTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var expiryTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var maxTimestampMsField = Decoder.ReadInt64(buffer, ref index);
+            var tokenIdField = Decoder.ReadCompactString(buffer, ref index);
+            var hmacField = Decoder.ReadCompactBytes(buffer, ref index);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 principalTypeField,
@@ -174,21 +174,21 @@ namespace Kafka.Client.Messages
                 throttleTimeMsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, CreateDelegationTokenResponse message)
+        private static int WriteV03(byte[] buffer, int index, CreateDelegationTokenResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-            buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-            buffer = Encoder.WriteCompactString(buffer, message.TokenRequesterPrincipalTypeField);
-            buffer = Encoder.WriteCompactString(buffer, message.TokenRequesterPrincipalNameField);
-            buffer = Encoder.WriteInt64(buffer, message.IssueTimestampMsField);
-            buffer = Encoder.WriteInt64(buffer, message.ExpiryTimestampMsField);
-            buffer = Encoder.WriteInt64(buffer, message.MaxTimestampMsField);
-            buffer = Encoder.WriteCompactString(buffer, message.TokenIdField);
-            buffer = Encoder.WriteCompactBytes(buffer, message.HmacField);
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactString(buffer, index, message.PrincipalTypeField);
+            index = Encoder.WriteCompactString(buffer, index, message.PrincipalNameField);
+            index = Encoder.WriteCompactString(buffer, index, message.TokenRequesterPrincipalTypeField);
+            index = Encoder.WriteCompactString(buffer, index, message.TokenRequesterPrincipalNameField);
+            index = Encoder.WriteInt64(buffer, index, message.IssueTimestampMsField);
+            index = Encoder.WriteInt64(buffer, index, message.ExpiryTimestampMsField);
+            index = Encoder.WriteInt64(buffer, index, message.MaxTimestampMsField);
+            index = Encoder.WriteCompactString(buffer, index, message.TokenIdField);
+            index = Encoder.WriteCompactBytes(buffer, index, message.HmacField);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

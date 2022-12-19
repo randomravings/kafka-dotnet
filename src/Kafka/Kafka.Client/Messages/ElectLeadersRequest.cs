@@ -22,6 +22,7 @@ namespace Kafka.Client.Messages
             default(ImmutableArray<TopicPartitions>?),
             default(int)
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="TopicField">The name of a topic.</param>
         /// <param name="PartitionsField">The partitions of this topic whose leader should be elected.</param>

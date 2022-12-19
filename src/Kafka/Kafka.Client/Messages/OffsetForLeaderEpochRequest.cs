@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using OffsetForLeaderTopic = Kafka.Client.Messages.OffsetForLeaderEpochRequest.OffsetForLeaderTopic;
 using OffsetForLeaderPartition = Kafka.Client.Messages.OffsetForLeaderEpochRequest.OffsetForLeaderTopic.OffsetForLeaderPartition;
+using OffsetForLeaderTopic = Kafka.Client.Messages.OffsetForLeaderEpochRequest.OffsetForLeaderTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<OffsetForLeaderTopic>.Empty
         );
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="TopicField">The topic name.</param>
         /// <param name="PartitionsField">Each partition to get offsets for.</param>

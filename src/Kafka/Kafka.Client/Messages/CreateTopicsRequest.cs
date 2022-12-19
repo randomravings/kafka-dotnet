@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreateableTopicConfig;
 using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
+using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreateableTopicConfig;
 using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreatableReplicaAssignment;
 
 namespace Kafka.Client.Messages
@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
             default(int),
             default(bool)
         );
+        public static short FlexibleVersion { get; } = 5;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="NumPartitionsField">The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.</param>

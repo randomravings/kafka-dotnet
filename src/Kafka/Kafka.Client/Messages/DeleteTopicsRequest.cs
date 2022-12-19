@@ -22,6 +22,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<string>.Empty,
             default(int)
         );
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="NameField">The topic name</param>
         /// <param name="TopicIdField">The unique topic ID</param>

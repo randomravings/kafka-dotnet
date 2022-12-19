@@ -23,6 +23,7 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<ReplicaElectionResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="TopicField">The topic name</param>
         /// <param name="PartitionResultField">The results for each partition</param>

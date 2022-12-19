@@ -1,5 +1,4 @@
 using System.CodeDom.Compiler;
-using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
@@ -28,7 +27,7 @@ namespace Kafka.Client.Messages
         long ExpiryTimestampMsField,
         long MaxTimestampMsField,
         string TokenIdField,
-        ImmutableArray<byte> HmacField,
+        ReadOnlyMemory<byte> HmacField,
         int ThrottleTimeMsField
     ) : Response(38)
     {
@@ -42,8 +41,9 @@ namespace Kafka.Client.Messages
             default(long),
             default(long),
             "",
-            ImmutableArray<byte>.Empty,
+            Array.Empty<byte>(),
             default(int)
         );
+        public static short FlexibleVersion { get; } = 2;
     };
 }

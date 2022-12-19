@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic;
 using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic.ListOffsetsPartition;
+using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -23,6 +23,7 @@ namespace Kafka.Client.Messages
             default(sbyte),
             ImmutableArray<ListOffsetsTopic>.Empty
         );
+        public static short FlexibleVersion { get; } = 6;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">Each partition in the request.</param>

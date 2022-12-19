@@ -1,9 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
-using OpData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.OpData;
 using EntryData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData;
 using EntityData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.EntityData;
+using OpData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.OpData;
 
 namespace Kafka.Client.Messages
 {
@@ -11,158 +10,159 @@ namespace Kafka.Client.Messages
     public static class AlterClientQuotasRequestSerde
     {
         private static readonly DecodeDelegate<AlterClientQuotasRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            ReadV00,
+            ReadV01,
         };
         private static readonly EncodeDelegate<AlterClientQuotasRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
+            WriteV00,
+            WriteV01,
         };
-        public static AlterClientQuotasRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static AlterClientQuotasRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, AlterClientQuotasRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static AlterClientQuotasRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, AlterClientQuotasRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static AlterClientQuotasRequest ReadV00(byte[] buffer, ref int index)
         {
-            var entriesField = Decoder.ReadArray<EntryData>(ref buffer, (ref ReadOnlyMemory<byte> b) => EntryDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Entries'");
-            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
+            var entriesField = Decoder.ReadArray<EntryData>(buffer, ref index, EntryDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Entries'");
+            var validateOnlyField = Decoder.ReadBoolean(buffer, ref index);
             return new(
                 entriesField,
                 validateOnlyField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, AlterClientQuotasRequest message)
+        private static int WriteV00(byte[] buffer, int index, AlterClientQuotasRequest message)
         {
-            buffer = Encoder.WriteArray<EntryData>(buffer, message.EntriesField, (b, i) => EntryDataSerde.WriteV00(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
-            return buffer;
+            index = Encoder.WriteArray<EntryData>(buffer, index, message.EntriesField, EntryDataSerde.WriteV00);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            return index;
         }
-        private static AlterClientQuotasRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static AlterClientQuotasRequest ReadV01(byte[] buffer, ref int index)
         {
-            var entriesField = Decoder.ReadCompactArray<EntryData>(ref buffer, (ref ReadOnlyMemory<byte> b) => EntryDataSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Entries'");
-            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var entriesField = Decoder.ReadCompactArray<EntryData>(buffer, ref index, EntryDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Entries'");
+            var validateOnlyField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 entriesField,
                 validateOnlyField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, AlterClientQuotasRequest message)
+        private static int WriteV01(byte[] buffer, int index, AlterClientQuotasRequest message)
         {
-            buffer = Encoder.WriteCompactArray<EntryData>(buffer, message.EntriesField, (b, i) => EntryDataSerde.WriteV01(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<EntryData>(buffer, index, message.EntriesField, EntryDataSerde.WriteV01);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class EntryDataSerde
         {
-            public static EntryData ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static EntryData ReadV00(byte[] buffer, ref int index)
             {
-                var entityField = Decoder.ReadArray<EntityData>(ref buffer, (ref ReadOnlyMemory<byte> b) => EntityDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
-                var opsField = Decoder.ReadArray<OpData>(ref buffer, (ref ReadOnlyMemory<byte> b) => OpDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Ops'");
+                var entityField = Decoder.ReadArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
+                var opsField = Decoder.ReadArray<OpData>(buffer, ref index, OpDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Ops'");
                 return new(
                     entityField,
                     opsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, EntryData message)
+            public static int WriteV00(byte[] buffer, int index, EntryData message)
             {
-                buffer = Encoder.WriteArray<EntityData>(buffer, message.EntityField, (b, i) => EntityDataSerde.WriteV00(b, i));
-                buffer = Encoder.WriteArray<OpData>(buffer, message.OpsField, (b, i) => OpDataSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteArray<EntityData>(buffer, index, message.EntityField, EntityDataSerde.WriteV00);
+                index = Encoder.WriteArray<OpData>(buffer, index, message.OpsField, OpDataSerde.WriteV00);
+                return index;
             }
-            public static EntryData ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static EntryData ReadV01(byte[] buffer, ref int index)
             {
-                var entityField = Decoder.ReadCompactArray<EntityData>(ref buffer, (ref ReadOnlyMemory<byte> b) => EntityDataSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
-                var opsField = Decoder.ReadCompactArray<OpData>(ref buffer, (ref ReadOnlyMemory<byte> b) => OpDataSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Ops'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var entityField = Decoder.ReadCompactArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
+                var opsField = Decoder.ReadCompactArray<OpData>(buffer, ref index, OpDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Ops'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     entityField,
                     opsField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, EntryData message)
+            public static int WriteV01(byte[] buffer, int index, EntryData message)
             {
-                buffer = Encoder.WriteCompactArray<EntityData>(buffer, message.EntityField, (b, i) => EntityDataSerde.WriteV01(b, i));
-                buffer = Encoder.WriteCompactArray<OpData>(buffer, message.OpsField, (b, i) => OpDataSerde.WriteV01(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
-            }
-            private static class OpDataSerde
-            {
-                public static OpData ReadV00(ref ReadOnlyMemory<byte> buffer)
-                {
-                    var keyField = Decoder.ReadString(ref buffer);
-                    var valueField = Decoder.ReadFloat64(ref buffer);
-                    var removeField = Decoder.ReadBoolean(ref buffer);
-                    return new(
-                        keyField,
-                        valueField,
-                        removeField
-                    );
-                }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, OpData message)
-                {
-                    buffer = Encoder.WriteString(buffer, message.KeyField);
-                    buffer = Encoder.WriteFloat64(buffer, message.ValueField);
-                    buffer = Encoder.WriteBoolean(buffer, message.RemoveField);
-                    return buffer;
-                }
-                public static OpData ReadV01(ref ReadOnlyMemory<byte> buffer)
-                {
-                    var keyField = Decoder.ReadCompactString(ref buffer);
-                    var valueField = Decoder.ReadFloat64(ref buffer);
-                    var removeField = Decoder.ReadBoolean(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
-                    return new(
-                        keyField,
-                        valueField,
-                        removeField
-                    );
-                }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, OpData message)
-                {
-                    buffer = Encoder.WriteCompactString(buffer, message.KeyField);
-                    buffer = Encoder.WriteFloat64(buffer, message.ValueField);
-                    buffer = Encoder.WriteBoolean(buffer, message.RemoveField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
-                }
+                index = Encoder.WriteCompactArray<EntityData>(buffer, index, message.EntityField, EntityDataSerde.WriteV01);
+                index = Encoder.WriteCompactArray<OpData>(buffer, index, message.OpsField, OpDataSerde.WriteV01);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class EntityDataSerde
             {
-                public static EntityData ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static EntityData ReadV00(byte[] buffer, ref int index)
                 {
-                    var entityTypeField = Decoder.ReadString(ref buffer);
-                    var entityNameField = Decoder.ReadNullableString(ref buffer);
+                    var entityTypeField = Decoder.ReadString(buffer, ref index);
+                    var entityNameField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
                         entityTypeField,
                         entityNameField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, EntityData message)
+                public static int WriteV00(byte[] buffer, int index, EntityData message)
                 {
-                    buffer = Encoder.WriteString(buffer, message.EntityTypeField);
-                    buffer = Encoder.WriteNullableString(buffer, message.EntityNameField);
-                    return buffer;
+                    index = Encoder.WriteString(buffer, index, message.EntityTypeField);
+                    index = Encoder.WriteNullableString(buffer, index, message.EntityNameField);
+                    return index;
                 }
-                public static EntityData ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static EntityData ReadV01(byte[] buffer, ref int index)
                 {
-                    var entityTypeField = Decoder.ReadCompactString(ref buffer);
-                    var entityNameField = Decoder.ReadCompactNullableString(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var entityTypeField = Decoder.ReadCompactString(buffer, ref index);
+                    var entityNameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         entityTypeField,
                         entityNameField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, EntityData message)
+                public static int WriteV01(byte[] buffer, int index, EntityData message)
                 {
-                    buffer = Encoder.WriteCompactString(buffer, message.EntityTypeField);
-                    buffer = Encoder.WriteCompactNullableString(buffer, message.EntityNameField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteCompactString(buffer, index, message.EntityTypeField);
+                    index = Encoder.WriteCompactNullableString(buffer, index, message.EntityNameField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
+                }
+            }
+            private static class OpDataSerde
+            {
+                public static OpData ReadV00(byte[] buffer, ref int index)
+                {
+                    var keyField = Decoder.ReadString(buffer, ref index);
+                    var valueField = Decoder.ReadFloat64(buffer, ref index);
+                    var removeField = Decoder.ReadBoolean(buffer, ref index);
+                    return new(
+                        keyField,
+                        valueField,
+                        removeField
+                    );
+                }
+                public static int WriteV00(byte[] buffer, int index, OpData message)
+                {
+                    index = Encoder.WriteString(buffer, index, message.KeyField);
+                    index = Encoder.WriteFloat64(buffer, index, message.ValueField);
+                    index = Encoder.WriteBoolean(buffer, index, message.RemoveField);
+                    return index;
+                }
+                public static OpData ReadV01(byte[] buffer, ref int index)
+                {
+                    var keyField = Decoder.ReadCompactString(buffer, ref index);
+                    var valueField = Decoder.ReadFloat64(buffer, ref index);
+                    var removeField = Decoder.ReadBoolean(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
+                    return new(
+                        keyField,
+                        valueField,
+                        removeField
+                    );
+                }
+                public static int WriteV01(byte[] buffer, int index, OpData message)
+                {
+                    index = Encoder.WriteCompactString(buffer, index, message.KeyField);
+                    index = Encoder.WriteFloat64(buffer, index, message.ValueField);
+                    index = Encoder.WriteBoolean(buffer, index, message.RemoveField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

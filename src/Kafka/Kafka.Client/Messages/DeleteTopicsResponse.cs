@@ -19,6 +19,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<DeletableTopicResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="NameField">The topic name</param>
         /// <param name="TopicIdField">the unique topic ID</param>

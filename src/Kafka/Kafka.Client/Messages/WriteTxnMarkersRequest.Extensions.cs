@@ -1,8 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
-using WritableTxnMarkerTopic = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker.WritableTxnMarkerTopic;
 using WritableTxnMarker = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker;
+using WritableTxnMarkerTopic = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker.WritableTxnMarkerTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -10,53 +9,54 @@ namespace Kafka.Client.Messages
     public static class WriteTxnMarkersRequestSerde
     {
         private static readonly DecodeDelegate<WriteTxnMarkersRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            ReadV00,
+            ReadV01,
         };
         private static readonly EncodeDelegate<WriteTxnMarkersRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
+            WriteV00,
+            WriteV01,
         };
-        public static WriteTxnMarkersRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static WriteTxnMarkersRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, WriteTxnMarkersRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static WriteTxnMarkersRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, WriteTxnMarkersRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static WriteTxnMarkersRequest ReadV00(byte[] buffer, ref int index)
         {
-            var markersField = Decoder.ReadArray<WritableTxnMarker>(ref buffer, (ref ReadOnlyMemory<byte> b) => WritableTxnMarkerSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Markers'");
+            var markersField = Decoder.ReadArray<WritableTxnMarker>(buffer, ref index, WritableTxnMarkerSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Markers'");
             return new(
                 markersField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, WriteTxnMarkersRequest message)
+        private static int WriteV00(byte[] buffer, int index, WriteTxnMarkersRequest message)
         {
-            buffer = Encoder.WriteArray<WritableTxnMarker>(buffer, message.MarkersField, (b, i) => WritableTxnMarkerSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteArray<WritableTxnMarker>(buffer, index, message.MarkersField, WritableTxnMarkerSerde.WriteV00);
+            return index;
         }
-        private static WriteTxnMarkersRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static WriteTxnMarkersRequest ReadV01(byte[] buffer, ref int index)
         {
-            var markersField = Decoder.ReadCompactArray<WritableTxnMarker>(ref buffer, (ref ReadOnlyMemory<byte> b) => WritableTxnMarkerSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Markers'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var markersField = Decoder.ReadCompactArray<WritableTxnMarker>(buffer, ref index, WritableTxnMarkerSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Markers'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 markersField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, WriteTxnMarkersRequest message)
+        private static int WriteV01(byte[] buffer, int index, WriteTxnMarkersRequest message)
         {
-            buffer = Encoder.WriteCompactArray<WritableTxnMarker>(buffer, message.MarkersField, (b, i) => WritableTxnMarkerSerde.WriteV01(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<WritableTxnMarker>(buffer, index, message.MarkersField, WritableTxnMarkerSerde.WriteV01);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class WritableTxnMarkerSerde
         {
-            public static WritableTxnMarker ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static WritableTxnMarker ReadV00(byte[] buffer, ref int index)
             {
-                var producerIdField = Decoder.ReadInt64(ref buffer);
-                var producerEpochField = Decoder.ReadInt16(ref buffer);
-                var transactionResultField = Decoder.ReadBoolean(ref buffer);
-                var topicsField = Decoder.ReadArray<WritableTxnMarkerTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => WritableTxnMarkerTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-                var coordinatorEpochField = Decoder.ReadInt32(ref buffer);
+                var producerIdField = Decoder.ReadInt64(buffer, ref index);
+                var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+                var transactionResultField = Decoder.ReadBoolean(buffer, ref index);
+                var topicsField = Decoder.ReadArray<WritableTxnMarkerTopic>(buffer, ref index, WritableTxnMarkerTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var coordinatorEpochField = Decoder.ReadInt32(buffer, ref index);
                 return new(
                     producerIdField,
                     producerEpochField,
@@ -65,23 +65,23 @@ namespace Kafka.Client.Messages
                     coordinatorEpochField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, WritableTxnMarker message)
+            public static int WriteV00(byte[] buffer, int index, WritableTxnMarker message)
             {
-                buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-                buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-                buffer = Encoder.WriteBoolean(buffer, message.TransactionResultField);
-                buffer = Encoder.WriteArray<WritableTxnMarkerTopic>(buffer, message.TopicsField, (b, i) => WritableTxnMarkerTopicSerde.WriteV00(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.CoordinatorEpochField);
-                return buffer;
+                index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+                index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+                index = Encoder.WriteBoolean(buffer, index, message.TransactionResultField);
+                index = Encoder.WriteArray<WritableTxnMarkerTopic>(buffer, index, message.TopicsField, WritableTxnMarkerTopicSerde.WriteV00);
+                index = Encoder.WriteInt32(buffer, index, message.CoordinatorEpochField);
+                return index;
             }
-            public static WritableTxnMarker ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static WritableTxnMarker ReadV01(byte[] buffer, ref int index)
             {
-                var producerIdField = Decoder.ReadInt64(ref buffer);
-                var producerEpochField = Decoder.ReadInt16(ref buffer);
-                var transactionResultField = Decoder.ReadBoolean(ref buffer);
-                var topicsField = Decoder.ReadCompactArray<WritableTxnMarkerTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => WritableTxnMarkerTopicSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-                var coordinatorEpochField = Decoder.ReadInt32(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var producerIdField = Decoder.ReadInt64(buffer, ref index);
+                var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+                var transactionResultField = Decoder.ReadBoolean(buffer, ref index);
+                var topicsField = Decoder.ReadCompactArray<WritableTxnMarkerTopic>(buffer, ref index, WritableTxnMarkerTopicSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var coordinatorEpochField = Decoder.ReadInt32(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     producerIdField,
                     producerEpochField,
@@ -90,49 +90,49 @@ namespace Kafka.Client.Messages
                     coordinatorEpochField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, WritableTxnMarker message)
+            public static int WriteV01(byte[] buffer, int index, WritableTxnMarker message)
             {
-                buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-                buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-                buffer = Encoder.WriteBoolean(buffer, message.TransactionResultField);
-                buffer = Encoder.WriteCompactArray<WritableTxnMarkerTopic>(buffer, message.TopicsField, (b, i) => WritableTxnMarkerTopicSerde.WriteV01(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.CoordinatorEpochField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+                index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+                index = Encoder.WriteBoolean(buffer, index, message.TransactionResultField);
+                index = Encoder.WriteCompactArray<WritableTxnMarkerTopic>(buffer, index, message.TopicsField, WritableTxnMarkerTopicSerde.WriteV01);
+                index = Encoder.WriteInt32(buffer, index, message.CoordinatorEpochField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class WritableTxnMarkerTopicSerde
             {
-                public static WritableTxnMarkerTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static WritableTxnMarkerTopic ReadV00(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(ref buffer);
-                    var partitionIndexesField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                    var nameField = Decoder.ReadString(buffer, ref index);
+                    var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                     return new(
                         nameField,
                         partitionIndexesField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, WritableTxnMarkerTopic message)
+                public static int WriteV00(byte[] buffer, int index, WritableTxnMarkerTopic message)
                 {
-                    buffer = Encoder.WriteString(buffer, message.NameField);
-                    buffer = Encoder.WriteArray<int>(buffer, message.PartitionIndexesField, (b, i) => Encoder.WriteInt32(b, i));
-                    return buffer;
+                    index = Encoder.WriteString(buffer, index, message.NameField);
+                    index = Encoder.WriteArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
+                    return index;
                 }
-                public static WritableTxnMarkerTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static WritableTxnMarkerTopic ReadV01(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(ref buffer);
-                    var partitionIndexesField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var nameField = Decoder.ReadCompactString(buffer, ref index);
+                    var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         nameField,
                         partitionIndexesField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, WritableTxnMarkerTopic message)
+                public static int WriteV01(byte[] buffer, int index, WritableTxnMarkerTopic message)
                 {
-                    buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                    buffer = Encoder.WriteCompactArray<int>(buffer, message.PartitionIndexesField, (b, i) => Encoder.WriteInt32(b, i));
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                    index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

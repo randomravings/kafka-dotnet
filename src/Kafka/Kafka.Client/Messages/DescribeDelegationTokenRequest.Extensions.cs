@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using DescribeDelegationTokenOwner = Kafka.Client.Messages.DescribeDelegationTokenRequest.DescribeDelegationTokenOwner;
 
 namespace Kafka.Client.Messages
@@ -9,139 +8,140 @@ namespace Kafka.Client.Messages
     public static class DescribeDelegationTokenRequestSerde
     {
         private static readonly DecodeDelegate<DescribeDelegationTokenRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<DescribeDelegationTokenRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static DescribeDelegationTokenRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DescribeDelegationTokenRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeDelegationTokenRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DescribeDelegationTokenRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DescribeDelegationTokenRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DescribeDelegationTokenRequest ReadV00(byte[] buffer, ref int index)
         {
-            var ownersField = Decoder.ReadArray<DescribeDelegationTokenOwner>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeDelegationTokenOwnerSerde.ReadV00(ref b));
+            var ownersField = Decoder.ReadArray<DescribeDelegationTokenOwner>(buffer, ref index, DescribeDelegationTokenOwnerSerde.ReadV00);
             return new(
                 ownersField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeDelegationTokenRequest message)
+        private static int WriteV00(byte[] buffer, int index, DescribeDelegationTokenRequest message)
         {
-            buffer = Encoder.WriteArray<DescribeDelegationTokenOwner>(buffer, message.OwnersField, (b, i) => DescribeDelegationTokenOwnerSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteArray<DescribeDelegationTokenOwner>(buffer, index, message.OwnersField, DescribeDelegationTokenOwnerSerde.WriteV00);
+            return index;
         }
-        private static DescribeDelegationTokenRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeDelegationTokenRequest ReadV01(byte[] buffer, ref int index)
         {
-            var ownersField = Decoder.ReadArray<DescribeDelegationTokenOwner>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeDelegationTokenOwnerSerde.ReadV01(ref b));
+            var ownersField = Decoder.ReadArray<DescribeDelegationTokenOwner>(buffer, ref index, DescribeDelegationTokenOwnerSerde.ReadV01);
             return new(
                 ownersField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DescribeDelegationTokenRequest message)
+        private static int WriteV01(byte[] buffer, int index, DescribeDelegationTokenRequest message)
         {
-            buffer = Encoder.WriteArray<DescribeDelegationTokenOwner>(buffer, message.OwnersField, (b, i) => DescribeDelegationTokenOwnerSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteArray<DescribeDelegationTokenOwner>(buffer, index, message.OwnersField, DescribeDelegationTokenOwnerSerde.WriteV01);
+            return index;
         }
-        private static DescribeDelegationTokenRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeDelegationTokenRequest ReadV02(byte[] buffer, ref int index)
         {
-            var ownersField = Decoder.ReadCompactArray<DescribeDelegationTokenOwner>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeDelegationTokenOwnerSerde.ReadV02(ref b));
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var ownersField = Decoder.ReadCompactArray<DescribeDelegationTokenOwner>(buffer, ref index, DescribeDelegationTokenOwnerSerde.ReadV02);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 ownersField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, DescribeDelegationTokenRequest message)
+        private static int WriteV02(byte[] buffer, int index, DescribeDelegationTokenRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DescribeDelegationTokenOwner>(buffer, message.OwnersField, (b, i) => DescribeDelegationTokenOwnerSerde.WriteV02(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DescribeDelegationTokenOwner>(buffer, index, message.OwnersField, DescribeDelegationTokenOwnerSerde.WriteV02);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static DescribeDelegationTokenRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeDelegationTokenRequest ReadV03(byte[] buffer, ref int index)
         {
-            var ownersField = Decoder.ReadCompactArray<DescribeDelegationTokenOwner>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeDelegationTokenOwnerSerde.ReadV03(ref b));
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var ownersField = Decoder.ReadCompactArray<DescribeDelegationTokenOwner>(buffer, ref index, DescribeDelegationTokenOwnerSerde.ReadV03);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 ownersField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, DescribeDelegationTokenRequest message)
+        private static int WriteV03(byte[] buffer, int index, DescribeDelegationTokenRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DescribeDelegationTokenOwner>(buffer, message.OwnersField, (b, i) => DescribeDelegationTokenOwnerSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DescribeDelegationTokenOwner>(buffer, index, message.OwnersField, DescribeDelegationTokenOwnerSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class DescribeDelegationTokenOwnerSerde
         {
-            public static DescribeDelegationTokenOwner ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeDelegationTokenOwner ReadV00(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadString(ref buffer);
-                var principalNameField = Decoder.ReadString(ref buffer);
+                var principalTypeField = Decoder.ReadString(buffer, ref index);
+                var principalNameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     principalTypeField,
                     principalNameField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, DescribeDelegationTokenOwner message)
+            public static int WriteV00(byte[] buffer, int index, DescribeDelegationTokenOwner message)
             {
-                buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
-                buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.PrincipalTypeField);
+                index = Encoder.WriteString(buffer, index, message.PrincipalNameField);
+                return index;
             }
-            public static DescribeDelegationTokenOwner ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeDelegationTokenOwner ReadV01(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadString(ref buffer);
-                var principalNameField = Decoder.ReadString(ref buffer);
+                var principalTypeField = Decoder.ReadString(buffer, ref index);
+                var principalNameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     principalTypeField,
                     principalNameField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, DescribeDelegationTokenOwner message)
+            public static int WriteV01(byte[] buffer, int index, DescribeDelegationTokenOwner message)
             {
-                buffer = Encoder.WriteString(buffer, message.PrincipalTypeField);
-                buffer = Encoder.WriteString(buffer, message.PrincipalNameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.PrincipalTypeField);
+                index = Encoder.WriteString(buffer, index, message.PrincipalNameField);
+                return index;
             }
-            public static DescribeDelegationTokenOwner ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeDelegationTokenOwner ReadV02(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadCompactString(ref buffer);
-                var principalNameField = Decoder.ReadCompactString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var principalNameField = Decoder.ReadCompactString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     principalTypeField,
                     principalNameField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, DescribeDelegationTokenOwner message)
+            public static int WriteV02(byte[] buffer, int index, DescribeDelegationTokenOwner message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.PrincipalTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.PrincipalNameField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static DescribeDelegationTokenOwner ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeDelegationTokenOwner ReadV03(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadCompactString(ref buffer);
-                var principalNameField = Decoder.ReadCompactString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var principalNameField = Decoder.ReadCompactString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     principalTypeField,
                     principalNameField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, DescribeDelegationTokenOwner message)
+            public static int WriteV03(byte[] buffer, int index, DescribeDelegationTokenOwner message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.PrincipalTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.PrincipalNameField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.PrincipalTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.PrincipalNameField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

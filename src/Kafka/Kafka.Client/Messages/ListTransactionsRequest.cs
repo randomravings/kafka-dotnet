@@ -18,5 +18,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<string>.Empty,
             ImmutableArray<long>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
     };
 }

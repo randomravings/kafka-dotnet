@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<EntryData>.Empty
         );
+        public static short FlexibleVersion { get; } = 1;
         /// <summary>
         /// <param name="ErrorCodeField">The error code, or `0` if the quota alteration succeeded.</param>
         /// <param name="ErrorMessageField">The error message, or `null` if the quota alteration succeeded.</param>

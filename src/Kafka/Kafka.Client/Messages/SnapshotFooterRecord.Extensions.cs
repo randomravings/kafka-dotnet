@@ -7,29 +7,30 @@ namespace Kafka.Client.Messages
     public static class SnapshotFooterRecordSerde
     {
         private static readonly DecodeDelegate<SnapshotFooterRecord>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<SnapshotFooterRecord>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static SnapshotFooterRecord Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static SnapshotFooterRecord Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, SnapshotFooterRecord message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static SnapshotFooterRecord ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, SnapshotFooterRecord message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static SnapshotFooterRecord ReadV00(byte[] buffer, ref int index)
         {
-            var versionField = Decoder.ReadInt16(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var versionField = Decoder.ReadInt16(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 versionField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, SnapshotFooterRecord message)
+        private static int WriteV00(byte[] buffer, int index, SnapshotFooterRecord message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.VersionField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.VersionField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

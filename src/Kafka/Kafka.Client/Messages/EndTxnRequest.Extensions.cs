@@ -7,28 +7,29 @@ namespace Kafka.Client.Messages
     public static class EndTxnRequestSerde
     {
         private static readonly DecodeDelegate<EndTxnRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<EndTxnRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static EndTxnRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static EndTxnRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, EndTxnRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static EndTxnRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, EndTxnRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static EndTxnRequest ReadV00(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
-            var committedField = Decoder.ReadBoolean(ref buffer);
+            var transactionalIdField = Decoder.ReadString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+            var committedField = Decoder.ReadBoolean(buffer, ref index);
             return new(
                 transactionalIdField,
                 producerIdField,
@@ -36,20 +37,20 @@ namespace Kafka.Client.Messages
                 committedField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, EndTxnRequest message)
+        private static int WriteV00(byte[] buffer, int index, EndTxnRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteBoolean(buffer, message.CommittedField);
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteBoolean(buffer, index, message.CommittedField);
+            return index;
         }
-        private static EndTxnRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static EndTxnRequest ReadV01(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
-            var committedField = Decoder.ReadBoolean(ref buffer);
+            var transactionalIdField = Decoder.ReadString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+            var committedField = Decoder.ReadBoolean(buffer, ref index);
             return new(
                 transactionalIdField,
                 producerIdField,
@@ -57,20 +58,20 @@ namespace Kafka.Client.Messages
                 committedField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, EndTxnRequest message)
+        private static int WriteV01(byte[] buffer, int index, EndTxnRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteBoolean(buffer, message.CommittedField);
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteBoolean(buffer, index, message.CommittedField);
+            return index;
         }
-        private static EndTxnRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static EndTxnRequest ReadV02(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
-            var committedField = Decoder.ReadBoolean(ref buffer);
+            var transactionalIdField = Decoder.ReadString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+            var committedField = Decoder.ReadBoolean(buffer, ref index);
             return new(
                 transactionalIdField,
                 producerIdField,
@@ -78,21 +79,21 @@ namespace Kafka.Client.Messages
                 committedField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, EndTxnRequest message)
+        private static int WriteV02(byte[] buffer, int index, EndTxnRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteBoolean(buffer, message.CommittedField);
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteBoolean(buffer, index, message.CommittedField);
+            return index;
         }
-        private static EndTxnRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static EndTxnRequest ReadV03(byte[] buffer, ref int index)
         {
-            var transactionalIdField = Decoder.ReadCompactString(ref buffer);
-            var producerIdField = Decoder.ReadInt64(ref buffer);
-            var producerEpochField = Decoder.ReadInt16(ref buffer);
-            var committedField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var transactionalIdField = Decoder.ReadCompactString(buffer, ref index);
+            var producerIdField = Decoder.ReadInt64(buffer, ref index);
+            var producerEpochField = Decoder.ReadInt16(buffer, ref index);
+            var committedField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 transactionalIdField,
                 producerIdField,
@@ -100,14 +101,14 @@ namespace Kafka.Client.Messages
                 committedField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, EndTxnRequest message)
+        private static int WriteV03(byte[] buffer, int index, EndTxnRequest message)
         {
-            buffer = Encoder.WriteCompactString(buffer, message.TransactionalIdField);
-            buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-            buffer = Encoder.WriteInt16(buffer, message.ProducerEpochField);
-            buffer = Encoder.WriteBoolean(buffer, message.CommittedField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactString(buffer, index, message.TransactionalIdField);
+            index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+            index = Encoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            index = Encoder.WriteBoolean(buffer, index, message.CommittedField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

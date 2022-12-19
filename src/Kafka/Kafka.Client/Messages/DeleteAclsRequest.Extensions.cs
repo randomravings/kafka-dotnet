@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using DeleteAclsFilter = Kafka.Client.Messages.DeleteAclsRequest.DeleteAclsFilter;
 
 namespace Kafka.Client.Messages
@@ -9,85 +8,86 @@ namespace Kafka.Client.Messages
     public static class DeleteAclsRequestSerde
     {
         private static readonly DecodeDelegate<DeleteAclsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<DeleteAclsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static DeleteAclsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DeleteAclsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DeleteAclsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DeleteAclsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DeleteAclsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DeleteAclsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var filtersField = Decoder.ReadArray<DeleteAclsFilter>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteAclsFilterSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Filters'");
+            var filtersField = Decoder.ReadArray<DeleteAclsFilter>(buffer, ref index, DeleteAclsFilterSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Filters'");
             return new(
                 filtersField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DeleteAclsRequest message)
+        private static int WriteV00(byte[] buffer, int index, DeleteAclsRequest message)
         {
-            buffer = Encoder.WriteArray<DeleteAclsFilter>(buffer, message.FiltersField, (b, i) => DeleteAclsFilterSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteArray<DeleteAclsFilter>(buffer, index, message.FiltersField, DeleteAclsFilterSerde.WriteV00);
+            return index;
         }
-        private static DeleteAclsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteAclsRequest ReadV01(byte[] buffer, ref int index)
         {
-            var filtersField = Decoder.ReadArray<DeleteAclsFilter>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteAclsFilterSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Filters'");
+            var filtersField = Decoder.ReadArray<DeleteAclsFilter>(buffer, ref index, DeleteAclsFilterSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Filters'");
             return new(
                 filtersField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DeleteAclsRequest message)
+        private static int WriteV01(byte[] buffer, int index, DeleteAclsRequest message)
         {
-            buffer = Encoder.WriteArray<DeleteAclsFilter>(buffer, message.FiltersField, (b, i) => DeleteAclsFilterSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteArray<DeleteAclsFilter>(buffer, index, message.FiltersField, DeleteAclsFilterSerde.WriteV01);
+            return index;
         }
-        private static DeleteAclsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteAclsRequest ReadV02(byte[] buffer, ref int index)
         {
-            var filtersField = Decoder.ReadCompactArray<DeleteAclsFilter>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteAclsFilterSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Filters'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var filtersField = Decoder.ReadCompactArray<DeleteAclsFilter>(buffer, ref index, DeleteAclsFilterSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Filters'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 filtersField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, DeleteAclsRequest message)
+        private static int WriteV02(byte[] buffer, int index, DeleteAclsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DeleteAclsFilter>(buffer, message.FiltersField, (b, i) => DeleteAclsFilterSerde.WriteV02(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DeleteAclsFilter>(buffer, index, message.FiltersField, DeleteAclsFilterSerde.WriteV02);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static DeleteAclsRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteAclsRequest ReadV03(byte[] buffer, ref int index)
         {
-            var filtersField = Decoder.ReadCompactArray<DeleteAclsFilter>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeleteAclsFilterSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Filters'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var filtersField = Decoder.ReadCompactArray<DeleteAclsFilter>(buffer, ref index, DeleteAclsFilterSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Filters'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 filtersField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, DeleteAclsRequest message)
+        private static int WriteV03(byte[] buffer, int index, DeleteAclsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DeleteAclsFilter>(buffer, message.FiltersField, (b, i) => DeleteAclsFilterSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DeleteAclsFilter>(buffer, index, message.FiltersField, DeleteAclsFilterSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class DeleteAclsFilterSerde
         {
-            public static DeleteAclsFilter ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static DeleteAclsFilter ReadV00(byte[] buffer, ref int index)
             {
-                var resourceTypeFilterField = Decoder.ReadInt8(ref buffer);
-                var resourceNameFilterField = Decoder.ReadNullableString(ref buffer);
+                var resourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameFilterField = Decoder.ReadNullableString(buffer, ref index);
                 var patternTypeFilterField = default(sbyte);
-                var principalFilterField = Decoder.ReadNullableString(ref buffer);
-                var hostFilterField = Decoder.ReadNullableString(ref buffer);
-                var operationField = Decoder.ReadInt8(ref buffer);
-                var permissionTypeField = Decoder.ReadInt8(ref buffer);
+                var principalFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var hostFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var operationField = Decoder.ReadInt8(buffer, ref index);
+                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 return new(
                     resourceTypeFilterField,
                     resourceNameFilterField,
@@ -98,25 +98,25 @@ namespace Kafka.Client.Messages
                     permissionTypeField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, DeleteAclsFilter message)
+            public static int WriteV00(byte[] buffer, int index, DeleteAclsFilter message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeFilterField);
-                buffer = Encoder.WriteNullableString(buffer, message.ResourceNameFilterField);
-                buffer = Encoder.WriteNullableString(buffer, message.PrincipalFilterField);
-                buffer = Encoder.WriteNullableString(buffer, message.HostFilterField);
-                buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeFilterField);
+                index = Encoder.WriteNullableString(buffer, index, message.ResourceNameFilterField);
+                index = Encoder.WriteNullableString(buffer, index, message.PrincipalFilterField);
+                index = Encoder.WriteNullableString(buffer, index, message.HostFilterField);
+                index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                return index;
             }
-            public static DeleteAclsFilter ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static DeleteAclsFilter ReadV01(byte[] buffer, ref int index)
             {
-                var resourceTypeFilterField = Decoder.ReadInt8(ref buffer);
-                var resourceNameFilterField = Decoder.ReadNullableString(ref buffer);
-                var patternTypeFilterField = Decoder.ReadInt8(ref buffer);
-                var principalFilterField = Decoder.ReadNullableString(ref buffer);
-                var hostFilterField = Decoder.ReadNullableString(ref buffer);
-                var operationField = Decoder.ReadInt8(ref buffer);
-                var permissionTypeField = Decoder.ReadInt8(ref buffer);
+                var resourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var patternTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var principalFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var hostFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var operationField = Decoder.ReadInt8(buffer, ref index);
+                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 return new(
                     resourceTypeFilterField,
                     resourceNameFilterField,
@@ -127,27 +127,27 @@ namespace Kafka.Client.Messages
                     permissionTypeField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, DeleteAclsFilter message)
+            public static int WriteV01(byte[] buffer, int index, DeleteAclsFilter message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeFilterField);
-                buffer = Encoder.WriteNullableString(buffer, message.ResourceNameFilterField);
-                buffer = Encoder.WriteInt8(buffer, message.PatternTypeFilterField);
-                buffer = Encoder.WriteNullableString(buffer, message.PrincipalFilterField);
-                buffer = Encoder.WriteNullableString(buffer, message.HostFilterField);
-                buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeFilterField);
+                index = Encoder.WriteNullableString(buffer, index, message.ResourceNameFilterField);
+                index = Encoder.WriteInt8(buffer, index, message.PatternTypeFilterField);
+                index = Encoder.WriteNullableString(buffer, index, message.PrincipalFilterField);
+                index = Encoder.WriteNullableString(buffer, index, message.HostFilterField);
+                index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                return index;
             }
-            public static DeleteAclsFilter ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static DeleteAclsFilter ReadV02(byte[] buffer, ref int index)
             {
-                var resourceTypeFilterField = Decoder.ReadInt8(ref buffer);
-                var resourceNameFilterField = Decoder.ReadCompactNullableString(ref buffer);
-                var patternTypeFilterField = Decoder.ReadInt8(ref buffer);
-                var principalFilterField = Decoder.ReadCompactNullableString(ref buffer);
-                var hostFilterField = Decoder.ReadCompactNullableString(ref buffer);
-                var operationField = Decoder.ReadInt8(ref buffer);
-                var permissionTypeField = Decoder.ReadInt8(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var resourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var patternTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var principalFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var hostFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var operationField = Decoder.ReadInt8(buffer, ref index);
+                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     resourceTypeFilterField,
                     resourceNameFilterField,
@@ -158,28 +158,28 @@ namespace Kafka.Client.Messages
                     permissionTypeField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, DeleteAclsFilter message)
+            public static int WriteV02(byte[] buffer, int index, DeleteAclsFilter message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeFilterField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ResourceNameFilterField);
-                buffer = Encoder.WriteInt8(buffer, message.PatternTypeFilterField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.PrincipalFilterField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.HostFilterField);
-                buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeFilterField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ResourceNameFilterField);
+                index = Encoder.WriteInt8(buffer, index, message.PatternTypeFilterField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.PrincipalFilterField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.HostFilterField);
+                index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static DeleteAclsFilter ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static DeleteAclsFilter ReadV03(byte[] buffer, ref int index)
             {
-                var resourceTypeFilterField = Decoder.ReadInt8(ref buffer);
-                var resourceNameFilterField = Decoder.ReadCompactNullableString(ref buffer);
-                var patternTypeFilterField = Decoder.ReadInt8(ref buffer);
-                var principalFilterField = Decoder.ReadCompactNullableString(ref buffer);
-                var hostFilterField = Decoder.ReadCompactNullableString(ref buffer);
-                var operationField = Decoder.ReadInt8(ref buffer);
-                var permissionTypeField = Decoder.ReadInt8(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var resourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var patternTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var principalFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var hostFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var operationField = Decoder.ReadInt8(buffer, ref index);
+                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     resourceTypeFilterField,
                     resourceNameFilterField,
@@ -190,17 +190,17 @@ namespace Kafka.Client.Messages
                     permissionTypeField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, DeleteAclsFilter message)
+            public static int WriteV03(byte[] buffer, int index, DeleteAclsFilter message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeFilterField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ResourceNameFilterField);
-                buffer = Encoder.WriteInt8(buffer, message.PatternTypeFilterField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.PrincipalFilterField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.HostFilterField);
-                buffer = Encoder.WriteInt8(buffer, message.OperationField);
-                buffer = Encoder.WriteInt8(buffer, message.PermissionTypeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeFilterField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ResourceNameFilterField);
+                index = Encoder.WriteInt8(buffer, index, message.PatternTypeFilterField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.PrincipalFilterField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.HostFilterField);
+                index = Encoder.WriteInt8(buffer, index, message.OperationField);
+                index = Encoder.WriteInt8(buffer, index, message.PermissionTypeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

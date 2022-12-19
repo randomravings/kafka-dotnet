@@ -11,8 +11,5 @@ namespace Kafka.Client.Clients.Consumer
         TKey Key,
         TValue Value,
         ClusterInfo ClusterInfo
-    )
-        where TKey : notnull
-        where TValue : notnull
-    ;
+    );
 }

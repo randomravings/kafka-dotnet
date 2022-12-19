@@ -1,4 +1,9 @@
 ﻿namespace Kafka.Common.Encoding
 {
-    public delegate Memory<byte> EncodeVersionDelegate<TItem>(Memory<byte> buffer, short version, TItem item);
+    public delegate int EncodeVersionDelegate<TItem>(
+        byte[] buffer,
+        int offset,
+        TItem item,
+        short version
+    );
 }

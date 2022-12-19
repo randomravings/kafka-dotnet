@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using FeatureUpdateKey = Kafka.Client.Messages.UpdateFeaturesRequest.FeatureUpdateKey;
 
 namespace Kafka.Client.Messages
@@ -9,66 +8,67 @@ namespace Kafka.Client.Messages
     public static class UpdateFeaturesRequestSerde
     {
         private static readonly DecodeDelegate<UpdateFeaturesRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            ReadV00,
+            ReadV01,
         };
         private static readonly EncodeDelegate<UpdateFeaturesRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
+            WriteV00,
+            WriteV01,
         };
-        public static UpdateFeaturesRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static UpdateFeaturesRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, UpdateFeaturesRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static UpdateFeaturesRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, UpdateFeaturesRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static UpdateFeaturesRequest ReadV00(byte[] buffer, ref int index)
         {
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            var featureUpdatesField = Decoder.ReadCompactArray<FeatureUpdateKey>(ref buffer, (ref ReadOnlyMemory<byte> b) => FeatureUpdateKeySerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'FeatureUpdates'");
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            var featureUpdatesField = Decoder.ReadCompactArray<FeatureUpdateKey>(buffer, ref index, FeatureUpdateKeySerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'FeatureUpdates'");
             var validateOnlyField = default(bool);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 timeoutMsField,
                 featureUpdatesField,
                 validateOnlyField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, UpdateFeaturesRequest message)
+        private static int WriteV00(byte[] buffer, int index, UpdateFeaturesRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.timeoutMsField);
-            buffer = Encoder.WriteCompactArray<FeatureUpdateKey>(buffer, message.FeatureUpdatesField, (b, i) => FeatureUpdateKeySerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
+            index = Encoder.WriteCompactArray<FeatureUpdateKey>(buffer, index, message.FeatureUpdatesField, FeatureUpdateKeySerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static UpdateFeaturesRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static UpdateFeaturesRequest ReadV01(byte[] buffer, ref int index)
         {
-            var timeoutMsField = Decoder.ReadInt32(ref buffer);
-            var featureUpdatesField = Decoder.ReadCompactArray<FeatureUpdateKey>(ref buffer, (ref ReadOnlyMemory<byte> b) => FeatureUpdateKeySerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'FeatureUpdates'");
-            var validateOnlyField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var timeoutMsField = Decoder.ReadInt32(buffer, ref index);
+            var featureUpdatesField = Decoder.ReadCompactArray<FeatureUpdateKey>(buffer, ref index, FeatureUpdateKeySerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'FeatureUpdates'");
+            var validateOnlyField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 timeoutMsField,
                 featureUpdatesField,
                 validateOnlyField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, UpdateFeaturesRequest message)
+        private static int WriteV01(byte[] buffer, int index, UpdateFeaturesRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.timeoutMsField);
-            buffer = Encoder.WriteCompactArray<FeatureUpdateKey>(buffer, message.FeatureUpdatesField, (b, i) => FeatureUpdateKeySerde.WriteV01(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.ValidateOnlyField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
+            index = Encoder.WriteCompactArray<FeatureUpdateKey>(buffer, index, message.FeatureUpdatesField, FeatureUpdateKeySerde.WriteV01);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class FeatureUpdateKeySerde
         {
-            public static FeatureUpdateKey ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static FeatureUpdateKey ReadV00(byte[] buffer, ref int index)
             {
-                var featureField = Decoder.ReadCompactString(ref buffer);
-                var maxVersionLevelField = Decoder.ReadInt16(ref buffer);
-                var allowDowngradeField = Decoder.ReadBoolean(ref buffer);
+                var featureField = Decoder.ReadCompactString(buffer, ref index);
+                var maxVersionLevelField = Decoder.ReadInt16(buffer, ref index);
+                var allowDowngradeField = Decoder.ReadBoolean(buffer, ref index);
                 var upgradeTypeField = default(sbyte);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     featureField,
                     maxVersionLevelField,
@@ -76,21 +76,21 @@ namespace Kafka.Client.Messages
                     upgradeTypeField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, FeatureUpdateKey message)
+            public static int WriteV00(byte[] buffer, int index, FeatureUpdateKey message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.FeatureField);
-                buffer = Encoder.WriteInt16(buffer, message.MaxVersionLevelField);
-                buffer = Encoder.WriteBoolean(buffer, message.AllowDowngradeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.FeatureField);
+                index = Encoder.WriteInt16(buffer, index, message.MaxVersionLevelField);
+                index = Encoder.WriteBoolean(buffer, index, message.AllowDowngradeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static FeatureUpdateKey ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static FeatureUpdateKey ReadV01(byte[] buffer, ref int index)
             {
-                var featureField = Decoder.ReadCompactString(ref buffer);
-                var maxVersionLevelField = Decoder.ReadInt16(ref buffer);
+                var featureField = Decoder.ReadCompactString(buffer, ref index);
+                var maxVersionLevelField = Decoder.ReadInt16(buffer, ref index);
                 var allowDowngradeField = default(bool);
-                var upgradeTypeField = Decoder.ReadInt8(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var upgradeTypeField = Decoder.ReadInt8(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     featureField,
                     maxVersionLevelField,
@@ -98,13 +98,13 @@ namespace Kafka.Client.Messages
                     upgradeTypeField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, FeatureUpdateKey message)
+            public static int WriteV01(byte[] buffer, int index, FeatureUpdateKey message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.FeatureField);
-                buffer = Encoder.WriteInt16(buffer, message.MaxVersionLevelField);
-                buffer = Encoder.WriteInt8(buffer, message.UpgradeTypeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.FeatureField);
+                index = Encoder.WriteInt16(buffer, index, message.MaxVersionLevelField);
+                index = Encoder.WriteInt8(buffer, index, message.UpgradeTypeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

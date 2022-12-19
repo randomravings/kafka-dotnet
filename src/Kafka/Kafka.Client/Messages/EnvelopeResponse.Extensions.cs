@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Messages
 {
@@ -8,32 +7,33 @@ namespace Kafka.Client.Messages
     public static class EnvelopeResponseSerde
     {
         private static readonly DecodeDelegate<EnvelopeResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<EnvelopeResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static EnvelopeResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static EnvelopeResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, EnvelopeResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static EnvelopeResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, EnvelopeResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static EnvelopeResponse ReadV00(byte[] buffer, ref int index)
         {
-            var responseDataField = Decoder.ReadCompactNullableBytes(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var responseDataField = Decoder.ReadCompactNullableBytes(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 responseDataField,
                 errorCodeField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, EnvelopeResponse message)
+        private static int WriteV00(byte[] buffer, int index, EnvelopeResponse message)
         {
-            buffer = Encoder.WriteCompactNullableBytes(buffer, message.ResponseDataField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactNullableBytes(buffer, index, message.ResponseDataField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

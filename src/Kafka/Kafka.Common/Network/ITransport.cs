@@ -7,6 +7,6 @@
         ValueTask Connect(CancellationToken cancellationToken = default);
         ValueTask Disconnect(CancellationToken cancellationToken = default);
         ValueTask Handshake(CancellationToken cancellationToken = default);
-        ValueTask<ReadOnlyMemory<byte>> HandleRequest(ReadOnlyMemory<byte> requestBytes, CancellationToken cancellationToken = default);
+        ValueTask<byte[]> HandleRequest(byte[] requestBytes, int offset, int length, CancellationToken cancellationToken = default);
     }
 }

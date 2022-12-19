@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using CreatePartitionsAssignment = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic.CreatePartitionsAssignment;
 using CreatePartitionsTopic = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic;
+using CreatePartitionsAssignment = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic.CreatePartitionsAssignment;
 
 namespace Kafka.Client.Messages
 {
@@ -23,6 +23,7 @@ namespace Kafka.Client.Messages
             default(int),
             default(bool)
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="CountField">The new partition count.</param>

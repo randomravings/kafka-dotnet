@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using ApiVersion = Kafka.Client.Messages.ApiVersionsResponse.ApiVersion;
-using SupportedFeatureKey = Kafka.Client.Messages.ApiVersionsResponse.SupportedFeatureKey;
 using FinalizedFeatureKey = Kafka.Client.Messages.ApiVersionsResponse.FinalizedFeatureKey;
+using SupportedFeatureKey = Kafka.Client.Messages.ApiVersionsResponse.SupportedFeatureKey;
+using ApiVersion = Kafka.Client.Messages.ApiVersionsResponse.ApiVersion;
 
 namespace Kafka.Client.Messages
 {
@@ -11,26 +11,27 @@ namespace Kafka.Client.Messages
     public static class ApiVersionsResponseSerde
     {
         private static readonly DecodeDelegate<ApiVersionsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
         };
         private static readonly EncodeDelegate<ApiVersionsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
         };
-        public static ApiVersionsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ApiVersionsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ApiVersionsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ApiVersionsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ApiVersionsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ApiVersionsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var apiKeysField = Decoder.ReadArray<ApiVersion>(ref buffer, (ref ReadOnlyMemory<byte> b) => ApiVersionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'ApiKeys'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var apiKeysField = Decoder.ReadArray<ApiVersion>(buffer, ref index, ApiVersionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'ApiKeys'");
             var throttleTimeMsField = default(int);
             var supportedFeaturesField = ImmutableArray<SupportedFeatureKey>.Empty;
             var finalizedFeaturesEpochField = default(long);
@@ -44,17 +45,17 @@ namespace Kafka.Client.Messages
                 finalizedFeaturesField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ApiVersionsResponse message)
+        private static int WriteV00(byte[] buffer, int index, ApiVersionsResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<ApiVersion>(buffer, message.ApiKeysField, (b, i) => ApiVersionSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<ApiVersion>(buffer, index, message.ApiKeysField, ApiVersionSerde.WriteV00);
+            return index;
         }
-        private static ApiVersionsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static ApiVersionsResponse ReadV01(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var apiKeysField = Decoder.ReadArray<ApiVersion>(ref buffer, (ref ReadOnlyMemory<byte> b) => ApiVersionSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'ApiKeys'");
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var apiKeysField = Decoder.ReadArray<ApiVersion>(buffer, ref index, ApiVersionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'ApiKeys'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
             var supportedFeaturesField = ImmutableArray<SupportedFeatureKey>.Empty;
             var finalizedFeaturesEpochField = default(long);
             var finalizedFeaturesField = ImmutableArray<FinalizedFeatureKey>.Empty;
@@ -67,18 +68,18 @@ namespace Kafka.Client.Messages
                 finalizedFeaturesField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, ApiVersionsResponse message)
+        private static int WriteV01(byte[] buffer, int index, ApiVersionsResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<ApiVersion>(buffer, message.ApiKeysField, (b, i) => ApiVersionSerde.WriteV01(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<ApiVersion>(buffer, index, message.ApiKeysField, ApiVersionSerde.WriteV01);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            return index;
         }
-        private static ApiVersionsResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static ApiVersionsResponse ReadV02(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var apiKeysField = Decoder.ReadArray<ApiVersion>(ref buffer, (ref ReadOnlyMemory<byte> b) => ApiVersionSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'ApiKeys'");
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var apiKeysField = Decoder.ReadArray<ApiVersion>(buffer, ref index, ApiVersionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'ApiKeys'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
             var supportedFeaturesField = ImmutableArray<SupportedFeatureKey>.Empty;
             var finalizedFeaturesEpochField = default(long);
             var finalizedFeaturesField = ImmutableArray<FinalizedFeatureKey>.Empty;
@@ -91,22 +92,22 @@ namespace Kafka.Client.Messages
                 finalizedFeaturesField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, ApiVersionsResponse message)
+        private static int WriteV02(byte[] buffer, int index, ApiVersionsResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<ApiVersion>(buffer, message.ApiKeysField, (b, i) => ApiVersionSerde.WriteV02(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<ApiVersion>(buffer, index, message.ApiKeysField, ApiVersionSerde.WriteV02);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            return index;
         }
-        private static ApiVersionsResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static ApiVersionsResponse ReadV03(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var apiKeysField = Decoder.ReadCompactArray<ApiVersion>(ref buffer, (ref ReadOnlyMemory<byte> b) => ApiVersionSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'ApiKeys'");
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var apiKeysField = Decoder.ReadCompactArray<ApiVersion>(buffer, ref index, ApiVersionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'ApiKeys'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
             var supportedFeaturesField = ImmutableArray<SupportedFeatureKey>.Empty;
             var finalizedFeaturesEpochField = default(long);
             var finalizedFeaturesField = ImmutableArray<FinalizedFeatureKey>.Empty;
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 apiKeysField,
@@ -116,138 +117,138 @@ namespace Kafka.Client.Messages
                 finalizedFeaturesField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, ApiVersionsResponse message)
+        private static int WriteV03(byte[] buffer, int index, ApiVersionsResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<ApiVersion>(buffer, message.ApiKeysField, (b, i) => ApiVersionSerde.WriteV03(b, i));
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<SupportedFeatureKey>(buffer, message.SupportedFeaturesField, (b, i) => SupportedFeatureKeySerde.WriteV03(b, i));
-            buffer = Encoder.WriteInt64(buffer, message.FinalizedFeaturesEpochField);
-            buffer = Encoder.WriteCompactArray<FinalizedFeatureKey>(buffer, message.FinalizedFeaturesField, (b, i) => FinalizedFeatureKeySerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
-        }
-        private static class ApiVersionSerde
-        {
-            public static ApiVersion ReadV00(ref ReadOnlyMemory<byte> buffer)
-            {
-                var apiKeyField = Decoder.ReadInt16(ref buffer);
-                var minVersionField = Decoder.ReadInt16(ref buffer);
-                var maxVersionField = Decoder.ReadInt16(ref buffer);
-                return new(
-                    apiKeyField,
-                    minVersionField,
-                    maxVersionField
-                );
-            }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, ApiVersion message)
-            {
-                buffer = Encoder.WriteInt16(buffer, message.ApiKeyField);
-                buffer = Encoder.WriteInt16(buffer, message.MinVersionField);
-                buffer = Encoder.WriteInt16(buffer, message.MaxVersionField);
-                return buffer;
-            }
-            public static ApiVersion ReadV01(ref ReadOnlyMemory<byte> buffer)
-            {
-                var apiKeyField = Decoder.ReadInt16(ref buffer);
-                var minVersionField = Decoder.ReadInt16(ref buffer);
-                var maxVersionField = Decoder.ReadInt16(ref buffer);
-                return new(
-                    apiKeyField,
-                    minVersionField,
-                    maxVersionField
-                );
-            }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, ApiVersion message)
-            {
-                buffer = Encoder.WriteInt16(buffer, message.ApiKeyField);
-                buffer = Encoder.WriteInt16(buffer, message.MinVersionField);
-                buffer = Encoder.WriteInt16(buffer, message.MaxVersionField);
-                return buffer;
-            }
-            public static ApiVersion ReadV02(ref ReadOnlyMemory<byte> buffer)
-            {
-                var apiKeyField = Decoder.ReadInt16(ref buffer);
-                var minVersionField = Decoder.ReadInt16(ref buffer);
-                var maxVersionField = Decoder.ReadInt16(ref buffer);
-                return new(
-                    apiKeyField,
-                    minVersionField,
-                    maxVersionField
-                );
-            }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, ApiVersion message)
-            {
-                buffer = Encoder.WriteInt16(buffer, message.ApiKeyField);
-                buffer = Encoder.WriteInt16(buffer, message.MinVersionField);
-                buffer = Encoder.WriteInt16(buffer, message.MaxVersionField);
-                return buffer;
-            }
-            public static ApiVersion ReadV03(ref ReadOnlyMemory<byte> buffer)
-            {
-                var apiKeyField = Decoder.ReadInt16(ref buffer);
-                var minVersionField = Decoder.ReadInt16(ref buffer);
-                var maxVersionField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
-                return new(
-                    apiKeyField,
-                    minVersionField,
-                    maxVersionField
-                );
-            }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, ApiVersion message)
-            {
-                buffer = Encoder.WriteInt16(buffer, message.ApiKeyField);
-                buffer = Encoder.WriteInt16(buffer, message.MinVersionField);
-                buffer = Encoder.WriteInt16(buffer, message.MaxVersionField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
-            }
-        }
-        private static class SupportedFeatureKeySerde
-        {
-            public static SupportedFeatureKey ReadV03(ref ReadOnlyMemory<byte> buffer)
-            {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var minVersionField = Decoder.ReadInt16(ref buffer);
-                var maxVersionField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
-                return new(
-                    nameField,
-                    minVersionField,
-                    maxVersionField
-                );
-            }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, SupportedFeatureKey message)
-            {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.MinVersionField);
-                buffer = Encoder.WriteInt16(buffer, message.MaxVersionField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
-            }
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<ApiVersion>(buffer, index, message.ApiKeysField, ApiVersionSerde.WriteV03);
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<SupportedFeatureKey>(buffer, index, message.SupportedFeaturesField, SupportedFeatureKeySerde.WriteV03);
+            index = Encoder.WriteInt64(buffer, index, message.FinalizedFeaturesEpochField);
+            index = Encoder.WriteCompactArray<FinalizedFeatureKey>(buffer, index, message.FinalizedFeaturesField, FinalizedFeatureKeySerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class FinalizedFeatureKeySerde
         {
-            public static FinalizedFeatureKey ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static FinalizedFeatureKey ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var maxVersionLevelField = Decoder.ReadInt16(ref buffer);
-                var minVersionLevelField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var maxVersionLevelField = Decoder.ReadInt16(buffer, ref index);
+                var minVersionLevelField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     maxVersionLevelField,
                     minVersionLevelField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, FinalizedFeatureKey message)
+            public static int WriteV03(byte[] buffer, int index, FinalizedFeatureKey message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.MaxVersionLevelField);
-                buffer = Encoder.WriteInt16(buffer, message.MinVersionLevelField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.MaxVersionLevelField);
+                index = Encoder.WriteInt16(buffer, index, message.MinVersionLevelField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+        }
+        private static class SupportedFeatureKeySerde
+        {
+            public static SupportedFeatureKey ReadV03(byte[] buffer, ref int index)
+            {
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var minVersionField = Decoder.ReadInt16(buffer, ref index);
+                var maxVersionField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    nameField,
+                    minVersionField,
+                    maxVersionField
+                );
+            }
+            public static int WriteV03(byte[] buffer, int index, SupportedFeatureKey message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.MinVersionField);
+                index = Encoder.WriteInt16(buffer, index, message.MaxVersionField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+        }
+        private static class ApiVersionSerde
+        {
+            public static ApiVersion ReadV00(byte[] buffer, ref int index)
+            {
+                var apiKeyField = Decoder.ReadInt16(buffer, ref index);
+                var minVersionField = Decoder.ReadInt16(buffer, ref index);
+                var maxVersionField = Decoder.ReadInt16(buffer, ref index);
+                return new(
+                    apiKeyField,
+                    minVersionField,
+                    maxVersionField
+                );
+            }
+            public static int WriteV00(byte[] buffer, int index, ApiVersion message)
+            {
+                index = Encoder.WriteInt16(buffer, index, message.ApiKeyField);
+                index = Encoder.WriteInt16(buffer, index, message.MinVersionField);
+                index = Encoder.WriteInt16(buffer, index, message.MaxVersionField);
+                return index;
+            }
+            public static ApiVersion ReadV01(byte[] buffer, ref int index)
+            {
+                var apiKeyField = Decoder.ReadInt16(buffer, ref index);
+                var minVersionField = Decoder.ReadInt16(buffer, ref index);
+                var maxVersionField = Decoder.ReadInt16(buffer, ref index);
+                return new(
+                    apiKeyField,
+                    minVersionField,
+                    maxVersionField
+                );
+            }
+            public static int WriteV01(byte[] buffer, int index, ApiVersion message)
+            {
+                index = Encoder.WriteInt16(buffer, index, message.ApiKeyField);
+                index = Encoder.WriteInt16(buffer, index, message.MinVersionField);
+                index = Encoder.WriteInt16(buffer, index, message.MaxVersionField);
+                return index;
+            }
+            public static ApiVersion ReadV02(byte[] buffer, ref int index)
+            {
+                var apiKeyField = Decoder.ReadInt16(buffer, ref index);
+                var minVersionField = Decoder.ReadInt16(buffer, ref index);
+                var maxVersionField = Decoder.ReadInt16(buffer, ref index);
+                return new(
+                    apiKeyField,
+                    minVersionField,
+                    maxVersionField
+                );
+            }
+            public static int WriteV02(byte[] buffer, int index, ApiVersion message)
+            {
+                index = Encoder.WriteInt16(buffer, index, message.ApiKeyField);
+                index = Encoder.WriteInt16(buffer, index, message.MinVersionField);
+                index = Encoder.WriteInt16(buffer, index, message.MaxVersionField);
+                return index;
+            }
+            public static ApiVersion ReadV03(byte[] buffer, ref int index)
+            {
+                var apiKeyField = Decoder.ReadInt16(buffer, ref index);
+                var minVersionField = Decoder.ReadInt16(buffer, ref index);
+                var maxVersionField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    apiKeyField,
+                    minVersionField,
+                    maxVersionField
+                );
+            }
+            public static int WriteV03(byte[] buffer, int index, ApiVersion message)
+            {
+                index = Encoder.WriteInt16(buffer, index, message.ApiKeyField);
+                index = Encoder.WriteInt16(buffer, index, message.MinVersionField);
+                index = Encoder.WriteInt16(buffer, index, message.MaxVersionField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

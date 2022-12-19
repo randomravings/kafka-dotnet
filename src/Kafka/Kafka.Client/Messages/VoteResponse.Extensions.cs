@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using TopicData = Kafka.Client.Messages.VoteResponse.TopicData;
 using PartitionData = Kafka.Client.Messages.VoteResponse.TopicData.PartitionData;
 
@@ -10,62 +9,63 @@ namespace Kafka.Client.Messages
     public static class VoteResponseSerde
     {
         private static readonly DecodeDelegate<VoteResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<VoteResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static VoteResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static VoteResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, VoteResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static VoteResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, VoteResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static VoteResponse ReadV00(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var topicsField = Decoder.ReadCompactArray<TopicData>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var topicsField = Decoder.ReadCompactArray<TopicData>(buffer, ref index, TopicDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, VoteResponse message)
+        private static int WriteV00(byte[] buffer, int index, VoteResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<TopicData>(buffer, message.TopicsField, (b, i) => TopicDataSerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<TopicData>(buffer, index, message.TopicsField, TopicDataSerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class TopicDataSerde
         {
-            public static TopicData ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static TopicData ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<PartitionData>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, TopicData message)
+            public static int WriteV00(byte[] buffer, int index, TopicData message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteCompactArray<PartitionData>(buffer, message.PartitionsField, (b, i) => PartitionDataSerde.WriteV00(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteCompactArray<PartitionData>(buffer, index, message.PartitionsField, PartitionDataSerde.WriteV00);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class PartitionDataSerde
             {
-                public static PartitionData ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static PartitionData ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var errorCodeField = Decoder.ReadInt16(ref buffer);
-                    var leaderIdField = Decoder.ReadInt32(ref buffer);
-                    var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                    var voteGrantedField = Decoder.ReadBoolean(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var voteGrantedField = Decoder.ReadBoolean(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -74,15 +74,15 @@ namespace Kafka.Client.Messages
                         voteGrantedField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, PartitionData message)
+                public static int WriteV00(byte[] buffer, int index, PartitionData message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    buffer = Encoder.WriteInt32(buffer, message.LeaderIdField);
-                    buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                    buffer = Encoder.WriteBoolean(buffer, message.VoteGrantedField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                    index = Encoder.WriteInt32(buffer, index, message.LeaderIdField);
+                    index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                    index = Encoder.WriteBoolean(buffer, index, message.VoteGrantedField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

@@ -4,7 +4,7 @@ namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record DescribeTopicsOptions(
         int TimeoutMs,
-        short? ApiVersion,
+        short ApiVersion,
         string ClientId,
         ImmutableArray<Guid> TopicIds,
         ImmutableArray<string> TopicNames,
@@ -13,7 +13,7 @@ namespace Kafka.Client.Clients.Admin.Model
     {
         public static DescribeTopicsOptions Empty { get; } = new(
             -1,
-            0,
+            -1,
             "",
             ImmutableArray<Guid>.Empty,
             ImmutableArray<string>.Empty,

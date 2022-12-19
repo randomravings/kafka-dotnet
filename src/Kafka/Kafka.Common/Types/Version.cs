@@ -17,6 +17,14 @@
         public bool None() =>
             Min > Max
         ;
+        public Version Intersect(
+            Version other
+        ) =>
+            new(
+                Math.Max(Min, other.Min),
+                Math.Min(Max, other.Max)
+            )
+        ;
         public static Version Between(
             short min,
             short max

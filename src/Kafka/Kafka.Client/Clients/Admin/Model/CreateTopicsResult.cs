@@ -1,25 +1,30 @@
-﻿using Kafka.Common.Exceptions;
-using Kafka.Common.Types;
+﻿using Kafka.Common.Types;
 using System.Collections.Immutable;
 using static Kafka.Client.Clients.Admin.Model.CreateTopicsResult;
 
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record CreateTopicsResult(
-        ImmutableSortedDictionary<Topic, CreatedTopicResult> CreatedTopics,
-        ImmutableSortedDictionary<Topic, Error> ErrorTopics
+        ImmutableArray<CreateTopicResult> CreatedTopics,
+        ImmutableArray<CreateTopicError> ErrorTopics
     )
     {
         public static Model.CreateTopicsResult Empty { get; } = new(
-            ImmutableSortedDictionary<Topic, CreatedTopicResult>.Empty,
-            ImmutableSortedDictionary<Topic, Error>.Empty
+            ImmutableArray<CreateTopicResult>.Empty,
+            ImmutableArray<CreateTopicError>.Empty
         );
 
-        public sealed record CreatedTopicResult(
-            Topic Topic,
+        public sealed record CreateTopicResult(
+            TopicId Id,
+            TopicName Name,
             int NumPartitions,
             int ReplicationFactor,
             ImmutableSortedDictionary<string, string?> Config
+        );
+
+        public sealed record CreateTopicError(
+            TopicName Name,
+            Error Error
         );
     };
 }

@@ -15,5 +15,6 @@ namespace Kafka.Client.Messages
         public static DeleteGroupsRequest Empty { get; } = new(
             ImmutableArray<string>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
     };
 }

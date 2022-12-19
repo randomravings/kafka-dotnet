@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using AlterUserScramCredentialsResult = Kafka.Client.Messages.AlterUserScramCredentialsResponse.AlterUserScramCredentialsResult;
 
 namespace Kafka.Client.Messages
@@ -9,54 +8,55 @@ namespace Kafka.Client.Messages
     public static class AlterUserScramCredentialsResponseSerde
     {
         private static readonly DecodeDelegate<AlterUserScramCredentialsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<AlterUserScramCredentialsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static AlterUserScramCredentialsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static AlterUserScramCredentialsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, AlterUserScramCredentialsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static AlterUserScramCredentialsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, AlterUserScramCredentialsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static AlterUserScramCredentialsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadCompactArray<AlterUserScramCredentialsResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterUserScramCredentialsResultSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadCompactArray<AlterUserScramCredentialsResult>(buffer, ref index, AlterUserScramCredentialsResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, AlterUserScramCredentialsResponse message)
+        private static int WriteV00(byte[] buffer, int index, AlterUserScramCredentialsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<AlterUserScramCredentialsResult>(buffer, message.ResultsField, (b, i) => AlterUserScramCredentialsResultSerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<AlterUserScramCredentialsResult>(buffer, index, message.ResultsField, AlterUserScramCredentialsResultSerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class AlterUserScramCredentialsResultSerde
         {
-            public static AlterUserScramCredentialsResult ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static AlterUserScramCredentialsResult ReadV00(byte[] buffer, ref int index)
             {
-                var userField = Decoder.ReadCompactString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var userField = Decoder.ReadCompactString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     userField,
                     errorCodeField,
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, AlterUserScramCredentialsResult message)
+            public static int WriteV00(byte[] buffer, int index, AlterUserScramCredentialsResult message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.UserField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.UserField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

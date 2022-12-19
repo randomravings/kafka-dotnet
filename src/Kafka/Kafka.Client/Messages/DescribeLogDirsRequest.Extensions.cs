@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using DescribableLogDirTopic = Kafka.Client.Messages.DescribeLogDirsRequest.DescribableLogDirTopic;
 
 namespace Kafka.Client.Messages
@@ -9,172 +8,173 @@ namespace Kafka.Client.Messages
     public static class DescribeLogDirsRequestSerde
     {
         private static readonly DecodeDelegate<DescribeLogDirsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
         };
         private static readonly EncodeDelegate<DescribeLogDirsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
         };
-        public static DescribeLogDirsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DescribeLogDirsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeLogDirsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DescribeLogDirsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DescribeLogDirsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DescribeLogDirsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<DescribableLogDirTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribableLogDirTopicSerde.ReadV00(ref b));
+            var topicsField = Decoder.ReadArray<DescribableLogDirTopic>(buffer, ref index, DescribableLogDirTopicSerde.ReadV00);
             return new(
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeLogDirsRequest message)
+        private static int WriteV00(byte[] buffer, int index, DescribeLogDirsRequest message)
         {
-            buffer = Encoder.WriteArray<DescribableLogDirTopic>(buffer, message.TopicsField, (b, i) => DescribableLogDirTopicSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteArray<DescribableLogDirTopic>(buffer, index, message.TopicsField, DescribableLogDirTopicSerde.WriteV00);
+            return index;
         }
-        private static DescribeLogDirsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeLogDirsRequest ReadV01(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<DescribableLogDirTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribableLogDirTopicSerde.ReadV01(ref b));
+            var topicsField = Decoder.ReadArray<DescribableLogDirTopic>(buffer, ref index, DescribableLogDirTopicSerde.ReadV01);
             return new(
                 topicsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DescribeLogDirsRequest message)
+        private static int WriteV01(byte[] buffer, int index, DescribeLogDirsRequest message)
         {
-            buffer = Encoder.WriteArray<DescribableLogDirTopic>(buffer, message.TopicsField, (b, i) => DescribableLogDirTopicSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteArray<DescribableLogDirTopic>(buffer, index, message.TopicsField, DescribableLogDirTopicSerde.WriteV01);
+            return index;
         }
-        private static DescribeLogDirsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeLogDirsRequest ReadV02(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<DescribableLogDirTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribableLogDirTopicSerde.ReadV02(ref b));
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<DescribableLogDirTopic>(buffer, ref index, DescribableLogDirTopicSerde.ReadV02);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, DescribeLogDirsRequest message)
+        private static int WriteV02(byte[] buffer, int index, DescribeLogDirsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DescribableLogDirTopic>(buffer, message.TopicsField, (b, i) => DescribableLogDirTopicSerde.WriteV02(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DescribableLogDirTopic>(buffer, index, message.TopicsField, DescribableLogDirTopicSerde.WriteV02);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static DescribeLogDirsRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeLogDirsRequest ReadV03(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<DescribableLogDirTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribableLogDirTopicSerde.ReadV03(ref b));
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<DescribableLogDirTopic>(buffer, ref index, DescribableLogDirTopicSerde.ReadV03);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, DescribeLogDirsRequest message)
+        private static int WriteV03(byte[] buffer, int index, DescribeLogDirsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DescribableLogDirTopic>(buffer, message.TopicsField, (b, i) => DescribableLogDirTopicSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DescribableLogDirTopic>(buffer, index, message.TopicsField, DescribableLogDirTopicSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static DescribeLogDirsRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeLogDirsRequest ReadV04(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<DescribableLogDirTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribableLogDirTopicSerde.ReadV04(ref b));
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<DescribableLogDirTopic>(buffer, ref index, DescribableLogDirTopicSerde.ReadV04);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, DescribeLogDirsRequest message)
+        private static int WriteV04(byte[] buffer, int index, DescribeLogDirsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DescribableLogDirTopic>(buffer, message.TopicsField, (b, i) => DescribableLogDirTopicSerde.WriteV04(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DescribableLogDirTopic>(buffer, index, message.TopicsField, DescribableLogDirTopicSerde.WriteV04);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class DescribableLogDirTopicSerde
         {
-            public static DescribableLogDirTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static DescribableLogDirTopic ReadV00(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var topicField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     topicField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, DescribableLogDirTopic message)
+            public static int WriteV00(byte[] buffer, int index, DescribableLogDirTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicField);
-                buffer = Encoder.WriteArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
             }
-            public static DescribableLogDirTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static DescribableLogDirTopic ReadV01(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var topicField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     topicField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, DescribableLogDirTopic message)
+            public static int WriteV01(byte[] buffer, int index, DescribableLogDirTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicField);
-                buffer = Encoder.WriteArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
             }
-            public static DescribableLogDirTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static DescribableLogDirTopic ReadV02(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, DescribableLogDirTopic message)
+            public static int WriteV02(byte[] buffer, int index, DescribableLogDirTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static DescribableLogDirTopic ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static DescribableLogDirTopic ReadV03(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, DescribableLogDirTopic message)
+            public static int WriteV03(byte[] buffer, int index, DescribableLogDirTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static DescribableLogDirTopic ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static DescribableLogDirTopic ReadV04(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, DescribableLogDirTopic message)
+            public static int WriteV04(byte[] buffer, int index, DescribableLogDirTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.PartitionsField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

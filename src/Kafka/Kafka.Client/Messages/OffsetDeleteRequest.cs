@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             "",
             ImmutableArray<OffsetDeleteRequestTopic>.Empty
         );
+        public static short FlexibleVersion { get; } = 32767;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">Each partition to delete offsets for.</param>

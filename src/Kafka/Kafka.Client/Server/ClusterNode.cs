@@ -11,7 +11,7 @@ namespace Kafka.Client.Server
     )
     {
         public static ClusterNode Empty { get; } = new(
-            int.MinValue,
+            ClusterNodeId.Empty,
             "",
             "",
             0,

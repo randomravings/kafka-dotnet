@@ -1,4 +1,7 @@
-﻿using Kafka.Client.Messages;
+﻿using Kafka.Client.Clients.Producer.Model;
+using Kafka.Client.Messages;
+using Kafka.Common;
+using Kafka.Common.Encoding;
 using Kafka.Common.Records;
 using Kafka.Common.Serialization;
 using Kafka.Common.Types;
@@ -13,6 +16,8 @@ namespace Kafka.Client.Clients.Producer
         private readonly ISerializer<TKey> _keySerializer;
         private readonly ISerializer<TValue> _valueSerializer;
         private readonly IPartitioner _partitioner;
+        private readonly RecordAccumulator<TKey, TValue> _requestAccumulator;
+        private readonly RecordsBuilder<TKey, TValue> _builder;
         public Producer(
             ProducerConfig config
         ) : base(config)
@@ -20,6 +25,14 @@ namespace Kafka.Client.Clients.Producer
             _keySerializer = GetKeySerializer(config);
             _valueSerializer = GetValueSerializer(config);
             _partitioner = GetPartitioner(config);
+            _builder = new RecordsBuilder<TKey, TValue>(HandleRecordSend);
+            _requestAccumulator = new RecordAccumulator<TKey, TValue>(
+                config.MaxInFlightRequestsPerConnection,
+                config.MaxRequestSize,
+                config.LingerMs,
+                RecordSize,
+                HandleRecordBatch
+            );
         }
 
         public Producer(
@@ -31,6 +44,14 @@ namespace Kafka.Client.Clients.Producer
             _keySerializer = keySerializer;
             _valueSerializer = valueSerializer;
             _partitioner = GetPartitioner(config);
+            _builder = new RecordsBuilder<TKey, TValue>(HandleRecordSend);
+            _requestAccumulator = new RecordAccumulator<TKey, TValue>(
+                config.MaxInFlightRequestsPerConnection,
+                config.MaxRequestSize,
+                config.LingerMs,
+                RecordSize,
+                HandleRecordBatch
+            );
         }
 
         public Producer(
@@ -41,6 +62,14 @@ namespace Kafka.Client.Clients.Producer
             _keySerializer = GetKeySerializer(config);
             _valueSerializer = GetValueSerializer(config);
             _partitioner = partitioner;
+            _builder = new RecordsBuilder<TKey, TValue>(HandleRecordSend);
+            _requestAccumulator = new RecordAccumulator<TKey, TValue>(
+                config.MaxInFlightRequestsPerConnection,
+                config.MaxRequestSize,
+                config.LingerMs,
+                RecordSize,
+                HandleRecordBatch
+            );
         }
 
         public Producer(
@@ -53,143 +82,42 @@ namespace Kafka.Client.Clients.Producer
             _keySerializer = keySerializer;
             _valueSerializer = valueSerializer;
             _partitioner = partitioner;
-        }
-
-        public async ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            TKey key,
-            TValue value,
-            CancellationToken cancellationToken
-        ) =>
-            await Send(
-                topic,
-                key,
-                value,
-                Timestamp.Now(),
-                ImmutableArray<RecordHeader>.Empty,
-                cancellationToken
-            )
-        ;
-
-        public async ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            TKey key,
-            TValue value,
-            Timestamp timestamp,
-            CancellationToken cancellationToken
-        ) =>
-            await Send(
-                topic,
-                key,
-                value,
-                timestamp,
-                ImmutableArray<RecordHeader>.Empty,
-                cancellationToken
-            )
-        ;
-
-        public async ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            TKey key,
-            TValue value,
-            ImmutableArray<RecordHeader> recordHeaders,
-            CancellationToken cancellationToken
-        ) =>
-            await Send(
-                topic,
-                key,
-                value,
-                Timestamp.Now(),
-                recordHeaders,
-                cancellationToken
-            )
-        ;
-
-        public async ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            TKey key,
-            TValue value,
-            Timestamp timestamp,
-            ImmutableArray<RecordHeader> recordHeaders,
-            CancellationToken cancellationToken
-        )
-        {
-            var record = new ProducerRecord<TKey, TValue>(
-                timestamp,
-                recordHeaders,
-                key,
-                value
+            _builder = new RecordsBuilder<TKey, TValue>(HandleRecordSend);
+            _requestAccumulator = new RecordAccumulator<TKey, TValue>(
+                config.MaxInFlightRequestsPerConnection,
+                config.MaxRequestSize,
+                config.LingerMs,
+                RecordSize,
+                HandleRecordBatch
             );
-            return await Send(topic, record, cancellationToken);
         }
 
         public async ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            ProducerRecord<TKey, TValue> producerRecord,
+            ProduceRecord<TKey, TValue> produceRecord,
             CancellationToken cancellationToken
         )
         {
-            var keyBytes = _keySerializer.Write(producerRecord.Key);
-            var valueBytes = _valueSerializer.Write(producerRecord.Value);
-            var partition = await _partitioner.Select(_cluster, topic, keyBytes);
+            var keyBytes = _keySerializer.Write(produceRecord.Key);
+            var valueBytes = _valueSerializer.Write(produceRecord.Value);
 
-            var record = new Record(
-                0,
-                0,
-                0,
-                1,
-                Attributes.None,
-                0,
-                0,
+            var partition = produceRecord.Partition;
+            if (partition == Partition.Unassigned)
+                partition = await _partitioner.Select(_cluster, produceRecord.Topic, keyBytes);
+
+            var timestamp = produceRecord.Timestamp;
+            if (timestamp == Timestamp.None)
+                timestamp = Timestamp.Now();
+
+            var result = await _requestAccumulator.Add(
+                produceRecord,
+                timestamp,
+                partition,
                 keyBytes,
                 valueBytes,
-                producerRecord.Headers
-            );
-
-            var batch = new RecordBatch(
-                0,
-                1,
-                0,
-                2,
-                0,
-                Attributes.None,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                new IRecord[] { record }.ToImmutableArray()
-            );
-
-            var request = new ProduceRequest(
-                null,
-                1,
-                5000,
-                new[]
-                {
-                    new ProduceRequest.TopicProduceData(
-                        topic,
-                        new[]
-                        {
-                            new ProduceRequest.TopicProduceData.PartitionProduceData(
-                                0,
-                                batch
-                            )
-                        }.ToImmutableArray()
-                    )
-                }.ToImmutableArray()
-            );
-
-            var respose = await HandleRequest(
-                request,
-                (s, v, r) => ProduceRequestSerde.Write(s, v, r),
-                (ref ReadOnlyMemory<byte> s, short v) => ProduceResponseSerde.Read(ref s, v),
-                null,
                 cancellationToken
             );
 
-            return new ProduceResult<TKey, TValue>(new(topic, new(partition, 0)), producerRecord);
+            return result;
         }
 
         private static IPartitioner GetPartitioner(
@@ -231,6 +159,112 @@ namespace Kafka.Client.Clients.Producer
             if (instance == null)
                 throw new TypeLoadException(fullName);
             return (TType)instance;
+        }
+
+        private static int HeaderSize(
+            ImmutableArray<RecordHeader> headers
+        )
+        {
+            var bytesRequired = 4;
+            foreach (var header in headers)
+                bytesRequired +=
+                    Encoder.SizeOfInt32(header.Key.Length) +
+                    header.Key.Length +
+                    Encoder.SizeOfInt32(header.Value.Length) +
+                    header.Value.Length
+                ;
+            return bytesRequired;
+        }
+
+        private static int RecordSize(ProduceCallback<TKey, TValue> produceCallback) =>
+            Encoder.SizeOfInt32(produceCallback.KeyBytes?.Length ?? 0) +
+            produceCallback.KeyBytes?.Length ?? 0 +
+            Encoder.SizeOfInt32(produceCallback.ValueBytes?.Length ?? 0) +
+            produceCallback.KeyBytes?.Length ?? 0 +
+            HeaderSize(produceCallback.Record.Headers) +
+            40 // Add some overhead to accout for overhead varint stuff.
+        ;
+
+        private void HandleRecordBatch(
+            BatchAccumulatedReason reason,
+            ImmutableArray<ProduceCallback<TKey, TValue>> batch
+        )
+        {
+            var batchPerPartition = batch
+                .GroupBy(
+                    g => new TopicPartition(g.Record.Topic, g.Partition)
+                )
+                .ToImmutableDictionary(
+                    k => k.Key,
+                    v => v.ToImmutableArray()
+                )
+            ;
+            _builder.Add(batchPerPartition, CancellationToken.None);
+        }
+
+        private async Task HandleRecordSend(
+            TopicPartition topicPartition,
+            IRecords records,
+            ImmutableArray<ProduceCallback<TKey, TValue>> produceCallbacks,
+            CancellationToken cancellationToken
+        )
+        {
+            var request = new ProduceRequest(
+                null,
+                -1,
+                30000,
+                new[]
+                {
+                    new ProduceRequest.TopicProduceData(
+                        topicPartition.Topic.Value ?? "",
+                        new[]
+                        {
+                            new ProduceRequest.TopicProduceData.PartitionProduceData(
+                                topicPartition.Partition,
+                                records
+                            )
+                        }.ToImmutableArray()
+                    )
+                }.ToImmutableArray()
+            );
+
+            var respose = await HandleRequest(
+                request,
+                (b, i, r, v) => ProduceRequestSerde.Write(b, i, r, v),
+                (byte[] b, ref int i, short v) => ProduceResponseSerde.Read(b, ref i, v),
+                9,
+                ProduceRequest.FlexibleVersion,
+                cancellationToken
+            );
+
+            for (int i = 0; i < respose.ResponsesField.Length; i++)
+            {
+                var topicResponse = respose.ResponsesField[i];
+                var topicName = new TopicName(topicResponse.NameField);
+                for (int j = 0; j < topicResponse.PartitionResponsesField.Length; j++)
+                {
+                    var partitionResponse = topicResponse.PartitionResponsesField[j];
+                    var partition = new Partition(partitionResponse.IndexField);
+                    var offset = new Offset(partitionResponse.BaseOffsetField);
+                    var topicPartitionOffset = new TopicPartitionOffset(topicName, new(partition, offset));
+                    var timestamp = Timestamp.LogAppend(partitionResponse.LogAppendTimeMsField);
+                    var error = Errors.Translate(partitionResponse.ErrorCodeField);
+                    var recordErrors = $"{partitionResponse.ErrorMessageField}:{string.Join(',',partitionResponse.RecordErrorsField.Select(r => $"[{r.BatchIndexField}]{r.BatchIndexErrorMessageField}"))}";
+
+                    var produceCallback = produceCallbacks[j];
+                    produceCallback.TaskCompletionSource.SetResult(
+                        new ProduceResult<TKey, TValue>(
+                            topicPartitionOffset,
+                            timestamp,
+                            produceCallback.Record.Headers,
+                            produceCallback.Record.Key,
+                            produceCallback.Record.Value,
+                            error,
+                            recordErrors
+                        )
+                    );
+                }
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ using Kafka.Common.Protocol;
 using Kafka.Common.Types;
 using Kafka.Common.Types.Comparison;
 using System.Collections.Immutable;
+using System.Net;
 
 namespace Kafka.Client.Clients
 {
@@ -14,8 +15,11 @@ namespace Kafka.Client.Clients
         IClient
         where TConfig : notnull, ClientConfig
     {
+        private const string CLIENT_NAME = "confluent-kafka-dotnet";
+        private const string CLIENT_VERSION = "1.9.2";
         private const short REQUEST_HEADER_VERSION = 2;
         private const short RESPONSE_HEADER_VERSION = 1;
+        private const short API_REQUEST_VERSION = 3;
         private int _coorelationIds = 0;
         private bool _disposed;
         private readonly ITransport _transport;
@@ -28,8 +32,8 @@ namespace Kafka.Client.Clients
         )
         {
             _config = config;
-            (var host, var port) = ParseBoostrap(config.BootstrapServers).First();
-            _transport = new PlaintextTransport(host, port);
+            var endpoint = ParseBoostrap(config.BootstrapServers).First();
+            _transport = new PlaintextTransport(endpoint);
         }
 
         protected async ValueTask EnsureConnection(CancellationToken cancellationToken)
@@ -46,7 +50,8 @@ namespace Kafka.Client.Clients
             TRequest request,
             EncodeVersionDelegate<TRequest> requestWriter,
             DecodeVersionDelegate<TResponse> responseReader,
-            short? versionOverride,
+            short versionOverride,
+            short flexibleVersion,
             CancellationToken cancellationToken
         )
             where TRequest : notnull, Request
@@ -57,9 +62,8 @@ namespace Kafka.Client.Clients
                 request,
                 requestWriter,
                 responseReader,
-                REQUEST_HEADER_VERSION,
-                RESPONSE_HEADER_VERSION,
                 versionOverride,
+                flexibleVersion,
                 cancellationToken
             );
         }
@@ -86,35 +90,55 @@ namespace Kafka.Client.Clients
             TRequest request,
             EncodeVersionDelegate<TRequest> requestWriter,
             DecodeVersionDelegate<TResponse> responseReader,
-            short headerRequestVersion,
-            short headerResponseVersion,
-            short? apiVersion,
+            short apiVersion,
+            short flexibleVersion,
+            CancellationToken cancellationToken
+        )
+            where TRequest : notnull, Request
+            where TResponse : notnull, Response
+            => await ExecuteRequest(
+                request,
+                requestWriter,
+                responseReader,
+                apiVersion,
+                flexibleVersion,
+                false,
+                cancellationToken
+            )
+        ;
+
+        private async ValueTask<TResponse> ExecuteRequest<TRequest, TResponse>(
+            TRequest request,
+            EncodeVersionDelegate<TRequest> requestWriter,
+            DecodeVersionDelegate<TResponse> responseReader,
+            short apiVersion,
+            short flexibleVersion,
+            bool ignoreHeaderTaggedFields,
             CancellationToken cancellationToken
         )
             where TRequest : notnull, Request
             where TResponse : notnull, Response
         {
             var correlationId = Interlocked.Increment(ref _coorelationIds);
-            var version = apiVersion.HasValue ?
-                apiVersion.Value :
-                _apiVersions[request.Api].Version.Max
-            ;
+            var version = apiVersion < 0 ? _apiVersions[request.Api].Version.Max : apiVersion;
+            var flexible = version >= flexibleVersion;
             var requestHeader = new RequestHeader(
                 request.Api,
                 version,
                 correlationId,
                 _config.ClientId
             );
-            var requestBuffer = new byte[1024 * 1024].AsMemory();
-            var requestSlice = requestBuffer;
-            requestSlice = RequestHeaderSerde.Write(requestSlice, headerRequestVersion, requestHeader);
-            requestSlice = requestWriter(requestSlice, version, request);
-            var len = requestBuffer.Length - requestSlice.Length;
-            var responseBuffer = await _transport.HandleRequest(requestBuffer[0..len], cancellationToken);
-            var responseHeader = ResponseHeaderSerde.Read(ref responseBuffer, headerResponseVersion);
+            var requestBuffer = new byte[1024 * 1024];
+            var requestIndex = 4;
+            requestIndex = RequestHeaderSerde.Write(requestBuffer, requestIndex, requestHeader, REQUEST_HEADER_VERSION, flexible);
+            requestIndex = requestWriter(requestBuffer, requestIndex, request, version);
+            Encoder.WriteInt32(requestBuffer, 0, requestIndex - 4);
+            var responseBuffer = await _transport.HandleRequest(requestBuffer, 0, requestIndex, cancellationToken);
+            var responseIndex = 0;
+            var responseHeader = ResponseHeaderSerde.Read(responseBuffer, ref responseIndex, RESPONSE_HEADER_VERSION, flexible && !ignoreHeaderTaggedFields);
             if (responseHeader.CorrelationIdField != requestHeader.CorrelationIdField)
                 throw new Exception($"Correlation Id mismath - Request: {requestHeader.CorrelationIdField} - Response: {responseHeader.CorrelationIdField}");
-            var response = responseReader(ref responseBuffer, version);
+            var response = responseReader(responseBuffer, ref responseIndex, version);
             return response;
         }
 
@@ -123,16 +147,16 @@ namespace Kafka.Client.Clients
         )
         {
             var request = new ApiVersionsRequest(
-                ".Net Client",
-                "1.0.0"
+                CLIENT_NAME,
+                CLIENT_VERSION
             );
             var response = await ExecuteRequest(
                 request,
-                (s, v, r) => ApiVersionsRequestSerde.Write(s, v, r),
-                (ref ReadOnlyMemory<byte> s, short v) => ApiVersionsResponseSerde.Read(ref s, v),
-                1,
-                0,
-                1,
+                ApiVersionsRequestSerde.Write,
+                ApiVersionsResponseSerde.Read,
+                API_REQUEST_VERSION,
+                ApiVersionsRequest.FlexibleVersion,
+                true,
                 cancellationToken
             );
             return response
@@ -164,11 +188,10 @@ namespace Kafka.Client.Clients
             );
             var response = await ExecuteRequest(
                 request,
-                (s, v, r) => MetadataRequestSerde.Write(s, v, r),
-                (ref ReadOnlyMemory<byte> s, short v) => MetadataResponseSerde.Read(ref s, v),
-                REQUEST_HEADER_VERSION,
-                RESPONSE_HEADER_VERSION,
-                null,
+                MetadataRequestSerde.Write,
+                MetadataResponseSerde.Read,
+                -1,
+                MetadataRequest.FlexibleVersion,
                 cancellationToken
             );
             var nodes = response.BrokersField.Select(
@@ -187,19 +210,15 @@ namespace Kafka.Client.Clients
                 )
             ;
             return new(
+                DateTimeOffset.UtcNow,
                 response.ClusterIdField ?? "",
-                nodes[new(response.ControllerIdField)],
                 nodes,
-                ImmutableSortedSet<Topic>.Empty,
-                ImmutableSortedSet<Topic>.Empty,
-                ImmutableSortedSet<Topic>.Empty,
-                ImmutableSortedDictionary<Topic, ImmutableArray<PartitionMetadata>>.Empty,
-                ImmutableSortedDictionary<string, Guid>.Empty
+                nodes[new(response.ControllerIdField)]
             );
         }
 
-        private static IEnumerable<(string Host, int Port)> ParseBoostrap(string bootstrapServers) =>
-            bootstrapServers.Split(',').Select(r => r.Split(':')).Select(r => (r[0], int.Parse(r[1])))
+        private static IEnumerable<DnsEndPoint> ParseBoostrap(string bootstrapServers) =>
+            bootstrapServers.Split(',').Select(r => r.Split(':')).Select(r => new DnsEndPoint(r[0], int.Parse(r[1])))
         ;
     }
 }

@@ -1,7 +1,7 @@
 ﻿using CommandLine;
-using Kafka.Cli.AdminClient.Options;
+using Kafka.Cli.Options;
 
-namespace Kafka.Cli.AdminClient.Verbs
+namespace Kafka.Cli.Verbs
 {
     [Verb("produce")]
     public sealed class VerbProduce

@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
-using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup;
 using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestTopic;
+using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup;
+using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
 
 namespace Kafka.Client.Messages
 {
@@ -27,6 +27,21 @@ namespace Kafka.Client.Messages
             ImmutableArray<OffsetFetchRequestGroup>.Empty,
             default(bool)
         );
+        public static short FlexibleVersion { get; } = 6;
+        /// <summary>
+        /// <param name="NameField">The topic name.</param>
+        /// <param name="PartitionIndexesField">The partition indexes we would like to fetch offsets for.</param>
+        /// </summary>
+        public sealed record OffsetFetchRequestTopic (
+            string NameField,
+            ImmutableArray<int> PartitionIndexesField
+        )
+        {
+            public static OffsetFetchRequestTopic Empty { get; } = new(
+                "",
+                ImmutableArray<int>.Empty
+            );
+        };
         /// <summary>
         /// <param name="groupIdField">The group ID.</param>
         /// <param name="TopicsField">Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.</param>
@@ -54,20 +69,6 @@ namespace Kafka.Client.Messages
                     ImmutableArray<int>.Empty
                 );
             };
-        };
-        /// <summary>
-        /// <param name="NameField">The topic name.</param>
-        /// <param name="PartitionIndexesField">The partition indexes we would like to fetch offsets for.</param>
-        /// </summary>
-        public sealed record OffsetFetchRequestTopic (
-            string NameField,
-            ImmutableArray<int> PartitionIndexesField
-        )
-        {
-            public static OffsetFetchRequestTopic Empty { get; } = new(
-                "",
-                ImmutableArray<int>.Empty
-            );
         };
     };
 }

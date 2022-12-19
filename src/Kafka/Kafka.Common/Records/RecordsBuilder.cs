@@ -2,13 +2,29 @@
 
 namespace Kafka.Common.Records
 {
-    public interface IRecordBatchBuilder
+    public interface IRecordsBuilder
     {
         IRecords Build();
     }
 
-    public sealed class RecordBatchBuilder :
-        IRecordBatchBuilder
+    public interface IMessagesBuilderV0
+    {
+        IMessagesBuilderV0 AddMessage(
+            
+        );
+        IRecords Build();
+    }
+
+    public interface IMessagesBuilderV1
+    {
+        IMessagesBuilderV0 AddMessage(
+
+        );
+        IRecords Build();
+    }
+
+    public sealed class RecordsBuilder :
+        IRecordsBuilder
     {
         private readonly sbyte _magic = 2;
         private long _baseOffset = 0;
@@ -23,11 +39,11 @@ namespace Kafka.Common.Records
         private int _baseSequence = 0;
         private ImmutableArray<IRecord>.Builder _records = ImmutableArray.CreateBuilder<IRecord>();
 
-        private RecordBatchBuilder() { }
+        private RecordsBuilder() { }
 
-        public static IRecordBatchBuilder New() => new RecordBatchBuilder();
+        public static IRecordsBuilder New() => new RecordsBuilder();
 
-        IRecords IRecordBatchBuilder.Build()
+        IRecords IRecordsBuilder.Build()
         {
 
             return new RecordBatch(

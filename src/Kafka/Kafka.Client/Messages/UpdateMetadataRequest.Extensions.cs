@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
+using UpdateMetadataEndpoint = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker.UpdateMetadataEndpoint;
+using UpdateMetadataPartitionState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataPartitionState;
 using UpdateMetadataBroker = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker;
 using UpdateMetadataTopicState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataTopicState;
-using UpdateMetadataPartitionState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataPartitionState;
-using UpdateMetadataEndpoint = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker.UpdateMetadataEndpoint;
 
 namespace Kafka.Client.Messages
 {
@@ -12,40 +12,45 @@ namespace Kafka.Client.Messages
     public static class UpdateMetadataRequestSerde
     {
         private static readonly DecodeDelegate<UpdateMetadataRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV07(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
+            ReadV06,
+            ReadV07,
+            ReadV08,
         };
         private static readonly EncodeDelegate<UpdateMetadataRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
-            (b, m) => WriteV06(b, m),
-            (b, m) => WriteV07(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
+            WriteV06,
+            WriteV07,
+            WriteV08,
         };
-        public static UpdateMetadataRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static UpdateMetadataRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, UpdateMetadataRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static UpdateMetadataRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, UpdateMetadataRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static UpdateMetadataRequest ReadV00(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
             var brokerEpochField = default(long);
-            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataPartitionStateSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
+            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(buffer, ref index, UpdateMetadataPartitionStateSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
             var topicStatesField = ImmutableArray<UpdateMetadataTopicState>.Empty;
-            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataBrokerSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
+            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(buffer, ref index, UpdateMetadataBrokerSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 ungroupedPartitionStatesField,
@@ -53,24 +58,26 @@ namespace Kafka.Client.Messages
                 liveBrokersField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, UpdateMetadataRequest message)
+        private static int WriteV00(byte[] buffer, int index, UpdateMetadataRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, message.UngroupedPartitionStatesField, (b, i) => UpdateMetadataPartitionStateSerde.WriteV00(b, i));
-            buffer = Encoder.WriteArray<UpdateMetadataBroker>(buffer, message.LiveBrokersField, (b, i) => UpdateMetadataBrokerSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, index, message.UngroupedPartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV00);
+            index = Encoder.WriteArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV00);
+            return index;
         }
-        private static UpdateMetadataRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static UpdateMetadataRequest ReadV01(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
             var brokerEpochField = default(long);
-            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataPartitionStateSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
+            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(buffer, ref index, UpdateMetadataPartitionStateSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
             var topicStatesField = ImmutableArray<UpdateMetadataTopicState>.Empty;
-            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataBrokerSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
+            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(buffer, ref index, UpdateMetadataBrokerSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 ungroupedPartitionStatesField,
@@ -78,24 +85,26 @@ namespace Kafka.Client.Messages
                 liveBrokersField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, UpdateMetadataRequest message)
+        private static int WriteV01(byte[] buffer, int index, UpdateMetadataRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, message.UngroupedPartitionStatesField, (b, i) => UpdateMetadataPartitionStateSerde.WriteV01(b, i));
-            buffer = Encoder.WriteArray<UpdateMetadataBroker>(buffer, message.LiveBrokersField, (b, i) => UpdateMetadataBrokerSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, index, message.UngroupedPartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV01);
+            index = Encoder.WriteArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV01);
+            return index;
         }
-        private static UpdateMetadataRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static UpdateMetadataRequest ReadV02(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
             var brokerEpochField = default(long);
-            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataPartitionStateSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
+            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(buffer, ref index, UpdateMetadataPartitionStateSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
             var topicStatesField = ImmutableArray<UpdateMetadataTopicState>.Empty;
-            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataBrokerSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
+            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(buffer, ref index, UpdateMetadataBrokerSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 ungroupedPartitionStatesField,
@@ -103,24 +112,26 @@ namespace Kafka.Client.Messages
                 liveBrokersField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, UpdateMetadataRequest message)
+        private static int WriteV02(byte[] buffer, int index, UpdateMetadataRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, message.UngroupedPartitionStatesField, (b, i) => UpdateMetadataPartitionStateSerde.WriteV02(b, i));
-            buffer = Encoder.WriteArray<UpdateMetadataBroker>(buffer, message.LiveBrokersField, (b, i) => UpdateMetadataBrokerSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, index, message.UngroupedPartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV02);
+            index = Encoder.WriteArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV02);
+            return index;
         }
-        private static UpdateMetadataRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static UpdateMetadataRequest ReadV03(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
             var brokerEpochField = default(long);
-            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataPartitionStateSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
+            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(buffer, ref index, UpdateMetadataPartitionStateSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
             var topicStatesField = ImmutableArray<UpdateMetadataTopicState>.Empty;
-            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataBrokerSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
+            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(buffer, ref index, UpdateMetadataBrokerSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 ungroupedPartitionStatesField,
@@ -128,24 +139,26 @@ namespace Kafka.Client.Messages
                 liveBrokersField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, UpdateMetadataRequest message)
+        private static int WriteV03(byte[] buffer, int index, UpdateMetadataRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, message.UngroupedPartitionStatesField, (b, i) => UpdateMetadataPartitionStateSerde.WriteV03(b, i));
-            buffer = Encoder.WriteArray<UpdateMetadataBroker>(buffer, message.LiveBrokersField, (b, i) => UpdateMetadataBrokerSerde.WriteV03(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, index, message.UngroupedPartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV03);
+            index = Encoder.WriteArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV03);
+            return index;
         }
-        private static UpdateMetadataRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static UpdateMetadataRequest ReadV04(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
             var brokerEpochField = default(long);
-            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataPartitionStateSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
+            var ungroupedPartitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(buffer, ref index, UpdateMetadataPartitionStateSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'UngroupedPartitionStates'");
             var topicStatesField = ImmutableArray<UpdateMetadataTopicState>.Empty;
-            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataBrokerSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
+            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(buffer, ref index, UpdateMetadataBrokerSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 ungroupedPartitionStatesField,
@@ -153,24 +166,26 @@ namespace Kafka.Client.Messages
                 liveBrokersField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, UpdateMetadataRequest message)
+        private static int WriteV04(byte[] buffer, int index, UpdateMetadataRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, message.UngroupedPartitionStatesField, (b, i) => UpdateMetadataPartitionStateSerde.WriteV04(b, i));
-            buffer = Encoder.WriteArray<UpdateMetadataBroker>(buffer, message.LiveBrokersField, (b, i) => UpdateMetadataBrokerSerde.WriteV04(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, index, message.UngroupedPartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV04);
+            index = Encoder.WriteArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV04);
+            return index;
         }
-        private static UpdateMetadataRequest ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static UpdateMetadataRequest ReadV05(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
             var ungroupedPartitionStatesField = ImmutableArray<UpdateMetadataPartitionState>.Empty;
-            var topicStatesField = Decoder.ReadArray<UpdateMetadataTopicState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataTopicStateSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
-            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataBrokerSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
+            var topicStatesField = Decoder.ReadArray<UpdateMetadataTopicState>(buffer, ref index, UpdateMetadataTopicStateSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveBrokersField = Decoder.ReadArray<UpdateMetadataBroker>(buffer, ref index, UpdateMetadataBrokerSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 ungroupedPartitionStatesField,
@@ -178,26 +193,28 @@ namespace Kafka.Client.Messages
                 liveBrokersField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, UpdateMetadataRequest message)
+        private static int WriteV05(byte[] buffer, int index, UpdateMetadataRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteArray<UpdateMetadataTopicState>(buffer, message.TopicStatesField, (b, i) => UpdateMetadataTopicStateSerde.WriteV05(b, i));
-            buffer = Encoder.WriteArray<UpdateMetadataBroker>(buffer, message.LiveBrokersField, (b, i) => UpdateMetadataBrokerSerde.WriteV05(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteArray<UpdateMetadataTopicState>(buffer, index, message.TopicStatesField, UpdateMetadataTopicStateSerde.WriteV05);
+            index = Encoder.WriteArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV05);
+            return index;
         }
-        private static UpdateMetadataRequest ReadV06(ref ReadOnlyMemory<byte> buffer)
+        private static UpdateMetadataRequest ReadV06(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
             var ungroupedPartitionStatesField = ImmutableArray<UpdateMetadataPartitionState>.Empty;
-            var topicStatesField = Decoder.ReadCompactArray<UpdateMetadataTopicState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataTopicStateSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
-            var liveBrokersField = Decoder.ReadCompactArray<UpdateMetadataBroker>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataBrokerSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicStatesField = Decoder.ReadCompactArray<UpdateMetadataTopicState>(buffer, ref index, UpdateMetadataTopicStateSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveBrokersField = Decoder.ReadCompactArray<UpdateMetadataBroker>(buffer, ref index, UpdateMetadataBrokerSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 ungroupedPartitionStatesField,
@@ -205,27 +222,29 @@ namespace Kafka.Client.Messages
                 liveBrokersField
             );
         }
-        private static Memory<byte> WriteV06(Memory<byte> buffer, UpdateMetadataRequest message)
+        private static int WriteV06(byte[] buffer, int index, UpdateMetadataRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteCompactArray<UpdateMetadataTopicState>(buffer, message.TopicStatesField, (b, i) => UpdateMetadataTopicStateSerde.WriteV06(b, i));
-            buffer = Encoder.WriteCompactArray<UpdateMetadataBroker>(buffer, message.LiveBrokersField, (b, i) => UpdateMetadataBrokerSerde.WriteV06(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteCompactArray<UpdateMetadataTopicState>(buffer, index, message.TopicStatesField, UpdateMetadataTopicStateSerde.WriteV06);
+            index = Encoder.WriteCompactArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV06);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static UpdateMetadataRequest ReadV07(ref ReadOnlyMemory<byte> buffer)
+        private static UpdateMetadataRequest ReadV07(byte[] buffer, ref int index)
         {
-            var controllerIdField = Decoder.ReadInt32(ref buffer);
-            var controllerEpochField = Decoder.ReadInt32(ref buffer);
-            var brokerEpochField = Decoder.ReadInt64(ref buffer);
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = default(int);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
             var ungroupedPartitionStatesField = ImmutableArray<UpdateMetadataPartitionState>.Empty;
-            var topicStatesField = Decoder.ReadCompactArray<UpdateMetadataTopicState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataTopicStateSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
-            var liveBrokersField = Decoder.ReadCompactArray<UpdateMetadataBroker>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataBrokerSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicStatesField = Decoder.ReadCompactArray<UpdateMetadataTopicState>(buffer, ref index, UpdateMetadataTopicStateSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveBrokersField = Decoder.ReadCompactArray<UpdateMetadataBroker>(buffer, ref index, UpdateMetadataBrokerSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 controllerIdField,
+                kRaftControllerIdField,
                 controllerEpochField,
                 brokerEpochField,
                 ungroupedPartitionStatesField,
@@ -233,23 +252,379 @@ namespace Kafka.Client.Messages
                 liveBrokersField
             );
         }
-        private static Memory<byte> WriteV07(Memory<byte> buffer, UpdateMetadataRequest message)
+        private static int WriteV07(byte[] buffer, int index, UpdateMetadataRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ControllerIdField);
-            buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-            buffer = Encoder.WriteInt64(buffer, message.BrokerEpochField);
-            buffer = Encoder.WriteCompactArray<UpdateMetadataTopicState>(buffer, message.TopicStatesField, (b, i) => UpdateMetadataTopicStateSerde.WriteV07(b, i));
-            buffer = Encoder.WriteCompactArray<UpdateMetadataBroker>(buffer, message.LiveBrokersField, (b, i) => UpdateMetadataBrokerSerde.WriteV07(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteCompactArray<UpdateMetadataTopicState>(buffer, index, message.TopicStatesField, UpdateMetadataTopicStateSerde.WriteV07);
+            index = Encoder.WriteCompactArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV07);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
+        }
+        private static UpdateMetadataRequest ReadV08(byte[] buffer, ref int index)
+        {
+            var controllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var kRaftControllerIdField = Decoder.ReadInt32(buffer, ref index);
+            var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+            var brokerEpochField = Decoder.ReadInt64(buffer, ref index);
+            var ungroupedPartitionStatesField = ImmutableArray<UpdateMetadataPartitionState>.Empty;
+            var topicStatesField = Decoder.ReadCompactArray<UpdateMetadataTopicState>(buffer, ref index, UpdateMetadataTopicStateSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'TopicStates'");
+            var liveBrokersField = Decoder.ReadCompactArray<UpdateMetadataBroker>(buffer, ref index, UpdateMetadataBrokerSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'LiveBrokers'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
+            return new(
+                controllerIdField,
+                kRaftControllerIdField,
+                controllerEpochField,
+                brokerEpochField,
+                ungroupedPartitionStatesField,
+                topicStatesField,
+                liveBrokersField
+            );
+        }
+        private static int WriteV08(byte[] buffer, int index, UpdateMetadataRequest message)
+        {
+            index = Encoder.WriteInt32(buffer, index, message.ControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.KRaftControllerIdField);
+            index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+            index = Encoder.WriteInt64(buffer, index, message.BrokerEpochField);
+            index = Encoder.WriteCompactArray<UpdateMetadataTopicState>(buffer, index, message.TopicStatesField, UpdateMetadataTopicStateSerde.WriteV08);
+            index = Encoder.WriteCompactArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV08);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
+        }
+        private static class UpdateMetadataPartitionStateSerde
+        {
+            public static UpdateMetadataPartitionState ReadV00(byte[] buffer, ref int index)
+            {
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var zkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var offlineReplicasField = ImmutableArray<int>.Empty;
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    zkVersionField,
+                    replicasField,
+                    offlineReplicasField
+                );
+            }
+            public static int WriteV00(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV01(byte[] buffer, ref int index)
+            {
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var zkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var offlineReplicasField = ImmutableArray<int>.Empty;
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    zkVersionField,
+                    replicasField,
+                    offlineReplicasField
+                );
+            }
+            public static int WriteV01(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV02(byte[] buffer, ref int index)
+            {
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var zkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var offlineReplicasField = ImmutableArray<int>.Empty;
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    zkVersionField,
+                    replicasField,
+                    offlineReplicasField
+                );
+            }
+            public static int WriteV02(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV03(byte[] buffer, ref int index)
+            {
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var zkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var offlineReplicasField = ImmutableArray<int>.Empty;
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    zkVersionField,
+                    replicasField,
+                    offlineReplicasField
+                );
+            }
+            public static int WriteV03(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV04(byte[] buffer, ref int index)
+            {
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var zkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var offlineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    zkVersionField,
+                    replicasField,
+                    offlineReplicasField
+                );
+            }
+            public static int WriteV04(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV05(byte[] buffer, ref int index)
+            {
+                var topicNameField = "";
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var zkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var offlineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    zkVersionField,
+                    replicasField,
+                    offlineReplicasField
+                );
+            }
+            public static int WriteV05(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV06(byte[] buffer, ref int index)
+            {
+                var topicNameField = "";
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var zkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var offlineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    zkVersionField,
+                    replicasField,
+                    offlineReplicasField
+                );
+            }
+            public static int WriteV06(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV07(byte[] buffer, ref int index)
+            {
+                var topicNameField = "";
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var zkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var offlineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    zkVersionField,
+                    replicasField,
+                    offlineReplicasField
+                );
+            }
+            public static int WriteV07(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV08(byte[] buffer, ref int index)
+            {
+                var topicNameField = "";
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var controllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var leaderField = Decoder.ReadInt32(buffer, ref index);
+                var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var isrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var zkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var replicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var offlineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    controllerEpochField,
+                    leaderField,
+                    leaderEpochField,
+                    isrField,
+                    zkVersionField,
+                    replicasField,
+                    offlineReplicasField
+                );
+            }
+            public static int WriteV08(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
         }
         private static class UpdateMetadataBrokerSerde
         {
-            public static UpdateMetadataBroker ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataBroker ReadV00(byte[] buffer, ref int index)
             {
-                var idField = Decoder.ReadInt32(ref buffer);
-                var v0HostField = Decoder.ReadString(ref buffer);
-                var v0PortField = Decoder.ReadInt32(ref buffer);
+                var idField = Decoder.ReadInt32(buffer, ref index);
+                var v0HostField = Decoder.ReadString(buffer, ref index);
+                var v0PortField = Decoder.ReadInt32(buffer, ref index);
                 var endpointsField = ImmutableArray<UpdateMetadataEndpoint>.Empty;
                 var rackField = default(string?);
                 return new(
@@ -260,19 +635,19 @@ namespace Kafka.Client.Messages
                     rackField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, UpdateMetadataBroker message)
+            public static int WriteV00(byte[] buffer, int index, UpdateMetadataBroker message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.IdField);
-                buffer = Encoder.WriteString(buffer, message.V0HostField);
-                buffer = Encoder.WriteInt32(buffer, message.V0PortField);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.IdField);
+                index = Encoder.WriteString(buffer, index, message.V0HostField);
+                index = Encoder.WriteInt32(buffer, index, message.V0PortField);
+                return index;
             }
-            public static UpdateMetadataBroker ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataBroker ReadV01(byte[] buffer, ref int index)
             {
-                var idField = Decoder.ReadInt32(ref buffer);
+                var idField = Decoder.ReadInt32(buffer, ref index);
                 var v0HostField = "";
                 var v0PortField = default(int);
-                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataEndpointSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
+                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(buffer, ref index, UpdateMetadataEndpointSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
                 var rackField = default(string?);
                 return new(
                     idField,
@@ -282,19 +657,19 @@ namespace Kafka.Client.Messages
                     rackField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, UpdateMetadataBroker message)
+            public static int WriteV01(byte[] buffer, int index, UpdateMetadataBroker message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.IdField);
-                buffer = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, message.EndpointsField, (b, i) => UpdateMetadataEndpointSerde.WriteV01(b, i));
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.IdField);
+                index = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, index, message.EndpointsField, UpdateMetadataEndpointSerde.WriteV01);
+                return index;
             }
-            public static UpdateMetadataBroker ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataBroker ReadV02(byte[] buffer, ref int index)
             {
-                var idField = Decoder.ReadInt32(ref buffer);
+                var idField = Decoder.ReadInt32(buffer, ref index);
                 var v0HostField = "";
                 var v0PortField = default(int);
-                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataEndpointSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
-                var rackField = Decoder.ReadNullableString(ref buffer);
+                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(buffer, ref index, UpdateMetadataEndpointSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
+                var rackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
                     idField,
                     v0HostField,
@@ -303,20 +678,20 @@ namespace Kafka.Client.Messages
                     rackField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, UpdateMetadataBroker message)
+            public static int WriteV02(byte[] buffer, int index, UpdateMetadataBroker message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.IdField);
-                buffer = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, message.EndpointsField, (b, i) => UpdateMetadataEndpointSerde.WriteV02(b, i));
-                buffer = Encoder.WriteNullableString(buffer, message.RackField);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.IdField);
+                index = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, index, message.EndpointsField, UpdateMetadataEndpointSerde.WriteV02);
+                index = Encoder.WriteNullableString(buffer, index, message.RackField);
+                return index;
             }
-            public static UpdateMetadataBroker ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataBroker ReadV03(byte[] buffer, ref int index)
             {
-                var idField = Decoder.ReadInt32(ref buffer);
+                var idField = Decoder.ReadInt32(buffer, ref index);
                 var v0HostField = "";
                 var v0PortField = default(int);
-                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataEndpointSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
-                var rackField = Decoder.ReadNullableString(ref buffer);
+                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(buffer, ref index, UpdateMetadataEndpointSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
+                var rackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
                     idField,
                     v0HostField,
@@ -325,20 +700,20 @@ namespace Kafka.Client.Messages
                     rackField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, UpdateMetadataBroker message)
+            public static int WriteV03(byte[] buffer, int index, UpdateMetadataBroker message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.IdField);
-                buffer = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, message.EndpointsField, (b, i) => UpdateMetadataEndpointSerde.WriteV03(b, i));
-                buffer = Encoder.WriteNullableString(buffer, message.RackField);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.IdField);
+                index = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, index, message.EndpointsField, UpdateMetadataEndpointSerde.WriteV03);
+                index = Encoder.WriteNullableString(buffer, index, message.RackField);
+                return index;
             }
-            public static UpdateMetadataBroker ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataBroker ReadV04(byte[] buffer, ref int index)
             {
-                var idField = Decoder.ReadInt32(ref buffer);
+                var idField = Decoder.ReadInt32(buffer, ref index);
                 var v0HostField = "";
                 var v0PortField = default(int);
-                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataEndpointSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
-                var rackField = Decoder.ReadNullableString(ref buffer);
+                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(buffer, ref index, UpdateMetadataEndpointSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
+                var rackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
                     idField,
                     v0HostField,
@@ -347,20 +722,20 @@ namespace Kafka.Client.Messages
                     rackField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, UpdateMetadataBroker message)
+            public static int WriteV04(byte[] buffer, int index, UpdateMetadataBroker message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.IdField);
-                buffer = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, message.EndpointsField, (b, i) => UpdateMetadataEndpointSerde.WriteV04(b, i));
-                buffer = Encoder.WriteNullableString(buffer, message.RackField);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.IdField);
+                index = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, index, message.EndpointsField, UpdateMetadataEndpointSerde.WriteV04);
+                index = Encoder.WriteNullableString(buffer, index, message.RackField);
+                return index;
             }
-            public static UpdateMetadataBroker ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataBroker ReadV05(byte[] buffer, ref int index)
             {
-                var idField = Decoder.ReadInt32(ref buffer);
+                var idField = Decoder.ReadInt32(buffer, ref index);
                 var v0HostField = "";
                 var v0PortField = default(int);
-                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataEndpointSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
-                var rackField = Decoder.ReadNullableString(ref buffer);
+                var endpointsField = Decoder.ReadArray<UpdateMetadataEndpoint>(buffer, ref index, UpdateMetadataEndpointSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
+                var rackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
                     idField,
                     v0HostField,
@@ -369,21 +744,21 @@ namespace Kafka.Client.Messages
                     rackField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, UpdateMetadataBroker message)
+            public static int WriteV05(byte[] buffer, int index, UpdateMetadataBroker message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.IdField);
-                buffer = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, message.EndpointsField, (b, i) => UpdateMetadataEndpointSerde.WriteV05(b, i));
-                buffer = Encoder.WriteNullableString(buffer, message.RackField);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.IdField);
+                index = Encoder.WriteArray<UpdateMetadataEndpoint>(buffer, index, message.EndpointsField, UpdateMetadataEndpointSerde.WriteV05);
+                index = Encoder.WriteNullableString(buffer, index, message.RackField);
+                return index;
             }
-            public static UpdateMetadataBroker ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataBroker ReadV06(byte[] buffer, ref int index)
             {
-                var idField = Decoder.ReadInt32(ref buffer);
+                var idField = Decoder.ReadInt32(buffer, ref index);
                 var v0HostField = "";
                 var v0PortField = default(int);
-                var endpointsField = Decoder.ReadCompactArray<UpdateMetadataEndpoint>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataEndpointSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
-                var rackField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var endpointsField = Decoder.ReadCompactArray<UpdateMetadataEndpoint>(buffer, ref index, UpdateMetadataEndpointSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
+                var rackField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     idField,
                     v0HostField,
@@ -392,22 +767,22 @@ namespace Kafka.Client.Messages
                     rackField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, UpdateMetadataBroker message)
+            public static int WriteV06(byte[] buffer, int index, UpdateMetadataBroker message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.IdField);
-                buffer = Encoder.WriteCompactArray<UpdateMetadataEndpoint>(buffer, message.EndpointsField, (b, i) => UpdateMetadataEndpointSerde.WriteV06(b, i));
-                buffer = Encoder.WriteCompactNullableString(buffer, message.RackField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.IdField);
+                index = Encoder.WriteCompactArray<UpdateMetadataEndpoint>(buffer, index, message.EndpointsField, UpdateMetadataEndpointSerde.WriteV06);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.RackField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static UpdateMetadataBroker ReadV07(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataBroker ReadV07(byte[] buffer, ref int index)
             {
-                var idField = Decoder.ReadInt32(ref buffer);
+                var idField = Decoder.ReadInt32(buffer, ref index);
                 var v0HostField = "";
                 var v0PortField = default(int);
-                var endpointsField = Decoder.ReadCompactArray<UpdateMetadataEndpoint>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataEndpointSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
-                var rackField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var endpointsField = Decoder.ReadCompactArray<UpdateMetadataEndpoint>(buffer, ref index, UpdateMetadataEndpointSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
+                var rackField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     idField,
                     v0HostField,
@@ -416,22 +791,46 @@ namespace Kafka.Client.Messages
                     rackField
                 );
             }
-            public static Memory<byte> WriteV07(Memory<byte> buffer, UpdateMetadataBroker message)
+            public static int WriteV07(byte[] buffer, int index, UpdateMetadataBroker message)
             {
-                buffer = Encoder.WriteInt32(buffer, message.IdField);
-                buffer = Encoder.WriteCompactArray<UpdateMetadataEndpoint>(buffer, message.EndpointsField, (b, i) => UpdateMetadataEndpointSerde.WriteV07(b, i));
-                buffer = Encoder.WriteCompactNullableString(buffer, message.RackField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt32(buffer, index, message.IdField);
+                index = Encoder.WriteCompactArray<UpdateMetadataEndpoint>(buffer, index, message.EndpointsField, UpdateMetadataEndpointSerde.WriteV07);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.RackField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static UpdateMetadataBroker ReadV08(byte[] buffer, ref int index)
+            {
+                var idField = Decoder.ReadInt32(buffer, ref index);
+                var v0HostField = "";
+                var v0PortField = default(int);
+                var endpointsField = Decoder.ReadCompactArray<UpdateMetadataEndpoint>(buffer, ref index, UpdateMetadataEndpointSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Endpoints'");
+                var rackField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    idField,
+                    v0HostField,
+                    v0PortField,
+                    endpointsField,
+                    rackField
+                );
+            }
+            public static int WriteV08(byte[] buffer, int index, UpdateMetadataBroker message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.IdField);
+                index = Encoder.WriteCompactArray<UpdateMetadataEndpoint>(buffer, index, message.EndpointsField, UpdateMetadataEndpointSerde.WriteV08);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.RackField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class UpdateMetadataEndpointSerde
             {
-                public static UpdateMetadataEndpoint ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static UpdateMetadataEndpoint ReadV01(byte[] buffer, ref int index)
                 {
-                    var portField = Decoder.ReadInt32(ref buffer);
-                    var hostField = Decoder.ReadString(ref buffer);
+                    var portField = Decoder.ReadInt32(buffer, ref index);
+                    var hostField = Decoder.ReadString(buffer, ref index);
                     var listenerField = "";
-                    var securityProtocolField = Decoder.ReadInt16(ref buffer);
+                    var securityProtocolField = Decoder.ReadInt16(buffer, ref index);
                     return new(
                         portField,
                         hostField,
@@ -439,19 +838,19 @@ namespace Kafka.Client.Messages
                         securityProtocolField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, UpdateMetadataEndpoint message)
+                public static int WriteV01(byte[] buffer, int index, UpdateMetadataEndpoint message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PortField);
-                    buffer = Encoder.WriteString(buffer, message.HostField);
-                    buffer = Encoder.WriteInt16(buffer, message.SecurityProtocolField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PortField);
+                    index = Encoder.WriteString(buffer, index, message.HostField);
+                    index = Encoder.WriteInt16(buffer, index, message.SecurityProtocolField);
+                    return index;
                 }
-                public static UpdateMetadataEndpoint ReadV02(ref ReadOnlyMemory<byte> buffer)
+                public static UpdateMetadataEndpoint ReadV02(byte[] buffer, ref int index)
                 {
-                    var portField = Decoder.ReadInt32(ref buffer);
-                    var hostField = Decoder.ReadString(ref buffer);
+                    var portField = Decoder.ReadInt32(buffer, ref index);
+                    var hostField = Decoder.ReadString(buffer, ref index);
                     var listenerField = "";
-                    var securityProtocolField = Decoder.ReadInt16(ref buffer);
+                    var securityProtocolField = Decoder.ReadInt16(buffer, ref index);
                     return new(
                         portField,
                         hostField,
@@ -459,19 +858,19 @@ namespace Kafka.Client.Messages
                         securityProtocolField
                     );
                 }
-                public static Memory<byte> WriteV02(Memory<byte> buffer, UpdateMetadataEndpoint message)
+                public static int WriteV02(byte[] buffer, int index, UpdateMetadataEndpoint message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PortField);
-                    buffer = Encoder.WriteString(buffer, message.HostField);
-                    buffer = Encoder.WriteInt16(buffer, message.SecurityProtocolField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PortField);
+                    index = Encoder.WriteString(buffer, index, message.HostField);
+                    index = Encoder.WriteInt16(buffer, index, message.SecurityProtocolField);
+                    return index;
                 }
-                public static UpdateMetadataEndpoint ReadV03(ref ReadOnlyMemory<byte> buffer)
+                public static UpdateMetadataEndpoint ReadV03(byte[] buffer, ref int index)
                 {
-                    var portField = Decoder.ReadInt32(ref buffer);
-                    var hostField = Decoder.ReadString(ref buffer);
-                    var listenerField = Decoder.ReadString(ref buffer);
-                    var securityProtocolField = Decoder.ReadInt16(ref buffer);
+                    var portField = Decoder.ReadInt32(buffer, ref index);
+                    var hostField = Decoder.ReadString(buffer, ref index);
+                    var listenerField = Decoder.ReadString(buffer, ref index);
+                    var securityProtocolField = Decoder.ReadInt16(buffer, ref index);
                     return new(
                         portField,
                         hostField,
@@ -479,20 +878,20 @@ namespace Kafka.Client.Messages
                         securityProtocolField
                     );
                 }
-                public static Memory<byte> WriteV03(Memory<byte> buffer, UpdateMetadataEndpoint message)
+                public static int WriteV03(byte[] buffer, int index, UpdateMetadataEndpoint message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PortField);
-                    buffer = Encoder.WriteString(buffer, message.HostField);
-                    buffer = Encoder.WriteString(buffer, message.ListenerField);
-                    buffer = Encoder.WriteInt16(buffer, message.SecurityProtocolField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PortField);
+                    index = Encoder.WriteString(buffer, index, message.HostField);
+                    index = Encoder.WriteString(buffer, index, message.ListenerField);
+                    index = Encoder.WriteInt16(buffer, index, message.SecurityProtocolField);
+                    return index;
                 }
-                public static UpdateMetadataEndpoint ReadV04(ref ReadOnlyMemory<byte> buffer)
+                public static UpdateMetadataEndpoint ReadV04(byte[] buffer, ref int index)
                 {
-                    var portField = Decoder.ReadInt32(ref buffer);
-                    var hostField = Decoder.ReadString(ref buffer);
-                    var listenerField = Decoder.ReadString(ref buffer);
-                    var securityProtocolField = Decoder.ReadInt16(ref buffer);
+                    var portField = Decoder.ReadInt32(buffer, ref index);
+                    var hostField = Decoder.ReadString(buffer, ref index);
+                    var listenerField = Decoder.ReadString(buffer, ref index);
+                    var securityProtocolField = Decoder.ReadInt16(buffer, ref index);
                     return new(
                         portField,
                         hostField,
@@ -500,20 +899,20 @@ namespace Kafka.Client.Messages
                         securityProtocolField
                     );
                 }
-                public static Memory<byte> WriteV04(Memory<byte> buffer, UpdateMetadataEndpoint message)
+                public static int WriteV04(byte[] buffer, int index, UpdateMetadataEndpoint message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PortField);
-                    buffer = Encoder.WriteString(buffer, message.HostField);
-                    buffer = Encoder.WriteString(buffer, message.ListenerField);
-                    buffer = Encoder.WriteInt16(buffer, message.SecurityProtocolField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PortField);
+                    index = Encoder.WriteString(buffer, index, message.HostField);
+                    index = Encoder.WriteString(buffer, index, message.ListenerField);
+                    index = Encoder.WriteInt16(buffer, index, message.SecurityProtocolField);
+                    return index;
                 }
-                public static UpdateMetadataEndpoint ReadV05(ref ReadOnlyMemory<byte> buffer)
+                public static UpdateMetadataEndpoint ReadV05(byte[] buffer, ref int index)
                 {
-                    var portField = Decoder.ReadInt32(ref buffer);
-                    var hostField = Decoder.ReadString(ref buffer);
-                    var listenerField = Decoder.ReadString(ref buffer);
-                    var securityProtocolField = Decoder.ReadInt16(ref buffer);
+                    var portField = Decoder.ReadInt32(buffer, ref index);
+                    var hostField = Decoder.ReadString(buffer, ref index);
+                    var listenerField = Decoder.ReadString(buffer, ref index);
+                    var securityProtocolField = Decoder.ReadInt16(buffer, ref index);
                     return new(
                         portField,
                         hostField,
@@ -521,21 +920,21 @@ namespace Kafka.Client.Messages
                         securityProtocolField
                     );
                 }
-                public static Memory<byte> WriteV05(Memory<byte> buffer, UpdateMetadataEndpoint message)
+                public static int WriteV05(byte[] buffer, int index, UpdateMetadataEndpoint message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PortField);
-                    buffer = Encoder.WriteString(buffer, message.HostField);
-                    buffer = Encoder.WriteString(buffer, message.ListenerField);
-                    buffer = Encoder.WriteInt16(buffer, message.SecurityProtocolField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PortField);
+                    index = Encoder.WriteString(buffer, index, message.HostField);
+                    index = Encoder.WriteString(buffer, index, message.ListenerField);
+                    index = Encoder.WriteInt16(buffer, index, message.SecurityProtocolField);
+                    return index;
                 }
-                public static UpdateMetadataEndpoint ReadV06(ref ReadOnlyMemory<byte> buffer)
+                public static UpdateMetadataEndpoint ReadV06(byte[] buffer, ref int index)
                 {
-                    var portField = Decoder.ReadInt32(ref buffer);
-                    var hostField = Decoder.ReadCompactString(ref buffer);
-                    var listenerField = Decoder.ReadCompactString(ref buffer);
-                    var securityProtocolField = Decoder.ReadInt16(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var portField = Decoder.ReadInt32(buffer, ref index);
+                    var hostField = Decoder.ReadCompactString(buffer, ref index);
+                    var listenerField = Decoder.ReadCompactString(buffer, ref index);
+                    var securityProtocolField = Decoder.ReadInt16(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         portField,
                         hostField,
@@ -543,22 +942,22 @@ namespace Kafka.Client.Messages
                         securityProtocolField
                     );
                 }
-                public static Memory<byte> WriteV06(Memory<byte> buffer, UpdateMetadataEndpoint message)
+                public static int WriteV06(byte[] buffer, int index, UpdateMetadataEndpoint message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PortField);
-                    buffer = Encoder.WriteCompactString(buffer, message.HostField);
-                    buffer = Encoder.WriteCompactString(buffer, message.ListenerField);
-                    buffer = Encoder.WriteInt16(buffer, message.SecurityProtocolField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PortField);
+                    index = Encoder.WriteCompactString(buffer, index, message.HostField);
+                    index = Encoder.WriteCompactString(buffer, index, message.ListenerField);
+                    index = Encoder.WriteInt16(buffer, index, message.SecurityProtocolField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
-                public static UpdateMetadataEndpoint ReadV07(ref ReadOnlyMemory<byte> buffer)
+                public static UpdateMetadataEndpoint ReadV07(byte[] buffer, ref int index)
                 {
-                    var portField = Decoder.ReadInt32(ref buffer);
-                    var hostField = Decoder.ReadCompactString(ref buffer);
-                    var listenerField = Decoder.ReadCompactString(ref buffer);
-                    var securityProtocolField = Decoder.ReadInt16(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var portField = Decoder.ReadInt32(buffer, ref index);
+                    var hostField = Decoder.ReadCompactString(buffer, ref index);
+                    var listenerField = Decoder.ReadCompactString(buffer, ref index);
+                    var securityProtocolField = Decoder.ReadInt16(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         portField,
                         hostField,
@@ -566,362 +965,117 @@ namespace Kafka.Client.Messages
                         securityProtocolField
                     );
                 }
-                public static Memory<byte> WriteV07(Memory<byte> buffer, UpdateMetadataEndpoint message)
+                public static int WriteV07(byte[] buffer, int index, UpdateMetadataEndpoint message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PortField);
-                    buffer = Encoder.WriteCompactString(buffer, message.HostField);
-                    buffer = Encoder.WriteCompactString(buffer, message.ListenerField);
-                    buffer = Encoder.WriteInt16(buffer, message.SecurityProtocolField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PortField);
+                    index = Encoder.WriteCompactString(buffer, index, message.HostField);
+                    index = Encoder.WriteCompactString(buffer, index, message.ListenerField);
+                    index = Encoder.WriteInt16(buffer, index, message.SecurityProtocolField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
+                }
+                public static UpdateMetadataEndpoint ReadV08(byte[] buffer, ref int index)
+                {
+                    var portField = Decoder.ReadInt32(buffer, ref index);
+                    var hostField = Decoder.ReadCompactString(buffer, ref index);
+                    var listenerField = Decoder.ReadCompactString(buffer, ref index);
+                    var securityProtocolField = Decoder.ReadInt16(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
+                    return new(
+                        portField,
+                        hostField,
+                        listenerField,
+                        securityProtocolField
+                    );
+                }
+                public static int WriteV08(byte[] buffer, int index, UpdateMetadataEndpoint message)
+                {
+                    index = Encoder.WriteInt32(buffer, index, message.PortField);
+                    index = Encoder.WriteCompactString(buffer, index, message.HostField);
+                    index = Encoder.WriteCompactString(buffer, index, message.ListenerField);
+                    index = Encoder.WriteInt16(buffer, index, message.SecurityProtocolField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }
         private static class UpdateMetadataTopicStateSerde
         {
-            public static UpdateMetadataTopicState ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataTopicState ReadV05(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
+                var topicNameField = Decoder.ReadString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var partitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataPartitionStateSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                var partitionStatesField = Decoder.ReadArray<UpdateMetadataPartitionState>(buffer, ref index, UpdateMetadataPartitionStateSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
                 return new(
                     topicNameField,
                     topicIdField,
                     partitionStatesField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, UpdateMetadataTopicState message)
+            public static int WriteV05(byte[] buffer, int index, UpdateMetadataTopicState message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, message.PartitionStatesField, (b, i) => UpdateMetadataPartitionStateSerde.WriteV05(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteArray<UpdateMetadataPartitionState>(buffer, index, message.PartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV05);
+                return index;
             }
-            public static UpdateMetadataTopicState ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataTopicState ReadV06(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var partitionStatesField = Decoder.ReadCompactArray<UpdateMetadataPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataPartitionStateSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var partitionStatesField = Decoder.ReadCompactArray<UpdateMetadataPartitionState>(buffer, ref index, UpdateMetadataPartitionStateSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     topicIdField,
                     partitionStatesField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, UpdateMetadataTopicState message)
+            public static int WriteV06(byte[] buffer, int index, UpdateMetadataTopicState message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteCompactArray<UpdateMetadataPartitionState>(buffer, message.PartitionStatesField, (b, i) => UpdateMetadataPartitionStateSerde.WriteV06(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteCompactArray<UpdateMetadataPartitionState>(buffer, index, message.PartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV06);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static UpdateMetadataTopicState ReadV07(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataTopicState ReadV07(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                var partitionStatesField = Decoder.ReadCompactArray<UpdateMetadataPartitionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdateMetadataPartitionStateSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var partitionStatesField = Decoder.ReadCompactArray<UpdateMetadataPartitionState>(buffer, ref index, UpdateMetadataPartitionStateSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     topicIdField,
                     partitionStatesField
                 );
             }
-            public static Memory<byte> WriteV07(Memory<byte> buffer, UpdateMetadataTopicState message)
+            public static int WriteV07(byte[] buffer, int index, UpdateMetadataTopicState message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteCompactArray<UpdateMetadataPartitionState>(buffer, message.PartitionStatesField, (b, i) => UpdateMetadataPartitionStateSerde.WriteV07(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactArray<UpdateMetadataPartitionState>(buffer, index, message.PartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV07);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-        }
-        private static class UpdateMetadataPartitionStateSerde
-        {
-            public static UpdateMetadataPartitionState ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static UpdateMetadataTopicState ReadV08(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var zkVersionField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var offlineReplicasField = ImmutableArray<int>.Empty;
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var partitionStatesField = Decoder.ReadCompactArray<UpdateMetadataPartitionState>(buffer, ref index, UpdateMetadataPartitionStateSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
-                    partitionIndexField,
-                    controllerEpochField,
-                    leaderField,
-                    leaderEpochField,
-                    isrField,
-                    zkVersionField,
-                    replicasField,
-                    offlineReplicasField
+                    topicIdField,
+                    partitionStatesField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, UpdateMetadataPartitionState message)
+            public static int WriteV08(byte[] buffer, int index, UpdateMetadataTopicState message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.ZkVersionField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
-            }
-            public static UpdateMetadataPartitionState ReadV01(ref ReadOnlyMemory<byte> buffer)
-            {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var zkVersionField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var offlineReplicasField = ImmutableArray<int>.Empty;
-                return new(
-                    topicNameField,
-                    partitionIndexField,
-                    controllerEpochField,
-                    leaderField,
-                    leaderEpochField,
-                    isrField,
-                    zkVersionField,
-                    replicasField,
-                    offlineReplicasField
-                );
-            }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, UpdateMetadataPartitionState message)
-            {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.ZkVersionField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
-            }
-            public static UpdateMetadataPartitionState ReadV02(ref ReadOnlyMemory<byte> buffer)
-            {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var zkVersionField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var offlineReplicasField = ImmutableArray<int>.Empty;
-                return new(
-                    topicNameField,
-                    partitionIndexField,
-                    controllerEpochField,
-                    leaderField,
-                    leaderEpochField,
-                    isrField,
-                    zkVersionField,
-                    replicasField,
-                    offlineReplicasField
-                );
-            }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, UpdateMetadataPartitionState message)
-            {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.ZkVersionField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
-            }
-            public static UpdateMetadataPartitionState ReadV03(ref ReadOnlyMemory<byte> buffer)
-            {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var zkVersionField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var offlineReplicasField = ImmutableArray<int>.Empty;
-                return new(
-                    topicNameField,
-                    partitionIndexField,
-                    controllerEpochField,
-                    leaderField,
-                    leaderEpochField,
-                    isrField,
-                    zkVersionField,
-                    replicasField,
-                    offlineReplicasField
-                );
-            }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, UpdateMetadataPartitionState message)
-            {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.ZkVersionField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
-            }
-            public static UpdateMetadataPartitionState ReadV04(ref ReadOnlyMemory<byte> buffer)
-            {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var zkVersionField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var offlineReplicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                return new(
-                    topicNameField,
-                    partitionIndexField,
-                    controllerEpochField,
-                    leaderField,
-                    leaderEpochField,
-                    isrField,
-                    zkVersionField,
-                    replicasField,
-                    offlineReplicasField
-                );
-            }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, UpdateMetadataPartitionState message)
-            {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.ZkVersionField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteArray<int>(buffer, message.OfflineReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
-            }
-            public static UpdateMetadataPartitionState ReadV05(ref ReadOnlyMemory<byte> buffer)
-            {
-                var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var zkVersionField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var offlineReplicasField = Decoder.ReadArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                return new(
-                    topicNameField,
-                    partitionIndexField,
-                    controllerEpochField,
-                    leaderField,
-                    leaderEpochField,
-                    isrField,
-                    zkVersionField,
-                    replicasField,
-                    offlineReplicasField
-                );
-            }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, UpdateMetadataPartitionState message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.ZkVersionField);
-                buffer = Encoder.WriteArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteArray<int>(buffer, message.OfflineReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                return buffer;
-            }
-            public static UpdateMetadataPartitionState ReadV06(ref ReadOnlyMemory<byte> buffer)
-            {
-                var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var zkVersionField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var offlineReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
-                return new(
-                    topicNameField,
-                    partitionIndexField,
-                    controllerEpochField,
-                    leaderField,
-                    leaderEpochField,
-                    isrField,
-                    zkVersionField,
-                    replicasField,
-                    offlineReplicasField
-                );
-            }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, UpdateMetadataPartitionState message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.ZkVersionField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.OfflineReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
-            }
-            public static UpdateMetadataPartitionState ReadV07(ref ReadOnlyMemory<byte> buffer)
-            {
-                var topicNameField = "";
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var controllerEpochField = Decoder.ReadInt32(ref buffer);
-                var leaderField = Decoder.ReadInt32(ref buffer);
-                var leaderEpochField = Decoder.ReadInt32(ref buffer);
-                var isrField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var zkVersionField = Decoder.ReadInt32(ref buffer);
-                var replicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var offlineReplicasField = Decoder.ReadCompactArray<int>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadInt32(ref b)) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
-                return new(
-                    topicNameField,
-                    partitionIndexField,
-                    controllerEpochField,
-                    leaderField,
-                    leaderEpochField,
-                    isrField,
-                    zkVersionField,
-                    replicasField,
-                    offlineReplicasField
-                );
-            }
-            public static Memory<byte> WriteV07(Memory<byte> buffer, UpdateMetadataPartitionState message)
-            {
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt32(buffer, message.ControllerEpochField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderField);
-                buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.IsrField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteInt32(buffer, message.ZkVersionField);
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.ReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteCompactArray<int>(buffer, message.OfflineReplicasField, (b, i) => Encoder.WriteInt32(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactArray<UpdateMetadataPartitionState>(buffer, index, message.PartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV08);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

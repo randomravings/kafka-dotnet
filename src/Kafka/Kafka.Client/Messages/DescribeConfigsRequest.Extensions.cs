@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using DescribeConfigsResource = Kafka.Client.Messages.DescribeConfigsRequest.DescribeConfigsResource;
 
 namespace Kafka.Client.Messages
@@ -9,27 +8,28 @@ namespace Kafka.Client.Messages
     public static class DescribeConfigsRequestSerde
     {
         private static readonly DecodeDelegate<DescribeConfigsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
         };
         private static readonly EncodeDelegate<DescribeConfigsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
         };
-        public static DescribeConfigsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DescribeConfigsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeConfigsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DescribeConfigsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DescribeConfigsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DescribeConfigsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var resourcesField = Decoder.ReadArray<DescribeConfigsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeConfigsResourceSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var resourcesField = Decoder.ReadArray<DescribeConfigsResource>(buffer, ref index, DescribeConfigsResourceSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
             var includeSynonymsField = default(bool);
             var includeDocumentationField = default(bool);
             return new(
@@ -38,15 +38,15 @@ namespace Kafka.Client.Messages
                 includeDocumentationField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeConfigsRequest message)
+        private static int WriteV00(byte[] buffer, int index, DescribeConfigsRequest message)
         {
-            buffer = Encoder.WriteArray<DescribeConfigsResource>(buffer, message.ResourcesField, (b, i) => DescribeConfigsResourceSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteArray<DescribeConfigsResource>(buffer, index, message.ResourcesField, DescribeConfigsResourceSerde.WriteV00);
+            return index;
         }
-        private static DescribeConfigsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeConfigsRequest ReadV01(byte[] buffer, ref int index)
         {
-            var resourcesField = Decoder.ReadArray<DescribeConfigsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeConfigsResourceSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
-            var includeSynonymsField = Decoder.ReadBoolean(ref buffer);
+            var resourcesField = Decoder.ReadArray<DescribeConfigsResource>(buffer, ref index, DescribeConfigsResourceSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var includeSynonymsField = Decoder.ReadBoolean(buffer, ref index);
             var includeDocumentationField = default(bool);
             return new(
                 resourcesField,
@@ -54,16 +54,16 @@ namespace Kafka.Client.Messages
                 includeDocumentationField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DescribeConfigsRequest message)
+        private static int WriteV01(byte[] buffer, int index, DescribeConfigsRequest message)
         {
-            buffer = Encoder.WriteArray<DescribeConfigsResource>(buffer, message.ResourcesField, (b, i) => DescribeConfigsResourceSerde.WriteV01(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeSynonymsField);
-            return buffer;
+            index = Encoder.WriteArray<DescribeConfigsResource>(buffer, index, message.ResourcesField, DescribeConfigsResourceSerde.WriteV01);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeSynonymsField);
+            return index;
         }
-        private static DescribeConfigsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeConfigsRequest ReadV02(byte[] buffer, ref int index)
         {
-            var resourcesField = Decoder.ReadArray<DescribeConfigsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeConfigsResourceSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
-            var includeSynonymsField = Decoder.ReadBoolean(ref buffer);
+            var resourcesField = Decoder.ReadArray<DescribeConfigsResource>(buffer, ref index, DescribeConfigsResourceSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var includeSynonymsField = Decoder.ReadBoolean(buffer, ref index);
             var includeDocumentationField = default(bool);
             return new(
                 resourcesField,
@@ -71,143 +71,143 @@ namespace Kafka.Client.Messages
                 includeDocumentationField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, DescribeConfigsRequest message)
+        private static int WriteV02(byte[] buffer, int index, DescribeConfigsRequest message)
         {
-            buffer = Encoder.WriteArray<DescribeConfigsResource>(buffer, message.ResourcesField, (b, i) => DescribeConfigsResourceSerde.WriteV02(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeSynonymsField);
-            return buffer;
+            index = Encoder.WriteArray<DescribeConfigsResource>(buffer, index, message.ResourcesField, DescribeConfigsResourceSerde.WriteV02);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeSynonymsField);
+            return index;
         }
-        private static DescribeConfigsRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeConfigsRequest ReadV03(byte[] buffer, ref int index)
         {
-            var resourcesField = Decoder.ReadArray<DescribeConfigsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeConfigsResourceSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
-            var includeSynonymsField = Decoder.ReadBoolean(ref buffer);
-            var includeDocumentationField = Decoder.ReadBoolean(ref buffer);
+            var resourcesField = Decoder.ReadArray<DescribeConfigsResource>(buffer, ref index, DescribeConfigsResourceSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var includeSynonymsField = Decoder.ReadBoolean(buffer, ref index);
+            var includeDocumentationField = Decoder.ReadBoolean(buffer, ref index);
             return new(
                 resourcesField,
                 includeSynonymsField,
                 includeDocumentationField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, DescribeConfigsRequest message)
+        private static int WriteV03(byte[] buffer, int index, DescribeConfigsRequest message)
         {
-            buffer = Encoder.WriteArray<DescribeConfigsResource>(buffer, message.ResourcesField, (b, i) => DescribeConfigsResourceSerde.WriteV03(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeSynonymsField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeDocumentationField);
-            return buffer;
+            index = Encoder.WriteArray<DescribeConfigsResource>(buffer, index, message.ResourcesField, DescribeConfigsResourceSerde.WriteV03);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeSynonymsField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeDocumentationField);
+            return index;
         }
-        private static DescribeConfigsRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeConfigsRequest ReadV04(byte[] buffer, ref int index)
         {
-            var resourcesField = Decoder.ReadCompactArray<DescribeConfigsResource>(ref buffer, (ref ReadOnlyMemory<byte> b) => DescribeConfigsResourceSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
-            var includeSynonymsField = Decoder.ReadBoolean(ref buffer);
-            var includeDocumentationField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var resourcesField = Decoder.ReadCompactArray<DescribeConfigsResource>(buffer, ref index, DescribeConfigsResourceSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Resources'");
+            var includeSynonymsField = Decoder.ReadBoolean(buffer, ref index);
+            var includeDocumentationField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 resourcesField,
                 includeSynonymsField,
                 includeDocumentationField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, DescribeConfigsRequest message)
+        private static int WriteV04(byte[] buffer, int index, DescribeConfigsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<DescribeConfigsResource>(buffer, message.ResourcesField, (b, i) => DescribeConfigsResourceSerde.WriteV04(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeSynonymsField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeDocumentationField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<DescribeConfigsResource>(buffer, index, message.ResourcesField, DescribeConfigsResourceSerde.WriteV04);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeSynonymsField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeDocumentationField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class DescribeConfigsResourceSerde
         {
-            public static DescribeConfigsResource ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeConfigsResource ReadV00(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadString(ref buffer);
-                var configurationKeysField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b));
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadString(buffer, ref index);
+                var configurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
                 return new(
                     resourceTypeField,
                     resourceNameField,
                     configurationKeysField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, DescribeConfigsResource message)
+            public static int WriteV00(byte[] buffer, int index, DescribeConfigsResource message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteArray<string>(buffer, message.ConfigurationKeysField, (b, i) => Encoder.WriteCompactString(b, i));
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteArray<string>(buffer, index, message.ConfigurationKeysField, Encoder.WriteCompactString);
+                return index;
             }
-            public static DescribeConfigsResource ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeConfigsResource ReadV01(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadString(ref buffer);
-                var configurationKeysField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b));
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadString(buffer, ref index);
+                var configurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
                 return new(
                     resourceTypeField,
                     resourceNameField,
                     configurationKeysField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, DescribeConfigsResource message)
+            public static int WriteV01(byte[] buffer, int index, DescribeConfigsResource message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteArray<string>(buffer, message.ConfigurationKeysField, (b, i) => Encoder.WriteCompactString(b, i));
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteArray<string>(buffer, index, message.ConfigurationKeysField, Encoder.WriteCompactString);
+                return index;
             }
-            public static DescribeConfigsResource ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeConfigsResource ReadV02(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadString(ref buffer);
-                var configurationKeysField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b));
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadString(buffer, ref index);
+                var configurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
                 return new(
                     resourceTypeField,
                     resourceNameField,
                     configurationKeysField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, DescribeConfigsResource message)
+            public static int WriteV02(byte[] buffer, int index, DescribeConfigsResource message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteArray<string>(buffer, message.ConfigurationKeysField, (b, i) => Encoder.WriteCompactString(b, i));
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteArray<string>(buffer, index, message.ConfigurationKeysField, Encoder.WriteCompactString);
+                return index;
             }
-            public static DescribeConfigsResource ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeConfigsResource ReadV03(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadString(ref buffer);
-                var configurationKeysField = Decoder.ReadArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b));
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadString(buffer, ref index);
+                var configurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
                 return new(
                     resourceTypeField,
                     resourceNameField,
                     configurationKeysField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, DescribeConfigsResource message)
+            public static int WriteV03(byte[] buffer, int index, DescribeConfigsResource message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteArray<string>(buffer, message.ConfigurationKeysField, (b, i) => Encoder.WriteCompactString(b, i));
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteArray<string>(buffer, index, message.ConfigurationKeysField, Encoder.WriteCompactString);
+                return index;
             }
-            public static DescribeConfigsResource ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static DescribeConfigsResource ReadV04(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadCompactString(ref buffer);
-                var configurationKeysField = Decoder.ReadCompactArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b));
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var configurationKeysField = Decoder.ReadCompactArray<string>(buffer, ref index, Decoder.ReadCompactString);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     resourceTypeField,
                     resourceNameField,
                     configurationKeysField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, DescribeConfigsResource message)
+            public static int WriteV04(byte[] buffer, int index, DescribeConfigsResource message)
             {
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteCompactArray<string>(buffer, message.ConfigurationKeysField, (b, i) => Encoder.WriteCompactString(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteCompactArray<string>(buffer, index, message.ConfigurationKeysField, Encoder.WriteCompactString);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Messages
 {
@@ -8,25 +7,26 @@ namespace Kafka.Client.Messages
     public static class SaslAuthenticateResponseSerde
     {
         private static readonly DecodeDelegate<SaslAuthenticateResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
         };
         private static readonly EncodeDelegate<SaslAuthenticateResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
         };
-        public static SaslAuthenticateResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static SaslAuthenticateResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, SaslAuthenticateResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static SaslAuthenticateResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, SaslAuthenticateResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static SaslAuthenticateResponse ReadV00(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadNullableString(ref buffer);
-            var authBytesField = Decoder.ReadBytes(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+            var authBytesField = Decoder.ReadBytes(buffer, ref index);
             var sessionLifetimeMsField = default(long);
             return new(
                 errorCodeField,
@@ -35,19 +35,19 @@ namespace Kafka.Client.Messages
                 sessionLifetimeMsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, SaslAuthenticateResponse message)
+        private static int WriteV00(byte[] buffer, int index, SaslAuthenticateResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteBytes(buffer, message.AuthBytesField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteBytes(buffer, index, message.AuthBytesField);
+            return index;
         }
-        private static SaslAuthenticateResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static SaslAuthenticateResponse ReadV01(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadNullableString(ref buffer);
-            var authBytesField = Decoder.ReadBytes(ref buffer);
-            var sessionLifetimeMsField = Decoder.ReadInt64(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+            var authBytesField = Decoder.ReadBytes(buffer, ref index);
+            var sessionLifetimeMsField = Decoder.ReadInt64(buffer, ref index);
             return new(
                 errorCodeField,
                 errorMessageField,
@@ -55,21 +55,21 @@ namespace Kafka.Client.Messages
                 sessionLifetimeMsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, SaslAuthenticateResponse message)
+        private static int WriteV01(byte[] buffer, int index, SaslAuthenticateResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteBytes(buffer, message.AuthBytesField);
-            buffer = Encoder.WriteInt64(buffer, message.SessionLifetimeMsField);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteBytes(buffer, index, message.AuthBytesField);
+            index = Encoder.WriteInt64(buffer, index, message.SessionLifetimeMsField);
+            return index;
         }
-        private static SaslAuthenticateResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static SaslAuthenticateResponse ReadV02(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-            var authBytesField = Decoder.ReadCompactBytes(ref buffer);
-            var sessionLifetimeMsField = Decoder.ReadInt64(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var authBytesField = Decoder.ReadCompactBytes(buffer, ref index);
+            var sessionLifetimeMsField = Decoder.ReadInt64(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 errorMessageField,
@@ -77,14 +77,14 @@ namespace Kafka.Client.Messages
                 sessionLifetimeMsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, SaslAuthenticateResponse message)
+        private static int WriteV02(byte[] buffer, int index, SaslAuthenticateResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteCompactBytes(buffer, message.AuthBytesField);
-            buffer = Encoder.WriteInt64(buffer, message.SessionLifetimeMsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteCompactBytes(buffer, index, message.AuthBytesField);
+            index = Encoder.WriteInt64(buffer, index, message.SessionLifetimeMsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

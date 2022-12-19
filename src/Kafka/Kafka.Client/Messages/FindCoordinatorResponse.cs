@@ -34,6 +34,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<Coordinator>.Empty
         );
+        public static short FlexibleVersion { get; } = 3;
         /// <summary>
         /// <param name="KeyField">The coordinator key.</param>
         /// <param name="NodeIdField">The node id.</param>

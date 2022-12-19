@@ -1,7 +1,7 @@
 ﻿namespace Kafka.Common.Types
 {
     public readonly record struct TopicPartitionOffset(
-        Topic Topic,
+        TopicName Topic,
         PartitionOffset PartitionOffset
     );
 }

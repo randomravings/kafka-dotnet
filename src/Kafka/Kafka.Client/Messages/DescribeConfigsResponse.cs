@@ -2,8 +2,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 using DescribeConfigsResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult;
-using DescribeConfigsSynonym = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult.DescribeConfigsSynonym;
 using DescribeConfigsResourceResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult;
+using DescribeConfigsSynonym = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult.DescribeConfigsSynonym;
 
 namespace Kafka.Client.Messages
 {
@@ -21,6 +21,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<DescribeConfigsResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="ErrorCodeField">The error code, or 0 if we were able to successfully describe the configurations.</param>
         /// <param name="ErrorMessageField">The error message, or null if we were able to successfully describe the configurations.</param>

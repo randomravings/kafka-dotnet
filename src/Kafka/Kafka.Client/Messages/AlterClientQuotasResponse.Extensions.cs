@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using EntryData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData;
 using EntityData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData.EntityData;
 
@@ -10,123 +9,124 @@ namespace Kafka.Client.Messages
     public static class AlterClientQuotasResponseSerde
     {
         private static readonly DecodeDelegate<AlterClientQuotasResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            ReadV00,
+            ReadV01,
         };
         private static readonly EncodeDelegate<AlterClientQuotasResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
+            WriteV00,
+            WriteV01,
         };
-        public static AlterClientQuotasResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static AlterClientQuotasResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, AlterClientQuotasResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static AlterClientQuotasResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, AlterClientQuotasResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static AlterClientQuotasResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var entriesField = Decoder.ReadArray<EntryData>(ref buffer, (ref ReadOnlyMemory<byte> b) => EntryDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Entries'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var entriesField = Decoder.ReadArray<EntryData>(buffer, ref index, EntryDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Entries'");
             return new(
                 throttleTimeMsField,
                 entriesField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, AlterClientQuotasResponse message)
+        private static int WriteV00(byte[] buffer, int index, AlterClientQuotasResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<EntryData>(buffer, message.EntriesField, (b, i) => EntryDataSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<EntryData>(buffer, index, message.EntriesField, EntryDataSerde.WriteV00);
+            return index;
         }
-        private static AlterClientQuotasResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static AlterClientQuotasResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var entriesField = Decoder.ReadCompactArray<EntryData>(ref buffer, (ref ReadOnlyMemory<byte> b) => EntryDataSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Entries'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var entriesField = Decoder.ReadCompactArray<EntryData>(buffer, ref index, EntryDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Entries'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 entriesField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, AlterClientQuotasResponse message)
+        private static int WriteV01(byte[] buffer, int index, AlterClientQuotasResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<EntryData>(buffer, message.EntriesField, (b, i) => EntryDataSerde.WriteV01(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<EntryData>(buffer, index, message.EntriesField, EntryDataSerde.WriteV01);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class EntryDataSerde
         {
-            public static EntryData ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static EntryData ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadNullableString(ref buffer);
-                var entityField = Decoder.ReadArray<EntityData>(ref buffer, (ref ReadOnlyMemory<byte> b) => EntityDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var entityField = Decoder.ReadArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
                 return new(
                     errorCodeField,
                     errorMessageField,
                     entityField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, EntryData message)
+            public static int WriteV00(byte[] buffer, int index, EntryData message)
             {
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteArray<EntityData>(buffer, message.EntityField, (b, i) => EntityDataSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteArray<EntityData>(buffer, index, message.EntityField, EntityDataSerde.WriteV00);
+                return index;
             }
-            public static EntryData ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static EntryData ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-                var entityField = Decoder.ReadCompactArray<EntityData>(ref buffer, (ref ReadOnlyMemory<byte> b) => EntityDataSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var entityField = Decoder.ReadCompactArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     errorCodeField,
                     errorMessageField,
                     entityField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, EntryData message)
+            public static int WriteV01(byte[] buffer, int index, EntryData message)
             {
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteCompactArray<EntityData>(buffer, message.EntityField, (b, i) => EntityDataSerde.WriteV01(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteCompactArray<EntityData>(buffer, index, message.EntityField, EntityDataSerde.WriteV01);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class EntityDataSerde
             {
-                public static EntityData ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static EntityData ReadV00(byte[] buffer, ref int index)
                 {
-                    var entityTypeField = Decoder.ReadString(ref buffer);
-                    var entityNameField = Decoder.ReadNullableString(ref buffer);
+                    var entityTypeField = Decoder.ReadString(buffer, ref index);
+                    var entityNameField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
                         entityTypeField,
                         entityNameField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, EntityData message)
+                public static int WriteV00(byte[] buffer, int index, EntityData message)
                 {
-                    buffer = Encoder.WriteString(buffer, message.EntityTypeField);
-                    buffer = Encoder.WriteNullableString(buffer, message.EntityNameField);
-                    return buffer;
+                    index = Encoder.WriteString(buffer, index, message.EntityTypeField);
+                    index = Encoder.WriteNullableString(buffer, index, message.EntityNameField);
+                    return index;
                 }
-                public static EntityData ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static EntityData ReadV01(byte[] buffer, ref int index)
                 {
-                    var entityTypeField = Decoder.ReadCompactString(ref buffer);
-                    var entityNameField = Decoder.ReadCompactNullableString(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var entityTypeField = Decoder.ReadCompactString(buffer, ref index);
+                    var entityNameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         entityTypeField,
                         entityNameField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, EntityData message)
+                public static int WriteV01(byte[] buffer, int index, EntityData message)
                 {
-                    buffer = Encoder.WriteCompactString(buffer, message.EntityTypeField);
-                    buffer = Encoder.WriteCompactNullableString(buffer, message.EntityNameField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteCompactString(buffer, index, message.EntityTypeField);
+                    index = Encoder.WriteCompactNullableString(buffer, index, message.EntityNameField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

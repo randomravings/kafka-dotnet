@@ -22,6 +22,7 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<ListedGroup>.Empty
         );
+        public static short FlexibleVersion { get; } = 3;
         /// <summary>
         /// <param name="GroupIdField">The group ID.</param>
         /// <param name="ProtocolTypeField">The group protocol type.</param>

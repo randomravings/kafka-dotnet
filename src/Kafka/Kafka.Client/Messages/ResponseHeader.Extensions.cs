@@ -6,44 +6,49 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public static class ResponseHeaderSerde
     {
-        private static readonly DecodeDelegate<ResponseHeader>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+        private delegate ResponseHeader DecodeDelegate(byte[] buffer, ref int index, bool flexible);
+        private delegate int EncodeDelegate(byte[] buffer, int offset, ResponseHeader item, bool flexible);
+        private static readonly DecodeDelegate[] READ_VERSIONS = {
+            ReadV00,
+            ReadV01,
         };
-        private static readonly EncodeDelegate<ResponseHeader>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
+        private static readonly EncodeDelegate[] WRITE_VERSIONS = {
+            WriteV00,
+            WriteV01,
         };
-        public static ResponseHeader Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ResponseHeader Read(byte[] buffer, ref int index, short version, bool flexible) =>
+            READ_VERSIONS[version](buffer, ref index, flexible)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ResponseHeader message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ResponseHeader ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ResponseHeader message, short version, bool flexible) =>
+            WRITE_VERSIONS[version](buffer, index, message,flexible)
+        ;
+        private static ResponseHeader ReadV00(byte[] buffer, ref int index, bool flexible)
         {
-            var correlationIdField = Decoder.ReadInt32(ref buffer);
+            var correlationIdField = Decoder.ReadInt32(buffer, ref index);
             return new(
                 correlationIdField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ResponseHeader message)
+        private static int WriteV00(byte[] buffer, int index, ResponseHeader message, bool flexible)
         {
-            buffer = Encoder.WriteInt32(buffer, message.CorrelationIdField);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.CorrelationIdField);
+            return index;
         }
-        private static ResponseHeader ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static ResponseHeader ReadV01(byte[] buffer, ref int index, bool flexible)
         {
-            var correlationIdField = Decoder.ReadInt32(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var correlationIdField = Decoder.ReadInt32(buffer, ref index);
+            if (flexible)
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 correlationIdField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, ResponseHeader message)
+        private static int WriteV01(byte[] buffer, int index, ResponseHeader message, bool flexible)
         {
-            buffer = Encoder.WriteInt32(buffer, message.CorrelationIdField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.CorrelationIdField);
+            if (flexible)
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

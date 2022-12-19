@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<DeleteRecordsTopic>.Empty,
             default(int)
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">Each partition that we want to delete records from.</param>

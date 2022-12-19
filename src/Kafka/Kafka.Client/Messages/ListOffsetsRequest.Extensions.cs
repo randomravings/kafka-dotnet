@@ -1,8 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
-using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic;
 using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic.ListOffsetsPartition;
+using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -10,310 +9,311 @@ namespace Kafka.Client.Messages
     public static class ListOffsetsRequestSerde
     {
         private static readonly DecodeDelegate<ListOffsetsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV07(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
+            ReadV06,
+            ReadV07,
         };
         private static readonly EncodeDelegate<ListOffsetsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
-            (b, m) => WriteV06(b, m),
-            (b, m) => WriteV07(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
+            WriteV06,
+            WriteV07,
         };
-        public static ListOffsetsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ListOffsetsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ListOffsetsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ListOffsetsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ListOffsetsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ListOffsetsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var replicaIdField = Decoder.ReadInt32(ref buffer);
+            var replicaIdField = Decoder.ReadInt32(buffer, ref index);
             var isolationLevelField = default(sbyte);
-            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(buffer, ref index, ListOffsetsTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 replicaIdField,
                 isolationLevelField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ListOffsetsRequest message)
+        private static int WriteV00(byte[] buffer, int index, ListOffsetsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ReplicaIdField);
-            buffer = Encoder.WriteArray<ListOffsetsTopic>(buffer, message.TopicsField, (b, i) => ListOffsetsTopicSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+            index = Encoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicSerde.WriteV00);
+            return index;
         }
-        private static ListOffsetsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static ListOffsetsRequest ReadV01(byte[] buffer, ref int index)
         {
-            var replicaIdField = Decoder.ReadInt32(ref buffer);
+            var replicaIdField = Decoder.ReadInt32(buffer, ref index);
             var isolationLevelField = default(sbyte);
-            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsTopicSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(buffer, ref index, ListOffsetsTopicSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 replicaIdField,
                 isolationLevelField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, ListOffsetsRequest message)
+        private static int WriteV01(byte[] buffer, int index, ListOffsetsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ReplicaIdField);
-            buffer = Encoder.WriteArray<ListOffsetsTopic>(buffer, message.TopicsField, (b, i) => ListOffsetsTopicSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+            index = Encoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicSerde.WriteV01);
+            return index;
         }
-        private static ListOffsetsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static ListOffsetsRequest ReadV02(byte[] buffer, ref int index)
         {
-            var replicaIdField = Decoder.ReadInt32(ref buffer);
-            var isolationLevelField = Decoder.ReadInt8(ref buffer);
-            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsTopicSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var replicaIdField = Decoder.ReadInt32(buffer, ref index);
+            var isolationLevelField = Decoder.ReadInt8(buffer, ref index);
+            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(buffer, ref index, ListOffsetsTopicSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 replicaIdField,
                 isolationLevelField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, ListOffsetsRequest message)
+        private static int WriteV02(byte[] buffer, int index, ListOffsetsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ReplicaIdField);
-            buffer = Encoder.WriteInt8(buffer, message.IsolationLevelField);
-            buffer = Encoder.WriteArray<ListOffsetsTopic>(buffer, message.TopicsField, (b, i) => ListOffsetsTopicSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+            index = Encoder.WriteInt8(buffer, index, message.IsolationLevelField);
+            index = Encoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicSerde.WriteV02);
+            return index;
         }
-        private static ListOffsetsRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static ListOffsetsRequest ReadV03(byte[] buffer, ref int index)
         {
-            var replicaIdField = Decoder.ReadInt32(ref buffer);
-            var isolationLevelField = Decoder.ReadInt8(ref buffer);
-            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsTopicSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var replicaIdField = Decoder.ReadInt32(buffer, ref index);
+            var isolationLevelField = Decoder.ReadInt8(buffer, ref index);
+            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(buffer, ref index, ListOffsetsTopicSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 replicaIdField,
                 isolationLevelField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, ListOffsetsRequest message)
+        private static int WriteV03(byte[] buffer, int index, ListOffsetsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ReplicaIdField);
-            buffer = Encoder.WriteInt8(buffer, message.IsolationLevelField);
-            buffer = Encoder.WriteArray<ListOffsetsTopic>(buffer, message.TopicsField, (b, i) => ListOffsetsTopicSerde.WriteV03(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+            index = Encoder.WriteInt8(buffer, index, message.IsolationLevelField);
+            index = Encoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicSerde.WriteV03);
+            return index;
         }
-        private static ListOffsetsRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static ListOffsetsRequest ReadV04(byte[] buffer, ref int index)
         {
-            var replicaIdField = Decoder.ReadInt32(ref buffer);
-            var isolationLevelField = Decoder.ReadInt8(ref buffer);
-            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsTopicSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var replicaIdField = Decoder.ReadInt32(buffer, ref index);
+            var isolationLevelField = Decoder.ReadInt8(buffer, ref index);
+            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(buffer, ref index, ListOffsetsTopicSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 replicaIdField,
                 isolationLevelField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, ListOffsetsRequest message)
+        private static int WriteV04(byte[] buffer, int index, ListOffsetsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ReplicaIdField);
-            buffer = Encoder.WriteInt8(buffer, message.IsolationLevelField);
-            buffer = Encoder.WriteArray<ListOffsetsTopic>(buffer, message.TopicsField, (b, i) => ListOffsetsTopicSerde.WriteV04(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+            index = Encoder.WriteInt8(buffer, index, message.IsolationLevelField);
+            index = Encoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicSerde.WriteV04);
+            return index;
         }
-        private static ListOffsetsRequest ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static ListOffsetsRequest ReadV05(byte[] buffer, ref int index)
         {
-            var replicaIdField = Decoder.ReadInt32(ref buffer);
-            var isolationLevelField = Decoder.ReadInt8(ref buffer);
-            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsTopicSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var replicaIdField = Decoder.ReadInt32(buffer, ref index);
+            var isolationLevelField = Decoder.ReadInt8(buffer, ref index);
+            var topicsField = Decoder.ReadArray<ListOffsetsTopic>(buffer, ref index, ListOffsetsTopicSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 replicaIdField,
                 isolationLevelField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, ListOffsetsRequest message)
+        private static int WriteV05(byte[] buffer, int index, ListOffsetsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ReplicaIdField);
-            buffer = Encoder.WriteInt8(buffer, message.IsolationLevelField);
-            buffer = Encoder.WriteArray<ListOffsetsTopic>(buffer, message.TopicsField, (b, i) => ListOffsetsTopicSerde.WriteV05(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+            index = Encoder.WriteInt8(buffer, index, message.IsolationLevelField);
+            index = Encoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicSerde.WriteV05);
+            return index;
         }
-        private static ListOffsetsRequest ReadV06(ref ReadOnlyMemory<byte> buffer)
+        private static ListOffsetsRequest ReadV06(byte[] buffer, ref int index)
         {
-            var replicaIdField = Decoder.ReadInt32(ref buffer);
-            var isolationLevelField = Decoder.ReadInt8(ref buffer);
-            var topicsField = Decoder.ReadCompactArray<ListOffsetsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsTopicSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var replicaIdField = Decoder.ReadInt32(buffer, ref index);
+            var isolationLevelField = Decoder.ReadInt8(buffer, ref index);
+            var topicsField = Decoder.ReadCompactArray<ListOffsetsTopic>(buffer, ref index, ListOffsetsTopicSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 replicaIdField,
                 isolationLevelField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV06(Memory<byte> buffer, ListOffsetsRequest message)
+        private static int WriteV06(byte[] buffer, int index, ListOffsetsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ReplicaIdField);
-            buffer = Encoder.WriteInt8(buffer, message.IsolationLevelField);
-            buffer = Encoder.WriteCompactArray<ListOffsetsTopic>(buffer, message.TopicsField, (b, i) => ListOffsetsTopicSerde.WriteV06(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+            index = Encoder.WriteInt8(buffer, index, message.IsolationLevelField);
+            index = Encoder.WriteCompactArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicSerde.WriteV06);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static ListOffsetsRequest ReadV07(ref ReadOnlyMemory<byte> buffer)
+        private static ListOffsetsRequest ReadV07(byte[] buffer, ref int index)
         {
-            var replicaIdField = Decoder.ReadInt32(ref buffer);
-            var isolationLevelField = Decoder.ReadInt8(ref buffer);
-            var topicsField = Decoder.ReadCompactArray<ListOffsetsTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsTopicSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var replicaIdField = Decoder.ReadInt32(buffer, ref index);
+            var isolationLevelField = Decoder.ReadInt8(buffer, ref index);
+            var topicsField = Decoder.ReadCompactArray<ListOffsetsTopic>(buffer, ref index, ListOffsetsTopicSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 replicaIdField,
                 isolationLevelField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV07(Memory<byte> buffer, ListOffsetsRequest message)
+        private static int WriteV07(byte[] buffer, int index, ListOffsetsRequest message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ReplicaIdField);
-            buffer = Encoder.WriteInt8(buffer, message.IsolationLevelField);
-            buffer = Encoder.WriteCompactArray<ListOffsetsTopic>(buffer, message.TopicsField, (b, i) => ListOffsetsTopicSerde.WriteV07(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+            index = Encoder.WriteInt8(buffer, index, message.IsolationLevelField);
+            index = Encoder.WriteCompactArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicSerde.WriteV07);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class ListOffsetsTopicSerde
         {
-            public static ListOffsetsTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static ListOffsetsTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsPartitionSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(buffer, ref index, ListOffsetsPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, ListOffsetsTopic message)
+            public static int WriteV00(byte[] buffer, int index, ListOffsetsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<ListOffsetsPartition>(buffer, message.PartitionsField, (b, i) => ListOffsetsPartitionSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionSerde.WriteV00);
+                return index;
             }
-            public static ListOffsetsTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static ListOffsetsTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsPartitionSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(buffer, ref index, ListOffsetsPartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, ListOffsetsTopic message)
+            public static int WriteV01(byte[] buffer, int index, ListOffsetsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<ListOffsetsPartition>(buffer, message.PartitionsField, (b, i) => ListOffsetsPartitionSerde.WriteV01(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionSerde.WriteV01);
+                return index;
             }
-            public static ListOffsetsTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static ListOffsetsTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsPartitionSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(buffer, ref index, ListOffsetsPartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, ListOffsetsTopic message)
+            public static int WriteV02(byte[] buffer, int index, ListOffsetsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<ListOffsetsPartition>(buffer, message.PartitionsField, (b, i) => ListOffsetsPartitionSerde.WriteV02(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionSerde.WriteV02);
+                return index;
             }
-            public static ListOffsetsTopic ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static ListOffsetsTopic ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsPartitionSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(buffer, ref index, ListOffsetsPartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, ListOffsetsTopic message)
+            public static int WriteV03(byte[] buffer, int index, ListOffsetsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<ListOffsetsPartition>(buffer, message.PartitionsField, (b, i) => ListOffsetsPartitionSerde.WriteV03(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionSerde.WriteV03);
+                return index;
             }
-            public static ListOffsetsTopic ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static ListOffsetsTopic ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsPartitionSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(buffer, ref index, ListOffsetsPartitionSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, ListOffsetsTopic message)
+            public static int WriteV04(byte[] buffer, int index, ListOffsetsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<ListOffsetsPartition>(buffer, message.PartitionsField, (b, i) => ListOffsetsPartitionSerde.WriteV04(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionSerde.WriteV04);
+                return index;
             }
-            public static ListOffsetsTopic ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static ListOffsetsTopic ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsPartitionSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<ListOffsetsPartition>(buffer, ref index, ListOffsetsPartitionSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, ListOffsetsTopic message)
+            public static int WriteV05(byte[] buffer, int index, ListOffsetsTopic message)
             {
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteArray<ListOffsetsPartition>(buffer, message.PartitionsField, (b, i) => ListOffsetsPartitionSerde.WriteV05(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionSerde.WriteV05);
+                return index;
             }
-            public static ListOffsetsTopic ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static ListOffsetsTopic ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<ListOffsetsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsPartitionSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<ListOffsetsPartition>(buffer, ref index, ListOffsetsPartitionSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, ListOffsetsTopic message)
+            public static int WriteV06(byte[] buffer, int index, ListOffsetsTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteCompactArray<ListOffsetsPartition>(buffer, message.PartitionsField, (b, i) => ListOffsetsPartitionSerde.WriteV06(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionSerde.WriteV06);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static ListOffsetsTopic ReadV07(ref ReadOnlyMemory<byte> buffer)
+            public static ListOffsetsTopic ReadV07(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<ListOffsetsPartition>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListOffsetsPartitionSerde.ReadV07(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<ListOffsetsPartition>(buffer, ref index, ListOffsetsPartitionSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV07(Memory<byte> buffer, ListOffsetsTopic message)
+            public static int WriteV07(byte[] buffer, int index, ListOffsetsTopic message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteCompactArray<ListOffsetsPartition>(buffer, message.PartitionsField, (b, i) => ListOffsetsPartitionSerde.WriteV07(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionSerde.WriteV07);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class ListOffsetsPartitionSerde
             {
-                public static ListOffsetsPartition ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static ListOffsetsPartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
                     var currentLeaderEpochField = default(int);
-                    var timestampField = Decoder.ReadInt64(ref buffer);
-                    var maxNumOffsetsField = Decoder.ReadInt32(ref buffer);
+                    var timestampField = Decoder.ReadInt64(buffer, ref index);
+                    var maxNumOffsetsField = Decoder.ReadInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
                         currentLeaderEpochField,
@@ -321,18 +321,18 @@ namespace Kafka.Client.Messages
                         maxNumOffsetsField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, ListOffsetsPartition message)
+                public static int WriteV00(byte[] buffer, int index, ListOffsetsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.TimestampField);
-                    buffer = Encoder.WriteInt32(buffer, message.MaxNumOffsetsField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.TimestampField);
+                    index = Encoder.WriteInt32(buffer, index, message.MaxNumOffsetsField);
+                    return index;
                 }
-                public static ListOffsetsPartition ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static ListOffsetsPartition ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
                     var currentLeaderEpochField = default(int);
-                    var timestampField = Decoder.ReadInt64(ref buffer);
+                    var timestampField = Decoder.ReadInt64(buffer, ref index);
                     var maxNumOffsetsField = default(int);
                     return new(
                         partitionIndexField,
@@ -341,17 +341,17 @@ namespace Kafka.Client.Messages
                         maxNumOffsetsField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, ListOffsetsPartition message)
+                public static int WriteV01(byte[] buffer, int index, ListOffsetsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.TimestampField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.TimestampField);
+                    return index;
                 }
-                public static ListOffsetsPartition ReadV02(ref ReadOnlyMemory<byte> buffer)
+                public static ListOffsetsPartition ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
                     var currentLeaderEpochField = default(int);
-                    var timestampField = Decoder.ReadInt64(ref buffer);
+                    var timestampField = Decoder.ReadInt64(buffer, ref index);
                     var maxNumOffsetsField = default(int);
                     return new(
                         partitionIndexField,
@@ -360,17 +360,17 @@ namespace Kafka.Client.Messages
                         maxNumOffsetsField
                     );
                 }
-                public static Memory<byte> WriteV02(Memory<byte> buffer, ListOffsetsPartition message)
+                public static int WriteV02(byte[] buffer, int index, ListOffsetsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.TimestampField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.TimestampField);
+                    return index;
                 }
-                public static ListOffsetsPartition ReadV03(ref ReadOnlyMemory<byte> buffer)
+                public static ListOffsetsPartition ReadV03(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
                     var currentLeaderEpochField = default(int);
-                    var timestampField = Decoder.ReadInt64(ref buffer);
+                    var timestampField = Decoder.ReadInt64(buffer, ref index);
                     var maxNumOffsetsField = default(int);
                     return new(
                         partitionIndexField,
@@ -379,17 +379,17 @@ namespace Kafka.Client.Messages
                         maxNumOffsetsField
                     );
                 }
-                public static Memory<byte> WriteV03(Memory<byte> buffer, ListOffsetsPartition message)
+                public static int WriteV03(byte[] buffer, int index, ListOffsetsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt64(buffer, message.TimestampField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt64(buffer, index, message.TimestampField);
+                    return index;
                 }
-                public static ListOffsetsPartition ReadV04(ref ReadOnlyMemory<byte> buffer)
+                public static ListOffsetsPartition ReadV04(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var currentLeaderEpochField = Decoder.ReadInt32(ref buffer);
-                    var timestampField = Decoder.ReadInt64(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var currentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var timestampField = Decoder.ReadInt64(buffer, ref index);
                     var maxNumOffsetsField = default(int);
                     return new(
                         partitionIndexField,
@@ -398,18 +398,18 @@ namespace Kafka.Client.Messages
                         maxNumOffsetsField
                     );
                 }
-                public static Memory<byte> WriteV04(Memory<byte> buffer, ListOffsetsPartition message)
+                public static int WriteV04(byte[] buffer, int index, ListOffsetsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt32(buffer, message.CurrentLeaderEpochField);
-                    buffer = Encoder.WriteInt64(buffer, message.TimestampField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
+                    index = Encoder.WriteInt64(buffer, index, message.TimestampField);
+                    return index;
                 }
-                public static ListOffsetsPartition ReadV05(ref ReadOnlyMemory<byte> buffer)
+                public static ListOffsetsPartition ReadV05(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var currentLeaderEpochField = Decoder.ReadInt32(ref buffer);
-                    var timestampField = Decoder.ReadInt64(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var currentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var timestampField = Decoder.ReadInt64(buffer, ref index);
                     var maxNumOffsetsField = default(int);
                     return new(
                         partitionIndexField,
@@ -418,20 +418,20 @@ namespace Kafka.Client.Messages
                         maxNumOffsetsField
                     );
                 }
-                public static Memory<byte> WriteV05(Memory<byte> buffer, ListOffsetsPartition message)
+                public static int WriteV05(byte[] buffer, int index, ListOffsetsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt32(buffer, message.CurrentLeaderEpochField);
-                    buffer = Encoder.WriteInt64(buffer, message.TimestampField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
+                    index = Encoder.WriteInt64(buffer, index, message.TimestampField);
+                    return index;
                 }
-                public static ListOffsetsPartition ReadV06(ref ReadOnlyMemory<byte> buffer)
+                public static ListOffsetsPartition ReadV06(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var currentLeaderEpochField = Decoder.ReadInt32(ref buffer);
-                    var timestampField = Decoder.ReadInt64(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var currentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var timestampField = Decoder.ReadInt64(buffer, ref index);
                     var maxNumOffsetsField = default(int);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
                         currentLeaderEpochField,
@@ -439,21 +439,21 @@ namespace Kafka.Client.Messages
                         maxNumOffsetsField
                     );
                 }
-                public static Memory<byte> WriteV06(Memory<byte> buffer, ListOffsetsPartition message)
+                public static int WriteV06(byte[] buffer, int index, ListOffsetsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt32(buffer, message.CurrentLeaderEpochField);
-                    buffer = Encoder.WriteInt64(buffer, message.TimestampField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
+                    index = Encoder.WriteInt64(buffer, index, message.TimestampField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
-                public static ListOffsetsPartition ReadV07(ref ReadOnlyMemory<byte> buffer)
+                public static ListOffsetsPartition ReadV07(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var currentLeaderEpochField = Decoder.ReadInt32(ref buffer);
-                    var timestampField = Decoder.ReadInt64(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var currentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var timestampField = Decoder.ReadInt64(buffer, ref index);
                     var maxNumOffsetsField = default(int);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
                         currentLeaderEpochField,
@@ -461,13 +461,13 @@ namespace Kafka.Client.Messages
                         maxNumOffsetsField
                     );
                 }
-                public static Memory<byte> WriteV07(Memory<byte> buffer, ListOffsetsPartition message)
+                public static int WriteV07(byte[] buffer, int index, ListOffsetsPartition message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt32(buffer, message.CurrentLeaderEpochField);
-                    buffer = Encoder.WriteInt64(buffer, message.TimestampField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
+                    index = Encoder.WriteInt64(buffer, index, message.TimestampField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

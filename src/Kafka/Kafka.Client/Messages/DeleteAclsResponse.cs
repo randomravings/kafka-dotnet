@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<DeleteAclsFilterResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ErrorCodeField">The error code, or 0 if the filter succeeded.</param>
         /// <param name="ErrorMessageField">The error message, or null if the filter succeeded.</param>

@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<CreatableRenewers>.Empty,
             default(long)
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="PrincipalTypeField">The type of the Kafka principal.</param>
         /// <param name="PrincipalNameField">The name of the Kafka principal.</param>

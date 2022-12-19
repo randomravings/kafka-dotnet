@@ -24,9 +24,9 @@ namespace Kafka.Common.Records
 
         long IRecord.Timestamp => -1;
 
-        ImmutableArray<byte>? IRecord.Key => default;
+        ReadOnlyMemory<byte>? IRecord.Key => default;
 
-        ImmutableArray<byte>? IRecord.Value => default;
+        ReadOnlyMemory<byte>? IRecord.Value => default;
 
         long IRecord.TimestampDelta => 0;
 

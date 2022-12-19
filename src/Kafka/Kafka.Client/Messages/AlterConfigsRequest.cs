@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<AlterConfigsResource>.Empty,
             default(bool)
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ResourceTypeField">The resource type.</param>
         /// <param name="ResourceNameField">The resource name.</param>

@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
+using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic;
 using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic.MetadataResponsePartition;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponse.MetadataResponseBroker;
-using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -33,26 +33,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<MetadataResponseTopic>.Empty,
             default(int)
         );
-        /// <summary>
-        /// <param name="NodeIdField">The broker ID.</param>
-        /// <param name="HostField">The broker hostname.</param>
-        /// <param name="PortField">The broker port.</param>
-        /// <param name="RackField">The rack of the broker, or null if it has not been assigned to a rack.</param>
-        /// </summary>
-        public sealed record MetadataResponseBroker (
-            int NodeIdField,
-            string HostField,
-            int PortField,
-            string? RackField
-        )
-        {
-            public static MetadataResponseBroker Empty { get; } = new(
-                default(int),
-                "",
-                default(int),
-                default(string?)
-            );
-        };
+        public static short FlexibleVersion { get; } = 9;
         /// <summary>
         /// <param name="ErrorCodeField">The topic error, or 0 if there was no error.</param>
         /// <param name="NameField">The topic name.</param>
@@ -107,6 +88,26 @@ namespace Kafka.Client.Messages
                     ImmutableArray<int>.Empty
                 );
             };
+        };
+        /// <summary>
+        /// <param name="NodeIdField">The broker ID.</param>
+        /// <param name="HostField">The broker hostname.</param>
+        /// <param name="PortField">The broker port.</param>
+        /// <param name="RackField">The rack of the broker, or null if it has not been assigned to a rack.</param>
+        /// </summary>
+        public sealed record MetadataResponseBroker (
+            int NodeIdField,
+            string HostField,
+            int PortField,
+            string? RackField
+        )
+        {
+            public static MetadataResponseBroker Empty { get; } = new(
+                default(int),
+                "",
+                default(int),
+                default(string?)
+            );
         };
     };
 }

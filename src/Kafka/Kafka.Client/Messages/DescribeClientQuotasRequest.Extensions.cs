@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using ComponentData = Kafka.Client.Messages.DescribeClientQuotasRequest.ComponentData;
 
 namespace Kafka.Client.Messages
@@ -9,89 +8,90 @@ namespace Kafka.Client.Messages
     public static class DescribeClientQuotasRequestSerde
     {
         private static readonly DecodeDelegate<DescribeClientQuotasRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            ReadV00,
+            ReadV01,
         };
         private static readonly EncodeDelegate<DescribeClientQuotasRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
+            WriteV00,
+            WriteV01,
         };
-        public static DescribeClientQuotasRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DescribeClientQuotasRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeClientQuotasRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DescribeClientQuotasRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DescribeClientQuotasRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DescribeClientQuotasRequest ReadV00(byte[] buffer, ref int index)
         {
-            var componentsField = Decoder.ReadArray<ComponentData>(ref buffer, (ref ReadOnlyMemory<byte> b) => ComponentDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Components'");
-            var strictField = Decoder.ReadBoolean(ref buffer);
+            var componentsField = Decoder.ReadArray<ComponentData>(buffer, ref index, ComponentDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Components'");
+            var strictField = Decoder.ReadBoolean(buffer, ref index);
             return new(
                 componentsField,
                 strictField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeClientQuotasRequest message)
+        private static int WriteV00(byte[] buffer, int index, DescribeClientQuotasRequest message)
         {
-            buffer = Encoder.WriteArray<ComponentData>(buffer, message.ComponentsField, (b, i) => ComponentDataSerde.WriteV00(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.StrictField);
-            return buffer;
+            index = Encoder.WriteArray<ComponentData>(buffer, index, message.ComponentsField, ComponentDataSerde.WriteV00);
+            index = Encoder.WriteBoolean(buffer, index, message.StrictField);
+            return index;
         }
-        private static DescribeClientQuotasRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DescribeClientQuotasRequest ReadV01(byte[] buffer, ref int index)
         {
-            var componentsField = Decoder.ReadCompactArray<ComponentData>(ref buffer, (ref ReadOnlyMemory<byte> b) => ComponentDataSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Components'");
-            var strictField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var componentsField = Decoder.ReadCompactArray<ComponentData>(buffer, ref index, ComponentDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Components'");
+            var strictField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 componentsField,
                 strictField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DescribeClientQuotasRequest message)
+        private static int WriteV01(byte[] buffer, int index, DescribeClientQuotasRequest message)
         {
-            buffer = Encoder.WriteCompactArray<ComponentData>(buffer, message.ComponentsField, (b, i) => ComponentDataSerde.WriteV01(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.StrictField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<ComponentData>(buffer, index, message.ComponentsField, ComponentDataSerde.WriteV01);
+            index = Encoder.WriteBoolean(buffer, index, message.StrictField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class ComponentDataSerde
         {
-            public static ComponentData ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static ComponentData ReadV00(byte[] buffer, ref int index)
             {
-                var entityTypeField = Decoder.ReadString(ref buffer);
-                var matchTypeField = Decoder.ReadInt8(ref buffer);
-                var matchField = Decoder.ReadNullableString(ref buffer);
+                var entityTypeField = Decoder.ReadString(buffer, ref index);
+                var matchTypeField = Decoder.ReadInt8(buffer, ref index);
+                var matchField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
                     entityTypeField,
                     matchTypeField,
                     matchField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, ComponentData message)
+            public static int WriteV00(byte[] buffer, int index, ComponentData message)
             {
-                buffer = Encoder.WriteString(buffer, message.EntityTypeField);
-                buffer = Encoder.WriteInt8(buffer, message.MatchTypeField);
-                buffer = Encoder.WriteNullableString(buffer, message.MatchField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.EntityTypeField);
+                index = Encoder.WriteInt8(buffer, index, message.MatchTypeField);
+                index = Encoder.WriteNullableString(buffer, index, message.MatchField);
+                return index;
             }
-            public static ComponentData ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static ComponentData ReadV01(byte[] buffer, ref int index)
             {
-                var entityTypeField = Decoder.ReadCompactString(ref buffer);
-                var matchTypeField = Decoder.ReadInt8(ref buffer);
-                var matchField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var entityTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var matchTypeField = Decoder.ReadInt8(buffer, ref index);
+                var matchField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     entityTypeField,
                     matchTypeField,
                     matchField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, ComponentData message)
+            public static int WriteV01(byte[] buffer, int index, ComponentData message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.EntityTypeField);
-                buffer = Encoder.WriteInt8(buffer, message.MatchTypeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.MatchField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.EntityTypeField);
+                index = Encoder.WriteInt8(buffer, index, message.MatchTypeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.MatchField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

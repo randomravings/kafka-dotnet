@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using ListedGroup = Kafka.Client.Messages.ListGroupsResponse.ListedGroup;
 
 namespace Kafka.Client.Messages
@@ -9,123 +8,124 @@ namespace Kafka.Client.Messages
     public static class ListGroupsResponseSerde
     {
         private static readonly DecodeDelegate<ListGroupsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
         };
         private static readonly EncodeDelegate<ListGroupsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
         };
-        public static ListGroupsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ListGroupsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ListGroupsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ListGroupsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ListGroupsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ListGroupsResponse ReadV00(byte[] buffer, ref int index)
         {
             var throttleTimeMsField = default(int);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var groupsField = Decoder.ReadArray<ListedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListedGroupSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var groupsField = Decoder.ReadArray<ListedGroup>(buffer, ref index, ListedGroupSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ListGroupsResponse message)
+        private static int WriteV00(byte[] buffer, int index, ListGroupsResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<ListedGroup>(buffer, message.GroupsField, (b, i) => ListedGroupSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<ListedGroup>(buffer, index, message.GroupsField, ListedGroupSerde.WriteV00);
+            return index;
         }
-        private static ListGroupsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static ListGroupsResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var groupsField = Decoder.ReadArray<ListedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListedGroupSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var groupsField = Decoder.ReadArray<ListedGroup>(buffer, ref index, ListedGroupSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, ListGroupsResponse message)
+        private static int WriteV01(byte[] buffer, int index, ListGroupsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<ListedGroup>(buffer, message.GroupsField, (b, i) => ListedGroupSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<ListedGroup>(buffer, index, message.GroupsField, ListedGroupSerde.WriteV01);
+            return index;
         }
-        private static ListGroupsResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static ListGroupsResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var groupsField = Decoder.ReadArray<ListedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListedGroupSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var groupsField = Decoder.ReadArray<ListedGroup>(buffer, ref index, ListedGroupSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, ListGroupsResponse message)
+        private static int WriteV02(byte[] buffer, int index, ListGroupsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<ListedGroup>(buffer, message.GroupsField, (b, i) => ListedGroupSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<ListedGroup>(buffer, index, message.GroupsField, ListedGroupSerde.WriteV02);
+            return index;
         }
-        private static ListGroupsResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static ListGroupsResponse ReadV03(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var groupsField = Decoder.ReadCompactArray<ListedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListedGroupSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var groupsField = Decoder.ReadCompactArray<ListedGroup>(buffer, ref index, ListedGroupSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, ListGroupsResponse message)
+        private static int WriteV03(byte[] buffer, int index, ListGroupsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<ListedGroup>(buffer, message.GroupsField, (b, i) => ListedGroupSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<ListedGroup>(buffer, index, message.GroupsField, ListedGroupSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static ListGroupsResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static ListGroupsResponse ReadV04(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var groupsField = Decoder.ReadCompactArray<ListedGroup>(ref buffer, (ref ReadOnlyMemory<byte> b) => ListedGroupSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var groupsField = Decoder.ReadCompactArray<ListedGroup>(buffer, ref index, ListedGroupSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Groups'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, ListGroupsResponse message)
+        private static int WriteV04(byte[] buffer, int index, ListGroupsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<ListedGroup>(buffer, message.GroupsField, (b, i) => ListedGroupSerde.WriteV04(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<ListedGroup>(buffer, index, message.GroupsField, ListedGroupSerde.WriteV04);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class ListedGroupSerde
         {
-            public static ListedGroup ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static ListedGroup ReadV00(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(ref buffer);
-                var protocolTypeField = Decoder.ReadString(ref buffer);
+                var groupIdField = Decoder.ReadString(buffer, ref index);
+                var protocolTypeField = Decoder.ReadString(buffer, ref index);
                 var groupStateField = "";
                 return new(
                     groupIdField,
@@ -133,16 +133,16 @@ namespace Kafka.Client.Messages
                     groupStateField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, ListedGroup message)
+            public static int WriteV00(byte[] buffer, int index, ListedGroup message)
             {
-                buffer = Encoder.WriteString(buffer, message.GroupIdField);
-                buffer = Encoder.WriteString(buffer, message.ProtocolTypeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.GroupIdField);
+                index = Encoder.WriteString(buffer, index, message.ProtocolTypeField);
+                return index;
             }
-            public static ListedGroup ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static ListedGroup ReadV01(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(ref buffer);
-                var protocolTypeField = Decoder.ReadString(ref buffer);
+                var groupIdField = Decoder.ReadString(buffer, ref index);
+                var protocolTypeField = Decoder.ReadString(buffer, ref index);
                 var groupStateField = "";
                 return new(
                     groupIdField,
@@ -150,16 +150,16 @@ namespace Kafka.Client.Messages
                     groupStateField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, ListedGroup message)
+            public static int WriteV01(byte[] buffer, int index, ListedGroup message)
             {
-                buffer = Encoder.WriteString(buffer, message.GroupIdField);
-                buffer = Encoder.WriteString(buffer, message.ProtocolTypeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.GroupIdField);
+                index = Encoder.WriteString(buffer, index, message.ProtocolTypeField);
+                return index;
             }
-            public static ListedGroup ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static ListedGroup ReadV02(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(ref buffer);
-                var protocolTypeField = Decoder.ReadString(ref buffer);
+                var groupIdField = Decoder.ReadString(buffer, ref index);
+                var protocolTypeField = Decoder.ReadString(buffer, ref index);
                 var groupStateField = "";
                 return new(
                     groupIdField,
@@ -167,50 +167,50 @@ namespace Kafka.Client.Messages
                     groupStateField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, ListedGroup message)
+            public static int WriteV02(byte[] buffer, int index, ListedGroup message)
             {
-                buffer = Encoder.WriteString(buffer, message.GroupIdField);
-                buffer = Encoder.WriteString(buffer, message.ProtocolTypeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.GroupIdField);
+                index = Encoder.WriteString(buffer, index, message.ProtocolTypeField);
+                return index;
             }
-            public static ListedGroup ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static ListedGroup ReadV03(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadCompactString(ref buffer);
-                var protocolTypeField = Decoder.ReadCompactString(ref buffer);
+                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var protocolTypeField = Decoder.ReadCompactString(buffer, ref index);
                 var groupStateField = "";
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     groupIdField,
                     protocolTypeField,
                     groupStateField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, ListedGroup message)
+            public static int WriteV03(byte[] buffer, int index, ListedGroup message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.GroupIdField);
-                buffer = Encoder.WriteCompactString(buffer, message.ProtocolTypeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.GroupIdField);
+                index = Encoder.WriteCompactString(buffer, index, message.ProtocolTypeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static ListedGroup ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static ListedGroup ReadV04(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadCompactString(ref buffer);
-                var protocolTypeField = Decoder.ReadCompactString(ref buffer);
-                var groupStateField = Decoder.ReadCompactString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var protocolTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var groupStateField = Decoder.ReadCompactString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     groupIdField,
                     protocolTypeField,
                     groupStateField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, ListedGroup message)
+            public static int WriteV04(byte[] buffer, int index, ListedGroup message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.GroupIdField);
-                buffer = Encoder.WriteCompactString(buffer, message.ProtocolTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.GroupStateField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.GroupIdField);
+                index = Encoder.WriteCompactString(buffer, index, message.ProtocolTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.GroupStateField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

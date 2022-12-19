@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using StopReplicaPartitionError = Kafka.Client.Messages.StopReplicaResponse.StopReplicaPartitionError;
 
 namespace Kafka.Client.Messages
@@ -9,163 +8,203 @@ namespace Kafka.Client.Messages
     public static class StopReplicaResponseSerde
     {
         private static readonly DecodeDelegate<StopReplicaResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
         };
         private static readonly EncodeDelegate<StopReplicaResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
         };
-        public static StopReplicaResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static StopReplicaResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, StopReplicaResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static StopReplicaResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, StopReplicaResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static StopReplicaResponse ReadV00(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var partitionErrorsField = Decoder.ReadArray<StopReplicaPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => StopReplicaPartitionErrorSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadArray<StopReplicaPartitionError>(buffer, ref index, StopReplicaPartitionErrorSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
             return new(
                 errorCodeField,
                 partitionErrorsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, StopReplicaResponse message)
+        private static int WriteV00(byte[] buffer, int index, StopReplicaResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<StopReplicaPartitionError>(buffer, message.PartitionErrorsField, (b, i) => StopReplicaPartitionErrorSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<StopReplicaPartitionError>(buffer, index, message.PartitionErrorsField, StopReplicaPartitionErrorSerde.WriteV00);
+            return index;
         }
-        private static StopReplicaResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static StopReplicaResponse ReadV01(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var partitionErrorsField = Decoder.ReadArray<StopReplicaPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => StopReplicaPartitionErrorSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadArray<StopReplicaPartitionError>(buffer, ref index, StopReplicaPartitionErrorSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
             return new(
                 errorCodeField,
                 partitionErrorsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, StopReplicaResponse message)
+        private static int WriteV01(byte[] buffer, int index, StopReplicaResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteArray<StopReplicaPartitionError>(buffer, message.PartitionErrorsField, (b, i) => StopReplicaPartitionErrorSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteArray<StopReplicaPartitionError>(buffer, index, message.PartitionErrorsField, StopReplicaPartitionErrorSerde.WriteV01);
+            return index;
         }
-        private static StopReplicaResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static StopReplicaResponse ReadV02(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var partitionErrorsField = Decoder.ReadCompactArray<StopReplicaPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => StopReplicaPartitionErrorSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadCompactArray<StopReplicaPartitionError>(buffer, ref index, StopReplicaPartitionErrorSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 partitionErrorsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, StopReplicaResponse message)
+        private static int WriteV02(byte[] buffer, int index, StopReplicaResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<StopReplicaPartitionError>(buffer, message.PartitionErrorsField, (b, i) => StopReplicaPartitionErrorSerde.WriteV02(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<StopReplicaPartitionError>(buffer, index, message.PartitionErrorsField, StopReplicaPartitionErrorSerde.WriteV02);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static StopReplicaResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static StopReplicaResponse ReadV03(byte[] buffer, ref int index)
         {
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var partitionErrorsField = Decoder.ReadCompactArray<StopReplicaPartitionError>(ref buffer, (ref ReadOnlyMemory<byte> b) => StopReplicaPartitionErrorSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadCompactArray<StopReplicaPartitionError>(buffer, ref index, StopReplicaPartitionErrorSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 errorCodeField,
                 partitionErrorsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, StopReplicaResponse message)
+        private static int WriteV03(byte[] buffer, int index, StopReplicaResponse message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<StopReplicaPartitionError>(buffer, message.PartitionErrorsField, (b, i) => StopReplicaPartitionErrorSerde.WriteV03(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<StopReplicaPartitionError>(buffer, index, message.PartitionErrorsField, StopReplicaPartitionErrorSerde.WriteV03);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
+        }
+        private static StopReplicaResponse ReadV04(byte[] buffer, ref int index)
+        {
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var partitionErrorsField = Decoder.ReadCompactArray<StopReplicaPartitionError>(buffer, ref index, StopReplicaPartitionErrorSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'PartitionErrors'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
+            return new(
+                errorCodeField,
+                partitionErrorsField
+            );
+        }
+        private static int WriteV04(byte[] buffer, int index, StopReplicaResponse message)
+        {
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<StopReplicaPartitionError>(buffer, index, message.PartitionErrorsField, StopReplicaPartitionErrorSerde.WriteV04);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class StopReplicaPartitionErrorSerde
         {
-            public static StopReplicaPartitionError ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static StopReplicaPartitionError ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, StopReplicaPartitionError message)
+            public static int WriteV00(byte[] buffer, int index, StopReplicaPartitionError message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static StopReplicaPartitionError ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static StopReplicaPartitionError ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, StopReplicaPartitionError message)
+            public static int WriteV01(byte[] buffer, int index, StopReplicaPartitionError message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static StopReplicaPartitionError ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static StopReplicaPartitionError ReadV02(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, StopReplicaPartitionError message)
+            public static int WriteV02(byte[] buffer, int index, StopReplicaPartitionError message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static StopReplicaPartitionError ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static StopReplicaPartitionError ReadV03(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
-                var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionIndexField,
                     errorCodeField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, StopReplicaPartitionError message)
+            public static int WriteV03(byte[] buffer, int index, StopReplicaPartitionError message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static StopReplicaPartitionError ReadV04(byte[] buffer, ref int index)
+            {
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    topicNameField,
+                    partitionIndexField,
+                    errorCodeField
+                );
+            }
+            public static int WriteV04(byte[] buffer, int index, StopReplicaPartitionError message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

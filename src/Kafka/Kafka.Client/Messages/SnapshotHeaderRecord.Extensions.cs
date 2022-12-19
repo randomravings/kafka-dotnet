@@ -7,32 +7,33 @@ namespace Kafka.Client.Messages
     public static class SnapshotHeaderRecordSerde
     {
         private static readonly DecodeDelegate<SnapshotHeaderRecord>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<SnapshotHeaderRecord>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static SnapshotHeaderRecord Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static SnapshotHeaderRecord Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, SnapshotHeaderRecord message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static SnapshotHeaderRecord ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, SnapshotHeaderRecord message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static SnapshotHeaderRecord ReadV00(byte[] buffer, ref int index)
         {
-            var versionField = Decoder.ReadInt16(ref buffer);
-            var lastContainedLogTimestampField = Decoder.ReadInt64(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var versionField = Decoder.ReadInt16(buffer, ref index);
+            var lastContainedLogTimestampField = Decoder.ReadInt64(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 versionField,
                 lastContainedLogTimestampField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, SnapshotHeaderRecord message)
+        private static int WriteV00(byte[] buffer, int index, SnapshotHeaderRecord message)
         {
-            buffer = Encoder.WriteInt16(buffer, message.VersionField);
-            buffer = Encoder.WriteInt64(buffer, message.LastContainedLogTimestampField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt16(buffer, index, message.VersionField);
+            index = Encoder.WriteInt64(buffer, index, message.LastContainedLogTimestampField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

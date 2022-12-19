@@ -44,12 +44,12 @@ namespace Kafka.Common.Records
         /// <summary>
         /// Get the record's key, null if there is none.
         /// </summary>
-        ImmutableArray<byte>? Key { get; }
+        ReadOnlyMemory<byte>? Key { get; }
 
         /// <summary>
         /// Get the record's value, null if there is none.
         /// </summary>
-        ImmutableArray<byte>? Value { get; }
+        ReadOnlyMemory<byte>? Value { get; }
 
         /// <summary>
         /// 

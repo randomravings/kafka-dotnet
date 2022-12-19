@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using TopicData = Kafka.Client.Messages.BeginQuorumEpochRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.BeginQuorumEpochRequest.TopicData.PartitionData;
 
@@ -10,67 +9,68 @@ namespace Kafka.Client.Messages
     public static class BeginQuorumEpochRequestSerde
     {
         private static readonly DecodeDelegate<BeginQuorumEpochRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<BeginQuorumEpochRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static BeginQuorumEpochRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static BeginQuorumEpochRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, BeginQuorumEpochRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static BeginQuorumEpochRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, BeginQuorumEpochRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static BeginQuorumEpochRequest ReadV00(byte[] buffer, ref int index)
         {
-            var clusterIdField = Decoder.ReadNullableString(ref buffer);
-            var topicsField = Decoder.ReadArray<TopicData>(ref buffer, (ref ReadOnlyMemory<byte> b) => TopicDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var clusterIdField = Decoder.ReadNullableString(buffer, ref index);
+            var topicsField = Decoder.ReadArray<TopicData>(buffer, ref index, TopicDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             return new(
                 clusterIdField,
                 topicsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, BeginQuorumEpochRequest message)
+        private static int WriteV00(byte[] buffer, int index, BeginQuorumEpochRequest message)
         {
-            buffer = Encoder.WriteNullableString(buffer, message.ClusterIdField);
-            buffer = Encoder.WriteArray<TopicData>(buffer, message.TopicsField, (b, i) => TopicDataSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteNullableString(buffer, index, message.ClusterIdField);
+            index = Encoder.WriteArray<TopicData>(buffer, index, message.TopicsField, TopicDataSerde.WriteV00);
+            return index;
         }
         private static class TopicDataSerde
         {
-            public static TopicData ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static TopicData ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<PartitionData>(ref buffer, (ref ReadOnlyMemory<byte> b) => PartitionDataSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     topicNameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, TopicData message)
+            public static int WriteV00(byte[] buffer, int index, TopicData message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteArray<PartitionData>(buffer, message.PartitionsField, (b, i) => PartitionDataSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteArray<PartitionData>(buffer, index, message.PartitionsField, PartitionDataSerde.WriteV00);
+                return index;
             }
             private static class PartitionDataSerde
             {
-                public static PartitionData ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static PartitionData ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var leaderIdField = Decoder.ReadInt32(ref buffer);
-                    var leaderEpochField = Decoder.ReadInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
                         leaderIdField,
                         leaderEpochField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, PartitionData message)
+                public static int WriteV00(byte[] buffer, int index, PartitionData message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt32(buffer, message.LeaderIdField);
-                    buffer = Encoder.WriteInt32(buffer, message.LeaderEpochField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt32(buffer, index, message.LeaderIdField);
+                    index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                    return index;
                 }
             }
         }

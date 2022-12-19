@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using TransactionState = Kafka.Client.Messages.ListTransactionsResponse.TransactionState;
 
 namespace Kafka.Client.Messages
@@ -9,23 +8,24 @@ namespace Kafka.Client.Messages
     public static class ListTransactionsResponseSerde
     {
         private static readonly DecodeDelegate<ListTransactionsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<ListTransactionsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static ListTransactionsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ListTransactionsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ListTransactionsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ListTransactionsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ListTransactionsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ListTransactionsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var unknownStateFiltersField = Decoder.ReadCompactArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'UnknownStateFilters'");
-            var transactionStatesField = Decoder.ReadCompactArray<TransactionState>(ref buffer, (ref ReadOnlyMemory<byte> b) => TransactionStateSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TransactionStates'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var unknownStateFiltersField = Decoder.ReadCompactArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'UnknownStateFilters'");
+            var transactionStatesField = Decoder.ReadCompactArray<TransactionState>(buffer, ref index, TransactionStateSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'TransactionStates'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -33,36 +33,36 @@ namespace Kafka.Client.Messages
                 transactionStatesField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ListTransactionsResponse message)
+        private static int WriteV00(byte[] buffer, int index, ListTransactionsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactArray<string>(buffer, message.UnknownStateFiltersField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteCompactArray<TransactionState>(buffer, message.TransactionStatesField, (b, i) => TransactionStateSerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactArray<string>(buffer, index, message.UnknownStateFiltersField, Encoder.WriteCompactString);
+            index = Encoder.WriteCompactArray<TransactionState>(buffer, index, message.TransactionStatesField, TransactionStateSerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class TransactionStateSerde
         {
-            public static TransactionState ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static TransactionState ReadV00(byte[] buffer, ref int index)
             {
-                var transactionalIdField = Decoder.ReadCompactString(ref buffer);
-                var producerIdField = Decoder.ReadInt64(ref buffer);
-                var transactionStateField = Decoder.ReadCompactString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var transactionalIdField = Decoder.ReadCompactString(buffer, ref index);
+                var producerIdField = Decoder.ReadInt64(buffer, ref index);
+                var transactionStateField = Decoder.ReadCompactString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     transactionalIdField,
                     producerIdField,
                     transactionStateField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, TransactionState message)
+            public static int WriteV00(byte[] buffer, int index, TransactionState message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TransactionalIdField);
-                buffer = Encoder.WriteInt64(buffer, message.ProducerIdField);
-                buffer = Encoder.WriteCompactString(buffer, message.TransactionStateField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TransactionalIdField);
+                index = Encoder.WriteInt64(buffer, index, message.ProducerIdField);
+                index = Encoder.WriteCompactString(buffer, index, message.TransactionStateField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

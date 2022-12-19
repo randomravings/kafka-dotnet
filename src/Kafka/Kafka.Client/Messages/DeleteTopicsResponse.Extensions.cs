@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using DeletableTopicResult = Kafka.Client.Messages.DeleteTopicsResponse.DeletableTopicResult;
 
 namespace Kafka.Client.Messages
@@ -9,145 +8,146 @@ namespace Kafka.Client.Messages
     public static class DeleteTopicsResponseSerde
     {
         private static readonly DecodeDelegate<DeleteTopicsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
+            ReadV06,
         };
         private static readonly EncodeDelegate<DeleteTopicsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
-            (b, m) => WriteV06(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
+            WriteV06,
         };
-        public static DeleteTopicsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DeleteTopicsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DeleteTopicsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DeleteTopicsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DeleteTopicsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DeleteTopicsResponse ReadV00(byte[] buffer, ref int index)
         {
             var throttleTimeMsField = default(int);
-            var responsesField = Decoder.ReadArray<DeletableTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableTopicResultSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var responsesField = Decoder.ReadArray<DeletableTopicResult>(buffer, ref index, DeletableTopicResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
             return new(
                 throttleTimeMsField,
                 responsesField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DeleteTopicsResponse message)
+        private static int WriteV00(byte[] buffer, int index, DeleteTopicsResponse message)
         {
-            buffer = Encoder.WriteArray<DeletableTopicResult>(buffer, message.ResponsesField, (b, i) => DeletableTopicResultSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteArray<DeletableTopicResult>(buffer, index, message.ResponsesField, DeletableTopicResultSerde.WriteV00);
+            return index;
         }
-        private static DeleteTopicsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var responsesField = Decoder.ReadArray<DeletableTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableTopicResultSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var responsesField = Decoder.ReadArray<DeletableTopicResult>(buffer, ref index, DeletableTopicResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
             return new(
                 throttleTimeMsField,
                 responsesField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, DeleteTopicsResponse message)
+        private static int WriteV01(byte[] buffer, int index, DeleteTopicsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<DeletableTopicResult>(buffer, message.ResponsesField, (b, i) => DeletableTopicResultSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<DeletableTopicResult>(buffer, index, message.ResponsesField, DeletableTopicResultSerde.WriteV01);
+            return index;
         }
-        private static DeleteTopicsResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var responsesField = Decoder.ReadArray<DeletableTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableTopicResultSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var responsesField = Decoder.ReadArray<DeletableTopicResult>(buffer, ref index, DeletableTopicResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
             return new(
                 throttleTimeMsField,
                 responsesField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, DeleteTopicsResponse message)
+        private static int WriteV02(byte[] buffer, int index, DeleteTopicsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<DeletableTopicResult>(buffer, message.ResponsesField, (b, i) => DeletableTopicResultSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<DeletableTopicResult>(buffer, index, message.ResponsesField, DeletableTopicResultSerde.WriteV02);
+            return index;
         }
-        private static DeleteTopicsResponse ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsResponse ReadV03(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var responsesField = Decoder.ReadArray<DeletableTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableTopicResultSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var responsesField = Decoder.ReadArray<DeletableTopicResult>(buffer, ref index, DeletableTopicResultSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
             return new(
                 throttleTimeMsField,
                 responsesField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, DeleteTopicsResponse message)
+        private static int WriteV03(byte[] buffer, int index, DeleteTopicsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<DeletableTopicResult>(buffer, message.ResponsesField, (b, i) => DeletableTopicResultSerde.WriteV03(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<DeletableTopicResult>(buffer, index, message.ResponsesField, DeletableTopicResultSerde.WriteV03);
+            return index;
         }
-        private static DeleteTopicsResponse ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsResponse ReadV04(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var responsesField = Decoder.ReadCompactArray<DeletableTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableTopicResultSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var responsesField = Decoder.ReadCompactArray<DeletableTopicResult>(buffer, ref index, DeletableTopicResultSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 responsesField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, DeleteTopicsResponse message)
+        private static int WriteV04(byte[] buffer, int index, DeleteTopicsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<DeletableTopicResult>(buffer, message.ResponsesField, (b, i) => DeletableTopicResultSerde.WriteV04(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<DeletableTopicResult>(buffer, index, message.ResponsesField, DeletableTopicResultSerde.WriteV04);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static DeleteTopicsResponse ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsResponse ReadV05(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var responsesField = Decoder.ReadCompactArray<DeletableTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableTopicResultSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var responsesField = Decoder.ReadCompactArray<DeletableTopicResult>(buffer, ref index, DeletableTopicResultSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 responsesField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, DeleteTopicsResponse message)
+        private static int WriteV05(byte[] buffer, int index, DeleteTopicsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<DeletableTopicResult>(buffer, message.ResponsesField, (b, i) => DeletableTopicResultSerde.WriteV05(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<DeletableTopicResult>(buffer, index, message.ResponsesField, DeletableTopicResultSerde.WriteV05);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static DeleteTopicsResponse ReadV06(ref ReadOnlyMemory<byte> buffer)
+        private static DeleteTopicsResponse ReadV06(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var responsesField = Decoder.ReadCompactArray<DeletableTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => DeletableTopicResultSerde.ReadV06(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var responsesField = Decoder.ReadCompactArray<DeletableTopicResult>(buffer, ref index, DeletableTopicResultSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 responsesField
             );
         }
-        private static Memory<byte> WriteV06(Memory<byte> buffer, DeleteTopicsResponse message)
+        private static int WriteV06(byte[] buffer, int index, DeleteTopicsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<DeletableTopicResult>(buffer, message.ResponsesField, (b, i) => DeletableTopicResultSerde.WriteV06(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<DeletableTopicResult>(buffer, index, message.ResponsesField, DeletableTopicResultSerde.WriteV06);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class DeletableTopicResultSerde
         {
-            public static DeletableTopicResult ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableTopicResult ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 var errorMessageField = default(string?);
                 return new(
                     nameField,
@@ -156,19 +156,19 @@ namespace Kafka.Client.Messages
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, DeletableTopicResult message)
+            public static int WriteV00(byte[] buffer, int index, DeletableTopicResult message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static DeletableTopicResult ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableTopicResult ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 var errorMessageField = default(string?);
                 return new(
                     nameField,
@@ -177,19 +177,19 @@ namespace Kafka.Client.Messages
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, DeletableTopicResult message)
+            public static int WriteV01(byte[] buffer, int index, DeletableTopicResult message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static DeletableTopicResult ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableTopicResult ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 var errorMessageField = default(string?);
                 return new(
                     nameField,
@@ -198,19 +198,19 @@ namespace Kafka.Client.Messages
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, DeletableTopicResult message)
+            public static int WriteV02(byte[] buffer, int index, DeletableTopicResult message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static DeletableTopicResult ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableTopicResult ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 var errorMessageField = default(string?);
                 return new(
                     nameField,
@@ -219,21 +219,21 @@ namespace Kafka.Client.Messages
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, DeletableTopicResult message)
+            public static int WriteV03(byte[] buffer, int index, DeletableTopicResult message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                return index;
             }
-            public static DeletableTopicResult ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableTopicResult ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                 var errorMessageField = default(string?);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     topicIdField,
@@ -241,22 +241,22 @@ namespace Kafka.Client.Messages
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, DeletableTopicResult message)
+            public static int WriteV04(byte[] buffer, int index, DeletableTopicResult message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static DeletableTopicResult ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableTopicResult ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
                 var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     topicIdField,
@@ -264,23 +264,23 @@ namespace Kafka.Client.Messages
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, DeletableTopicResult message)
+            public static int WriteV05(byte[] buffer, int index, DeletableTopicResult message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static DeletableTopicResult ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static DeletableTopicResult ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactNullableString(ref buffer);
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     nameField,
                     topicIdField,
@@ -288,14 +288,14 @@ namespace Kafka.Client.Messages
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, DeletableTopicResult message)
+            public static int WriteV06(byte[] buffer, int index, DeletableTopicResult message)
             {
-                buffer = Encoder.WriteCompactNullableString(buffer, message.NameField);
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactNullableString(buffer, index, message.NameField);
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

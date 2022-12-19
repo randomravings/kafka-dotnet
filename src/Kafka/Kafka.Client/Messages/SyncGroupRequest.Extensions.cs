@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using SyncGroupRequestAssignment = Kafka.Client.Messages.SyncGroupRequest.SyncGroupRequestAssignment;
 
 namespace Kafka.Client.Messages
@@ -9,35 +8,36 @@ namespace Kafka.Client.Messages
     public static class SyncGroupRequestSerde
     {
         private static readonly DecodeDelegate<SyncGroupRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
         };
         private static readonly EncodeDelegate<SyncGroupRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
         };
-        public static SyncGroupRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static SyncGroupRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, SyncGroupRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static SyncGroupRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, SyncGroupRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static SyncGroupRequest ReadV00(byte[] buffer, ref int index)
         {
-            var groupIdField = Decoder.ReadString(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var memberIdField = Decoder.ReadString(ref buffer);
+            var groupIdField = Decoder.ReadString(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var memberIdField = Decoder.ReadString(buffer, ref index);
             var groupInstanceIdField = default(string?);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentsField = Decoder.ReadArray<SyncGroupRequestAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => SyncGroupRequestAssignmentSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+            var assignmentsField = Decoder.ReadArray<SyncGroupRequestAssignment>(buffer, ref index, SyncGroupRequestAssignmentSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
             return new(
                 groupIdField,
                 generationIdField,
@@ -48,23 +48,23 @@ namespace Kafka.Client.Messages
                 assignmentsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, SyncGroupRequest message)
+        private static int WriteV00(byte[] buffer, int index, SyncGroupRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteArray<SyncGroupRequestAssignment>(buffer, message.AssignmentsField, (b, i) => SyncGroupRequestAssignmentSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentSerde.WriteV00);
+            return index;
         }
-        private static SyncGroupRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupRequest ReadV01(byte[] buffer, ref int index)
         {
-            var groupIdField = Decoder.ReadString(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var memberIdField = Decoder.ReadString(ref buffer);
+            var groupIdField = Decoder.ReadString(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var memberIdField = Decoder.ReadString(buffer, ref index);
             var groupInstanceIdField = default(string?);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentsField = Decoder.ReadArray<SyncGroupRequestAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => SyncGroupRequestAssignmentSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+            var assignmentsField = Decoder.ReadArray<SyncGroupRequestAssignment>(buffer, ref index, SyncGroupRequestAssignmentSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
             return new(
                 groupIdField,
                 generationIdField,
@@ -75,23 +75,23 @@ namespace Kafka.Client.Messages
                 assignmentsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, SyncGroupRequest message)
+        private static int WriteV01(byte[] buffer, int index, SyncGroupRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteArray<SyncGroupRequestAssignment>(buffer, message.AssignmentsField, (b, i) => SyncGroupRequestAssignmentSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentSerde.WriteV01);
+            return index;
         }
-        private static SyncGroupRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupRequest ReadV02(byte[] buffer, ref int index)
         {
-            var groupIdField = Decoder.ReadString(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var memberIdField = Decoder.ReadString(ref buffer);
+            var groupIdField = Decoder.ReadString(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var memberIdField = Decoder.ReadString(buffer, ref index);
             var groupInstanceIdField = default(string?);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentsField = Decoder.ReadArray<SyncGroupRequestAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => SyncGroupRequestAssignmentSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+            var assignmentsField = Decoder.ReadArray<SyncGroupRequestAssignment>(buffer, ref index, SyncGroupRequestAssignmentSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
             return new(
                 groupIdField,
                 generationIdField,
@@ -102,23 +102,23 @@ namespace Kafka.Client.Messages
                 assignmentsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, SyncGroupRequest message)
+        private static int WriteV02(byte[] buffer, int index, SyncGroupRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteArray<SyncGroupRequestAssignment>(buffer, message.AssignmentsField, (b, i) => SyncGroupRequestAssignmentSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentSerde.WriteV02);
+            return index;
         }
-        private static SyncGroupRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupRequest ReadV03(byte[] buffer, ref int index)
         {
-            var groupIdField = Decoder.ReadString(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var memberIdField = Decoder.ReadString(ref buffer);
-            var groupInstanceIdField = Decoder.ReadNullableString(ref buffer);
+            var groupIdField = Decoder.ReadString(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var memberIdField = Decoder.ReadString(buffer, ref index);
+            var groupInstanceIdField = Decoder.ReadNullableString(buffer, ref index);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentsField = Decoder.ReadArray<SyncGroupRequestAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => SyncGroupRequestAssignmentSerde.ReadV03(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+            var assignmentsField = Decoder.ReadArray<SyncGroupRequestAssignment>(buffer, ref index, SyncGroupRequestAssignmentSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
             return new(
                 groupIdField,
                 generationIdField,
@@ -129,25 +129,25 @@ namespace Kafka.Client.Messages
                 assignmentsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, SyncGroupRequest message)
+        private static int WriteV03(byte[] buffer, int index, SyncGroupRequest message)
         {
-            buffer = Encoder.WriteString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteNullableString(buffer, message.GroupInstanceIdField);
-            buffer = Encoder.WriteArray<SyncGroupRequestAssignment>(buffer, message.AssignmentsField, (b, i) => SyncGroupRequestAssignmentSerde.WriteV03(b, i));
-            return buffer;
+            index = Encoder.WriteString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteNullableString(buffer, index, message.GroupInstanceIdField);
+            index = Encoder.WriteArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentSerde.WriteV03);
+            return index;
         }
-        private static SyncGroupRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupRequest ReadV04(byte[] buffer, ref int index)
         {
-            var groupIdField = Decoder.ReadCompactString(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var memberIdField = Decoder.ReadCompactString(ref buffer);
-            var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
+            var groupIdField = Decoder.ReadCompactString(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+            var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentsField = Decoder.ReadCompactArray<SyncGroupRequestAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => SyncGroupRequestAssignmentSerde.ReadV04(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var assignmentsField = Decoder.ReadCompactArray<SyncGroupRequestAssignment>(buffer, ref index, SyncGroupRequestAssignmentSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 groupIdField,
                 generationIdField,
@@ -158,26 +158,26 @@ namespace Kafka.Client.Messages
                 assignmentsField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, SyncGroupRequest message)
+        private static int WriteV04(byte[] buffer, int index, SyncGroupRequest message)
         {
-            buffer = Encoder.WriteCompactString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-            buffer = Encoder.WriteCompactArray<SyncGroupRequestAssignment>(buffer, message.AssignmentsField, (b, i) => SyncGroupRequestAssignmentSerde.WriteV04(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
+            index = Encoder.WriteCompactArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentSerde.WriteV04);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static SyncGroupRequest ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static SyncGroupRequest ReadV05(byte[] buffer, ref int index)
         {
-            var groupIdField = Decoder.ReadCompactString(ref buffer);
-            var generationIdField = Decoder.ReadInt32(ref buffer);
-            var memberIdField = Decoder.ReadCompactString(ref buffer);
-            var groupInstanceIdField = Decoder.ReadCompactNullableString(ref buffer);
-            var protocolTypeField = Decoder.ReadCompactNullableString(ref buffer);
-            var protocolNameField = Decoder.ReadCompactNullableString(ref buffer);
-            var assignmentsField = Decoder.ReadCompactArray<SyncGroupRequestAssignment>(ref buffer, (ref ReadOnlyMemory<byte> b) => SyncGroupRequestAssignmentSerde.ReadV05(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var groupIdField = Decoder.ReadCompactString(buffer, ref index);
+            var generationIdField = Decoder.ReadInt32(buffer, ref index);
+            var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+            var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var protocolTypeField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var protocolNameField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var assignmentsField = Decoder.ReadCompactArray<SyncGroupRequestAssignment>(buffer, ref index, SyncGroupRequestAssignmentSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 groupIdField,
                 generationIdField,
@@ -188,113 +188,113 @@ namespace Kafka.Client.Messages
                 assignmentsField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, SyncGroupRequest message)
+        private static int WriteV05(byte[] buffer, int index, SyncGroupRequest message)
         {
-            buffer = Encoder.WriteCompactString(buffer, message.GroupIdField);
-            buffer = Encoder.WriteInt32(buffer, message.GenerationIdField);
-            buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.GroupInstanceIdField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolTypeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ProtocolNameField);
-            buffer = Encoder.WriteCompactArray<SyncGroupRequestAssignment>(buffer, message.AssignmentsField, (b, i) => SyncGroupRequestAssignmentSerde.WriteV05(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactString(buffer, index, message.GroupIdField);
+            index = Encoder.WriteInt32(buffer, index, message.GenerationIdField);
+            index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolTypeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ProtocolNameField);
+            index = Encoder.WriteCompactArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentSerde.WriteV05);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class SyncGroupRequestAssignmentSerde
         {
-            public static SyncGroupRequestAssignment ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static SyncGroupRequestAssignment ReadV00(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
-                var assignmentField = Decoder.ReadBytes(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
+                var assignmentField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     assignmentField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, SyncGroupRequestAssignment message)
+            public static int WriteV00(byte[] buffer, int index, SyncGroupRequestAssignment message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteBytes(buffer, message.AssignmentField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteBytes(buffer, index, message.AssignmentField);
+                return index;
             }
-            public static SyncGroupRequestAssignment ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static SyncGroupRequestAssignment ReadV01(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
-                var assignmentField = Decoder.ReadBytes(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
+                var assignmentField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     assignmentField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, SyncGroupRequestAssignment message)
+            public static int WriteV01(byte[] buffer, int index, SyncGroupRequestAssignment message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteBytes(buffer, message.AssignmentField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteBytes(buffer, index, message.AssignmentField);
+                return index;
             }
-            public static SyncGroupRequestAssignment ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static SyncGroupRequestAssignment ReadV02(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
-                var assignmentField = Decoder.ReadBytes(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
+                var assignmentField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     assignmentField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, SyncGroupRequestAssignment message)
+            public static int WriteV02(byte[] buffer, int index, SyncGroupRequestAssignment message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteBytes(buffer, message.AssignmentField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteBytes(buffer, index, message.AssignmentField);
+                return index;
             }
-            public static SyncGroupRequestAssignment ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static SyncGroupRequestAssignment ReadV03(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(ref buffer);
-                var assignmentField = Decoder.ReadBytes(ref buffer);
+                var memberIdField = Decoder.ReadString(buffer, ref index);
+                var assignmentField = Decoder.ReadBytes(buffer, ref index);
                 return new(
                     memberIdField,
                     assignmentField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, SyncGroupRequestAssignment message)
+            public static int WriteV03(byte[] buffer, int index, SyncGroupRequestAssignment message)
             {
-                buffer = Encoder.WriteString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteBytes(buffer, message.AssignmentField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteBytes(buffer, index, message.AssignmentField);
+                return index;
             }
-            public static SyncGroupRequestAssignment ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static SyncGroupRequestAssignment ReadV04(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(ref buffer);
-                var assignmentField = Decoder.ReadCompactBytes(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var assignmentField = Decoder.ReadCompactBytes(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     memberIdField,
                     assignmentField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, SyncGroupRequestAssignment message)
+            public static int WriteV04(byte[] buffer, int index, SyncGroupRequestAssignment message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteCompactBytes(buffer, message.AssignmentField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteCompactBytes(buffer, index, message.AssignmentField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static SyncGroupRequestAssignment ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static SyncGroupRequestAssignment ReadV05(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(ref buffer);
-                var assignmentField = Decoder.ReadCompactBytes(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var assignmentField = Decoder.ReadCompactBytes(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     memberIdField,
                     assignmentField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, SyncGroupRequestAssignment message)
+            public static int WriteV05(byte[] buffer, int index, SyncGroupRequestAssignment message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.MemberIdField);
-                buffer = Encoder.WriteCompactBytes(buffer, message.AssignmentField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.MemberIdField);
+                index = Encoder.WriteCompactBytes(buffer, index, message.AssignmentField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

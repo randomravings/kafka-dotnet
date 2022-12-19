@@ -1,4 +1,6 @@
 ﻿using Kafka.Common.Encoding;
+using System.Net;
+using System.Net.Http;
 using System.Net.Sockets;
 
 namespace Kafka.Common.Network.Tcp
@@ -6,14 +8,12 @@ namespace Kafka.Common.Network.Tcp
     public sealed class PlaintextTransport :
         ITransport
     {
-        private readonly string _host;
-        private readonly int _port;
+        private readonly DnsEndPoint _endPoint;
         private readonly TcpClient _tcpClient;
 
-        public PlaintextTransport(string host, int port)
+        public PlaintextTransport(DnsEndPoint endPoint)
         {
-            _host = host;
-            _port = port;
+            _endPoint = endPoint;
             _tcpClient = new TcpClient();
         }
         bool ITransport.IsConnected =>
@@ -21,7 +21,7 @@ namespace Kafka.Common.Network.Tcp
         ;
 
         async ValueTask ITransport.Connect(CancellationToken cancellationToken) =>
-            await _tcpClient.ConnectAsync(_host, _port, cancellationToken)
+            await _tcpClient.ConnectAsync(_endPoint.Host, _endPoint.Port, cancellationToken)
         ;
 
         async ValueTask ITransport.Disconnect(CancellationToken cancellationToken)
@@ -34,37 +34,38 @@ namespace Kafka.Common.Network.Tcp
             await ValueTask.CompletedTask
         ;
 
-        async ValueTask<ReadOnlyMemory<byte>> ITransport.HandleRequest(
-            ReadOnlyMemory<byte> requestBytes,
+        async ValueTask<byte[]> ITransport.HandleRequest(
+            byte[] requestBytes,
+            int offset,
+            int length,
             CancellationToken cancellationToken
         )
         {
             var networkStream = _tcpClient.GetStream();
-            Encoder.WriteInt32(networkStream, requestBytes.Length);
-            await networkStream.WriteAsync(requestBytes, cancellationToken);
+            await networkStream.WriteAsync(requestBytes.AsMemory(offset, length), cancellationToken);
             await networkStream.FlushAsync(cancellationToken);
-            var sizeBytes = new byte[4].AsMemory();
+            var sizeBytes = new byte[4];
             await ReadBytesFromNetwork(networkStream, sizeBytes, cancellationToken);
-            var sizeBytesRef = (ReadOnlyMemory<byte>)sizeBytes;
-            var messageLen = Decoder.ReadInt32(ref sizeBytesRef);
-            var responseBytes = new byte[messageLen].AsMemory();
+            var index = 0;
+            var messageLen = Decoder.ReadInt32(sizeBytes, ref index);
+            var responseBytes = new byte[messageLen];
             await ReadBytesFromNetwork(networkStream, responseBytes, cancellationToken);
             return responseBytes;
         }
 
         private static async ValueTask ReadBytesFromNetwork(
             NetworkStream stream,
-            Memory<byte> bytes,
+            byte[] bytes,
             CancellationToken cancellationToken
         )
         {
             var offset = 0;
             while (offset < bytes.Length)
             {
-                var len = await stream.ReadAsync(bytes[offset..], cancellationToken);
-                if (len == 0)
+                var bytesReceived = await stream.ReadAsync(bytes.AsMemory(offset, bytes.Length - offset), cancellationToken);
+                if (bytesReceived == 0)
                     throw new IOException("No bytes received");
-                offset += len;
+                offset += bytesReceived;
             }
         }
 
@@ -72,7 +73,7 @@ namespace Kafka.Common.Network.Tcp
         {
             if (_tcpClient == null)
                 return;
-            if(_tcpClient.Connected)
+            if (_tcpClient.Connected)
                 _tcpClient.Close();
             _tcpClient.Dispose();
         }

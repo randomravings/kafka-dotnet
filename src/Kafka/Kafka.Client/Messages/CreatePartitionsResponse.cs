@@ -19,6 +19,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<CreatePartitionsTopicResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="ErrorCodeField">The result error, or zero if there was no error.</param>

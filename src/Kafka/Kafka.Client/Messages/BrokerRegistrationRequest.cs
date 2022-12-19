@@ -13,6 +13,7 @@ namespace Kafka.Client.Messages
     /// <param name="ListenersField">The listeners of this broker</param>
     /// <param name="FeaturesField">The features on this broker</param>
     /// <param name="RackField">The rack which this broker is in.</param>
+    /// <param name="IsMigratingZkBrokerField">Set by a ZK broker if the required configurations for ZK migration are present.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record BrokerRegistrationRequest (
@@ -21,7 +22,8 @@ namespace Kafka.Client.Messages
         Guid IncarnationIdField,
         ImmutableArray<Listener> ListenersField,
         ImmutableArray<Feature> FeaturesField,
-        string? RackField
+        string? RackField,
+        sbyte IsMigratingZkBrokerField
     ) : Request(62)
     {
         public static BrokerRegistrationRequest Empty { get; } = new(
@@ -30,8 +32,10 @@ namespace Kafka.Client.Messages
             default(Guid),
             ImmutableArray<Listener>.Empty,
             ImmutableArray<Feature>.Empty,
-            default(string?)
+            default(string?),
+            default(sbyte)
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The feature name.</param>
         /// <param name="MinSupportedVersionField">The minimum supported feature level.</param>

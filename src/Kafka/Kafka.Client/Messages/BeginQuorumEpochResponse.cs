@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<TopicData>.Empty
         );
+        public static short FlexibleVersion { get; } = 32767;
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionsField"></param>

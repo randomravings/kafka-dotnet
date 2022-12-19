@@ -1,8 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
-using AlterReplicaLogDirPartitionResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult.AlterReplicaLogDirPartitionResult;
 using AlterReplicaLogDirTopicResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult;
+using AlterReplicaLogDirPartitionResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult.AlterReplicaLogDirPartitionResult;
 
 namespace Kafka.Client.Messages
 {
@@ -10,164 +9,165 @@ namespace Kafka.Client.Messages
     public static class AlterReplicaLogDirsResponseSerde
     {
         private static readonly DecodeDelegate<AlterReplicaLogDirsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
         };
         private static readonly EncodeDelegate<AlterReplicaLogDirsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
         };
-        public static AlterReplicaLogDirsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static AlterReplicaLogDirsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, AlterReplicaLogDirsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static AlterReplicaLogDirsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, AlterReplicaLogDirsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static AlterReplicaLogDirsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadArray<AlterReplicaLogDirTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterReplicaLogDirTopicResultSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadArray<AlterReplicaLogDirTopicResult>(buffer, ref index, AlterReplicaLogDirTopicResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Results'");
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, AlterReplicaLogDirsResponse message)
+        private static int WriteV00(byte[] buffer, int index, AlterReplicaLogDirsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<AlterReplicaLogDirTopicResult>(buffer, message.ResultsField, (b, i) => AlterReplicaLogDirTopicResultSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<AlterReplicaLogDirTopicResult>(buffer, index, message.ResultsField, AlterReplicaLogDirTopicResultSerde.WriteV00);
+            return index;
         }
-        private static AlterReplicaLogDirsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static AlterReplicaLogDirsResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadArray<AlterReplicaLogDirTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterReplicaLogDirTopicResultSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadArray<AlterReplicaLogDirTopicResult>(buffer, ref index, AlterReplicaLogDirTopicResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Results'");
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, AlterReplicaLogDirsResponse message)
+        private static int WriteV01(byte[] buffer, int index, AlterReplicaLogDirsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<AlterReplicaLogDirTopicResult>(buffer, message.ResultsField, (b, i) => AlterReplicaLogDirTopicResultSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<AlterReplicaLogDirTopicResult>(buffer, index, message.ResultsField, AlterReplicaLogDirTopicResultSerde.WriteV01);
+            return index;
         }
-        private static AlterReplicaLogDirsResponse ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static AlterReplicaLogDirsResponse ReadV02(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var resultsField = Decoder.ReadCompactArray<AlterReplicaLogDirTopicResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterReplicaLogDirTopicResultSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var resultsField = Decoder.ReadCompactArray<AlterReplicaLogDirTopicResult>(buffer, ref index, AlterReplicaLogDirTopicResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 resultsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, AlterReplicaLogDirsResponse message)
+        private static int WriteV02(byte[] buffer, int index, AlterReplicaLogDirsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<AlterReplicaLogDirTopicResult>(buffer, message.ResultsField, (b, i) => AlterReplicaLogDirTopicResultSerde.WriteV02(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<AlterReplicaLogDirTopicResult>(buffer, index, message.ResultsField, AlterReplicaLogDirTopicResultSerde.WriteV02);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class AlterReplicaLogDirTopicResultSerde
         {
-            public static AlterReplicaLogDirTopicResult ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static AlterReplicaLogDirTopicResult ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<AlterReplicaLogDirPartitionResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterReplicaLogDirPartitionResultSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<AlterReplicaLogDirPartitionResult>(buffer, ref index, AlterReplicaLogDirPartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     topicNameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, AlterReplicaLogDirTopicResult message)
+            public static int WriteV00(byte[] buffer, int index, AlterReplicaLogDirTopicResult message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteArray<AlterReplicaLogDirPartitionResult>(buffer, message.PartitionsField, (b, i) => AlterReplicaLogDirPartitionResultSerde.WriteV00(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteArray<AlterReplicaLogDirPartitionResult>(buffer, index, message.PartitionsField, AlterReplicaLogDirPartitionResultSerde.WriteV00);
+                return index;
             }
-            public static AlterReplicaLogDirTopicResult ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static AlterReplicaLogDirTopicResult ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(ref buffer);
-                var partitionsField = Decoder.ReadArray<AlterReplicaLogDirPartitionResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterReplicaLogDirPartitionResultSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionsField = Decoder.ReadArray<AlterReplicaLogDirPartitionResult>(buffer, ref index, AlterReplicaLogDirPartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
                     topicNameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, AlterReplicaLogDirTopicResult message)
+            public static int WriteV01(byte[] buffer, int index, AlterReplicaLogDirTopicResult message)
             {
-                buffer = Encoder.WriteString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteArray<AlterReplicaLogDirPartitionResult>(buffer, message.PartitionsField, (b, i) => AlterReplicaLogDirPartitionResultSerde.WriteV01(b, i));
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteArray<AlterReplicaLogDirPartitionResult>(buffer, index, message.PartitionsField, AlterReplicaLogDirPartitionResultSerde.WriteV01);
+                return index;
             }
-            public static AlterReplicaLogDirTopicResult ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static AlterReplicaLogDirTopicResult ReadV02(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(ref buffer);
-                var partitionsField = Decoder.ReadCompactArray<AlterReplicaLogDirPartitionResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterReplicaLogDirPartitionResultSerde.ReadV02(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionsField = Decoder.ReadCompactArray<AlterReplicaLogDirPartitionResult>(buffer, ref index, AlterReplicaLogDirPartitionResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicNameField,
                     partitionsField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, AlterReplicaLogDirTopicResult message)
+            public static int WriteV02(byte[] buffer, int index, AlterReplicaLogDirTopicResult message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.TopicNameField);
-                buffer = Encoder.WriteCompactArray<AlterReplicaLogDirPartitionResult>(buffer, message.PartitionsField, (b, i) => AlterReplicaLogDirPartitionResultSerde.WriteV02(b, i));
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteCompactArray<AlterReplicaLogDirPartitionResult>(buffer, index, message.PartitionsField, AlterReplicaLogDirPartitionResultSerde.WriteV02);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
             private static class AlterReplicaLogDirPartitionResultSerde
             {
-                public static AlterReplicaLogDirPartitionResult ReadV00(ref ReadOnlyMemory<byte> buffer)
+                public static AlterReplicaLogDirPartitionResult ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static Memory<byte> WriteV00(Memory<byte> buffer, AlterReplicaLogDirPartitionResult message)
+                public static int WriteV00(byte[] buffer, int index, AlterReplicaLogDirPartitionResult message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                    return index;
                 }
-                public static AlterReplicaLogDirPartitionResult ReadV01(ref ReadOnlyMemory<byte> buffer)
+                public static AlterReplicaLogDirPartitionResult ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var errorCodeField = Decoder.ReadInt16(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static Memory<byte> WriteV01(Memory<byte> buffer, AlterReplicaLogDirPartitionResult message)
+                public static int WriteV01(byte[] buffer, int index, AlterReplicaLogDirPartitionResult message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                    return index;
                 }
-                public static AlterReplicaLogDirPartitionResult ReadV02(ref ReadOnlyMemory<byte> buffer)
+                public static AlterReplicaLogDirPartitionResult ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(ref buffer);
-                    var errorCodeField = Decoder.ReadInt16(ref buffer);
-                    _ = Decoder.ReadVarUInt32(ref buffer);
+                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField
                     );
                 }
-                public static Memory<byte> WriteV02(Memory<byte> buffer, AlterReplicaLogDirPartitionResult message)
+                public static int WriteV02(byte[] buffer, int index, AlterReplicaLogDirPartitionResult message)
                 {
-                    buffer = Encoder.WriteInt32(buffer, message.PartitionIndexField);
-                    buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                    buffer = Encoder.WriteVarUInt32(buffer, 0);
-                    return buffer;
+                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
                 }
             }
         }

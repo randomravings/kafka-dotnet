@@ -12,9 +12,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(true, new byte[] { 0x01 })]
         public void TestWriteBoolean(bool value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteBoolean(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteBoolean(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(0, new byte[] { 0x00 })]
@@ -24,9 +25,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(sbyte.MinValue, new byte[] { 0x80 })]
         public void TestWriteInt8(sbyte value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteInt8(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteInt8(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(0, new byte[] { 0x00, 0x00 })]
@@ -40,9 +42,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(short.MinValue, new byte[] { 0x80, 0x00 })]
         public void TestWriteInt16(short value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteInt16(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteInt16(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(0, new byte[] { 0x00, 0x00, 0x00, 0x00 })]
@@ -60,9 +63,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(int.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00 })]
         public void TestWriteInt32(int value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteInt32(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteInt32(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(0U, new byte[] { 0x00, 0x00, 0x00, 0x00 })]
@@ -76,9 +80,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(uint.MaxValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF })]
         public void TestWriteUInt32(uint value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteUInt32(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteUInt32(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(0, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })]
@@ -100,9 +105,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(long.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })]
         public void TestWriteInt64(long value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteInt64(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteInt64(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(0, new byte[] { 0x00 })]
@@ -131,9 +137,10 @@ namespace Kafka.Common.UnitTest.Encoding
             var sizeOf = Encoder.SizeOfInt32(value);
             Assert.That(sizeOf, Is.EqualTo(expected.Length));
 
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteVarInt32(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteVarInt32(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(0U, new byte[] { 0x00 })]
@@ -171,9 +178,10 @@ namespace Kafka.Common.UnitTest.Encoding
             var sizeOf = Encoder.SizeOfUInt32(value);
             Assert.That(sizeOf, Is.EqualTo(expected.Length));
 
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteVarUInt32(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteVarUInt32(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(0, new byte[] { 0x00 })]
@@ -224,9 +232,10 @@ namespace Kafka.Common.UnitTest.Encoding
             var sizeOf = Encoder.SizeOfInt64(value);
             Assert.That(sizeOf, Is.EqualTo(expected.Length));
 
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteVarInt64(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteVarInt64(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase("00000000-0000-0000-0000-000000000000", new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })]
@@ -235,9 +244,10 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteUUID(string value, byte[] expected)
         {
             Assert.That(Guid.TryParse(value, out var valueUuid), Is.True);
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteUuid(buffer, valueUuid);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteUuid(buffer, 0, valueUuid);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(0D, new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })]
@@ -247,9 +257,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(double.MaxValue, new byte[] { 0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF })]
         public void TestWriteFloat64(double value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteFloat64(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteFloat64(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase("", new byte[] { 0x00, 0x00 })]
@@ -262,9 +273,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x00, 0x20, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestWriteString(string value, byte[] expected)
         {
-            var buffer = new byte[40].AsMemory();
-            var slice = Encoder.WriteString(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[40];
+            var len = Encoder.WriteString(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase("", new byte[] { 0x01 })]
@@ -277,9 +289,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x21, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestWriteCompactString(string value, byte[] expected)
         {
-            var buffer = new byte[40].AsMemory();
-            var slice = Encoder.WriteCompactString(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[40];
+            var len = Encoder.WriteCompactString(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(null, new byte[] { 0xFF, 0xFF })]
@@ -293,9 +306,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x00, 0x20, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestWriteNullableString(string? value, byte[] expected)
         {
-            var buffer = new byte[40].AsMemory();
-            var slice = Encoder.WriteNullableString(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[40];
+            var len = Encoder.WriteNullableString(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(null, new byte[] { 0x00 })]
@@ -309,9 +323,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x21, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestWriteCompactNullableString(string? value, byte[] expected)
         {
-            var buffer = new byte[40].AsMemory();
-            var slice = Encoder.WriteCompactNullableString(buffer, value);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[40];
+            var len = Encoder.WriteCompactNullableString(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(new byte[] { }, new byte[] { 0x00, 0x00, 0x00, 0x00 })]
@@ -319,9 +334,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x00, 0x00, 0x00, 0x02, 0x00, 0x1A })]
         public void TestWriteBytes(byte[] value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteBytes(buffer, value.ToImmutableArray());
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteBytes(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(new byte[] { }, new byte[] { 0x01 })]
@@ -329,9 +345,10 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x03, 0x00, 0x1A })]
         public void TestWriteCompactBytes(byte[] value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteCompactBytes(buffer, value.ToImmutableArray());
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var len = Encoder.WriteCompactBytes(buffer, 0, value);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(null, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF })]
@@ -340,9 +357,11 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x00, 0x00, 0x00, 0x02, 0x00, 0x1A })]
         public void TestWriteNullableBytes(byte[]? value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteNullableBytes(buffer, value?.ToImmutableArray() ?? null);
-            AssertMemory(buffer, slice, expected);
+            var buffer = new byte[20];
+            var memory = value == null ? default(ReadOnlyMemory<byte>?) : value;
+            var len = Encoder.WriteNullableBytes(buffer, 0, memory);
+            Assert.That(len, Is.EqualTo(expected.Length));
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
 
         [TestCase(null, new byte[] { 0x00 })]
@@ -351,16 +370,11 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x03, 0x00, 0x1A })]
         public void TestWriteCompactNullableBytes(byte[]? value, byte[] expected)
         {
-            var buffer = new byte[20].AsMemory();
-            var slice = Encoder.WriteCompactNullableBytes(buffer, value?.ToImmutableArray() ?? null);
-            AssertMemory(buffer, slice, expected);
-        }
-
-        private static void AssertMemory(Memory<byte> buffer, Memory<byte> slice, byte[] expected)
-        {
-            var len = buffer.Length - slice.Length;
+            var buffer = new byte[20];
+            var memory = value == null ? default(ReadOnlyMemory<byte>?) : value;
+            var len = Encoder.WriteCompactNullableBytes(buffer, 0, memory);
             Assert.That(len, Is.EqualTo(expected.Length));
-            CollectionAssert.AreEqual(expected, buffer[0..len].ToArray());
+            CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
     }
 }

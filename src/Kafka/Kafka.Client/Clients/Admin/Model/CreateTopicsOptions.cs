@@ -5,7 +5,7 @@ namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record CreateTopicsOptions(
         int TimeoutMs,
-        short? ApiVersion,
+        short ApiVersion,
         string ClientId,
         bool ValidateOnly,
         bool RetryOnQuotaViolation,
@@ -14,7 +14,7 @@ namespace Kafka.Client.Clients.Admin.Model
     {
         public static CreateTopicsOptions Empty { get; } = new(
             -1,
-            0,
+            -1,
             "",
             false,
             false,

@@ -16,6 +16,7 @@ namespace Kafka.Client.Messages
         public static DescribeLogDirsRequest Empty { get; } = new(
             default(ImmutableArray<DescribableLogDirTopic>?)
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="TopicField">The topic name</param>
         /// <param name="PartitionsField">The partition indexes.</param>

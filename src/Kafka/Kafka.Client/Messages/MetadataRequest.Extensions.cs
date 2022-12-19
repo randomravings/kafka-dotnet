@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using MetadataRequestTopic = Kafka.Client.Messages.MetadataRequest.MetadataRequestTopic;
 
 namespace Kafka.Client.Messages
@@ -9,43 +8,44 @@ namespace Kafka.Client.Messages
     public static class MetadataRequestSerde
     {
         private static readonly DecodeDelegate<MetadataRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV05(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV06(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV07(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV08(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV09(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV10(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV11(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV12(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
+            ReadV05,
+            ReadV06,
+            ReadV07,
+            ReadV08,
+            ReadV09,
+            ReadV10,
+            ReadV11,
+            ReadV12,
         };
         private static readonly EncodeDelegate<MetadataRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
-            (b, m) => WriteV05(b, m),
-            (b, m) => WriteV06(b, m),
-            (b, m) => WriteV07(b, m),
-            (b, m) => WriteV08(b, m),
-            (b, m) => WriteV09(b, m),
-            (b, m) => WriteV10(b, m),
-            (b, m) => WriteV11(b, m),
-            (b, m) => WriteV12(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
+            WriteV05,
+            WriteV06,
+            WriteV07,
+            WriteV08,
+            WriteV09,
+            WriteV10,
+            WriteV11,
+            WriteV12,
         };
-        public static MetadataRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static MetadataRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, MetadataRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static MetadataRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, MetadataRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static MetadataRequest ReadV00(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
             var allowAutoTopicCreationField = default(bool);
             var includeClusterAuthorizedOperationsField = default(bool);
             var includeTopicAuthorizedOperationsField = default(bool);
@@ -56,16 +56,16 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV00(byte[] buffer, int index, MetadataRequest message)
         {
             if (message.TopicsField == null)
                 throw new ArgumentNullException(nameof(message.TopicsField));
-            buffer = Encoder.WriteArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV00);
+            return index;
         }
-        private static MetadataRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV01(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV01(ref b));
+            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV01);
             var allowAutoTopicCreationField = default(bool);
             var includeClusterAuthorizedOperationsField = default(bool);
             var includeTopicAuthorizedOperationsField = default(bool);
@@ -76,14 +76,14 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV01(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV01(b, i));
-            return buffer;
+            index = Encoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV01);
+            return index;
         }
-        private static MetadataRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV02(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV02(ref b));
+            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV02);
             var allowAutoTopicCreationField = default(bool);
             var includeClusterAuthorizedOperationsField = default(bool);
             var includeTopicAuthorizedOperationsField = default(bool);
@@ -94,14 +94,14 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV02(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV02(b, i));
-            return buffer;
+            index = Encoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV02);
+            return index;
         }
-        private static MetadataRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV03(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV03(ref b));
+            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV03);
             var allowAutoTopicCreationField = default(bool);
             var includeClusterAuthorizedOperationsField = default(bool);
             var includeTopicAuthorizedOperationsField = default(bool);
@@ -112,15 +112,15 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV03(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV03(b, i));
-            return buffer;
+            index = Encoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV03);
+            return index;
         }
-        private static MetadataRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV04(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV04(ref b));
-            var allowAutoTopicCreationField = Decoder.ReadBoolean(ref buffer);
+            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV04);
+            var allowAutoTopicCreationField = Decoder.ReadBoolean(buffer, ref index);
             var includeClusterAuthorizedOperationsField = default(bool);
             var includeTopicAuthorizedOperationsField = default(bool);
             return new(
@@ -130,16 +130,16 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV04(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV04(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.AllowAutoTopicCreationField);
-            return buffer;
+            index = Encoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV04);
+            index = Encoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
+            return index;
         }
-        private static MetadataRequest ReadV05(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV05(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV05(ref b));
-            var allowAutoTopicCreationField = Decoder.ReadBoolean(ref buffer);
+            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV05);
+            var allowAutoTopicCreationField = Decoder.ReadBoolean(buffer, ref index);
             var includeClusterAuthorizedOperationsField = default(bool);
             var includeTopicAuthorizedOperationsField = default(bool);
             return new(
@@ -149,16 +149,16 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV05(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV05(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV05(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.AllowAutoTopicCreationField);
-            return buffer;
+            index = Encoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV05);
+            index = Encoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
+            return index;
         }
-        private static MetadataRequest ReadV06(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV06(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV06(ref b));
-            var allowAutoTopicCreationField = Decoder.ReadBoolean(ref buffer);
+            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV06);
+            var allowAutoTopicCreationField = Decoder.ReadBoolean(buffer, ref index);
             var includeClusterAuthorizedOperationsField = default(bool);
             var includeTopicAuthorizedOperationsField = default(bool);
             return new(
@@ -168,16 +168,16 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV06(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV06(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV06(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.AllowAutoTopicCreationField);
-            return buffer;
+            index = Encoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV06);
+            index = Encoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
+            return index;
         }
-        private static MetadataRequest ReadV07(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV07(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV07(ref b));
-            var allowAutoTopicCreationField = Decoder.ReadBoolean(ref buffer);
+            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV07);
+            var allowAutoTopicCreationField = Decoder.ReadBoolean(buffer, ref index);
             var includeClusterAuthorizedOperationsField = default(bool);
             var includeTopicAuthorizedOperationsField = default(bool);
             return new(
@@ -187,18 +187,18 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV07(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV07(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV07(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.AllowAutoTopicCreationField);
-            return buffer;
+            index = Encoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV07);
+            index = Encoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
+            return index;
         }
-        private static MetadataRequest ReadV08(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV08(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV08(ref b));
-            var allowAutoTopicCreationField = Decoder.ReadBoolean(ref buffer);
-            var includeClusterAuthorizedOperationsField = Decoder.ReadBoolean(ref buffer);
-            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(ref buffer);
+            var topicsField = Decoder.ReadArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV08);
+            var allowAutoTopicCreationField = Decoder.ReadBoolean(buffer, ref index);
+            var includeClusterAuthorizedOperationsField = Decoder.ReadBoolean(buffer, ref index);
+            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(buffer, ref index);
             return new(
                 topicsField,
                 allowAutoTopicCreationField,
@@ -206,21 +206,21 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV08(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV08(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV08(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.AllowAutoTopicCreationField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeClusterAuthorizedOperationsField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeTopicAuthorizedOperationsField);
-            return buffer;
+            index = Encoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV08);
+            index = Encoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeClusterAuthorizedOperationsField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
+            return index;
         }
-        private static MetadataRequest ReadV09(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV09(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV09(ref b));
-            var allowAutoTopicCreationField = Decoder.ReadBoolean(ref buffer);
-            var includeClusterAuthorizedOperationsField = Decoder.ReadBoolean(ref buffer);
-            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV09);
+            var allowAutoTopicCreationField = Decoder.ReadBoolean(buffer, ref index);
+            var includeClusterAuthorizedOperationsField = Decoder.ReadBoolean(buffer, ref index);
+            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 allowAutoTopicCreationField,
@@ -228,22 +228,22 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV09(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV09(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteCompactArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV09(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.AllowAutoTopicCreationField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeClusterAuthorizedOperationsField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeTopicAuthorizedOperationsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV09);
+            index = Encoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeClusterAuthorizedOperationsField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static MetadataRequest ReadV10(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV10(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV10(ref b));
-            var allowAutoTopicCreationField = Decoder.ReadBoolean(ref buffer);
-            var includeClusterAuthorizedOperationsField = Decoder.ReadBoolean(ref buffer);
-            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV10);
+            var allowAutoTopicCreationField = Decoder.ReadBoolean(buffer, ref index);
+            var includeClusterAuthorizedOperationsField = Decoder.ReadBoolean(buffer, ref index);
+            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 allowAutoTopicCreationField,
@@ -251,22 +251,22 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV10(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV10(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteCompactArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV10(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.AllowAutoTopicCreationField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeClusterAuthorizedOperationsField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeTopicAuthorizedOperationsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV10);
+            index = Encoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeClusterAuthorizedOperationsField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static MetadataRequest ReadV11(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV11(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV11(ref b));
-            var allowAutoTopicCreationField = Decoder.ReadBoolean(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV11);
+            var allowAutoTopicCreationField = Decoder.ReadBoolean(buffer, ref index);
             var includeClusterAuthorizedOperationsField = default(bool);
-            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 allowAutoTopicCreationField,
@@ -274,21 +274,21 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV11(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV11(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteCompactArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV11(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.AllowAutoTopicCreationField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeTopicAuthorizedOperationsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV11);
+            index = Encoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static MetadataRequest ReadV12(ref ReadOnlyMemory<byte> buffer)
+        private static MetadataRequest ReadV12(byte[] buffer, ref int index)
         {
-            var topicsField = Decoder.ReadCompactArray<MetadataRequestTopic>(ref buffer, (ref ReadOnlyMemory<byte> b) => MetadataRequestTopicSerde.ReadV12(ref b));
-            var allowAutoTopicCreationField = Decoder.ReadBoolean(ref buffer);
+            var topicsField = Decoder.ReadCompactArray<MetadataRequestTopic>(buffer, ref index, MetadataRequestTopicSerde.ReadV12);
+            var allowAutoTopicCreationField = Decoder.ReadBoolean(buffer, ref index);
             var includeClusterAuthorizedOperationsField = default(bool);
-            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var includeTopicAuthorizedOperationsField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 topicsField,
                 allowAutoTopicCreationField,
@@ -296,228 +296,228 @@ namespace Kafka.Client.Messages
                 includeTopicAuthorizedOperationsField
             );
         }
-        private static Memory<byte> WriteV12(Memory<byte> buffer, MetadataRequest message)
+        private static int WriteV12(byte[] buffer, int index, MetadataRequest message)
         {
-            buffer = Encoder.WriteCompactArray<MetadataRequestTopic>(buffer, message.TopicsField, (b, i) => MetadataRequestTopicSerde.WriteV12(b, i));
-            buffer = Encoder.WriteBoolean(buffer, message.AllowAutoTopicCreationField);
-            buffer = Encoder.WriteBoolean(buffer, message.IncludeTopicAuthorizedOperationsField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicSerde.WriteV12);
+            index = Encoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
+            index = Encoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class MetadataRequestTopicSerde
         {
-            public static MetadataRequestTopic ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV00(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV00(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                return index;
             }
-            public static MetadataRequestTopic ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV01(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV01(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                return index;
             }
-            public static MetadataRequestTopic ReadV02(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV02(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV02(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV02(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                return index;
             }
-            public static MetadataRequestTopic ReadV03(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV03(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV03(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV03(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                return index;
             }
-            public static MetadataRequestTopic ReadV04(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV04(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV04(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV04(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                return index;
             }
-            public static MetadataRequestTopic ReadV05(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV05(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV05(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV05(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                return index;
             }
-            public static MetadataRequestTopic ReadV06(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV06(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV06(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV06(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                return index;
             }
-            public static MetadataRequestTopic ReadV07(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV07(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV07(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV07(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                return index;
             }
-            public static MetadataRequestTopic ReadV08(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV08(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(ref buffer);
+                var nameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV08(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV08(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteString(buffer, message.NameField);
-                return buffer;
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                return index;
             }
-            public static MetadataRequestTopic ReadV09(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV09(byte[] buffer, ref int index)
             {
                 var topicIdField = default(Guid);
-                var nameField = Decoder.ReadCompactString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV09(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV09(byte[] buffer, int index, MetadataRequestTopic message)
             {
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                buffer = Encoder.WriteCompactString(buffer, message.NameField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static MetadataRequestTopic ReadV10(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV10(byte[] buffer, ref int index)
             {
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                var nameField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV10(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV10(byte[] buffer, int index, MetadataRequestTopic message)
             {
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.NameField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.NameField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static MetadataRequestTopic ReadV11(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV11(byte[] buffer, ref int index)
             {
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                var nameField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV11(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV11(byte[] buffer, int index, MetadataRequestTopic message)
             {
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.NameField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.NameField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static MetadataRequestTopic ReadV12(ref ReadOnlyMemory<byte> buffer)
+            public static MetadataRequestTopic ReadV12(byte[] buffer, ref int index)
             {
-                var topicIdField = Decoder.ReadUuid(ref buffer);
-                var nameField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     topicIdField,
                     nameField
                 );
             }
-            public static Memory<byte> WriteV12(Memory<byte> buffer, MetadataRequestTopic message)
+            public static int WriteV12(byte[] buffer, int index, MetadataRequestTopic message)
             {
-                buffer = Encoder.WriteUuid(buffer, message.TopicIdField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.NameField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.NameField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

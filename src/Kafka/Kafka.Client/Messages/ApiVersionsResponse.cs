@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using ApiVersion = Kafka.Client.Messages.ApiVersionsResponse.ApiVersion;
-using SupportedFeatureKey = Kafka.Client.Messages.ApiVersionsResponse.SupportedFeatureKey;
 using FinalizedFeatureKey = Kafka.Client.Messages.ApiVersionsResponse.FinalizedFeatureKey;
+using SupportedFeatureKey = Kafka.Client.Messages.ApiVersionsResponse.SupportedFeatureKey;
+using ApiVersion = Kafka.Client.Messages.ApiVersionsResponse.ApiVersion;
 
 namespace Kafka.Client.Messages
 {
@@ -33,19 +33,20 @@ namespace Kafka.Client.Messages
             default(long),
             ImmutableArray<FinalizedFeatureKey>.Empty
         );
+        public static short FlexibleVersion { get; } = 3;
         /// <summary>
-        /// <param name="ApiKeyField">The API index.</param>
-        /// <param name="MinVersionField">The minimum supported version, inclusive.</param>
-        /// <param name="MaxVersionField">The maximum supported version, inclusive.</param>
+        /// <param name="NameField">The name of the feature.</param>
+        /// <param name="MaxVersionLevelField">The cluster-wide finalized max version level for the feature.</param>
+        /// <param name="MinVersionLevelField">The cluster-wide finalized min version level for the feature.</param>
         /// </summary>
-        public sealed record ApiVersion (
-            short ApiKeyField,
-            short MinVersionField,
-            short MaxVersionField
+        public sealed record FinalizedFeatureKey (
+            string NameField,
+            short MaxVersionLevelField,
+            short MinVersionLevelField
         )
         {
-            public static ApiVersion Empty { get; } = new(
-                default(short),
+            public static FinalizedFeatureKey Empty { get; } = new(
+                "",
                 default(short),
                 default(short)
             );
@@ -68,18 +69,18 @@ namespace Kafka.Client.Messages
             );
         };
         /// <summary>
-        /// <param name="NameField">The name of the feature.</param>
-        /// <param name="MaxVersionLevelField">The cluster-wide finalized max version level for the feature.</param>
-        /// <param name="MinVersionLevelField">The cluster-wide finalized min version level for the feature.</param>
+        /// <param name="ApiKeyField">The API index.</param>
+        /// <param name="MinVersionField">The minimum supported version, inclusive.</param>
+        /// <param name="MaxVersionField">The maximum supported version, inclusive.</param>
         /// </summary>
-        public sealed record FinalizedFeatureKey (
-            string NameField,
-            short MaxVersionLevelField,
-            short MinVersionLevelField
+        public sealed record ApiVersion (
+            short ApiKeyField,
+            short MinVersionField,
+            short MaxVersionField
         )
         {
-            public static FinalizedFeatureKey Empty { get; } = new(
-                "",
+            public static ApiVersion Empty { get; } = new(
+                default(short),
                 default(short),
                 default(short)
             );

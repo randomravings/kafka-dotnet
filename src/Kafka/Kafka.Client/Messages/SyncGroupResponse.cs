@@ -1,5 +1,4 @@
 using System.CodeDom.Compiler;
-using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 
 namespace Kafka.Client.Messages
@@ -17,7 +16,7 @@ namespace Kafka.Client.Messages
         short ErrorCodeField,
         string? ProtocolTypeField,
         string? ProtocolNameField,
-        ImmutableArray<byte> AssignmentField
+        ReadOnlyMemory<byte> AssignmentField
     ) : Response(14)
     {
         public static SyncGroupResponse Empty { get; } = new(
@@ -25,7 +24,8 @@ namespace Kafka.Client.Messages
             default(short),
             default(string?),
             default(string?),
-            ImmutableArray<byte>.Empty
+            Array.Empty<byte>()
         );
+        public static short FlexibleVersion { get; } = 4;
     };
 }

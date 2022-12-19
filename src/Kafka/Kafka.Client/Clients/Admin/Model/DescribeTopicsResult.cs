@@ -6,7 +6,7 @@ using static Kafka.Client.Clients.Admin.Model.DescribeTopicsResult.DescribeTopic
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record DescribeTopicsResult(
-        ImmutableSortedDictionary<Topic, DescribeTopicResult> Topics
+        ImmutableSortedDictionary<TopicName, DescribeTopicResult> Topics
     )
     {
         public sealed record DescribeTopicResult(

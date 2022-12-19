@@ -15,5 +15,6 @@ namespace Kafka.Client.Messages
         public static ListGroupsRequest Empty { get; } = new(
             ImmutableArray<string>.Empty
         );
+        public static short FlexibleVersion { get; } = 3;
     };
 }

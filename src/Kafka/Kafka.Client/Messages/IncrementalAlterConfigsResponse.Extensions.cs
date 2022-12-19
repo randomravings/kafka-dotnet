@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using AlterConfigsResourceResponse = Kafka.Client.Messages.IncrementalAlterConfigsResponse.AlterConfigsResourceResponse;
 
 namespace Kafka.Client.Messages
@@ -9,58 +8,59 @@ namespace Kafka.Client.Messages
     public static class IncrementalAlterConfigsResponseSerde
     {
         private static readonly DecodeDelegate<IncrementalAlterConfigsResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            ReadV00,
+            ReadV01,
         };
         private static readonly EncodeDelegate<IncrementalAlterConfigsResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
+            WriteV00,
+            WriteV01,
         };
-        public static IncrementalAlterConfigsResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static IncrementalAlterConfigsResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, IncrementalAlterConfigsResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static IncrementalAlterConfigsResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, IncrementalAlterConfigsResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static IncrementalAlterConfigsResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var responsesField = Decoder.ReadArray<AlterConfigsResourceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterConfigsResourceResponseSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var responsesField = Decoder.ReadArray<AlterConfigsResourceResponse>(buffer, ref index, AlterConfigsResourceResponseSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
             return new(
                 throttleTimeMsField,
                 responsesField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, IncrementalAlterConfigsResponse message)
+        private static int WriteV00(byte[] buffer, int index, IncrementalAlterConfigsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteArray<AlterConfigsResourceResponse>(buffer, message.ResponsesField, (b, i) => AlterConfigsResourceResponseSerde.WriteV00(b, i));
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteArray<AlterConfigsResourceResponse>(buffer, index, message.ResponsesField, AlterConfigsResourceResponseSerde.WriteV00);
+            return index;
         }
-        private static IncrementalAlterConfigsResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static IncrementalAlterConfigsResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var responsesField = Decoder.ReadCompactArray<AlterConfigsResourceResponse>(ref buffer, (ref ReadOnlyMemory<byte> b) => AlterConfigsResourceResponseSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var responsesField = Decoder.ReadCompactArray<AlterConfigsResourceResponse>(buffer, ref index, AlterConfigsResourceResponseSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Responses'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 responsesField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, IncrementalAlterConfigsResponse message)
+        private static int WriteV01(byte[] buffer, int index, IncrementalAlterConfigsResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteCompactArray<AlterConfigsResourceResponse>(buffer, message.ResponsesField, (b, i) => AlterConfigsResourceResponseSerde.WriteV01(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteCompactArray<AlterConfigsResourceResponse>(buffer, index, message.ResponsesField, AlterConfigsResourceResponseSerde.WriteV01);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class AlterConfigsResourceResponseSerde
         {
-            public static AlterConfigsResourceResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static AlterConfigsResourceResponse ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadNullableString(ref buffer);
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadString(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadString(buffer, ref index);
                 return new(
                     errorCodeField,
                     errorMessageField,
@@ -68,21 +68,21 @@ namespace Kafka.Client.Messages
                     resourceNameField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, AlterConfigsResourceResponse message)
+            public static int WriteV00(byte[] buffer, int index, AlterConfigsResourceResponse message)
             {
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteString(buffer, message.ResourceNameField);
-                return buffer;
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteString(buffer, index, message.ResourceNameField);
+                return index;
             }
-            public static AlterConfigsResourceResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static AlterConfigsResourceResponse ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-                var resourceTypeField = Decoder.ReadInt8(ref buffer);
-                var resourceNameField = Decoder.ReadCompactString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     errorCodeField,
                     errorMessageField,
@@ -90,14 +90,14 @@ namespace Kafka.Client.Messages
                     resourceNameField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, AlterConfigsResourceResponse message)
+            public static int WriteV01(byte[] buffer, int index, AlterConfigsResourceResponse message)
             {
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteInt8(buffer, message.ResourceTypeField);
-                buffer = Encoder.WriteCompactString(buffer, message.ResourceNameField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteInt8(buffer, index, message.ResourceTypeField);
+                index = Encoder.WriteCompactString(buffer, index, message.ResourceNameField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

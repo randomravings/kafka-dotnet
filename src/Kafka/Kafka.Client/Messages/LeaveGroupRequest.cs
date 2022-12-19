@@ -22,6 +22,7 @@ namespace Kafka.Client.Messages
             "",
             ImmutableArray<MemberIdentity>.Empty
         );
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="MemberIdField">The member ID to remove from the group.</param>
         /// <param name="GroupInstanceIdField">The group instance ID to remove from the group.</param>

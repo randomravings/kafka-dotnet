@@ -37,18 +37,19 @@ namespace Kafka.Client.Messages
             ImmutableArray<JoinGroupRequestProtocol>.Empty,
             default(string?)
         );
+        public static short FlexibleVersion { get; } = 6;
         /// <summary>
         /// <param name="NameField">The protocol name.</param>
         /// <param name="MetadataField">The protocol metadata.</param>
         /// </summary>
         public sealed record JoinGroupRequestProtocol (
             string NameField,
-            ImmutableArray<byte> MetadataField
+            ReadOnlyMemory<byte> MetadataField
         )
         {
             public static JoinGroupRequestProtocol Empty { get; } = new(
                 "",
-                ImmutableArray<byte>.Empty
+                Array.Empty<byte>()
             );
         };
     };

@@ -7,24 +7,25 @@ namespace Kafka.Client.Messages
     public static class BrokerHeartbeatResponseSerde
     {
         private static readonly DecodeDelegate<BrokerHeartbeatResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<BrokerHeartbeatResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static BrokerHeartbeatResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static BrokerHeartbeatResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, BrokerHeartbeatResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static BrokerHeartbeatResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, BrokerHeartbeatResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static BrokerHeartbeatResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var isCaughtUpField = Decoder.ReadBoolean(ref buffer);
-            var isFencedField = Decoder.ReadBoolean(ref buffer);
-            var shouldShutDownField = Decoder.ReadBoolean(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var isCaughtUpField = Decoder.ReadBoolean(buffer, ref index);
+            var isFencedField = Decoder.ReadBoolean(buffer, ref index);
+            var shouldShutDownField = Decoder.ReadBoolean(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -33,15 +34,15 @@ namespace Kafka.Client.Messages
                 shouldShutDownField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, BrokerHeartbeatResponse message)
+        private static int WriteV00(byte[] buffer, int index, BrokerHeartbeatResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteBoolean(buffer, message.IsCaughtUpField);
-            buffer = Encoder.WriteBoolean(buffer, message.IsFencedField);
-            buffer = Encoder.WriteBoolean(buffer, message.ShouldShutDownField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteBoolean(buffer, index, message.IsCaughtUpField);
+            index = Encoder.WriteBoolean(buffer, index, message.IsFencedField);
+            index = Encoder.WriteBoolean(buffer, index, message.ShouldShutDownField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

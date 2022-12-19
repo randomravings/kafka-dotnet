@@ -1,47 +1,13 @@
-﻿using Kafka.Common.Records;
+﻿using Kafka.Client.Clients.Producer.Model;
 using Kafka.Common.Types;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Producer
 {
-    internal interface IProducer<TKey, TValue> :
+    public interface IProducer<TKey, TValue> :
         IClient
     {
         ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            TKey key,
-            TValue value,
-            CancellationToken cancellationToken = default
-        );
-
-        ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            TKey key,
-            TValue value,
-            Timestamp timestamp,
-            CancellationToken cancellationToken = default
-        );
-
-        ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            TKey key,
-            TValue value,
-            ImmutableArray<RecordHeader> recordHeaders,
-            CancellationToken cancellationToken = default
-        );
-
-        ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            TKey key,
-            TValue value,
-            Timestamp timestamp,
-            ImmutableArray<RecordHeader> recordHeaders,
-            CancellationToken cancellationToken = default
-        );
-
-        ValueTask<ProduceResult<TKey, TValue>> Send(
-            string topic,
-            ProducerRecord<TKey, TValue> record,
+            ProduceRecord<TKey, TValue> produceRecrod,
             CancellationToken cancellationToken = default
         );
     }

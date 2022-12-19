@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 using UpdatableFeatureResult = Kafka.Client.Messages.UpdateFeaturesResponse.UpdatableFeatureResult;
 
 namespace Kafka.Client.Messages
@@ -9,25 +8,26 @@ namespace Kafka.Client.Messages
     public static class UpdateFeaturesResponseSerde
     {
         private static readonly DecodeDelegate<UpdateFeaturesResponse>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
+            ReadV00,
+            ReadV01,
         };
         private static readonly EncodeDelegate<UpdateFeaturesResponse>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
+            WriteV00,
+            WriteV01,
         };
-        public static UpdateFeaturesResponse Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static UpdateFeaturesResponse Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, UpdateFeaturesResponse message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static UpdateFeaturesResponse ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, UpdateFeaturesResponse message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static UpdateFeaturesResponse ReadV00(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-            var resultsField = Decoder.ReadCompactArray<UpdatableFeatureResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdatableFeatureResultSerde.ReadV00(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var resultsField = Decoder.ReadCompactArray<UpdatableFeatureResult>(buffer, ref index, UpdatableFeatureResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -35,22 +35,22 @@ namespace Kafka.Client.Messages
                 resultsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, UpdateFeaturesResponse message)
+        private static int WriteV00(byte[] buffer, int index, UpdateFeaturesResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteCompactArray<UpdatableFeatureResult>(buffer, message.ResultsField, (b, i) => UpdatableFeatureResultSerde.WriteV00(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteCompactArray<UpdatableFeatureResult>(buffer, index, message.ResultsField, UpdatableFeatureResultSerde.WriteV00);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static UpdateFeaturesResponse ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static UpdateFeaturesResponse ReadV01(byte[] buffer, ref int index)
         {
-            var throttleTimeMsField = Decoder.ReadInt32(ref buffer);
-            var errorCodeField = Decoder.ReadInt16(ref buffer);
-            var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-            var resultsField = Decoder.ReadCompactArray<UpdatableFeatureResult>(ref buffer, (ref ReadOnlyMemory<byte> b) => UpdatableFeatureResultSerde.ReadV01(ref b)) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
+            var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+            var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+            var resultsField = Decoder.ReadCompactArray<UpdatableFeatureResult>(buffer, ref index, UpdatableFeatureResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -58,56 +58,56 @@ namespace Kafka.Client.Messages
                 resultsField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, UpdateFeaturesResponse message)
+        private static int WriteV01(byte[] buffer, int index, UpdateFeaturesResponse message)
         {
-            buffer = Encoder.WriteInt32(buffer, message.ThrottleTimeMsField);
-            buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-            buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-            buffer = Encoder.WriteCompactArray<UpdatableFeatureResult>(buffer, message.ResultsField, (b, i) => UpdatableFeatureResultSerde.WriteV01(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+            index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+            index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+            index = Encoder.WriteCompactArray<UpdatableFeatureResult>(buffer, index, message.ResultsField, UpdatableFeatureResultSerde.WriteV01);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
         private static class UpdatableFeatureResultSerde
         {
-            public static UpdatableFeatureResult ReadV00(ref ReadOnlyMemory<byte> buffer)
+            public static UpdatableFeatureResult ReadV00(byte[] buffer, ref int index)
             {
-                var featureField = Decoder.ReadCompactString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var featureField = Decoder.ReadCompactString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     featureField,
                     errorCodeField,
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV00(Memory<byte> buffer, UpdatableFeatureResult message)
+            public static int WriteV00(byte[] buffer, int index, UpdatableFeatureResult message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.FeatureField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.FeatureField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
-            public static UpdatableFeatureResult ReadV01(ref ReadOnlyMemory<byte> buffer)
+            public static UpdatableFeatureResult ReadV01(byte[] buffer, ref int index)
             {
-                var featureField = Decoder.ReadCompactString(ref buffer);
-                var errorCodeField = Decoder.ReadInt16(ref buffer);
-                var errorMessageField = Decoder.ReadCompactNullableString(ref buffer);
-                _ = Decoder.ReadVarUInt32(ref buffer);
+                var featureField = Decoder.ReadCompactString(buffer, ref index);
+                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
                     featureField,
                     errorCodeField,
                     errorMessageField
                 );
             }
-            public static Memory<byte> WriteV01(Memory<byte> buffer, UpdatableFeatureResult message)
+            public static int WriteV01(byte[] buffer, int index, UpdatableFeatureResult message)
             {
-                buffer = Encoder.WriteCompactString(buffer, message.FeatureField);
-                buffer = Encoder.WriteInt16(buffer, message.ErrorCodeField);
-                buffer = Encoder.WriteCompactNullableString(buffer, message.ErrorMessageField);
-                buffer = Encoder.WriteVarUInt32(buffer, 0);
-                return buffer;
+                index = Encoder.WriteCompactString(buffer, index, message.FeatureField);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteCompactNullableString(buffer, index, message.ErrorMessageField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
             }
         }
     }

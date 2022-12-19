@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<AddPartitionsToTxnTopic>.Empty
         );
+        public static short FlexibleVersion { get; } = 3;
         /// <summary>
         /// <param name="NameField">The name of the topic.</param>
         /// <param name="PartitionsField">The partition indexes to add to the transaction</param>

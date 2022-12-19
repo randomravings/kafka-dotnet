@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Messages
 {
@@ -8,29 +7,30 @@ namespace Kafka.Client.Messages
     public static class DescribeTransactionsRequestSerde
     {
         private static readonly DecodeDelegate<DescribeTransactionsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
+            ReadV00,
         };
         private static readonly EncodeDelegate<DescribeTransactionsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
+            WriteV00,
         };
-        public static DescribeTransactionsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static DescribeTransactionsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, DescribeTransactionsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static DescribeTransactionsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, DescribeTransactionsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static DescribeTransactionsRequest ReadV00(byte[] buffer, ref int index)
         {
-            var transactionalIdsField = Decoder.ReadCompactArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'TransactionalIds'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var transactionalIdsField = Decoder.ReadCompactArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'TransactionalIds'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 transactionalIdsField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, DescribeTransactionsRequest message)
+        private static int WriteV00(byte[] buffer, int index, DescribeTransactionsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<string>(buffer, message.TransactionalIdsField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<string>(buffer, index, message.TransactionalIdsField, Encoder.WriteCompactString);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

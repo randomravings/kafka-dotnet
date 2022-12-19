@@ -12,6 +12,10 @@ namespace Kafka.Common.Types
         long TimestampMs
     )
     {
+        public static Timestamp None { get; } =
+            new(TimestampType.None, 0)
+        ;
+
         /// <summary>
         /// Creates a Create timestamp.
         /// </summary>

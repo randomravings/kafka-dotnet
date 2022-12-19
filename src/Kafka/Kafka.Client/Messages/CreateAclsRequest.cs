@@ -16,6 +16,7 @@ namespace Kafka.Client.Messages
         public static CreateAclsRequest Empty { get; } = new(
             ImmutableArray<AclCreation>.Empty
         );
+        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ResourceTypeField">The type of the resource.</param>
         /// <param name="ResourceNameField">The resource name for the ACL.</param>

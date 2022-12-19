@@ -1,6 +1,5 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Messages
 {
@@ -8,57 +7,58 @@ namespace Kafka.Client.Messages
     public static class SaslAuthenticateRequestSerde
     {
         private static readonly DecodeDelegate<SaslAuthenticateRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
         };
         private static readonly EncodeDelegate<SaslAuthenticateRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
         };
-        public static SaslAuthenticateRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static SaslAuthenticateRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, SaslAuthenticateRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static SaslAuthenticateRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, SaslAuthenticateRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static SaslAuthenticateRequest ReadV00(byte[] buffer, ref int index)
         {
-            var authBytesField = Decoder.ReadBytes(ref buffer);
+            var authBytesField = Decoder.ReadBytes(buffer, ref index);
             return new(
                 authBytesField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, SaslAuthenticateRequest message)
+        private static int WriteV00(byte[] buffer, int index, SaslAuthenticateRequest message)
         {
-            buffer = Encoder.WriteBytes(buffer, message.AuthBytesField);
-            return buffer;
+            index = Encoder.WriteBytes(buffer, index, message.AuthBytesField);
+            return index;
         }
-        private static SaslAuthenticateRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static SaslAuthenticateRequest ReadV01(byte[] buffer, ref int index)
         {
-            var authBytesField = Decoder.ReadBytes(ref buffer);
+            var authBytesField = Decoder.ReadBytes(buffer, ref index);
             return new(
                 authBytesField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, SaslAuthenticateRequest message)
+        private static int WriteV01(byte[] buffer, int index, SaslAuthenticateRequest message)
         {
-            buffer = Encoder.WriteBytes(buffer, message.AuthBytesField);
-            return buffer;
+            index = Encoder.WriteBytes(buffer, index, message.AuthBytesField);
+            return index;
         }
-        private static SaslAuthenticateRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static SaslAuthenticateRequest ReadV02(byte[] buffer, ref int index)
         {
-            var authBytesField = Decoder.ReadCompactBytes(ref buffer);
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var authBytesField = Decoder.ReadCompactBytes(buffer, ref index);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 authBytesField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, SaslAuthenticateRequest message)
+        private static int WriteV02(byte[] buffer, int index, SaslAuthenticateRequest message)
         {
-            buffer = Encoder.WriteCompactBytes(buffer, message.AuthBytesField);
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactBytes(buffer, index, message.AuthBytesField);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

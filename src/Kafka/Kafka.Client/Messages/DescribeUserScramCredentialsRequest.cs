@@ -16,6 +16,7 @@ namespace Kafka.Client.Messages
         public static DescribeUserScramCredentialsRequest Empty { get; } = new(
             default(ImmutableArray<UserName>?)
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The user name.</param>
         /// </summary>

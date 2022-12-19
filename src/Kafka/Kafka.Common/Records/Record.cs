@@ -6,18 +6,6 @@ namespace Kafka.Common.Records
     /// <summary>
     /// Record for magic 2  .
     /// </summary>
-    /// <param name="BaseOffset">
-    /// Passed to record to enable computing of the actual offset from delta.
-    /// <para>Note: This is not serialized.</para>
-    /// </param>
-    /// <param name="BaseTimestamp">
-    /// Passed to record to enable computing of the actual timestamp from delta.
-    /// <para>Note: This is not serialized.</para>
-    /// </param>
-    /// <param name="Sequence">
-    /// Passed to record to explicitly show the sequence in the batch.
-    /// <para>Note: This is not serialized.</para>
-    /// </param>
     /// <param name="Length">Size of the record in bytes.</param>
     /// <param name="Attributes">
     /// <code>
@@ -40,21 +28,18 @@ namespace Kafka.Common.Records
     /// <param name="Value">Value bytes, null if no value in record.</param>
     /// <param name="Headers">Record Headers, empty if no header.</param>
     public sealed record Record(
-        [property: SerializationIgnore] long BaseOffset,
-        [property: SerializationIgnore] long BaseTimestamp,
-        [property: SerializationIgnore] int Sequence,
         [property: Serialization(SerializationType.VarInt32, 0)] int Length,
         [property: Serialization(SerializationType.Int16, 1)] Attributes Attributes,
         [property: Serialization(SerializationType.VarInt64, 2)] long TimestampDelta,
         [property: Serialization(SerializationType.VarInt32, 3)] int OffsetDelta,
-        [property: Serialization(SerializationType.CompactBytes, 4)] ImmutableArray<byte>? Key,
-        [property: Serialization(SerializationType.CompactBytes, 5)] ImmutableArray<byte>? Value,
+        [property: Serialization(SerializationType.CompactBytes, 4)] ReadOnlyMemory<byte>? Key,
+        [property: Serialization(SerializationType.CompactBytes, 5)] ReadOnlyMemory<byte>? Value,
         [property: Serialization(SerializationType.Array, 0)] ImmutableArray<RecordHeader> Headers
     ) : IRecord
     {
-        int IRecord.Sequence => Sequence;
+        int IRecord.Sequence => -1;
 
-        long IRecord.Offset => BaseOffset + OffsetDelta;
+        long IRecord.Offset => -1;
 
         int IRecord.SizeInBytes => Length;
 
@@ -64,11 +49,11 @@ namespace Kafka.Common.Records
 
         Attributes IRecord.Attributes => Attributes.None;
 
-        long IRecord.Timestamp => BaseTimestamp + TimestampDelta;
+        long IRecord.Timestamp => -1;
 
-        ImmutableArray<byte>? IRecord.Key => Key;
+        ReadOnlyMemory<byte>? IRecord.Key => Key;
 
-        ImmutableArray<byte>? IRecord.Value => Value;
+        ReadOnlyMemory<byte>? IRecord.Value => Value;
 
         long IRecord.TimestampDelta => TimestampDelta;
 

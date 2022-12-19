@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TxnOffsetCommitRequestPartition = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic.TxnOffsetCommitRequestPartition;
 using TxnOffsetCommitRequestTopic = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic;
+using TxnOffsetCommitRequestPartition = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic.TxnOffsetCommitRequestPartition;
 
 namespace Kafka.Client.Messages
 {
@@ -38,6 +38,7 @@ namespace Kafka.Client.Messages
             default(string?),
             ImmutableArray<TxnOffsetCommitRequestTopic>.Empty
         );
+        public static short FlexibleVersion { get; } = 3;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">The partitions inside the topic that we want to committ offsets for.</param>

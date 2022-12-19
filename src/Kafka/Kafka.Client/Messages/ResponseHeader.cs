@@ -14,5 +14,6 @@ namespace Kafka.Client.Messages
         public static ResponseHeader Empty { get; } = new(
             default(int)
         );
+        public static short FlexibleVersion { get; } = 1;
     };
 }

@@ -34,18 +34,19 @@ namespace Kafka.Client.Messages
             default(string?),
             ImmutableArray<SyncGroupRequestAssignment>.Empty
         );
+        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="MemberIdField">The ID of the member to assign.</param>
         /// <param name="AssignmentField">The member assignment.</param>
         /// </summary>
         public sealed record SyncGroupRequestAssignment (
             string MemberIdField,
-            ImmutableArray<byte> AssignmentField
+            ReadOnlyMemory<byte> AssignmentField
         )
         {
             public static SyncGroupRequestAssignment Empty { get; } = new(
                 "",
-                ImmutableArray<byte>.Empty
+                Array.Empty<byte>()
             );
         };
     };

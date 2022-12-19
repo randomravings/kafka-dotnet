@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
+using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
 using PartitionProduceResponse = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse;
 using TopicProduceResponse = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse;
-using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
 
 namespace Kafka.Client.Messages
 {
@@ -21,6 +21,7 @@ namespace Kafka.Client.Messages
             ImmutableArray<TopicProduceResponse>.Empty,
             default(int)
         );
+        public static short FlexibleVersion { get; } = 9;
         /// <summary>
         /// <param name="NameField">The topic name</param>
         /// <param name="PartitionResponsesField">Each partition that we produced to within the topic.</param>

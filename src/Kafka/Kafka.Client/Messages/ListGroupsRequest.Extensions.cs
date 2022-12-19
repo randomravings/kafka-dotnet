@@ -8,83 +8,84 @@ namespace Kafka.Client.Messages
     public static class ListGroupsRequestSerde
     {
         private static readonly DecodeDelegate<ListGroupsRequest>[] READ_VERSIONS = {
-            (ref ReadOnlyMemory<byte> b) => ReadV00(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV01(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV02(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV03(ref b),
-            (ref ReadOnlyMemory<byte> b) => ReadV04(ref b),
+            ReadV00,
+            ReadV01,
+            ReadV02,
+            ReadV03,
+            ReadV04,
         };
         private static readonly EncodeDelegate<ListGroupsRequest>[] WRITE_VERSIONS = {
-            (b, m) => WriteV00(b, m),
-            (b, m) => WriteV01(b, m),
-            (b, m) => WriteV02(b, m),
-            (b, m) => WriteV03(b, m),
-            (b, m) => WriteV04(b, m),
+            WriteV00,
+            WriteV01,
+            WriteV02,
+            WriteV03,
+            WriteV04,
         };
-        public static ListGroupsRequest Read(ref ReadOnlyMemory<byte> buffer, short version) =>
-            READ_VERSIONS[version](ref buffer)
+        public static ListGroupsRequest Read(byte[] buffer, ref int index, short version) =>
+            READ_VERSIONS[version](buffer, ref index)
         ;
-        public static Memory<byte> Write(Memory<byte> buffer, short version, ListGroupsRequest message) =>
-            WRITE_VERSIONS[version](buffer, message);
-        private static ListGroupsRequest ReadV00(ref ReadOnlyMemory<byte> buffer)
+        public static int Write(byte[] buffer, int index, ListGroupsRequest message, short version) =>
+            WRITE_VERSIONS[version](buffer, index, message)
+        ;
+        private static ListGroupsRequest ReadV00(byte[] buffer, ref int index)
         {
             var statesFilterField = ImmutableArray<string>.Empty;
             return new(
                 statesFilterField
             );
         }
-        private static Memory<byte> WriteV00(Memory<byte> buffer, ListGroupsRequest message)
+        private static int WriteV00(byte[] buffer, int index, ListGroupsRequest message)
         {
-            return buffer;
+            return index;
         }
-        private static ListGroupsRequest ReadV01(ref ReadOnlyMemory<byte> buffer)
+        private static ListGroupsRequest ReadV01(byte[] buffer, ref int index)
         {
             var statesFilterField = ImmutableArray<string>.Empty;
             return new(
                 statesFilterField
             );
         }
-        private static Memory<byte> WriteV01(Memory<byte> buffer, ListGroupsRequest message)
+        private static int WriteV01(byte[] buffer, int index, ListGroupsRequest message)
         {
-            return buffer;
+            return index;
         }
-        private static ListGroupsRequest ReadV02(ref ReadOnlyMemory<byte> buffer)
+        private static ListGroupsRequest ReadV02(byte[] buffer, ref int index)
         {
             var statesFilterField = ImmutableArray<string>.Empty;
             return new(
                 statesFilterField
             );
         }
-        private static Memory<byte> WriteV02(Memory<byte> buffer, ListGroupsRequest message)
+        private static int WriteV02(byte[] buffer, int index, ListGroupsRequest message)
         {
-            return buffer;
+            return index;
         }
-        private static ListGroupsRequest ReadV03(ref ReadOnlyMemory<byte> buffer)
+        private static ListGroupsRequest ReadV03(byte[] buffer, ref int index)
         {
             var statesFilterField = ImmutableArray<string>.Empty;
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 statesFilterField
             );
         }
-        private static Memory<byte> WriteV03(Memory<byte> buffer, ListGroupsRequest message)
+        private static int WriteV03(byte[] buffer, int index, ListGroupsRequest message)
         {
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
-        private static ListGroupsRequest ReadV04(ref ReadOnlyMemory<byte> buffer)
+        private static ListGroupsRequest ReadV04(byte[] buffer, ref int index)
         {
-            var statesFilterField = Decoder.ReadCompactArray<string>(ref buffer, (ref ReadOnlyMemory<byte> b) => Decoder.ReadCompactString(ref b)) ?? throw new NullReferenceException("Null not allowed for 'StatesFilter'");
-            _ = Decoder.ReadVarUInt32(ref buffer);
+            var statesFilterField = Decoder.ReadCompactArray<string>(buffer, ref index, Decoder.ReadCompactString) ?? throw new NullReferenceException("Null not allowed for 'StatesFilter'");
+            _ = Decoder.ReadVarUInt32(buffer, ref index);
             return new(
                 statesFilterField
             );
         }
-        private static Memory<byte> WriteV04(Memory<byte> buffer, ListGroupsRequest message)
+        private static int WriteV04(byte[] buffer, int index, ListGroupsRequest message)
         {
-            buffer = Encoder.WriteCompactArray<string>(buffer, message.StatesFilterField, (b, i) => Encoder.WriteCompactString(b, i));
-            buffer = Encoder.WriteVarUInt32(buffer, 0);
-            return buffer;
+            index = Encoder.WriteCompactArray<string>(buffer, index, message.StatesFilterField, Encoder.WriteCompactString);
+            index = Encoder.WriteVarUInt32(buffer, index, 0);
+            return index;
         }
     }
 }

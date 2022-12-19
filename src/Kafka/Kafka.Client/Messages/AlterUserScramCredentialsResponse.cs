@@ -19,6 +19,7 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<AlterUserScramCredentialsResult>.Empty
         );
+        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="UserField">The user name.</param>
         /// <param name="ErrorCodeField">The error code.</param>
