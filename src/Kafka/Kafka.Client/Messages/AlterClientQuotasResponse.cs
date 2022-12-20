@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using EntryData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData;
 using EntityData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData.EntityData;
+using EntryData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData;
 
 namespace Kafka.Client.Messages
 {
@@ -20,7 +20,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<EntryData>.Empty
         );
-        public static short FlexibleVersion { get; } = 1;
         /// <summary>
         /// <param name="ErrorCodeField">The error code, or `0` if the quota alteration succeeded.</param>
         /// <param name="ErrorMessageField">The error message, or `null` if the quota alteration succeeded.</param>

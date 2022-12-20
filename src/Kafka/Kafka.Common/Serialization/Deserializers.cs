@@ -17,7 +17,7 @@ namespace Kafka.Common.Serialization
         private sealed class IgnoreDeserializer :
             IDeserializer<Ignore>
         {
-            Ignore IDeserializer<Ignore>.Read(byte[]? buffer) =>
+            Ignore IDeserializer<Ignore>.Read(ReadOnlyMemory<byte>? buffer) =>
                 Types.Ignore.Value
             ;
         }
@@ -28,7 +28,7 @@ namespace Kafka.Common.Serialization
         private sealed class NullDeserializer :
             IDeserializer<Null>
         {
-            Null IDeserializer<Null>.Read(byte[]? buffer) =>
+            Null IDeserializer<Null>.Read(ReadOnlyMemory<byte>? buffer) =>
                 buffer switch
                 {
                     null => Types.Null.Value,
@@ -43,7 +43,7 @@ namespace Kafka.Common.Serialization
         private sealed class BytesDeserializer :
             IDeserializer<byte[]>
         {
-            byte[] IDeserializer<byte[]>.Read(byte[]? buffer) =>
+            byte[] IDeserializer<byte[]>.Read(ReadOnlyMemory<byte>? buffer) =>
                 Nullable.Bytes.Read(buffer) switch
                 {
                     null => throw NullEx(),
@@ -58,7 +58,7 @@ namespace Kafka.Common.Serialization
         private sealed class Int32Deserializer :
             IDeserializer<int>
         {
-            int IDeserializer<int>.Read(byte[]? buffer) =>
+            int IDeserializer<int>.Read(ReadOnlyMemory<byte>? buffer) =>
                 Nullable.Int32.Read(buffer) switch
                 {
                     null => throw NullEx(),
@@ -73,7 +73,7 @@ namespace Kafka.Common.Serialization
         private sealed class Utf8Deserializer :
             IDeserializer<string>
         {
-            string IDeserializer<string>.Read(byte[]? buffer) =>
+            string IDeserializer<string>.Read(ReadOnlyMemory<byte>? buffer) =>
                 Nullable.Utf8.Read(buffer) switch
                 {
                     null => throw NullEx(),
@@ -98,9 +98,13 @@ namespace Kafka.Common.Serialization
             private sealed class BytesDeserializer :
                 IDeserializer<byte[]?>
             {
-                byte[]? IDeserializer<byte[]?>.Read(byte[]? buffer) =>
-                    buffer
-                ;
+                byte[]? IDeserializer<byte[]?>.Read(ReadOnlyMemory<byte>? buffer)
+                {
+                    if (buffer.HasValue)
+                        return buffer.Value.ToArray();
+                    else
+                        return default;
+                }
             }
 
             /// <summary>
@@ -109,17 +113,18 @@ namespace Kafka.Common.Serialization
             private sealed class Int32Deserializer :
                 IDeserializer<int?>
             {
-                int? IDeserializer<int?>.Read(byte[]? buffer)
+                int? IDeserializer<int?>.Read(ReadOnlyMemory<byte>? buffer)
                 {
                     if (buffer == null)
                         return default;
-                    if (buffer.Length != 4)
+                    var span = buffer.Value.Span;
+                    if (span.Length != 4)
                         throw new SerializationException("Size of buffer received by IntegerDeserializer is not 4");
                     int value = 0;
                     for (int i = 0; i < 4; i++)
                     {
                         value <<= 8;
-                        value |= buffer[i] & 0xff;
+                        value |= span[i] & 0xff;
                     }
                     return value;
                 }
@@ -131,11 +136,13 @@ namespace Kafka.Common.Serialization
             private sealed class Utf8Deserializer :
                 IDeserializer<string?>
             {
-                public string? Read(byte[]? buffer)
+                public string? Read(ReadOnlyMemory<byte>? buffer)
                 {
-                    if (buffer == null)
+                    if (buffer.HasValue)
+                        return System.Text.Encoding.UTF8.GetString(buffer.Value.Span);
+                    else
                         return default;
-                    return System.Text.Encoding.UTF8.GetString(buffer);
+
                 }
             }
         }

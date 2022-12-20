@@ -11,12 +11,11 @@ namespace Kafka.Client.Messages
     public sealed record ApiVersionsRequest (
         string ClientSoftwareNameField,
         string ClientSoftwareVersionField
-    ) : Request(18)
+    ) : Request(18,0,3,3)
     {
         public static ApiVersionsRequest Empty { get; } = new(
             "",
             ""
         );
-        public static short FlexibleVersion { get; } = 3;
     };
 }

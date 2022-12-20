@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using UpdateMetadataEndpoint = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker.UpdateMetadataEndpoint;
-using UpdateMetadataPartitionState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataPartitionState;
-using UpdateMetadataBroker = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker;
 using UpdateMetadataTopicState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataTopicState;
+using UpdateMetadataBroker = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker;
+using UpdateMetadataPartitionState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataPartitionState;
+using UpdateMetadataEndpoint = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker.UpdateMetadataEndpoint;
 
 namespace Kafka.Client.Messages
 {
@@ -26,7 +26,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<UpdateMetadataPartitionState> UngroupedPartitionStatesField,
         ImmutableArray<UpdateMetadataTopicState> TopicStatesField,
         ImmutableArray<UpdateMetadataBroker> LiveBrokersField
-    ) : Request(6)
+    ) : Request(6,0,8,6)
     {
         public static UpdateMetadataRequest Empty { get; } = new(
             default(int),
@@ -37,40 +37,21 @@ namespace Kafka.Client.Messages
             ImmutableArray<UpdateMetadataTopicState>.Empty,
             ImmutableArray<UpdateMetadataBroker>.Empty
         );
-        public static short FlexibleVersion { get; } = 6;
         /// <summary>
-        /// <param name="TopicNameField">In older versions of this RPC, the topic name.</param>
-        /// <param name="PartitionIndexField">The partition index.</param>
-        /// <param name="ControllerEpochField">The controller epoch.</param>
-        /// <param name="LeaderField">The ID of the broker which is the current partition leader.</param>
-        /// <param name="LeaderEpochField">The leader epoch of this partition.</param>
-        /// <param name="IsrField">The brokers which are in the ISR for this partition.</param>
-        /// <param name="ZkVersionField">The Zookeeper version.</param>
-        /// <param name="ReplicasField">All the replicas of this partition.</param>
-        /// <param name="OfflineReplicasField">The replicas of this partition which are offline.</param>
+        /// <param name="TopicNameField">The topic name.</param>
+        /// <param name="TopicIdField">The topic id.</param>
+        /// <param name="PartitionStatesField">The partition that we would like to update.</param>
         /// </summary>
-        public sealed record UpdateMetadataPartitionState (
+        public sealed record UpdateMetadataTopicState (
             string TopicNameField,
-            int PartitionIndexField,
-            int ControllerEpochField,
-            int LeaderField,
-            int LeaderEpochField,
-            ImmutableArray<int> IsrField,
-            int ZkVersionField,
-            ImmutableArray<int> ReplicasField,
-            ImmutableArray<int> OfflineReplicasField
+            Guid TopicIdField,
+            ImmutableArray<UpdateMetadataPartitionState> PartitionStatesField
         )
         {
-            public static UpdateMetadataPartitionState Empty { get; } = new(
+            public static UpdateMetadataTopicState Empty { get; } = new(
                 "",
-                default(int),
-                default(int),
-                default(int),
-                default(int),
-                ImmutableArray<int>.Empty,
-                default(int),
-                ImmutableArray<int>.Empty,
-                ImmutableArray<int>.Empty
+                default(Guid),
+                ImmutableArray<UpdateMetadataPartitionState>.Empty
             );
         };
         /// <summary>
@@ -117,20 +98,38 @@ namespace Kafka.Client.Messages
             };
         };
         /// <summary>
-        /// <param name="TopicNameField">The topic name.</param>
-        /// <param name="TopicIdField">The topic id.</param>
-        /// <param name="PartitionStatesField">The partition that we would like to update.</param>
+        /// <param name="TopicNameField">In older versions of this RPC, the topic name.</param>
+        /// <param name="PartitionIndexField">The partition index.</param>
+        /// <param name="ControllerEpochField">The controller epoch.</param>
+        /// <param name="LeaderField">The ID of the broker which is the current partition leader.</param>
+        /// <param name="LeaderEpochField">The leader epoch of this partition.</param>
+        /// <param name="IsrField">The brokers which are in the ISR for this partition.</param>
+        /// <param name="ZkVersionField">The Zookeeper version.</param>
+        /// <param name="ReplicasField">All the replicas of this partition.</param>
+        /// <param name="OfflineReplicasField">The replicas of this partition which are offline.</param>
         /// </summary>
-        public sealed record UpdateMetadataTopicState (
+        public sealed record UpdateMetadataPartitionState (
             string TopicNameField,
-            Guid TopicIdField,
-            ImmutableArray<UpdateMetadataPartitionState> PartitionStatesField
+            int PartitionIndexField,
+            int ControllerEpochField,
+            int LeaderField,
+            int LeaderEpochField,
+            ImmutableArray<int> IsrField,
+            int ZkVersionField,
+            ImmutableArray<int> ReplicasField,
+            ImmutableArray<int> OfflineReplicasField
         )
         {
-            public static UpdateMetadataTopicState Empty { get; } = new(
+            public static UpdateMetadataPartitionState Empty { get; } = new(
                 "",
-                default(Guid),
-                ImmutableArray<UpdateMetadataPartitionState>.Empty
+                default(int),
+                default(int),
+                default(int),
+                default(int),
+                ImmutableArray<int>.Empty,
+                default(int),
+                ImmutableArray<int>.Empty,
+                ImmutableArray<int>.Empty
             );
         };
     };

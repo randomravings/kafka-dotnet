@@ -13,13 +13,12 @@ namespace Kafka.Client.Messages
         ReadOnlyMemory<byte> RequestDataField,
         ReadOnlyMemory<byte>? RequestPrincipalField,
         ReadOnlyMemory<byte> ClientHostAddressField
-    ) : Request(58)
+    ) : Request(58,0,0,0)
     {
         public static EnvelopeRequest Empty { get; } = new(
             Array.Empty<byte>(),
             default(ReadOnlyMemory<byte>?),
             Array.Empty<byte>()
         );
-        public static short FlexibleVersion { get; } = 0;
     };
 }

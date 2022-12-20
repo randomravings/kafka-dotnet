@@ -10,11 +10,10 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DeleteGroupsRequest (
         ImmutableArray<string> GroupsNamesField
-    ) : Request(42)
+    ) : Request(42,0,2,2)
     {
         public static DeleteGroupsRequest Empty { get; } = new(
             ImmutableArray<string>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
     };
 }

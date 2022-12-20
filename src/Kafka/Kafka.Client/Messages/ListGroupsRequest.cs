@@ -10,11 +10,10 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record ListGroupsRequest (
         ImmutableArray<string> StatesFilterField
-    ) : Request(16)
+    ) : Request(16,0,4,3)
     {
         public static ListGroupsRequest Empty { get; } = new(
             ImmutableArray<string>.Empty
         );
-        public static short FlexibleVersion { get; } = 3;
     };
 }

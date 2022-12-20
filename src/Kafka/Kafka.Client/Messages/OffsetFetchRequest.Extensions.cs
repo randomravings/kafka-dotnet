@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestTopic;
 using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup;
 using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
+using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -220,6 +220,46 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
         }
+        private static class OffsetFetchRequestGroupSerde
+        {
+            public static OffsetFetchRequestGroup ReadV08(byte[] buffer, ref int index)
+            {
+                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var topicsField = Decoder.ReadCompactArray<OffsetFetchRequestTopics>(buffer, ref index, OffsetFetchRequestTopicsSerde.ReadV08);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    groupIdField,
+                    topicsField
+                );
+            }
+            public static int WriteV08(byte[] buffer, int index, OffsetFetchRequestGroup message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.groupIdField);
+                index = Encoder.WriteCompactArray<OffsetFetchRequestTopics>(buffer, index, message.TopicsField, OffsetFetchRequestTopicsSerde.WriteV08);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            private static class OffsetFetchRequestTopicsSerde
+            {
+                public static OffsetFetchRequestTopics ReadV08(byte[] buffer, ref int index)
+                {
+                    var nameField = Decoder.ReadCompactString(buffer, ref index);
+                    var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
+                    return new(
+                        nameField,
+                        partitionIndexesField
+                    );
+                }
+                public static int WriteV08(byte[] buffer, int index, OffsetFetchRequestTopics message)
+                {
+                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                    index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
+                }
+            }
+        }
         private static class OffsetFetchRequestTopicSerde
         {
             public static OffsetFetchRequestTopic ReadV00(byte[] buffer, ref int index)
@@ -345,46 +385,6 @@ namespace Kafka.Client.Messages
                 index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
                 index = Encoder.WriteVarUInt32(buffer, index, 0);
                 return index;
-            }
-        }
-        private static class OffsetFetchRequestGroupSerde
-        {
-            public static OffsetFetchRequestGroup ReadV08(byte[] buffer, ref int index)
-            {
-                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
-                var topicsField = Decoder.ReadCompactArray<OffsetFetchRequestTopics>(buffer, ref index, OffsetFetchRequestTopicsSerde.ReadV08);
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    groupIdField,
-                    topicsField
-                );
-            }
-            public static int WriteV08(byte[] buffer, int index, OffsetFetchRequestGroup message)
-            {
-                index = Encoder.WriteCompactString(buffer, index, message.groupIdField);
-                index = Encoder.WriteCompactArray<OffsetFetchRequestTopics>(buffer, index, message.TopicsField, OffsetFetchRequestTopicsSerde.WriteV08);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-            private static class OffsetFetchRequestTopicsSerde
-            {
-                public static OffsetFetchRequestTopics ReadV08(byte[] buffer, ref int index)
-                {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
-                    _ = Decoder.ReadVarUInt32(buffer, ref index);
-                    return new(
-                        nameField,
-                        partitionIndexesField
-                    );
-                }
-                public static int WriteV08(byte[] buffer, int index, OffsetFetchRequestTopics message)
-                {
-                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                    index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
-                    index = Encoder.WriteVarUInt32(buffer, index, 0);
-                    return index;
-                }
             }
         }
     }

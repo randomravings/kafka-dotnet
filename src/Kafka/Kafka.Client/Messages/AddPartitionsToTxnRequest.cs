@@ -17,7 +17,7 @@ namespace Kafka.Client.Messages
         long ProducerIdField,
         short ProducerEpochField,
         ImmutableArray<AddPartitionsToTxnTopic> TopicsField
-    ) : Request(24)
+    ) : Request(24,0,3,3)
     {
         public static AddPartitionsToTxnRequest Empty { get; } = new(
             "",
@@ -25,7 +25,6 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<AddPartitionsToTxnTopic>.Empty
         );
-        public static short FlexibleVersion { get; } = 3;
         /// <summary>
         /// <param name="NameField">The name of the topic.</param>
         /// <param name="PartitionsField">The partition indexes to add to the transaction</param>

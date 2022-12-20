@@ -15,7 +15,7 @@ namespace Kafka.Client.Messages
         int TransactionTimeoutMsField,
         long ProducerIdField,
         short ProducerEpochField
-    ) : Request(22)
+    ) : Request(22,0,4,2)
     {
         public static InitProducerIdRequest Empty { get; } = new(
             default(string?),
@@ -23,6 +23,5 @@ namespace Kafka.Client.Messages
             default(long),
             default(short)
         );
-        public static short FlexibleVersion { get; } = 2;
     };
 }

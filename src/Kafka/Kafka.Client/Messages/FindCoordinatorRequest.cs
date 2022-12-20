@@ -14,13 +14,12 @@ namespace Kafka.Client.Messages
         string KeyField,
         sbyte KeyTypeField,
         ImmutableArray<string> CoordinatorKeysField
-    ) : Request(10)
+    ) : Request(10,0,4,3)
     {
         public static FindCoordinatorRequest Empty { get; } = new(
             "",
             default(sbyte),
             ImmutableArray<string>.Empty
         );
-        public static short FlexibleVersion { get; } = 3;
     };
 }

@@ -17,7 +17,7 @@ namespace Kafka.Client.Messages
         string? OwnerPrincipalNameField,
         ImmutableArray<CreatableRenewers> RenewersField,
         long MaxLifetimeMsField
-    ) : Request(38)
+    ) : Request(38,0,3,2)
     {
         public static CreateDelegationTokenRequest Empty { get; } = new(
             default(string?),
@@ -25,7 +25,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<CreatableRenewers>.Empty,
             default(long)
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="PrincipalTypeField">The type of the Kafka principal.</param>
         /// <param name="PrincipalNameField">The name of the Kafka principal.</param>

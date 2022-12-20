@@ -9,8 +9,5 @@ namespace Kafka.Cli.Options
 
         [Option("client-id")]
         public string ClientId { get; set; } = "";
-
-        [Option("apiversion", Required = false)]
-        public short ApiVersion { get; set; } = -1;
     }
 }

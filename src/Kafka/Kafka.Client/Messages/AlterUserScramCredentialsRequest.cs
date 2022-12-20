@@ -14,13 +14,12 @@ namespace Kafka.Client.Messages
     public sealed record AlterUserScramCredentialsRequest (
         ImmutableArray<ScramCredentialDeletion> DeletionsField,
         ImmutableArray<ScramCredentialUpsertion> UpsertionsField
-    ) : Request(51)
+    ) : Request(51,0,0,0)
     {
         public static AlterUserScramCredentialsRequest Empty { get; } = new(
             ImmutableArray<ScramCredentialDeletion>.Empty,
             ImmutableArray<ScramCredentialUpsertion>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The user name.</param>
         /// <param name="MechanismField">The SCRAM mechanism.</param>

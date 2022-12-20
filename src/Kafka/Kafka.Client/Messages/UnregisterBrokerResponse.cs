@@ -20,6 +20,5 @@ namespace Kafka.Client.Messages
             default(short),
             default(string?)
         );
-        public static short FlexibleVersion { get; } = 0;
     };
 }

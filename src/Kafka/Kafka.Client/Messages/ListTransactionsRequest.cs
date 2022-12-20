@@ -12,12 +12,11 @@ namespace Kafka.Client.Messages
     public sealed record ListTransactionsRequest (
         ImmutableArray<string> StateFiltersField,
         ImmutableArray<long> ProducerIdFiltersField
-    ) : Request(66)
+    ) : Request(66,0,0,0)
     {
         public static ListTransactionsRequest Empty { get; } = new(
             ImmutableArray<string>.Empty,
             ImmutableArray<long>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
     };
 }

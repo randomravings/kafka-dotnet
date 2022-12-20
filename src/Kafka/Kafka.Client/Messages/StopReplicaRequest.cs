@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
+using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
 using StopReplicaTopicState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState;
-using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
+using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
 
 namespace Kafka.Client.Messages
 {
@@ -28,7 +28,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<StopReplicaPartitionV0> UngroupedPartitionsField,
         ImmutableArray<StopReplicaTopicV1> TopicsField,
         ImmutableArray<StopReplicaTopicState> TopicStatesField
-    ) : Request(5)
+    ) : Request(5,0,4,2)
     {
         public static StopReplicaRequest Empty { get; } = new(
             default(int),
@@ -40,19 +40,18 @@ namespace Kafka.Client.Messages
             ImmutableArray<StopReplicaTopicV1>.Empty,
             ImmutableArray<StopReplicaTopicState>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
-        /// <param name="TopicNameField">The topic name.</param>
-        /// <param name="PartitionIndexField">The partition index.</param>
+        /// <param name="NameField">The topic name.</param>
+        /// <param name="PartitionIndexesField">The partition indexes.</param>
         /// </summary>
-        public sealed record StopReplicaPartitionV0 (
-            string TopicNameField,
-            int PartitionIndexField
+        public sealed record StopReplicaTopicV1 (
+            string NameField,
+            ImmutableArray<int> PartitionIndexesField
         )
         {
-            public static StopReplicaPartitionV0 Empty { get; } = new(
+            public static StopReplicaTopicV1 Empty { get; } = new(
                 "",
-                default(int)
+                ImmutableArray<int>.Empty
             );
         };
         /// <summary>
@@ -87,17 +86,17 @@ namespace Kafka.Client.Messages
             };
         };
         /// <summary>
-        /// <param name="NameField">The topic name.</param>
-        /// <param name="PartitionIndexesField">The partition indexes.</param>
+        /// <param name="TopicNameField">The topic name.</param>
+        /// <param name="PartitionIndexField">The partition index.</param>
         /// </summary>
-        public sealed record StopReplicaTopicV1 (
-            string NameField,
-            ImmutableArray<int> PartitionIndexesField
+        public sealed record StopReplicaPartitionV0 (
+            string TopicNameField,
+            int PartitionIndexField
         )
         {
-            public static StopReplicaTopicV1 Empty { get; } = new(
+            public static StopReplicaPartitionV0 Empty { get; } = new(
                 "",
-                ImmutableArray<int>.Empty
+                default(int)
             );
         };
     };

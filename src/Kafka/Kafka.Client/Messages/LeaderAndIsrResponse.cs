@@ -23,7 +23,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<LeaderAndIsrPartitionError>.Empty,
             ImmutableArray<LeaderAndIsrTopicError>.Empty
         );
-        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionIndexField">The partition index.</param>

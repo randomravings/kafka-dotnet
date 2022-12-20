@@ -113,8 +113,8 @@ namespace Kafka.Client.Clients.Producer
         private static int ComputeRecordSize(
             long timestampDelta,
             int offsetDelta,
-            byte[]? key,
-            byte[]? value,
+            ReadOnlyMemory<byte>? key,
+            ReadOnlyMemory<byte>? value,
             ImmutableArray<RecordHeader> headers
         ) =>
             Encoder.SizeOfInt64(timestampDelta) +

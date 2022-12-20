@@ -145,7 +145,7 @@ namespace Kafka.CodeGen.CSharp
             switch (message)
             {
                 case ApiRequestMessage a:
-                    await writer.WriteLineAsync($"    ) : {nameof(Request)}({a.ApiKey.Value})");
+                    await writer.WriteLineAsync($"    ) : {nameof(Request)}({a.ApiKey.Value},{a.ValidVersions.Min},{a.ValidVersions.Max},{a.FlexibleVersions.Min})");
                     break;
                 case ApiResponseMessage a:
                     await writer.WriteLineAsync($"    ) : {nameof(Response)}({a.ApiKey.Value})");
@@ -161,7 +161,6 @@ namespace Kafka.CodeGen.CSharp
                 message.Name,
                 message.Fields
             );
-            await writer.WriteLineAsync($"        public static short FlexibleVersion {{ get; }} = {message.FlexibleVersions.Min};");
             await WriteMessageNestedRecords(
                 message.Structs,
                 writer,
@@ -361,7 +360,7 @@ namespace Kafka.CodeGen.CSharp
             await writer.WriteLineAsync($"    [GeneratedCode(\"{assemblyName.Name}\", \"{assemblyName.Version}\")]");
             await writer.WriteLineAsync($"    public static class {message.Name}Serde");
             await writer.WriteLineAsync($"    {{");
-            switch(message)
+            switch (message)
             {
                 case HeaderMessage h:
                     await WriteHeaderRecordExtension(writer, h);
@@ -794,15 +793,19 @@ namespace Kafka.CodeGen.CSharp
         )
         {
             if (!fieldProperties.Versions.Includes(version) || fieldProperties.TaggedVersions.Includes(version))
+            {
                 if (fieldProperties.NullableVersions.Includes(version))
                     await writer.WriteLineAsync($"default({nameof(IRecords)});");
                 else
                     await writer.WriteLineAsync($"{nameof(RecordBatch)}.{nameof(RecordBatch.Empty)};");
+            }
             else
+            {
                 if (fieldProperties.NullableVersions.Includes(version))
-                await writer.WriteLineAsync($"Decoder.ReadRecords(buffer, ref index) ?? throw new {nameof(NullReferenceException)}(\"Null not allowed for '{fieldName}'\");");
-            else
-                await writer.WriteLineAsync($"Decoder.ReadRecords(buffer, ref index) ?? {nameof(RecordBatch)}.{nameof(RecordBatch.Empty)};");
+                    await writer.WriteLineAsync($"Decoder.ReadRecords(buffer, ref index);");
+                else
+                    await writer.WriteLineAsync($"Decoder.ReadRecords(buffer, ref index) ?? throw new {nameof(NullReferenceException)}(\"Null not allowed for '{fieldName}'\");");
+            }
         }
 
         private static async ValueTask DecodeScalarField(

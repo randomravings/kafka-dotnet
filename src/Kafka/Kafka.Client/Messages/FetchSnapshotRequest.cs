@@ -19,7 +19,7 @@ namespace Kafka.Client.Messages
         int ReplicaIdField,
         int MaxBytesField,
         ImmutableArray<TopicSnapshot> TopicsField
-    ) : Request(59)
+    ) : Request(59,0,0,0)
     {
         public static FetchSnapshotRequest Empty { get; } = new(
             default(string?),
@@ -27,7 +27,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<TopicSnapshot>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The name of the topic to fetch</param>
         /// <param name="PartitionsField">The partitions to fetch</param>

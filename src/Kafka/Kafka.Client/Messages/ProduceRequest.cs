@@ -2,8 +2,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
 using Kafka.Common.Protocol;
-using TopicProduceData = Kafka.Client.Messages.ProduceRequest.TopicProduceData;
 using PartitionProduceData = Kafka.Client.Messages.ProduceRequest.TopicProduceData.PartitionProduceData;
+using TopicProduceData = Kafka.Client.Messages.ProduceRequest.TopicProduceData;
 
 namespace Kafka.Client.Messages
 {
@@ -19,7 +19,7 @@ namespace Kafka.Client.Messages
         short AcksField,
         int TimeoutMsField,
         ImmutableArray<TopicProduceData> TopicDataField
-    ) : Request(0)
+    ) : Request(0,0,9,9)
     {
         public static ProduceRequest Empty { get; } = new(
             default(string?),
@@ -27,7 +27,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<TopicProduceData>.Empty
         );
-        public static short FlexibleVersion { get; } = 9;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionDataField">Each partition to produce to.</param>

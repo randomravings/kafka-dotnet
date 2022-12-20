@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using DeleteAclsMatchingAcl = Kafka.Client.Messages.DeleteAclsResponse.DeleteAclsFilterResult.DeleteAclsMatchingAcl;
 using DeleteAclsFilterResult = Kafka.Client.Messages.DeleteAclsResponse.DeleteAclsFilterResult;
+using DeleteAclsMatchingAcl = Kafka.Client.Messages.DeleteAclsResponse.DeleteAclsFilterResult.DeleteAclsMatchingAcl;
 
 namespace Kafka.Client.Messages
 {
@@ -20,7 +20,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<DeleteAclsFilterResult>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ErrorCodeField">The error code, or 0 if the filter succeeded.</param>
         /// <param name="ErrorMessageField">The error message, or null if the filter succeeded.</param>

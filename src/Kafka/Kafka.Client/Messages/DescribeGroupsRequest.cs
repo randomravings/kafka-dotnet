@@ -12,12 +12,11 @@ namespace Kafka.Client.Messages
     public sealed record DescribeGroupsRequest (
         ImmutableArray<string> GroupsField,
         bool IncludeAuthorizedOperationsField
-    ) : Request(15)
+    ) : Request(15,0,5,5)
     {
         public static DescribeGroupsRequest Empty { get; } = new(
             ImmutableArray<string>.Empty,
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 5;
     };
 }

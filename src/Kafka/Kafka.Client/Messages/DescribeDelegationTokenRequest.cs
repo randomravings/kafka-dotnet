@@ -11,12 +11,11 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DescribeDelegationTokenRequest (
         ImmutableArray<DescribeDelegationTokenOwner>? OwnersField
-    ) : Request(41)
+    ) : Request(41,0,3,2)
     {
         public static DescribeDelegationTokenRequest Empty { get; } = new(
             default(ImmutableArray<DescribeDelegationTokenOwner>?)
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="PrincipalTypeField">The owner principal type.</param>
         /// <param name="PrincipalNameField">The owner principal name.</param>

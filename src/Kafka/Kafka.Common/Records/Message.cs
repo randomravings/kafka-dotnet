@@ -1,18 +1,18 @@
-﻿using Kafka.Common.Attributes;
-using Kafka.Common.Hashing;
+﻿using Kafka.Common.Hashing;
+using System.Collections.Immutable;
 
 namespace Kafka.Common.Records
 {
     public sealed record Message(
-        [property: SerializationIgnore] int Sequence,
-        [property: Serialization(SerializationType.Int64, 0)] long Offset,
-        [property: Serialization(SerializationType.Int32, 1)] int MessageSize,
-        [property: Serialization(SerializationType.Int32, 2)] int Crc,
-        [property: Serialization(SerializationType.Int8, 3)] sbyte MagicByte,
-        [property: Serialization(SerializationType.Int8, 4)] Attributes Attributes,
-        [property: Serialization(SerializationType.Int64, 5)] long Timestamp,
-        [property: Serialization(SerializationType.Bytes, 6)] ReadOnlyMemory<byte>? Key,
-        [property: Serialization(SerializationType.Bytes, 7)] ReadOnlyMemory<byte>? Value
+        int Sequence,
+        long Offset,
+        int MessageSize,
+        int Crc,
+        sbyte MagicByte,
+        Attributes Attributes,
+        long Timestamp,
+        ReadOnlyMemory<byte>? Key,
+        ReadOnlyMemory<byte>? Value
     ) : IRecord
     {
         int IRecord.Sequence => Sequence;
@@ -39,7 +39,7 @@ namespace Kafka.Common.Records
 
         CompressionType IRecord.CompressionType => (CompressionType)(Attributes & Attributes.CompressionType);
 
-        RecordHeader[] IRecord.Headers => Array.Empty<RecordHeader>();
+        ImmutableArray<RecordHeader> IRecord.Headers => ImmutableArray<RecordHeader>.Empty;
 
         void IRecord.EnsureValid()
         {

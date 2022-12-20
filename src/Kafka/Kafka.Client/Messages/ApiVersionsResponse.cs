@@ -2,8 +2,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 using FinalizedFeatureKey = Kafka.Client.Messages.ApiVersionsResponse.FinalizedFeatureKey;
-using SupportedFeatureKey = Kafka.Client.Messages.ApiVersionsResponse.SupportedFeatureKey;
 using ApiVersion = Kafka.Client.Messages.ApiVersionsResponse.ApiVersion;
+using SupportedFeatureKey = Kafka.Client.Messages.ApiVersionsResponse.SupportedFeatureKey;
 
 namespace Kafka.Client.Messages
 {
@@ -33,7 +33,6 @@ namespace Kafka.Client.Messages
             default(long),
             ImmutableArray<FinalizedFeatureKey>.Empty
         );
-        public static short FlexibleVersion { get; } = 3;
         /// <summary>
         /// <param name="NameField">The name of the feature.</param>
         /// <param name="MaxVersionLevelField">The cluster-wide finalized max version level for the feature.</param>
@@ -52,23 +51,6 @@ namespace Kafka.Client.Messages
             );
         };
         /// <summary>
-        /// <param name="NameField">The name of the feature.</param>
-        /// <param name="MinVersionField">The minimum supported version for the feature.</param>
-        /// <param name="MaxVersionField">The maximum supported version for the feature.</param>
-        /// </summary>
-        public sealed record SupportedFeatureKey (
-            string NameField,
-            short MinVersionField,
-            short MaxVersionField
-        )
-        {
-            public static SupportedFeatureKey Empty { get; } = new(
-                "",
-                default(short),
-                default(short)
-            );
-        };
-        /// <summary>
         /// <param name="ApiKeyField">The API index.</param>
         /// <param name="MinVersionField">The minimum supported version, inclusive.</param>
         /// <param name="MaxVersionField">The maximum supported version, inclusive.</param>
@@ -81,6 +63,23 @@ namespace Kafka.Client.Messages
         {
             public static ApiVersion Empty { get; } = new(
                 default(short),
+                default(short),
+                default(short)
+            );
+        };
+        /// <summary>
+        /// <param name="NameField">The name of the feature.</param>
+        /// <param name="MinVersionField">The minimum supported version for the feature.</param>
+        /// <param name="MaxVersionField">The maximum supported version for the feature.</param>
+        /// </summary>
+        public sealed record SupportedFeatureKey (
+            string NameField,
+            short MinVersionField,
+            short MaxVersionField
+        )
+        {
+            public static SupportedFeatureKey Empty { get; } = new(
+                "",
                 default(short),
                 default(short)
             );

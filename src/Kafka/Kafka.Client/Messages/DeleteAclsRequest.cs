@@ -11,12 +11,11 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DeleteAclsRequest (
         ImmutableArray<DeleteAclsFilter> FiltersField
-    ) : Request(31)
+    ) : Request(31,0,3,2)
     {
         public static DeleteAclsRequest Empty { get; } = new(
             ImmutableArray<DeleteAclsFilter>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ResourceTypeFilterField">The resource type.</param>
         /// <param name="ResourceNameFilterField">The resource name.</param>

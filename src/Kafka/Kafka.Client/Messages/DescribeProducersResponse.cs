@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
+using TopicResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse;
 using ProducerState = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse.ProducerState;
 using PartitionResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse;
-using TopicResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse;
 
 namespace Kafka.Client.Messages
 {
@@ -21,7 +21,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<TopicResponse>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The topic name</param>
         /// <param name="PartitionsField">Each partition in the response.</param>

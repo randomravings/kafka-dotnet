@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
+using TopicResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse;
 using ProducerState = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse.ProducerState;
 using PartitionResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse;
-using TopicResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse;
 
 namespace Kafka.Client.Messages
 {

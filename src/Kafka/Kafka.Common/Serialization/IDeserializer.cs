@@ -2,6 +2,6 @@
 {
     public interface IDeserializer<T>
     {
-        T Read(byte[]? buffer);
+        T Read(ReadOnlyMemory<byte>? buffer);
     }
 }

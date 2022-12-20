@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using OffsetCommitResponseTopic = Kafka.Client.Messages.OffsetCommitResponse.OffsetCommitResponseTopic;
 using OffsetCommitResponsePartition = Kafka.Client.Messages.OffsetCommitResponse.OffsetCommitResponseTopic.OffsetCommitResponsePartition;
+using OffsetCommitResponseTopic = Kafka.Client.Messages.OffsetCommitResponse.OffsetCommitResponseTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -20,7 +20,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<OffsetCommitResponseTopic>.Empty
         );
-        public static short FlexibleVersion { get; } = 8;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">The responses for each partition in the topic.</param>

@@ -4,8 +4,8 @@ using Kafka.Common.Records;
 using Kafka.Common.Protocol;
 using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
 using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
 using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
 
 namespace Kafka.Client.Messages
 {
@@ -26,7 +26,6 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<TopicSnapshot>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The name of the topic to fetch.</param>
         /// <param name="PartitionsField">The partitions to fetch.</param>

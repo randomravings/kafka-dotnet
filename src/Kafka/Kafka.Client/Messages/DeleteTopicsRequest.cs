@@ -15,14 +15,13 @@ namespace Kafka.Client.Messages
         ImmutableArray<DeleteTopicState> TopicsField,
         ImmutableArray<string> TopicNamesField,
         int TimeoutMsField
-    ) : Request(20)
+    ) : Request(20,0,6,4)
     {
         public static DeleteTopicsRequest Empty { get; } = new(
             ImmutableArray<DeleteTopicState>.Empty,
             ImmutableArray<string>.Empty,
             default(int)
         );
-        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="NameField">The topic name</param>
         /// <param name="TopicIdField">The unique topic ID</param>

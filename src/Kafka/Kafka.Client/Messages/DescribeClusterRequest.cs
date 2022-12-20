@@ -9,11 +9,10 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DescribeClusterRequest (
         bool IncludeClusterAuthorizedOperationsField
-    ) : Request(60)
+    ) : Request(60,0,0,0)
     {
         public static DescribeClusterRequest Empty { get; } = new(
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 0;
     };
 }

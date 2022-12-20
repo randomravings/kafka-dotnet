@@ -11,12 +11,11 @@ namespace Kafka.Client.Messages
     public sealed record ControlledShutdownRequest (
         int BrokerIdField,
         long BrokerEpochField
-    ) : Request(7)
+    ) : Request(7,0,3,3)
     {
         public static ControlledShutdownRequest Empty { get; } = new(
             default(int),
             default(long)
         );
-        public static short FlexibleVersion { get; } = 3;
     };
 }

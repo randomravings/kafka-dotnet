@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicData = Kafka.Client.Messages.AlterPartitionResponse.TopicData;
 using PartitionData = Kafka.Client.Messages.AlterPartitionResponse.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.AlterPartitionResponse.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -23,7 +23,6 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<TopicData>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="TopicNameField">The name of the topic</param>
         /// <param name="TopicIdField">The ID of the topic</param>

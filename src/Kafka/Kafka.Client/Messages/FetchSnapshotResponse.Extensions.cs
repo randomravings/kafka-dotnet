@@ -3,8 +3,8 @@ using Kafka.Common.Encoding;
 using Kafka.Common.Records;
 using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
 using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
 using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
 
 namespace Kafka.Client.Messages
 {
@@ -72,7 +72,7 @@ namespace Kafka.Client.Messages
                     var currentLeaderField = LeaderIdAndEpoch.Empty;
                     var sizeField = Decoder.ReadInt64(buffer, ref index);
                     var positionField = Decoder.ReadInt64(buffer, ref index);
-                    var unalignedRecordsField = Decoder.ReadRecords(buffer, ref index) ?? RecordBatch.Empty;
+                    var unalignedRecordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'UnalignedRecords'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         indexField,

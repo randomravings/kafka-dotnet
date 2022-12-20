@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicData = Kafka.Client.Messages.AlterPartitionRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.AlterPartitionRequest.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.AlterPartitionRequest.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -16,14 +16,13 @@ namespace Kafka.Client.Messages
         int BrokerIdField,
         long BrokerEpochField,
         ImmutableArray<TopicData> TopicsField
-    ) : Request(56)
+    ) : Request(56,0,2,0)
     {
         public static AlterPartitionRequest Empty { get; } = new(
             default(int),
             default(long),
             ImmutableArray<TopicData>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="TopicNameField">The name of the topic to alter ISRs for</param>
         /// <param name="TopicIdField">The ID of the topic to alter ISRs for</param>

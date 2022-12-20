@@ -34,7 +34,6 @@ namespace Kafka.Cli.Cmd
                 };
                 using var adminClient = (IAdminClient)new Client.Clients.Admin.AdminClient(adminClientConfig);
                 var options = new ListTopicsOptionsBuilder(adminClientConfig)
-                    .Version(verb.ApiVersion)
                     .IncludeInternal(!verb.ExcludeInternal)
                     .Build()
                 ;
@@ -75,7 +74,6 @@ namespace Kafka.Cli.Cmd
                     replicaAssinment.Add(key, value);
                 }
                 var options = new CreateTopicsOptionsBuilder(adminClientConfig)
-                    .Version(verb.ApiVersion)
                     .NewTopic(b => b
                         .Name(verb.Topic)
                         .NumPartitions(verb.PartitionCount)
@@ -136,7 +134,6 @@ namespace Kafka.Cli.Cmd
                 };
                 using var adminClient = (IAdminClient)new Client.Clients.Admin.AdminClient(adminClientConfig);
                 var options = new DeleteTopicsOptionsBuilder(adminClientConfig)
-                    .Version(verb.ApiVersion)
                     .TopicName(verb.TopicName)
                     .TopicId(verb.TopicId)
                     .Build()
@@ -171,7 +168,6 @@ namespace Kafka.Cli.Cmd
                 };
                 using var adminClient = (IAdminClient)new Client.Clients.Admin.AdminClient(adminClientConfig);
                 var options = new DescribeTopicsOptionsBuilder(adminClientConfig)
-                    .Version(verb.ApiVersion)
                     .TopicName(verb.TopicName)
                     .TopicId(verb.TopicId)
                     .Build()

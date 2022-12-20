@@ -79,7 +79,7 @@ namespace Kafka.Common.Records
         /// Get the headers.
         /// <para>For magic versions prior to 2, this always returns an empty array.</para>
         /// </summary>
-        RecordHeader[] Headers { get; }
+        ImmutableArray<RecordHeader> Headers { get; }
 
         /// <summary>
         /// Performs a CRC check on the record data.

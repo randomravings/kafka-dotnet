@@ -40,7 +40,6 @@ namespace Kafka.Client.Messages
             "",
             ImmutableArray<JoinGroupResponseMember>.Empty
         );
-        public static short FlexibleVersion { get; } = 6;
         /// <summary>
         /// <param name="MemberIdField">The group member ID.</param>
         /// <param name="GroupInstanceIdField">The unique identifier of the consumer instance provided by end user.</param>

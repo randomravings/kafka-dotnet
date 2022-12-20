@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using AlterReplicaLogDirTopic = Kafka.Client.Messages.AlterReplicaLogDirsRequest.AlterReplicaLogDir.AlterReplicaLogDirTopic;
 using AlterReplicaLogDir = Kafka.Client.Messages.AlterReplicaLogDirsRequest.AlterReplicaLogDir;
+using AlterReplicaLogDirTopic = Kafka.Client.Messages.AlterReplicaLogDirsRequest.AlterReplicaLogDir.AlterReplicaLogDirTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -12,12 +12,11 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record AlterReplicaLogDirsRequest (
         ImmutableArray<AlterReplicaLogDir> DirsField
-    ) : Request(34)
+    ) : Request(34,0,2,2)
     {
         public static AlterReplicaLogDirsRequest Empty { get; } = new(
             ImmutableArray<AlterReplicaLogDir>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="PathField">The absolute directory path.</param>
         /// <param name="TopicsField">The topics to add to the directory.</param>

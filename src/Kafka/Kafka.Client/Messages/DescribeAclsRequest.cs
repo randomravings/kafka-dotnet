@@ -21,7 +21,7 @@ namespace Kafka.Client.Messages
         string? HostFilterField,
         sbyte OperationField,
         sbyte PermissionTypeField
-    ) : Request(29)
+    ) : Request(29,0,3,2)
     {
         public static DescribeAclsRequest Empty { get; } = new(
             default(sbyte),
@@ -32,6 +32,5 @@ namespace Kafka.Client.Messages
             default(sbyte),
             default(sbyte)
         );
-        public static short FlexibleVersion { get; } = 2;
     };
 }

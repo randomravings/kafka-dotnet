@@ -5,17 +5,13 @@ namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record CreateTopicsOptions(
         int TimeoutMs,
-        short ApiVersion,
-        string ClientId,
         bool ValidateOnly,
         bool RetryOnQuotaViolation,
         ImmutableArray<NewTopic> Topics
-    ) : ClientOptions(TimeoutMs, ApiVersion, ClientId)
+    ) : ClientOptions(TimeoutMs)
     {
         public static CreateTopicsOptions Empty { get; } = new(
             -1,
-            -1,
-            "",
             false,
             false,
             ImmutableArray<NewTopic>.Empty

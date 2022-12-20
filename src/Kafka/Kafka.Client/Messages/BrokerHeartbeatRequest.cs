@@ -17,7 +17,7 @@ namespace Kafka.Client.Messages
         long CurrentMetadataOffsetField,
         bool WantFenceField,
         bool WantShutDownField
-    ) : Request(63)
+    ) : Request(63,0,0,0)
     {
         public static BrokerHeartbeatRequest Empty { get; } = new(
             default(int),
@@ -26,6 +26,5 @@ namespace Kafka.Client.Messages
             default(bool),
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 0;
     };
 }

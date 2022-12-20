@@ -19,7 +19,6 @@ namespace Kafka.Cli.Cmd
                 };
                 using var adminClient = (IAdminClient)new Client.Clients.Admin.AdminClient(adminClientConfig);
                 var options = new ApiVersionsOptionsBuilder(adminClientConfig)
-                    .Version(verb.ApiVersion)
                     .Build()
                 ;
                 var result = await adminClient.GetApiVersions(

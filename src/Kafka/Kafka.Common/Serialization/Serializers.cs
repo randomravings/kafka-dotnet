@@ -12,7 +12,7 @@ namespace Kafka.Common.Serialization
         private sealed class NullSerializer :
             ISerializer<Null>
         {
-            byte[]? ISerializer<Null>.Write(Null value) =>
+            ReadOnlyMemory<byte>? ISerializer<Null>.Write(Null value) =>
                 null
             ;
         }
@@ -20,7 +20,7 @@ namespace Kafka.Common.Serialization
         private sealed class BytesSerializer :
             ISerializer<byte[]>
         {
-            byte[]? ISerializer<byte[]>.Write(byte[] value) =>
+            ReadOnlyMemory<byte>? ISerializer<byte[]>.Write(byte[] value) =>
                 Nullable.Bytes.Write(value)
             ;
         }
@@ -28,7 +28,7 @@ namespace Kafka.Common.Serialization
         private sealed class Int32Serializer :
             ISerializer<int>
         {
-            byte[]? ISerializer<int>.Write(int value) =>
+            ReadOnlyMemory<byte>? ISerializer<int>.Write(int value) =>
                 Nullable.Int32.Write(value)
             ;
         }
@@ -36,7 +36,7 @@ namespace Kafka.Common.Serialization
         private sealed class Utf8Serializer :
             ISerializer<string>
         {
-            byte[]? ISerializer<string>.Write(string value) =>
+            ReadOnlyMemory<byte>? ISerializer<string>.Write(string value) =>
                 value switch
                 {
                     null => throw NullEx(),
@@ -51,14 +51,14 @@ namespace Kafka.Common.Serialization
 
         private static class Nullable
         {
-            public static ISerializer<byte[]?> Bytes { get; } = new BytesSerializer();
+            public static ISerializer<ReadOnlyMemory<byte>?> Bytes { get; } = new BytesSerializer();
             public static ISerializer<int?> Int32 { get; } = new Int32Serializer();
             public static ISerializer<string?> Utf8 { get; } = new Utf8Serializer();
 
             private sealed class BytesSerializer :
-                ISerializer<byte[]?>
+                ISerializer<ReadOnlyMemory<byte>?>
             {
-                byte[]? ISerializer<byte[]?>.Write(byte[]? value) =>
+                ReadOnlyMemory<byte>? ISerializer<ReadOnlyMemory<byte>?>.Write(ReadOnlyMemory<byte>? value) =>
                     value
                 ;
             }
@@ -66,7 +66,7 @@ namespace Kafka.Common.Serialization
             private sealed class Int32Serializer :
                 ISerializer<int?>
             {
-                byte[]? ISerializer<int?>.Write(int? value)
+                ReadOnlyMemory<byte>? ISerializer<int?>.Write(int? value)
                 {
                     if (value == null)
                         return null;
@@ -80,10 +80,10 @@ namespace Kafka.Common.Serialization
             private sealed class Utf8Serializer :
                 ISerializer<string?>
             {
-                byte[]? ISerializer<string?>.Write(string? value)
+                ReadOnlyMemory<byte>? ISerializer<string?>.Write(string? value)
                 {
                     if (value == null)
-                        return default;
+                        return null;
                     return System.Text.Encoding.UTF8.GetBytes(value);
                 }
             }

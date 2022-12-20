@@ -14,13 +14,12 @@ namespace Kafka.Client.Messages
     public sealed record AlterPartitionReassignmentsRequest (
         int TimeoutMsField,
         ImmutableArray<ReassignableTopic> TopicsField
-    ) : Request(45)
+    ) : Request(45,0,0,0)
     {
         public static AlterPartitionReassignmentsRequest Empty { get; } = new(
             default(int),
             ImmutableArray<ReassignableTopic>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">The partitions to reassign.</param>

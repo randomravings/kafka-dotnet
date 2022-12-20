@@ -25,7 +25,7 @@ namespace Kafka.Client.Messages
         string ProtocolTypeField,
         ImmutableArray<JoinGroupRequestProtocol> ProtocolsField,
         string? ReasonField
-    ) : Request(11)
+    ) : Request(11,0,9,6)
     {
         public static JoinGroupRequest Empty { get; } = new(
             "",
@@ -37,7 +37,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<JoinGroupRequestProtocol>.Empty,
             default(string?)
         );
-        public static short FlexibleVersion { get; } = 6;
         /// <summary>
         /// <param name="NameField">The protocol name.</param>
         /// <param name="MetadataField">The protocol metadata.</param>

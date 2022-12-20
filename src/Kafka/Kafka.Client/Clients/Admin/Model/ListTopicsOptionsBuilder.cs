@@ -16,8 +16,6 @@
         public override ListTopicsOptions Build() =>
             new(
                 _timeoutMs,
-                _version,
-                _clientId,
                 _includeInternal
             )
         ;

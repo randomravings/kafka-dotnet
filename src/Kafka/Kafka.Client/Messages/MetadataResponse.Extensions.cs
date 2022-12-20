@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic;
 using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic.MetadataResponsePartition;
+using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponse.MetadataResponseBroker;
 
 namespace Kafka.Client.Messages

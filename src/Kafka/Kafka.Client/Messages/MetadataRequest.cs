@@ -17,7 +17,7 @@ namespace Kafka.Client.Messages
         bool AllowAutoTopicCreationField,
         bool IncludeClusterAuthorizedOperationsField,
         bool IncludeTopicAuthorizedOperationsField
-    ) : Request(3)
+    ) : Request(3,0,12,9)
     {
         public static MetadataRequest Empty { get; } = new(
             default(ImmutableArray<MetadataRequestTopic>?),
@@ -25,7 +25,6 @@ namespace Kafka.Client.Messages
             default(bool),
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 9;
         /// <summary>
         /// <param name="TopicIdField">The topic id.</param>
         /// <param name="NameField">The topic name.</param>

@@ -32,8 +32,6 @@ namespace Kafka.Client.Clients.Admin.Model
         public override CreateTopicsOptions Build() =>
             new(
                 _timeoutMs,
-                _version,
-                _clientId,
                 _validateOnly,
                 _retryOnQuotaViolation,
                 _topics.ToImmutableArray()

@@ -2,12 +2,12 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
 using Kafka.Common.Protocol;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
-using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
-using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
 using PartitionData = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData;
+using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
+using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
 
 namespace Kafka.Client.Messages
 {
@@ -31,7 +31,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<FetchableTopicResponse>.Empty
         );
-        public static short FlexibleVersion { get; } = 12;
         /// <summary>
         /// <param name="TopicField">The topic name.</param>
         /// <param name="TopicIdField">The unique topic ID</param>
@@ -89,17 +88,17 @@ namespace Kafka.Client.Messages
                     default(IRecords)
                 );
                 /// <summary>
-                /// <param name="EpochField"></param>
                 /// <param name="EndOffsetField"></param>
+                /// <param name="EpochField"></param>
                 /// </summary>
-                public sealed record EpochEndOffset (
-                    int EpochField,
-                    long EndOffsetField
+                public sealed record SnapshotId (
+                    long EndOffsetField,
+                    int EpochField
                 )
                 {
-                    public static EpochEndOffset Empty { get; } = new(
-                        default(int),
-                        default(long)
+                    public static SnapshotId Empty { get; } = new(
+                        default(long),
+                        default(int)
                     );
                 };
                 /// <summary>
@@ -117,20 +116,6 @@ namespace Kafka.Client.Messages
                     );
                 };
                 /// <summary>
-                /// <param name="EndOffsetField"></param>
-                /// <param name="EpochField"></param>
-                /// </summary>
-                public sealed record SnapshotId (
-                    long EndOffsetField,
-                    int EpochField
-                )
-                {
-                    public static SnapshotId Empty { get; } = new(
-                        default(long),
-                        default(int)
-                    );
-                };
-                /// <summary>
                 /// <param name="LeaderIdField">The ID of the current leader or -1 if the leader is unknown.</param>
                 /// <param name="LeaderEpochField">The latest known leader epoch</param>
                 /// </summary>
@@ -142,6 +127,20 @@ namespace Kafka.Client.Messages
                     public static LeaderIdAndEpoch Empty { get; } = new(
                         default(int),
                         default(int)
+                    );
+                };
+                /// <summary>
+                /// <param name="EpochField"></param>
+                /// <param name="EndOffsetField"></param>
+                /// </summary>
+                public sealed record EpochEndOffset (
+                    int EpochField,
+                    long EndOffsetField
+                )
+                {
+                    public static EpochEndOffset Empty { get; } = new(
+                        default(int),
+                        default(long)
                     );
                 };
             };

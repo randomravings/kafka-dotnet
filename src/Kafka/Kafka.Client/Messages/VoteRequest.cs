@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicData = Kafka.Client.Messages.VoteRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.VoteRequest.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.VoteRequest.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -14,13 +14,12 @@ namespace Kafka.Client.Messages
     public sealed record VoteRequest (
         string? ClusterIdField,
         ImmutableArray<TopicData> TopicsField
-    ) : Request(52)
+    ) : Request(52,0,0,0)
     {
         public static VoteRequest Empty { get; } = new(
             default(string?),
             ImmutableArray<TopicData>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionsField"></param>

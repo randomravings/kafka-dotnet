@@ -11,12 +11,11 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DescribeLogDirsRequest (
         ImmutableArray<DescribableLogDirTopic>? TopicsField
-    ) : Request(35)
+    ) : Request(35,0,4,2)
     {
         public static DescribeLogDirsRequest Empty { get; } = new(
             default(ImmutableArray<DescribableLogDirTopic>?)
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="TopicField">The topic name</param>
         /// <param name="PartitionsField">The partition indexes.</param>

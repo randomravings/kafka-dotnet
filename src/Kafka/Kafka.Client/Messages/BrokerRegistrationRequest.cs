@@ -24,7 +24,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<Feature> FeaturesField,
         string? RackField,
         sbyte IsMigratingZkBrokerField
-    ) : Request(62)
+    ) : Request(62,0,0,0)
     {
         public static BrokerRegistrationRequest Empty { get; } = new(
             default(int),
@@ -35,7 +35,6 @@ namespace Kafka.Client.Messages
             default(string?),
             default(sbyte)
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="NameField">The feature name.</param>
         /// <param name="MinSupportedVersionField">The minimum supported feature level.</param>

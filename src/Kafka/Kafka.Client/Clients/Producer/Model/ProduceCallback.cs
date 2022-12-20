@@ -6,8 +6,8 @@ namespace Kafka.Client.Clients.Producer.Model
         ProduceRecord<TKey, TValue> Record,
         Timestamp Timestamp,
         Partition Partition,
-        byte[]? KeyBytes,
-        byte[]? ValueBytes,
+        ReadOnlyMemory<byte>? KeyBytes,
+        ReadOnlyMemory<byte>? ValueBytes,
         TaskCompletionSource<ProduceResult<TKey, TValue>> TaskCompletionSource
     );
 }

@@ -10,11 +10,10 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record DescribeTransactionsRequest (
         ImmutableArray<string> TransactionalIdsField
-    ) : Request(65)
+    ) : Request(65,0,0,0)
     {
         public static DescribeTransactionsRequest Empty { get; } = new(
             ImmutableArray<string>.Empty
         );
-        public static short FlexibleVersion { get; } = 0;
     };
 }

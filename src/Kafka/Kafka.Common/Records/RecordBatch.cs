@@ -1,23 +1,22 @@
-﻿using Kafka.Common.Attributes;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Immutable;
 
 namespace Kafka.Common.Records
 {
     public sealed record RecordBatch(
-        [property: Serialization(SerializationType.Int64, 0)] long BaseOffset,
-        [property: Serialization(SerializationType.Int32, 1)] int BatchLength,
-        [property: Serialization(SerializationType.Int32, 2)] int PartitionLeaderEpoch,
-        [property: Serialization(SerializationType.Int8, 3)] sbyte Magic,
-        [property: Serialization(SerializationType.Int32, 4)] int Crc,
-        [property: Serialization(SerializationType.Int16, 5)] Attributes Attributes,
-        [property: Serialization(SerializationType.Int32, 6)] int LastOffsetDelta,
-        [property: Serialization(SerializationType.Int64, 7)] long BaseTimestamp,
-        [property: Serialization(SerializationType.Int64, 8)] long MaxTimestamp,
-        [property: Serialization(SerializationType.Int64, 9)] long ProducerId,
-        [property: Serialization(SerializationType.Int16, 10)] short ProducerEpoch,
-        [property: Serialization(SerializationType.Int32, 11)] int BaseSequence,
-        [property: SerializationSequence(12)] IImmutableList<IRecord> Records
+        long BaseOffset,
+        int BatchLength,
+        int PartitionLeaderEpoch,
+        sbyte Magic,
+        int Crc,
+        Attributes Attributes,
+        int LastOffsetDelta,
+        long BaseTimestamp,
+        long MaxTimestamp,
+        long ProducerId,
+        short ProducerEpoch,
+        int BaseSequence,
+        ImmutableArray<IRecord> Records
     ) : IRecords
     {
         public static RecordBatch Empty { get; } = new(
@@ -71,11 +70,19 @@ namespace Kafka.Common.Records
 
         IRecord IReadOnlyList<IRecord>.this[int index] => Records[index];
 
-        int IReadOnlyCollection<IRecord>.Count => Records.Count;
+        int IReadOnlyCollection<IRecord>.Count => Records.Length;
 
-        IEnumerator<IRecord> IEnumerable<IRecord>.GetEnumerator() => Records.GetEnumerator();
+        IEnumerator<IRecord> IEnumerable<IRecord>.GetEnumerator()
+        {
+            foreach (var record in Records)
+                yield return record;
+        }
 
-        IEnumerator IEnumerable.GetEnumerator() => Records.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            foreach (var record in Records)
+                yield return record;
+        }
 
         void IRecords.EnsureValid()
         {

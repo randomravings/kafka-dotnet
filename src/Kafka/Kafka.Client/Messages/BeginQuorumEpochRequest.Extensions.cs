@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using TopicData = Kafka.Client.Messages.BeginQuorumEpochRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.BeginQuorumEpochRequest.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.BeginQuorumEpochRequest.TopicData;
 
 namespace Kafka.Client.Messages
 {

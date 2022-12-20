@@ -11,12 +11,11 @@ namespace Kafka.Client.Messages
     public sealed record AllocateProducerIdsRequest (
         int BrokerIdField,
         long BrokerEpochField
-    ) : Request(67)
+    ) : Request(67,0,0,0)
     {
         public static AllocateProducerIdsRequest Empty { get; } = new(
             default(int),
             default(long)
         );
-        public static short FlexibleVersion { get; } = 0;
     };
 }

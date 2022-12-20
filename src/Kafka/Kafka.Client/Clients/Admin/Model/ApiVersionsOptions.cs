@@ -2,16 +2,12 @@
 {
     public sealed record ApiVersionsOptions(
         int TimeoutMs,
-        short? ApiVersion,
-        string ClientId,
         string ClientSoftwareNameField,
         string ClientSoftwareVersionField
-    ) : ClientOptions(TimeoutMs, ApiVersion, ClientId)
+    ) : ClientOptions(TimeoutMs)
     {
         public static ApiVersionsOptions Empty { get; } = new(
             -1,
-            0,
-            "",
             "",
             ""
         );

@@ -40,8 +40,8 @@ namespace Kafka.Client.Clients.Producer
             ProduceRecord<TKey, TValue> produceRecord,
             Timestamp timestamp,
             Partition partition,
-            byte[]? KeyBytes,
-            byte[]? ValueBytes,
+            ReadOnlyMemory<byte>? KeyBytes,
+            ReadOnlyMemory<byte>? ValueBytes,
             CancellationToken cancellationToken
         )
         {

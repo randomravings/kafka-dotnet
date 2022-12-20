@@ -15,14 +15,13 @@ namespace Kafka.Client.Messages
         ImmutableArray<DescribeConfigsResource> ResourcesField,
         bool IncludeSynonymsField,
         bool IncludeDocumentationField
-    ) : Request(32)
+    ) : Request(32,0,4,4)
     {
         public static DescribeConfigsRequest Empty { get; } = new(
             ImmutableArray<DescribeConfigsResource>.Empty,
             default(bool),
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="ResourceTypeField">The resource type.</param>
         /// <param name="ResourceNameField">The resource name.</param>

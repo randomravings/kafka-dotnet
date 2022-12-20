@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using Kafka.Common.Records;
-using TopicProduceData = Kafka.Client.Messages.ProduceRequest.TopicProduceData;
 using PartitionProduceData = Kafka.Client.Messages.ProduceRequest.TopicProduceData.PartitionProduceData;
+using TopicProduceData = Kafka.Client.Messages.ProduceRequest.TopicProduceData;
 
 namespace Kafka.Client.Messages
 {
@@ -407,7 +407,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV00(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         indexField,
                         recordsField
@@ -422,7 +422,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV01(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         indexField,
                         recordsField
@@ -437,7 +437,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV02(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         indexField,
                         recordsField
@@ -452,7 +452,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV03(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         indexField,
                         recordsField
@@ -467,7 +467,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV04(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         indexField,
                         recordsField
@@ -482,7 +482,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV05(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         indexField,
                         recordsField
@@ -497,7 +497,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV06(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         indexField,
                         recordsField
@@ -512,7 +512,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV07(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         indexField,
                         recordsField
@@ -527,7 +527,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV08(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         indexField,
                         recordsField
@@ -542,7 +542,7 @@ namespace Kafka.Client.Messages
                 public static PartitionProduceData ReadV09(byte[] buffer, ref int index)
                 {
                     var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         indexField,

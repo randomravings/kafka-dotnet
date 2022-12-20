@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using DescribedGroupMember = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup.DescribedGroupMember;
 using DescribedGroup = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup;
+using DescribedGroupMember = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup.DescribedGroupMember;
 
 namespace Kafka.Client.Messages
 {
@@ -20,7 +20,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<DescribedGroup>.Empty
         );
-        public static short FlexibleVersion { get; } = 5;
         /// <summary>
         /// <param name="ErrorCodeField">The describe error, or 0 if there was no error.</param>
         /// <param name="GroupIdField">The group ID string.</param>

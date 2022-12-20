@@ -19,7 +19,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<AlterConfigsResourceResponse>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ErrorCodeField">The resource error code.</param>
         /// <param name="ErrorMessageField">The resource error message, or null if there was no error.</param>

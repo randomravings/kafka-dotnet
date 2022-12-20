@@ -12,12 +12,11 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record WriteTxnMarkersRequest (
         ImmutableArray<WritableTxnMarker> MarkersField
-    ) : Request(27)
+    ) : Request(27,0,1,1)
     {
         public static WriteTxnMarkersRequest Empty { get; } = new(
             ImmutableArray<WritableTxnMarker>.Empty
         );
-        public static short FlexibleVersion { get; } = 1;
         /// <summary>
         /// <param name="ProducerIdField">The current producer ID.</param>
         /// <param name="ProducerEpochField">The current epoch associated with the producer ID.</param>

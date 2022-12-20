@@ -17,6 +17,5 @@ namespace Kafka.Client.Messages
             default(ReadOnlyMemory<byte>?),
             default(short)
         );
-        public static short FlexibleVersion { get; } = 0;
     };
 }

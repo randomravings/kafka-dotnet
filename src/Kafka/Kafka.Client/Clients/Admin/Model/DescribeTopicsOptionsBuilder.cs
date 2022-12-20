@@ -34,8 +34,6 @@ namespace Kafka.Client.Clients.Admin.Model
         public override DescribeTopicsOptions Build() =>
             new(
                 _timeoutMs,
-                _version,
-                _clientId,
                 _topicIds.ToImmutableArray(),
                 _topicNames.ToImmutableArray(),
                 _includeTopicAuthorizedOperations

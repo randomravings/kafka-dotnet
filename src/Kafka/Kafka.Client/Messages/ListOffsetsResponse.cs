@@ -20,7 +20,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<ListOffsetsTopicResponse>.Empty
         );
-        public static short FlexibleVersion { get; } = 6;
         /// <summary>
         /// <param name="NameField">The topic name</param>
         /// <param name="PartitionsField">Each partition in the response.</param>

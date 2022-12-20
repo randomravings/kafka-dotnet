@@ -19,7 +19,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<AclCreationResult>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ErrorCodeField">The result error, or zero if there was no error.</param>
         /// <param name="ErrorMessageField">The result message, or null if there was no error.</param>

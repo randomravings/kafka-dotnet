@@ -1,11 +1,10 @@
-﻿using Kafka.Common.Attributes;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Immutable;
 
 namespace Kafka.Common.Records
 {
     public sealed record MessageSet(
-        [property: SerializationSequence(0)] IImmutableList<IRecord> Records
+        IImmutableList<IRecord> Records
     ) : IRecords
     {
         long IRecords.Offset => Records.Any() ? Records[0].Offset : -1;

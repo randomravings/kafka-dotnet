@@ -15,14 +15,13 @@ namespace Kafka.Client.Messages
         string GroupIdField,
         string MemberIdField,
         ImmutableArray<MemberIdentity> MembersField
-    ) : Request(13)
+    ) : Request(13,0,5,4)
     {
         public static LeaveGroupRequest Empty { get; } = new(
             "",
             "",
             ImmutableArray<MemberIdentity>.Empty
         );
-        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="MemberIdField">The member ID to remove from the group.</param>
         /// <param name="GroupInstanceIdField">The group instance ID to remove from the group.</param>

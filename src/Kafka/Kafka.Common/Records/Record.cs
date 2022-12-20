@@ -1,5 +1,4 @@
-﻿using Kafka.Common.Attributes;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace Kafka.Common.Records
 {
@@ -28,13 +27,13 @@ namespace Kafka.Common.Records
     /// <param name="Value">Value bytes, null if no value in record.</param>
     /// <param name="Headers">Record Headers, empty if no header.</param>
     public sealed record Record(
-        [property: Serialization(SerializationType.VarInt32, 0)] int Length,
-        [property: Serialization(SerializationType.Int16, 1)] Attributes Attributes,
-        [property: Serialization(SerializationType.VarInt64, 2)] long TimestampDelta,
-        [property: Serialization(SerializationType.VarInt32, 3)] int OffsetDelta,
-        [property: Serialization(SerializationType.CompactBytes, 4)] ReadOnlyMemory<byte>? Key,
-        [property: Serialization(SerializationType.CompactBytes, 5)] ReadOnlyMemory<byte>? Value,
-        [property: Serialization(SerializationType.Array, 0)] ImmutableArray<RecordHeader> Headers
+        int Length,
+        Attributes Attributes,
+        long TimestampDelta,
+        int OffsetDelta,
+        ReadOnlyMemory<byte>? Key,
+        ReadOnlyMemory<byte>? Value,
+        ImmutableArray<RecordHeader> Headers
     ) : IRecord
     {
         int IRecord.Sequence => -1;
@@ -63,7 +62,7 @@ namespace Kafka.Common.Records
 
         TimestampType IRecord.TimestampType => TimestampType.None;
 
-        RecordHeader[] IRecord.Headers => Array.Empty<RecordHeader>();
+        ImmutableArray<RecordHeader> IRecord.Headers => ImmutableArray<RecordHeader>.Empty;
 
         void IRecord.EnsureValid()
         {

@@ -6,16 +6,16 @@ namespace Kafka.Client.Clients.Producer
         : ClientConfig
     {
         [JsonPropertyName("partitioner.class")]
-        public string PartitionerClass { get; } = "";
+        public string PartitionerClass { get; set; } = "";
         [JsonPropertyName("key.serializer")]
-        public string KeySerializer { get; } = "";
+        public string KeySerializer { get; set; } = "";
         [JsonPropertyName("value.serializer")]
-        public string ValueSerializer { get; } = "";
+        public string ValueSerializer { get; set; } = "";
         [JsonPropertyName("max.in.flight.requests.per.connection")]
-        public int MaxInFlightRequestsPerConnection { get; } = 5;
+        public int MaxInFlightRequestsPerConnection { get; set; } = 5;
         [JsonPropertyName("max.request.size")]
-        public int MaxRequestSize { get; } = 1048576;
+        public int MaxRequestSize { get; set; } = 1048576;
         [JsonPropertyName("linger.ms")]
-        public long LingerMs { get; } = 0;
+        public long LingerMs { get; set; } = 0;
     }
 }

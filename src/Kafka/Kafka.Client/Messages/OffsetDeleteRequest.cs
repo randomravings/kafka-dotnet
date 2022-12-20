@@ -14,13 +14,12 @@ namespace Kafka.Client.Messages
     public sealed record OffsetDeleteRequest (
         string GroupIdField,
         ImmutableArray<OffsetDeleteRequestTopic> TopicsField
-    ) : Request(47)
+    ) : Request(47,0,0,32767)
     {
         public static OffsetDeleteRequest Empty { get; } = new(
             "",
             ImmutableArray<OffsetDeleteRequestTopic>.Empty
         );
-        public static short FlexibleVersion { get; } = 32767;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">Each partition to delete offsets for.</param>

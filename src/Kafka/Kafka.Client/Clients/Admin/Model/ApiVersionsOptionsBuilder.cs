@@ -23,8 +23,6 @@
         public override ApiVersionsOptions Build() =>
             new(
                 _timeoutMs,
-                _version,
-                _clientId,
                 _clientSoftwareName,
                 _clientSoftwareVersion
             )

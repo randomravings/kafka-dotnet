@@ -232,8 +232,6 @@ namespace Kafka.Client.Clients.Producer
                 request,
                 (b, i, r, v) => ProduceRequestSerde.Write(b, i, r, v),
                 (byte[] b, ref int i, short v) => ProduceResponseSerde.Read(b, ref i, v),
-                9,
-                ProduceRequest.FlexibleVersion,
                 cancellationToken
             );
 

@@ -23,7 +23,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<DescribedDelegationToken>.Empty,
             default(int)
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="PrincipalTypeField">The token principal type.</param>
         /// <param name="PrincipalNameField">The token principal name.</param>

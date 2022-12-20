@@ -11,12 +11,11 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record CreateAclsRequest (
         ImmutableArray<AclCreation> CreationsField
-    ) : Request(30)
+    ) : Request(30,0,3,2)
     {
         public static CreateAclsRequest Empty { get; } = new(
             ImmutableArray<AclCreation>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ResourceTypeField">The type of the resource.</param>
         /// <param name="ResourceNameField">The resource name for the ACL.</param>

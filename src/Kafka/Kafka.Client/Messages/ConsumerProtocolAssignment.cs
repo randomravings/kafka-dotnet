@@ -19,7 +19,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<TopicPartition>.Empty,
             default(ReadOnlyMemory<byte>?)
         );
-        public static short FlexibleVersion { get; } = 32767;
         /// <summary>
         /// <param name="TopicField"></param>
         /// <param name="PartitionsField"></param>

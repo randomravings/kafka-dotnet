@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using TopicData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData;
-using ReplicaState = Kafka.Client.Messages.DescribeQuorumResponse.ReplicaState;
 using PartitionData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData.PartitionData;
+using ReplicaState = Kafka.Client.Messages.DescribeQuorumResponse.ReplicaState;
+using TopicData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -56,6 +56,53 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteCompactArray<TopicData>(buffer, index, message.TopicsField, TopicDataSerde.WriteV01);
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
+        }
+        private static class ReplicaStateSerde
+        {
+            public static ReplicaState ReadV00(byte[] buffer, ref int index)
+            {
+                var replicaIdField = Decoder.ReadInt32(buffer, ref index);
+                var logEndOffsetField = Decoder.ReadInt64(buffer, ref index);
+                var lastFetchTimestampField = default(long);
+                var lastCaughtUpTimestampField = default(long);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    replicaIdField,
+                    logEndOffsetField,
+                    lastFetchTimestampField,
+                    lastCaughtUpTimestampField
+                );
+            }
+            public static int WriteV00(byte[] buffer, int index, ReplicaState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+                index = Encoder.WriteInt64(buffer, index, message.LogEndOffsetField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static ReplicaState ReadV01(byte[] buffer, ref int index)
+            {
+                var replicaIdField = Decoder.ReadInt32(buffer, ref index);
+                var logEndOffsetField = Decoder.ReadInt64(buffer, ref index);
+                var lastFetchTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var lastCaughtUpTimestampField = Decoder.ReadInt64(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    replicaIdField,
+                    logEndOffsetField,
+                    lastFetchTimestampField,
+                    lastCaughtUpTimestampField
+                );
+            }
+            public static int WriteV01(byte[] buffer, int index, ReplicaState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
+                index = Encoder.WriteInt64(buffer, index, message.LogEndOffsetField);
+                index = Encoder.WriteInt64(buffer, index, message.LastFetchTimestampField);
+                index = Encoder.WriteInt64(buffer, index, message.LastCaughtUpTimestampField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
         }
         private static class TopicDataSerde
         {
@@ -159,53 +206,6 @@ namespace Kafka.Client.Messages
                     index = Encoder.WriteVarUInt32(buffer, index, 0);
                     return index;
                 }
-            }
-        }
-        private static class ReplicaStateSerde
-        {
-            public static ReplicaState ReadV00(byte[] buffer, ref int index)
-            {
-                var replicaIdField = Decoder.ReadInt32(buffer, ref index);
-                var logEndOffsetField = Decoder.ReadInt64(buffer, ref index);
-                var lastFetchTimestampField = default(long);
-                var lastCaughtUpTimestampField = default(long);
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    replicaIdField,
-                    logEndOffsetField,
-                    lastFetchTimestampField,
-                    lastCaughtUpTimestampField
-                );
-            }
-            public static int WriteV00(byte[] buffer, int index, ReplicaState message)
-            {
-                index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
-                index = Encoder.WriteInt64(buffer, index, message.LogEndOffsetField);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-            public static ReplicaState ReadV01(byte[] buffer, ref int index)
-            {
-                var replicaIdField = Decoder.ReadInt32(buffer, ref index);
-                var logEndOffsetField = Decoder.ReadInt64(buffer, ref index);
-                var lastFetchTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var lastCaughtUpTimestampField = Decoder.ReadInt64(buffer, ref index);
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    replicaIdField,
-                    logEndOffsetField,
-                    lastFetchTimestampField,
-                    lastCaughtUpTimestampField
-                );
-            }
-            public static int WriteV01(byte[] buffer, int index, ReplicaState message)
-            {
-                index = Encoder.WriteInt32(buffer, index, message.ReplicaIdField);
-                index = Encoder.WriteInt64(buffer, index, message.LogEndOffsetField);
-                index = Encoder.WriteInt64(buffer, index, message.LastFetchTimestampField);
-                index = Encoder.WriteInt64(buffer, index, message.LastCaughtUpTimestampField);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
             }
         }
     }

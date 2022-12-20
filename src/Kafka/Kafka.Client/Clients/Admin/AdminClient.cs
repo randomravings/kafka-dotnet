@@ -36,7 +36,7 @@ namespace Kafka.Client.Clients.Admin
         )
         {
             var request = new MetadataRequest(
-                (options.ApiVersion == 0 ? null : ImmutableArray<MetadataRequest.MetadataRequestTopic>.Empty),
+                ImmutableArray<MetadataRequest.MetadataRequestTopic>.Empty,
                 options.IncludeInternal,
                 false,
                 false
@@ -45,8 +45,6 @@ namespace Kafka.Client.Clients.Admin
                 request,
                 MetadataRequestSerde.Write,
                 MetadataResponseSerde.Read,
-                options.ApiVersion,
-                ProduceRequest.FlexibleVersion,
                 cancellationToken
             );
             var topics = response
@@ -92,8 +90,6 @@ namespace Kafka.Client.Clients.Admin
                 request,
                 CreateTopicsRequestSerde.Write,
                 CreateTopicsResponseSerde.Read,
-                options.ApiVersion,
-                CreateTopicsRequest.FlexibleVersion,
                 cancellationToken
             );
             var createdTopics = response
@@ -161,8 +157,6 @@ namespace Kafka.Client.Clients.Admin
                 request,
                 DeleteTopicsRequestSerde.Write,
                 DeleteTopicsResponseSerde.Read,
-                options.ApiVersion,
-                CreateTopicsRequest.FlexibleVersion,
                 cancellationToken
             );
             var deletedTopics = response
@@ -225,8 +219,6 @@ namespace Kafka.Client.Clients.Admin
                 request,
                 MetadataRequestSerde.Write,
                 MetadataResponseSerde.Read,
-                options.ApiVersion,
-                MetadataRequest.FlexibleVersion,
                 cancellationToken
             );
             return new(

@@ -17,14 +17,13 @@ namespace Kafka.Client.Messages
         ImmutableArray<CreatableTopic> TopicsField,
         int timeoutMsField,
         bool validateOnlyField
-    ) : Request(19)
+    ) : Request(19,0,7,5)
     {
         public static CreateTopicsRequest Empty { get; } = new(
             ImmutableArray<CreatableTopic>.Empty,
             default(int),
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 5;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="NumPartitionsField">The number of partitions to create in the topic, or -1 if we are either specifying a manual partition assignment or using the default partitions.</param>

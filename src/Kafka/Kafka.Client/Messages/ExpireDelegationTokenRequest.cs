@@ -11,12 +11,11 @@ namespace Kafka.Client.Messages
     public sealed record ExpireDelegationTokenRequest (
         ReadOnlyMemory<byte> HmacField,
         long ExpiryTimePeriodMsField
-    ) : Request(40)
+    ) : Request(40,0,2,2)
     {
         public static ExpireDelegationTokenRequest Empty { get; } = new(
             Array.Empty<byte>(),
             default(long)
         );
-        public static short FlexibleVersion { get; } = 2;
     };
 }

@@ -15,7 +15,7 @@ namespace Kafka.Client.Messages
         long ProducerIdField,
         short ProducerEpochField,
         bool CommittedField
-    ) : Request(26)
+    ) : Request(26,0,3,3)
     {
         public static EndTxnRequest Empty { get; } = new(
             "",
@@ -23,6 +23,5 @@ namespace Kafka.Client.Messages
             default(short),
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 3;
     };
 }

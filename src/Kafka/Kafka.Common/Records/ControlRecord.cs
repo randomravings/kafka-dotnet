@@ -1,11 +1,10 @@
-﻿using Kafka.Common.Attributes;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
 namespace Kafka.Common.Records
 {
     public sealed record ControlRecord(
-        [property: Serialization(SerializationType.Int16, 0)] short Version,
-        [property: Serialization(SerializationType.Int16, 1)] ControlType Value
+        short Version,
+        ControlType Value
     ) : IRecord
     {
         public static ControlRecord Empty = new(-1, ControlType.None);
@@ -36,7 +35,7 @@ namespace Kafka.Common.Records
 
         CompressionType IRecord.CompressionType => CompressionType.None;
 
-        RecordHeader[] IRecord.Headers => Array.Empty<RecordHeader>();
+        ImmutableArray<RecordHeader> IRecord.Headers => ImmutableArray<RecordHeader>.Empty;
 
         void IRecord.EnsureValid()
         {

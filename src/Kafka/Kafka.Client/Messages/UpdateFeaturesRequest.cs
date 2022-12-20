@@ -15,14 +15,13 @@ namespace Kafka.Client.Messages
         int timeoutMsField,
         ImmutableArray<FeatureUpdateKey> FeatureUpdatesField,
         bool ValidateOnlyField
-    ) : Request(57)
+    ) : Request(57,0,1,0)
     {
         public static UpdateFeaturesRequest Empty { get; } = new(
             default(int),
             ImmutableArray<FeatureUpdateKey>.Empty,
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 0;
         /// <summary>
         /// <param name="FeatureField">The name of the finalized feature to be updated.</param>
         /// <param name="MaxVersionLevelField">The new maximum version level for the finalized feature. A value >= 1 is valid. A value < 1, is special, and can be used to request the deletion of the finalized feature.</param>

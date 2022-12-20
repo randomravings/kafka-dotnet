@@ -19,7 +19,6 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<RemainingPartition>.Empty
         );
-        public static short FlexibleVersion { get; } = 3;
         /// <summary>
         /// <param name="TopicNameField">The name of the topic.</param>
         /// <param name="PartitionIndexField">The index of the partition.</param>

@@ -2,15 +2,11 @@
 {
     public sealed record ListTopicsOptions(
         int TimeoutMs,
-        short ApiVersion,
-        string ClientId,
         bool IncludeInternal
-    ) : ClientOptions(TimeoutMs, ApiVersion, ClientId)
+    ) : ClientOptions(TimeoutMs)
     {
         public static ListTopicsOptions Empty { get; } = new(
             -1,
-            -1,
-            "",
             false
         );
     };

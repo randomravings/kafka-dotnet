@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using EntryData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData;
 using EntityData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.EntityData;
 using OpData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.OpData;
+using EntryData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData;
 
 namespace Kafka.Client.Messages
 {

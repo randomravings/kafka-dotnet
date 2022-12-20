@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using EntryData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData;
 using EntityData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.EntityData;
+using EntryData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData;
 using ValueData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.ValueData;
 
 namespace Kafka.Client.Messages

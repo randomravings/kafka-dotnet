@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using CreatePartitionsTopic = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic;
 using CreatePartitionsAssignment = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic.CreatePartitionsAssignment;
+using CreatePartitionsTopic = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -16,14 +16,13 @@ namespace Kafka.Client.Messages
         ImmutableArray<CreatePartitionsTopic> TopicsField,
         int TimeoutMsField,
         bool ValidateOnlyField
-    ) : Request(37)
+    ) : Request(37,0,3,2)
     {
         public static CreatePartitionsRequest Empty { get; } = new(
             ImmutableArray<CreatePartitionsTopic>.Empty,
             default(int),
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="CountField">The new partition count.</param>

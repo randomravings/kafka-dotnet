@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using AlterableConfig = Kafka.Client.Messages.IncrementalAlterConfigsRequest.AlterConfigsResource.AlterableConfig;
 using AlterConfigsResource = Kafka.Client.Messages.IncrementalAlterConfigsRequest.AlterConfigsResource;
+using AlterableConfig = Kafka.Client.Messages.IncrementalAlterConfigsRequest.AlterConfigsResource.AlterableConfig;
 
 namespace Kafka.Client.Messages
 {
@@ -14,13 +14,12 @@ namespace Kafka.Client.Messages
     public sealed record IncrementalAlterConfigsRequest (
         ImmutableArray<AlterConfigsResource> ResourcesField,
         bool ValidateOnlyField
-    ) : Request(44)
+    ) : Request(44,0,1,1)
     {
         public static IncrementalAlterConfigsRequest Empty { get; } = new(
             ImmutableArray<AlterConfigsResource>.Empty,
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 1;
         /// <summary>
         /// <param name="ResourceTypeField">The resource type.</param>
         /// <param name="ResourceNameField">The resource name.</param>

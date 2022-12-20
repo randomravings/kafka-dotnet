@@ -23,7 +23,7 @@ namespace Kafka.Client.Messages
         string? ProtocolTypeField,
         string? ProtocolNameField,
         ImmutableArray<SyncGroupRequestAssignment> AssignmentsField
-    ) : Request(14)
+    ) : Request(14,0,5,4)
     {
         public static SyncGroupRequest Empty { get; } = new(
             "",
@@ -34,7 +34,6 @@ namespace Kafka.Client.Messages
             default(string?),
             ImmutableArray<SyncGroupRequestAssignment>.Empty
         );
-        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="MemberIdField">The ID of the member to assign.</param>
         /// <param name="AssignmentField">The member assignment.</param>

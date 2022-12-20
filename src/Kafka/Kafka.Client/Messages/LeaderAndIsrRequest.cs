@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using LeaderAndIsrPartitionState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrPartitionState;
 using LeaderAndIsrTopicState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrTopicState;
+using LeaderAndIsrPartitionState = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrPartitionState;
 using LeaderAndIsrLiveLeader = Kafka.Client.Messages.LeaderAndIsrRequest.LeaderAndIsrLiveLeader;
 
 namespace Kafka.Client.Messages
@@ -27,7 +27,7 @@ namespace Kafka.Client.Messages
         ImmutableArray<LeaderAndIsrPartitionState> UngroupedPartitionStatesField,
         ImmutableArray<LeaderAndIsrTopicState> TopicStatesField,
         ImmutableArray<LeaderAndIsrLiveLeader> LiveLeadersField
-    ) : Request(4)
+    ) : Request(4,0,7,4)
     {
         public static LeaderAndIsrRequest Empty { get; } = new(
             default(int),
@@ -39,7 +39,23 @@ namespace Kafka.Client.Messages
             ImmutableArray<LeaderAndIsrTopicState>.Empty,
             ImmutableArray<LeaderAndIsrLiveLeader>.Empty
         );
-        public static short FlexibleVersion { get; } = 4;
+        /// <summary>
+        /// <param name="TopicNameField">The topic name.</param>
+        /// <param name="TopicIdField">The unique topic ID.</param>
+        /// <param name="PartitionStatesField">The state of each partition</param>
+        /// </summary>
+        public sealed record LeaderAndIsrTopicState (
+            string TopicNameField,
+            Guid TopicIdField,
+            ImmutableArray<LeaderAndIsrPartitionState> PartitionStatesField
+        )
+        {
+            public static LeaderAndIsrTopicState Empty { get; } = new(
+                "",
+                default(Guid),
+                ImmutableArray<LeaderAndIsrPartitionState>.Empty
+            );
+        };
         /// <summary>
         /// <param name="TopicNameField">The topic name.  This is only present in v0 or v1.</param>
         /// <param name="PartitionIndexField">The partition index.</param>
@@ -82,23 +98,6 @@ namespace Kafka.Client.Messages
                 ImmutableArray<int>.Empty,
                 default(bool),
                 default(sbyte)
-            );
-        };
-        /// <summary>
-        /// <param name="TopicNameField">The topic name.</param>
-        /// <param name="TopicIdField">The unique topic ID.</param>
-        /// <param name="PartitionStatesField">The state of each partition</param>
-        /// </summary>
-        public sealed record LeaderAndIsrTopicState (
-            string TopicNameField,
-            Guid TopicIdField,
-            ImmutableArray<LeaderAndIsrPartitionState> PartitionStatesField
-        )
-        {
-            public static LeaderAndIsrTopicState Empty { get; } = new(
-                "",
-                default(Guid),
-                ImmutableArray<LeaderAndIsrPartitionState>.Empty
             );
         };
         /// <summary>

@@ -9,11 +9,10 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record SaslAuthenticateRequest (
         ReadOnlyMemory<byte> AuthBytesField
-    ) : Request(36)
+    ) : Request(36,0,2,2)
     {
         public static SaslAuthenticateRequest Empty { get; } = new(
             Array.Empty<byte>()
         );
-        public static short FlexibleVersion { get; } = 2;
     };
 }

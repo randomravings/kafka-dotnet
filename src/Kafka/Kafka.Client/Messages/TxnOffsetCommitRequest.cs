@@ -26,7 +26,7 @@ namespace Kafka.Client.Messages
         string MemberIdField,
         string? GroupInstanceIdField,
         ImmutableArray<TxnOffsetCommitRequestTopic> TopicsField
-    ) : Request(28)
+    ) : Request(28,0,3,3)
     {
         public static TxnOffsetCommitRequest Empty { get; } = new(
             "",
@@ -38,7 +38,6 @@ namespace Kafka.Client.Messages
             default(string?),
             ImmutableArray<TxnOffsetCommitRequestTopic>.Empty
         );
-        public static short FlexibleVersion { get; } = 3;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">The partitions inside the topic that we want to committ offsets for.</param>

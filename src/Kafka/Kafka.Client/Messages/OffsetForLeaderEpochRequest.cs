@@ -14,13 +14,12 @@ namespace Kafka.Client.Messages
     public sealed record OffsetForLeaderEpochRequest (
         int ReplicaIdField,
         ImmutableArray<OffsetForLeaderTopic> TopicsField
-    ) : Request(23)
+    ) : Request(23,0,4,4)
     {
         public static OffsetForLeaderEpochRequest Empty { get; } = new(
             default(int),
             ImmutableArray<OffsetForLeaderTopic>.Empty
         );
-        public static short FlexibleVersion { get; } = 4;
         /// <summary>
         /// <param name="TopicField">The topic name.</param>
         /// <param name="PartitionsField">Each partition to get offsets for.</param>

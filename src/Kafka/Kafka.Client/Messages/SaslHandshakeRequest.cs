@@ -9,11 +9,10 @@ namespace Kafka.Client.Messages
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record SaslHandshakeRequest (
         string MechanismField
-    ) : Request(17)
+    ) : Request(17,0,1,32767)
     {
         public static SaslHandshakeRequest Empty { get; } = new(
             ""
         );
-        public static short FlexibleVersion { get; } = 32767;
     };
 }

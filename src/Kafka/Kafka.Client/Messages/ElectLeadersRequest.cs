@@ -15,14 +15,13 @@ namespace Kafka.Client.Messages
         sbyte ElectionTypeField,
         ImmutableArray<TopicPartitions>? TopicPartitionsField,
         int TimeoutMsField
-    ) : Request(43)
+    ) : Request(43,0,2,2)
     {
         public static ElectLeadersRequest Empty { get; } = new(
             default(sbyte),
             default(ImmutableArray<TopicPartitions>?),
             default(int)
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="TopicField">The name of a topic.</param>
         /// <param name="PartitionsField">The partitions of this topic whose leader should be elected.</param>

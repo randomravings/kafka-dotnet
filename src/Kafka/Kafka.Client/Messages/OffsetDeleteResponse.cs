@@ -23,7 +23,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<OffsetDeleteResponseTopic>.Empty
         );
-        public static short FlexibleVersion { get; } = 32767;
         /// <summary>
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">The responses for each partition in the topic.</param>

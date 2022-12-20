@@ -8,7 +8,7 @@ namespace Kafka.Client.Clients.Producer
     {
         private DefaultPartitioner() { }
         public static DefaultPartitioner Instance { get; } = new();
-        public async ValueTask<int> Select(Cluster cluster, TopicName topic, byte[]? keyBytes) =>
+        public async ValueTask<int> Select(Cluster cluster, TopicName topic, ReadOnlyMemory<byte>? keyBytes) =>
             await new ValueTask<int>(0);
         public void Close() { }
     }

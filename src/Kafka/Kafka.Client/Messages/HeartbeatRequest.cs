@@ -15,7 +15,7 @@ namespace Kafka.Client.Messages
         int GenerationIdField,
         string MemberIdField,
         string? GroupInstanceIdField
-    ) : Request(12)
+    ) : Request(12,0,4,4)
     {
         public static HeartbeatRequest Empty { get; } = new(
             "",
@@ -23,6 +23,5 @@ namespace Kafka.Client.Messages
             "",
             default(string?)
         );
-        public static short FlexibleVersion { get; } = 4;
     };
 }

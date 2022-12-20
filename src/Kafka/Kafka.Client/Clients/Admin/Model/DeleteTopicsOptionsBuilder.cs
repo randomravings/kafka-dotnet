@@ -27,8 +27,6 @@ namespace Kafka.Client.Clients.Admin.Model
         public override DeleteTopicsOptions Build() =>
             new(
                 _timeoutMs,
-                _version,
-                _clientId,
                 _topicIds.ToImmutableArray(),
                 _topicNames.ToImmutableArray()
             )

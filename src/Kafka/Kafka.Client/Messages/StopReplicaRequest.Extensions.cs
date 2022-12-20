@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
+using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
 using StopReplicaTopicState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState;
-using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
+using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
 
 namespace Kafka.Client.Messages
 {
@@ -185,21 +185,38 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
         }
-        private static class StopReplicaPartitionV0Serde
+        private static class StopReplicaTopicV1Serde
         {
-            public static StopReplicaPartitionV0 ReadV00(byte[] buffer, ref int index)
+            public static StopReplicaTopicV1 ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var nameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 return new(
-                    topicNameField,
-                    partitionIndexField
+                    nameField,
+                    partitionIndexesField
                 );
             }
-            public static int WriteV00(byte[] buffer, int index, StopReplicaPartitionV0 message)
+            public static int WriteV01(byte[] buffer, int index, StopReplicaTopicV1 message)
             {
-                index = Encoder.WriteString(buffer, index, message.TopicNameField);
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
+                return index;
+            }
+            public static StopReplicaTopicV1 ReadV02(byte[] buffer, ref int index)
+            {
+                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    nameField,
+                    partitionIndexesField
+                );
+            }
+            public static int WriteV02(byte[] buffer, int index, StopReplicaTopicV1 message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
                 return index;
             }
         }
@@ -283,38 +300,21 @@ namespace Kafka.Client.Messages
                 }
             }
         }
-        private static class StopReplicaTopicV1Serde
+        private static class StopReplicaPartitionV0Serde
         {
-            public static StopReplicaTopicV1 ReadV01(byte[] buffer, ref int index)
+            public static StopReplicaPartitionV0 ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var topicNameField = Decoder.ReadString(buffer, ref index);
+                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    topicNameField,
+                    partitionIndexField
                 );
             }
-            public static int WriteV01(byte[] buffer, int index, StopReplicaTopicV1 message)
+            public static int WriteV00(byte[] buffer, int index, StopReplicaPartitionV0 message)
             {
-                index = Encoder.WriteString(buffer, index, message.NameField);
-                index = Encoder.WriteArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
-                return index;
-            }
-            public static StopReplicaTopicV1 ReadV02(byte[] buffer, ref int index)
-            {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    nameField,
-                    partitionIndexesField
-                );
-            }
-            public static int WriteV02(byte[] buffer, int index, StopReplicaTopicV1 message)
-            {
-                index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
                 return index;
             }
         }

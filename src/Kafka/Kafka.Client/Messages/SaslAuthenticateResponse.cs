@@ -23,6 +23,5 @@ namespace Kafka.Client.Messages
             Array.Empty<byte>(),
             default(long)
         );
-        public static short FlexibleVersion { get; } = 2;
     };
 }

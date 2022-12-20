@@ -19,7 +19,6 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<StopReplicaPartitionError>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionIndexField">The partition index.</param>

@@ -15,7 +15,7 @@ namespace Kafka.Client.Messages
         long ProducerIdField,
         short ProducerEpochField,
         string GroupIdField
-    ) : Request(25)
+    ) : Request(25,0,3,3)
     {
         public static AddOffsetsToTxnRequest Empty { get; } = new(
             "",
@@ -23,6 +23,5 @@ namespace Kafka.Client.Messages
             default(short),
             ""
         );
-        public static short FlexibleVersion { get; } = 3;
     };
 }

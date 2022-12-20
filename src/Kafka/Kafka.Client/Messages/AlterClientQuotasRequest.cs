@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using EntryData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData;
 using EntityData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.EntityData;
 using OpData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.OpData;
+using EntryData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData;
 
 namespace Kafka.Client.Messages
 {
@@ -15,13 +15,12 @@ namespace Kafka.Client.Messages
     public sealed record AlterClientQuotasRequest (
         ImmutableArray<EntryData> EntriesField,
         bool ValidateOnlyField
-    ) : Request(49)
+    ) : Request(49,0,1,1)
     {
         public static AlterClientQuotasRequest Empty { get; } = new(
             ImmutableArray<EntryData>.Empty,
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 1;
         /// <summary>
         /// <param name="EntityField">The quota entity to alter.</param>
         /// <param name="OpsField">An individual quota configuration entry to alter.</param>

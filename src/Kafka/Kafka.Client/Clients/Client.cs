@@ -19,7 +19,6 @@ namespace Kafka.Client.Clients
         private const string CLIENT_VERSION = "1.9.2";
         private const short REQUEST_HEADER_VERSION = 2;
         private const short RESPONSE_HEADER_VERSION = 1;
-        private const short API_REQUEST_VERSION = 3;
         private int _coorelationIds = 0;
         private bool _disposed;
         private readonly ITransport _transport;
@@ -50,8 +49,6 @@ namespace Kafka.Client.Clients
             TRequest request,
             EncodeVersionDelegate<TRequest> requestWriter,
             DecodeVersionDelegate<TResponse> responseReader,
-            short versionOverride,
-            short flexibleVersion,
             CancellationToken cancellationToken
         )
             where TRequest : notnull, Request
@@ -62,8 +59,6 @@ namespace Kafka.Client.Clients
                 request,
                 requestWriter,
                 responseReader,
-                versionOverride,
-                flexibleVersion,
                 cancellationToken
             );
         }
@@ -90,8 +85,6 @@ namespace Kafka.Client.Clients
             TRequest request,
             EncodeVersionDelegate<TRequest> requestWriter,
             DecodeVersionDelegate<TResponse> responseReader,
-            short apiVersion,
-            short flexibleVersion,
             CancellationToken cancellationToken
         )
             where TRequest : notnull, Request
@@ -100,8 +93,6 @@ namespace Kafka.Client.Clients
                 request,
                 requestWriter,
                 responseReader,
-                apiVersion,
-                flexibleVersion,
                 false,
                 cancellationToken
             )
@@ -111,8 +102,6 @@ namespace Kafka.Client.Clients
             TRequest request,
             EncodeVersionDelegate<TRequest> requestWriter,
             DecodeVersionDelegate<TResponse> responseReader,
-            short apiVersion,
-            short flexibleVersion,
             bool ignoreHeaderTaggedFields,
             CancellationToken cancellationToken
         )
@@ -120,8 +109,10 @@ namespace Kafka.Client.Clients
             where TResponse : notnull, Response
         {
             var correlationId = Interlocked.Increment(ref _coorelationIds);
-            var version = apiVersion < 0 ? _apiVersions[request.Api].Version.Max : apiVersion;
-            var flexible = version >= flexibleVersion;
+            var version = request.MaxVersion;
+            if(_apiVersions.TryGetValue(request.Api, out var storedVersion))
+                version = Math.Min(request.MaxVersion, storedVersion.Version.Max);
+            var flexible = version >= request.FlexibleVersion;
             var requestHeader = new RequestHeader(
                 request.Api,
                 version,
@@ -154,8 +145,6 @@ namespace Kafka.Client.Clients
                 request,
                 ApiVersionsRequestSerde.Write,
                 ApiVersionsResponseSerde.Read,
-                API_REQUEST_VERSION,
-                ApiVersionsRequest.FlexibleVersion,
                 true,
                 cancellationToken
             );
@@ -190,8 +179,6 @@ namespace Kafka.Client.Clients
                 request,
                 MetadataRequestSerde.Write,
                 MetadataResponseSerde.Read,
-                -1,
-                MetadataRequest.FlexibleVersion,
                 cancellationToken
             );
             var nodes = response.BrokersField.Select(

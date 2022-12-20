@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using EntryData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData;
 using EntityData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.EntityData;
+using EntryData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData;
 using ValueData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.ValueData;
 
 namespace Kafka.Client.Messages
@@ -27,7 +27,6 @@ namespace Kafka.Client.Messages
             default(string?),
             default(ImmutableArray<EntryData>?)
         );
-        public static short FlexibleVersion { get; } = 1;
         /// <summary>
         /// <param name="EntityField">The quota entity description.</param>
         /// <param name="ValuesField">The quota values for the entity.</param>

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using FetchPartition = Kafka.Client.Messages.FetchRequest.FetchTopic.FetchPartition;
 using FetchTopic = Kafka.Client.Messages.FetchRequest.FetchTopic;
+using FetchPartition = Kafka.Client.Messages.FetchRequest.FetchTopic.FetchPartition;
 using ForgottenTopic = Kafka.Client.Messages.FetchRequest.ForgottenTopic;
 
 namespace Kafka.Client.Messages

@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using AlterableConfig = Kafka.Client.Messages.AlterConfigsRequest.AlterConfigsResource.AlterableConfig;
 using AlterConfigsResource = Kafka.Client.Messages.AlterConfigsRequest.AlterConfigsResource;
+using AlterableConfig = Kafka.Client.Messages.AlterConfigsRequest.AlterConfigsResource.AlterableConfig;
 
 namespace Kafka.Client.Messages
 {

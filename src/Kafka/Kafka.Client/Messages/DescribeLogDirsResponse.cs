@@ -24,7 +24,6 @@ namespace Kafka.Client.Messages
             default(short),
             ImmutableArray<DescribeLogDirsResult>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
         /// <param name="LogDirField">The absolute log directory path.</param>

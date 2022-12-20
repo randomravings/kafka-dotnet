@@ -13,13 +13,12 @@ namespace Kafka.Client.Messages
     public sealed record DescribeClientQuotasRequest (
         ImmutableArray<ComponentData> ComponentsField,
         bool StrictField
-    ) : Request(48)
+    ) : Request(48,0,1,1)
     {
         public static DescribeClientQuotasRequest Empty { get; } = new(
             ImmutableArray<ComponentData>.Empty,
             default(bool)
         );
-        public static short FlexibleVersion { get; } = 1;
         /// <summary>
         /// <param name="EntityTypeField">The entity type that the filter component applies to.</param>
         /// <param name="MatchTypeField">How to match the entity {0 = exact name, 1 = default name, 2 = any specified name}.</param>

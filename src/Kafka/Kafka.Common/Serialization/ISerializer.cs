@@ -2,6 +2,6 @@
 {
     public interface ISerializer<T>
     {
-        byte[]? Write(T value);
+        ReadOnlyMemory<byte>? Write(T value);
     }
 }

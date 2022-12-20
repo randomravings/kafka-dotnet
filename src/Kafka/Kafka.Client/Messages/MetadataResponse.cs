@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic;
 using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic.MetadataResponsePartition;
+using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponse.MetadataResponseBroker;
 
 namespace Kafka.Client.Messages
@@ -33,7 +33,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<MetadataResponseTopic>.Empty,
             default(int)
         );
-        public static short FlexibleVersion { get; } = 9;
         /// <summary>
         /// <param name="ErrorCodeField">The topic error, or 0 if there was no error.</param>
         /// <param name="NameField">The topic name.</param>

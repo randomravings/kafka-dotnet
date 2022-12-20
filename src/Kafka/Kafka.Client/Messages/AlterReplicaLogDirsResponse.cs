@@ -20,7 +20,6 @@ namespace Kafka.Client.Messages
             default(int),
             ImmutableArray<AlterReplicaLogDirTopicResult>.Empty
         );
-        public static short FlexibleVersion { get; } = 2;
         /// <summary>
         /// <param name="TopicNameField">The name of the topic.</param>
         /// <param name="PartitionsField">The results for each partition.</param>

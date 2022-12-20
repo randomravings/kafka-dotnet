@@ -11,12 +11,11 @@ namespace Kafka.Client.Messages
     public sealed record RenewDelegationTokenRequest (
         ReadOnlyMemory<byte> HmacField,
         long RenewPeriodMsField
-    ) : Request(39)
+    ) : Request(39,0,2,2)
     {
         public static RenewDelegationTokenRequest Empty { get; } = new(
             Array.Empty<byte>(),
             default(long)
         );
-        public static short FlexibleVersion { get; } = 2;
     };
 }

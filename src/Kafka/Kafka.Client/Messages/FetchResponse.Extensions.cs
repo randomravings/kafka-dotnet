@@ -2,12 +2,12 @@ using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
-using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
-using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
 using PartitionData = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData;
+using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
+using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
 
 namespace Kafka.Client.Messages
 {
@@ -593,7 +593,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -628,7 +628,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -663,7 +663,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -698,7 +698,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -733,7 +733,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV04);
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -770,7 +770,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV05);
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -808,7 +808,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV06);
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -846,7 +846,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV07);
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -884,7 +884,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV08);
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -922,7 +922,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV09);
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -960,7 +960,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV10);
                     var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -998,7 +998,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV11);
                     var preferredReadReplicaField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
                         partitionIndexField,
                         errorCodeField,
@@ -1037,7 +1037,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadCompactArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV12);
                     var preferredReadReplicaField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
@@ -1081,7 +1081,7 @@ namespace Kafka.Client.Messages
                     var snapshotIdField = SnapshotId.Empty;
                     var abortedTransactionsField = Decoder.ReadCompactArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV13);
                     var preferredReadReplicaField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'Records'");
+                    var recordsField = Decoder.ReadRecords(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
                         partitionIndexField,
@@ -1113,39 +1113,39 @@ namespace Kafka.Client.Messages
                     index = Encoder.WriteVarUInt32(buffer, index, 0);
                     return index;
                 }
-                private static class EpochEndOffsetSerde
+                private static class SnapshotIdSerde
                 {
-                    public static EpochEndOffset ReadV12(byte[] buffer, ref int index)
+                    public static SnapshotId ReadV12(byte[] buffer, ref int index)
                     {
-                        var epochField = Decoder.ReadInt32(buffer, ref index);
                         var endOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var epochField = Decoder.ReadInt32(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            epochField,
-                            endOffsetField
+                            endOffsetField,
+                            epochField
                         );
                     }
-                    public static int WriteV12(byte[] buffer, int index, EpochEndOffset message)
+                    public static int WriteV12(byte[] buffer, int index, SnapshotId message)
                     {
-                        index = Encoder.WriteInt32(buffer, index, message.EpochField);
                         index = Encoder.WriteInt64(buffer, index, message.EndOffsetField);
+                        index = Encoder.WriteInt32(buffer, index, message.EpochField);
                         index = Encoder.WriteVarUInt32(buffer, index, 0);
                         return index;
                     }
-                    public static EpochEndOffset ReadV13(byte[] buffer, ref int index)
+                    public static SnapshotId ReadV13(byte[] buffer, ref int index)
                     {
-                        var epochField = Decoder.ReadInt32(buffer, ref index);
                         var endOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var epochField = Decoder.ReadInt32(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            epochField,
-                            endOffsetField
+                            endOffsetField,
+                            epochField
                         );
                     }
-                    public static int WriteV13(byte[] buffer, int index, EpochEndOffset message)
+                    public static int WriteV13(byte[] buffer, int index, SnapshotId message)
                     {
-                        index = Encoder.WriteInt32(buffer, index, message.EpochField);
                         index = Encoder.WriteInt64(buffer, index, message.EndOffsetField);
+                        index = Encoder.WriteInt32(buffer, index, message.EpochField);
                         index = Encoder.WriteVarUInt32(buffer, index, 0);
                         return index;
                     }
@@ -1307,43 +1307,6 @@ namespace Kafka.Client.Messages
                         return index;
                     }
                 }
-                private static class SnapshotIdSerde
-                {
-                    public static SnapshotId ReadV12(byte[] buffer, ref int index)
-                    {
-                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
-                        var epochField = Decoder.ReadInt32(buffer, ref index);
-                        _ = Decoder.ReadVarUInt32(buffer, ref index);
-                        return new(
-                            endOffsetField,
-                            epochField
-                        );
-                    }
-                    public static int WriteV12(byte[] buffer, int index, SnapshotId message)
-                    {
-                        index = Encoder.WriteInt64(buffer, index, message.EndOffsetField);
-                        index = Encoder.WriteInt32(buffer, index, message.EpochField);
-                        index = Encoder.WriteVarUInt32(buffer, index, 0);
-                        return index;
-                    }
-                    public static SnapshotId ReadV13(byte[] buffer, ref int index)
-                    {
-                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
-                        var epochField = Decoder.ReadInt32(buffer, ref index);
-                        _ = Decoder.ReadVarUInt32(buffer, ref index);
-                        return new(
-                            endOffsetField,
-                            epochField
-                        );
-                    }
-                    public static int WriteV13(byte[] buffer, int index, SnapshotId message)
-                    {
-                        index = Encoder.WriteInt64(buffer, index, message.EndOffsetField);
-                        index = Encoder.WriteInt32(buffer, index, message.EpochField);
-                        index = Encoder.WriteVarUInt32(buffer, index, 0);
-                        return index;
-                    }
-                }
                 private static class LeaderIdAndEpochSerde
                 {
                     public static LeaderIdAndEpoch ReadV12(byte[] buffer, ref int index)
@@ -1377,6 +1340,43 @@ namespace Kafka.Client.Messages
                     {
                         index = Encoder.WriteInt32(buffer, index, message.LeaderIdField);
                         index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                        index = Encoder.WriteVarUInt32(buffer, index, 0);
+                        return index;
+                    }
+                }
+                private static class EpochEndOffsetSerde
+                {
+                    public static EpochEndOffset ReadV12(byte[] buffer, ref int index)
+                    {
+                        var epochField = Decoder.ReadInt32(buffer, ref index);
+                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        _ = Decoder.ReadVarUInt32(buffer, ref index);
+                        return new(
+                            epochField,
+                            endOffsetField
+                        );
+                    }
+                    public static int WriteV12(byte[] buffer, int index, EpochEndOffset message)
+                    {
+                        index = Encoder.WriteInt32(buffer, index, message.EpochField);
+                        index = Encoder.WriteInt64(buffer, index, message.EndOffsetField);
+                        index = Encoder.WriteVarUInt32(buffer, index, 0);
+                        return index;
+                    }
+                    public static EpochEndOffset ReadV13(byte[] buffer, ref int index)
+                    {
+                        var epochField = Decoder.ReadInt32(buffer, ref index);
+                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        _ = Decoder.ReadVarUInt32(buffer, ref index);
+                        return new(
+                            epochField,
+                            endOffsetField
+                        );
+                    }
+                    public static int WriteV13(byte[] buffer, int index, EpochEndOffset message)
+                    {
+                        index = Encoder.WriteInt32(buffer, index, message.EpochField);
+                        index = Encoder.WriteInt64(buffer, index, message.EndOffsetField);
                         index = Encoder.WriteVarUInt32(buffer, index, 0);
                         return index;
                     }
