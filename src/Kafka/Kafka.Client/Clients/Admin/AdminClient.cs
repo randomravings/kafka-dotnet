@@ -228,13 +228,13 @@ namespace Kafka.Client.Clients.Admin
                         t.NameField,
                         t.IsInternalField,
                         t.TopicAuthorizedOperationsField,
-                        (ErrorCode)t.ErrorCodeField,
+                        Errors.Translate(t.ErrorCodeField),
                         t.PartitionsField.Select(
                             p => new DescribeTopicsResult.DescribeTopicResult.TopicPartitionDescription(
                                 p.PartitionIndexField,
                                 p.LeaderIdField,
                                 p.LeaderEpochField,
-                                (ErrorCode)p.ErrorCodeField,
+                                Errors.Translate(p.ErrorCodeField),
                                 p.ReplicaNodesField,
                                 p.IsrNodesField,
                                 p.OfflineReplicasField

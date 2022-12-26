@@ -41,12 +41,12 @@ namespace Kafka.Client.Messages
         {
             public static TopicData ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionsField
+                    TopicNameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TopicData message)
@@ -60,18 +60,18 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionData ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var candidateEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var candidateIdField = Decoder.ReadInt32(buffer, ref index);
-                    var lastOffsetEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var lastOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var CandidateEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var CandidateIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LastOffsetEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var LastOffsetField = Decoder.ReadInt64(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        candidateEpochField,
-                        candidateIdField,
-                        lastOffsetEpochField,
-                        lastOffsetField
+                        PartitionIndexField,
+                        CandidateEpochField,
+                        CandidateIdField,
+                        LastOffsetEpochField,
+                        LastOffsetField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionData message)

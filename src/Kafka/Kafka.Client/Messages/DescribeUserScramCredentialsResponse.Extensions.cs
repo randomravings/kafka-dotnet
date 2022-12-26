@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using DescribeUserScramCredentialsResult = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult;
 using CredentialInfo = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult.CredentialInfo;
+using DescribeUserScramCredentialsResult = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult;
 
 namespace Kafka.Client.Messages
 {
@@ -47,16 +47,16 @@ namespace Kafka.Client.Messages
         {
             public static DescribeUserScramCredentialsResult ReadV00(byte[] buffer, ref int index)
             {
-                var userField = Decoder.ReadCompactString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var credentialInfosField = Decoder.ReadCompactArray<CredentialInfo>(buffer, ref index, CredentialInfoSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'CredentialInfos'");
+                var UserField = Decoder.ReadCompactString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var CredentialInfosField = Decoder.ReadCompactArray<CredentialInfo>(buffer, ref index, CredentialInfoSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'CredentialInfos'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    userField,
-                    errorCodeField,
-                    errorMessageField,
-                    credentialInfosField
+                    UserField,
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    CredentialInfosField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DescribeUserScramCredentialsResult message)
@@ -72,12 +72,12 @@ namespace Kafka.Client.Messages
             {
                 public static CredentialInfo ReadV00(byte[] buffer, ref int index)
                 {
-                    var mechanismField = Decoder.ReadInt8(buffer, ref index);
-                    var iterationsField = Decoder.ReadInt32(buffer, ref index);
+                    var MechanismField = Decoder.ReadInt8(buffer, ref index);
+                    var IterationsField = Decoder.ReadInt32(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        mechanismField,
-                        iterationsField
+                        MechanismField,
+                        IterationsField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, CredentialInfo message)

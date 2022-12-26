@@ -106,13 +106,13 @@ namespace Kafka.Client.Messages
         {
             public static CreatePartitionsTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var countField = Decoder.ReadInt32(buffer, ref index);
-                var assignmentsField = Decoder.ReadArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV00);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var CountField = Decoder.ReadInt32(buffer, ref index);
+                var AssignmentsField = Decoder.ReadArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV00);
                 return new(
-                    nameField,
-                    countField,
-                    assignmentsField
+                    NameField,
+                    CountField,
+                    AssignmentsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, CreatePartitionsTopic message)
@@ -124,13 +124,13 @@ namespace Kafka.Client.Messages
             }
             public static CreatePartitionsTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var countField = Decoder.ReadInt32(buffer, ref index);
-                var assignmentsField = Decoder.ReadArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV01);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var CountField = Decoder.ReadInt32(buffer, ref index);
+                var AssignmentsField = Decoder.ReadArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV01);
                 return new(
-                    nameField,
-                    countField,
-                    assignmentsField
+                    NameField,
+                    CountField,
+                    AssignmentsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, CreatePartitionsTopic message)
@@ -142,14 +142,14 @@ namespace Kafka.Client.Messages
             }
             public static CreatePartitionsTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var countField = Decoder.ReadInt32(buffer, ref index);
-                var assignmentsField = Decoder.ReadCompactArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV02);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var CountField = Decoder.ReadInt32(buffer, ref index);
+                var AssignmentsField = Decoder.ReadCompactArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV02);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    countField,
-                    assignmentsField
+                    NameField,
+                    CountField,
+                    AssignmentsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, CreatePartitionsTopic message)
@@ -162,14 +162,14 @@ namespace Kafka.Client.Messages
             }
             public static CreatePartitionsTopic ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var countField = Decoder.ReadInt32(buffer, ref index);
-                var assignmentsField = Decoder.ReadCompactArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV03);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var CountField = Decoder.ReadInt32(buffer, ref index);
+                var AssignmentsField = Decoder.ReadCompactArray<CreatePartitionsAssignment>(buffer, ref index, CreatePartitionsAssignmentSerde.ReadV03);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    countField,
-                    assignmentsField
+                    NameField,
+                    CountField,
+                    AssignmentsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, CreatePartitionsTopic message)
@@ -184,9 +184,9 @@ namespace Kafka.Client.Messages
             {
                 public static CreatePartitionsAssignment ReadV00(byte[] buffer, ref int index)
                 {
-                    var brokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var BrokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     return new(
-                        brokerIdsField
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, CreatePartitionsAssignment message)
@@ -196,9 +196,9 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatePartitionsAssignment ReadV01(byte[] buffer, ref int index)
                 {
-                    var brokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var BrokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     return new(
-                        brokerIdsField
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, CreatePartitionsAssignment message)
@@ -208,10 +208,10 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatePartitionsAssignment ReadV02(byte[] buffer, ref int index)
                 {
-                    var brokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var BrokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        brokerIdsField
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, CreatePartitionsAssignment message)
@@ -222,10 +222,10 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatePartitionsAssignment ReadV03(byte[] buffer, ref int index)
                 {
-                    var brokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var BrokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        brokerIdsField
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, CreatePartitionsAssignment message)

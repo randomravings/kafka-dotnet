@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup;
 using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
+using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup;
 using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestTopic;
 
 namespace Kafka.Client.Messages
@@ -224,17 +224,17 @@ namespace Kafka.Client.Messages
         {
             public static OffsetFetchRequestGroup ReadV08(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
-                var topicsField = Decoder.ReadCompactArray<OffsetFetchRequestTopics>(buffer, ref index, OffsetFetchRequestTopicsSerde.ReadV08);
+                var GroupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicsField = Decoder.ReadCompactArray<OffsetFetchRequestTopics>(buffer, ref index, OffsetFetchRequestTopicsSerde.ReadV08);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    groupIdField,
-                    topicsField
+                    GroupIdField,
+                    TopicsField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, OffsetFetchRequestGroup message)
             {
-                index = Encoder.WriteCompactString(buffer, index, message.groupIdField);
+                index = Encoder.WriteCompactString(buffer, index, message.GroupIdField);
                 index = Encoder.WriteCompactArray<OffsetFetchRequestTopics>(buffer, index, message.TopicsField, OffsetFetchRequestTopicsSerde.WriteV08);
                 index = Encoder.WriteVarUInt32(buffer, index, 0);
                 return index;
@@ -243,12 +243,12 @@ namespace Kafka.Client.Messages
             {
                 public static OffsetFetchRequestTopics ReadV08(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PartitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        partitionIndexesField
+                        NameField,
+                        PartitionIndexesField
                     );
                 }
                 public static int WriteV08(byte[] buffer, int index, OffsetFetchRequestTopics message)
@@ -264,11 +264,11 @@ namespace Kafka.Client.Messages
         {
             public static OffsetFetchRequestTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    NameField,
+                    PartitionIndexesField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, OffsetFetchRequestTopic message)
@@ -279,11 +279,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetFetchRequestTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    NameField,
+                    PartitionIndexesField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, OffsetFetchRequestTopic message)
@@ -294,11 +294,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetFetchRequestTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    NameField,
+                    PartitionIndexesField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, OffsetFetchRequestTopic message)
@@ -309,11 +309,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetFetchRequestTopic ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    NameField,
+                    PartitionIndexesField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, OffsetFetchRequestTopic message)
@@ -324,11 +324,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetFetchRequestTopic ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    NameField,
+                    PartitionIndexesField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, OffsetFetchRequestTopic message)
@@ -339,11 +339,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetFetchRequestTopic ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    NameField,
+                    PartitionIndexesField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, OffsetFetchRequestTopic message)
@@ -354,12 +354,12 @@ namespace Kafka.Client.Messages
             }
             public static OffsetFetchRequestTopic ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    NameField,
+                    PartitionIndexesField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, OffsetFetchRequestTopic message)
@@ -371,12 +371,12 @@ namespace Kafka.Client.Messages
             }
             public static OffsetFetchRequestTopic ReadV07(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    NameField,
+                    PartitionIndexesField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, OffsetFetchRequestTopic message)

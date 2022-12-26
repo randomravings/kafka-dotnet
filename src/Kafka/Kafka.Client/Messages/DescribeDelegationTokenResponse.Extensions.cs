@@ -106,27 +106,27 @@ namespace Kafka.Client.Messages
         {
             public static DescribedDelegationToken ReadV00(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadString(buffer, ref index);
-                var principalNameField = Decoder.ReadString(buffer, ref index);
-                var tokenRequesterPrincipalTypeField = "";
-                var tokenRequesterPrincipalNameField = "";
-                var issueTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var expiryTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var maxTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var tokenIdField = Decoder.ReadString(buffer, ref index);
-                var hmacField = Decoder.ReadBytes(buffer, ref index);
-                var renewersField = Decoder.ReadArray<DescribedDelegationTokenRenewer>(buffer, ref index, DescribedDelegationTokenRenewerSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+                var PrincipalTypeField = Decoder.ReadString(buffer, ref index);
+                var PrincipalNameField = Decoder.ReadString(buffer, ref index);
+                var TokenRequesterPrincipalTypeField = "";
+                var TokenRequesterPrincipalNameField = "";
+                var IssueTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var ExpiryTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var MaxTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var TokenIdField = Decoder.ReadString(buffer, ref index);
+                var HmacField = Decoder.ReadBytes(buffer, ref index);
+                var RenewersField = Decoder.ReadArray<DescribedDelegationTokenRenewer>(buffer, ref index, DescribedDelegationTokenRenewerSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
                 return new(
-                    principalTypeField,
-                    principalNameField,
-                    tokenRequesterPrincipalTypeField,
-                    tokenRequesterPrincipalNameField,
-                    issueTimestampField,
-                    expiryTimestampField,
-                    maxTimestampField,
-                    tokenIdField,
-                    hmacField,
-                    renewersField
+                    PrincipalTypeField,
+                    PrincipalNameField,
+                    TokenRequesterPrincipalTypeField,
+                    TokenRequesterPrincipalNameField,
+                    IssueTimestampField,
+                    ExpiryTimestampField,
+                    MaxTimestampField,
+                    TokenIdField,
+                    HmacField,
+                    RenewersField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DescribedDelegationToken message)
@@ -143,27 +143,27 @@ namespace Kafka.Client.Messages
             }
             public static DescribedDelegationToken ReadV01(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadString(buffer, ref index);
-                var principalNameField = Decoder.ReadString(buffer, ref index);
-                var tokenRequesterPrincipalTypeField = "";
-                var tokenRequesterPrincipalNameField = "";
-                var issueTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var expiryTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var maxTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var tokenIdField = Decoder.ReadString(buffer, ref index);
-                var hmacField = Decoder.ReadBytes(buffer, ref index);
-                var renewersField = Decoder.ReadArray<DescribedDelegationTokenRenewer>(buffer, ref index, DescribedDelegationTokenRenewerSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+                var PrincipalTypeField = Decoder.ReadString(buffer, ref index);
+                var PrincipalNameField = Decoder.ReadString(buffer, ref index);
+                var TokenRequesterPrincipalTypeField = "";
+                var TokenRequesterPrincipalNameField = "";
+                var IssueTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var ExpiryTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var MaxTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var TokenIdField = Decoder.ReadString(buffer, ref index);
+                var HmacField = Decoder.ReadBytes(buffer, ref index);
+                var RenewersField = Decoder.ReadArray<DescribedDelegationTokenRenewer>(buffer, ref index, DescribedDelegationTokenRenewerSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
                 return new(
-                    principalTypeField,
-                    principalNameField,
-                    tokenRequesterPrincipalTypeField,
-                    tokenRequesterPrincipalNameField,
-                    issueTimestampField,
-                    expiryTimestampField,
-                    maxTimestampField,
-                    tokenIdField,
-                    hmacField,
-                    renewersField
+                    PrincipalTypeField,
+                    PrincipalNameField,
+                    TokenRequesterPrincipalTypeField,
+                    TokenRequesterPrincipalNameField,
+                    IssueTimestampField,
+                    ExpiryTimestampField,
+                    MaxTimestampField,
+                    TokenIdField,
+                    HmacField,
+                    RenewersField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DescribedDelegationToken message)
@@ -180,28 +180,28 @@ namespace Kafka.Client.Messages
             }
             public static DescribedDelegationToken ReadV02(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
-                var principalNameField = Decoder.ReadCompactString(buffer, ref index);
-                var tokenRequesterPrincipalTypeField = "";
-                var tokenRequesterPrincipalNameField = "";
-                var issueTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var expiryTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var maxTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var tokenIdField = Decoder.ReadCompactString(buffer, ref index);
-                var hmacField = Decoder.ReadCompactBytes(buffer, ref index);
-                var renewersField = Decoder.ReadCompactArray<DescribedDelegationTokenRenewer>(buffer, ref index, DescribedDelegationTokenRenewerSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+                var PrincipalTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var PrincipalNameField = Decoder.ReadCompactString(buffer, ref index);
+                var TokenRequesterPrincipalTypeField = "";
+                var TokenRequesterPrincipalNameField = "";
+                var IssueTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var ExpiryTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var MaxTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var TokenIdField = Decoder.ReadCompactString(buffer, ref index);
+                var HmacField = Decoder.ReadCompactBytes(buffer, ref index);
+                var RenewersField = Decoder.ReadCompactArray<DescribedDelegationTokenRenewer>(buffer, ref index, DescribedDelegationTokenRenewerSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    principalTypeField,
-                    principalNameField,
-                    tokenRequesterPrincipalTypeField,
-                    tokenRequesterPrincipalNameField,
-                    issueTimestampField,
-                    expiryTimestampField,
-                    maxTimestampField,
-                    tokenIdField,
-                    hmacField,
-                    renewersField
+                    PrincipalTypeField,
+                    PrincipalNameField,
+                    TokenRequesterPrincipalTypeField,
+                    TokenRequesterPrincipalNameField,
+                    IssueTimestampField,
+                    ExpiryTimestampField,
+                    MaxTimestampField,
+                    TokenIdField,
+                    HmacField,
+                    RenewersField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DescribedDelegationToken message)
@@ -219,28 +219,28 @@ namespace Kafka.Client.Messages
             }
             public static DescribedDelegationToken ReadV03(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
-                var principalNameField = Decoder.ReadCompactString(buffer, ref index);
-                var tokenRequesterPrincipalTypeField = Decoder.ReadCompactString(buffer, ref index);
-                var tokenRequesterPrincipalNameField = Decoder.ReadCompactString(buffer, ref index);
-                var issueTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var expiryTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var maxTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var tokenIdField = Decoder.ReadCompactString(buffer, ref index);
-                var hmacField = Decoder.ReadCompactBytes(buffer, ref index);
-                var renewersField = Decoder.ReadCompactArray<DescribedDelegationTokenRenewer>(buffer, ref index, DescribedDelegationTokenRenewerSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
+                var PrincipalTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var PrincipalNameField = Decoder.ReadCompactString(buffer, ref index);
+                var TokenRequesterPrincipalTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var TokenRequesterPrincipalNameField = Decoder.ReadCompactString(buffer, ref index);
+                var IssueTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var ExpiryTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var MaxTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var TokenIdField = Decoder.ReadCompactString(buffer, ref index);
+                var HmacField = Decoder.ReadCompactBytes(buffer, ref index);
+                var RenewersField = Decoder.ReadCompactArray<DescribedDelegationTokenRenewer>(buffer, ref index, DescribedDelegationTokenRenewerSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Renewers'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    principalTypeField,
-                    principalNameField,
-                    tokenRequesterPrincipalTypeField,
-                    tokenRequesterPrincipalNameField,
-                    issueTimestampField,
-                    expiryTimestampField,
-                    maxTimestampField,
-                    tokenIdField,
-                    hmacField,
-                    renewersField
+                    PrincipalTypeField,
+                    PrincipalNameField,
+                    TokenRequesterPrincipalTypeField,
+                    TokenRequesterPrincipalNameField,
+                    IssueTimestampField,
+                    ExpiryTimestampField,
+                    MaxTimestampField,
+                    TokenIdField,
+                    HmacField,
+                    RenewersField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, DescribedDelegationToken message)
@@ -262,11 +262,11 @@ namespace Kafka.Client.Messages
             {
                 public static DescribedDelegationTokenRenewer ReadV00(byte[] buffer, ref int index)
                 {
-                    var principalTypeField = Decoder.ReadString(buffer, ref index);
-                    var principalNameField = Decoder.ReadString(buffer, ref index);
+                    var PrincipalTypeField = Decoder.ReadString(buffer, ref index);
+                    var PrincipalNameField = Decoder.ReadString(buffer, ref index);
                     return new(
-                        principalTypeField,
-                        principalNameField
+                        PrincipalTypeField,
+                        PrincipalNameField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, DescribedDelegationTokenRenewer message)
@@ -277,11 +277,11 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribedDelegationTokenRenewer ReadV01(byte[] buffer, ref int index)
                 {
-                    var principalTypeField = Decoder.ReadString(buffer, ref index);
-                    var principalNameField = Decoder.ReadString(buffer, ref index);
+                    var PrincipalTypeField = Decoder.ReadString(buffer, ref index);
+                    var PrincipalNameField = Decoder.ReadString(buffer, ref index);
                     return new(
-                        principalTypeField,
-                        principalNameField
+                        PrincipalTypeField,
+                        PrincipalNameField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, DescribedDelegationTokenRenewer message)
@@ -292,12 +292,12 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribedDelegationTokenRenewer ReadV02(byte[] buffer, ref int index)
                 {
-                    var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
-                    var principalNameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PrincipalTypeField = Decoder.ReadCompactString(buffer, ref index);
+                    var PrincipalNameField = Decoder.ReadCompactString(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        principalTypeField,
-                        principalNameField
+                        PrincipalTypeField,
+                        PrincipalNameField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, DescribedDelegationTokenRenewer message)
@@ -309,12 +309,12 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribedDelegationTokenRenewer ReadV03(byte[] buffer, ref int index)
                 {
-                    var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
-                    var principalNameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PrincipalTypeField = Decoder.ReadCompactString(buffer, ref index);
+                    var PrincipalNameField = Decoder.ReadCompactString(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        principalTypeField,
-                        principalNameField
+                        PrincipalTypeField,
+                        PrincipalNameField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, DescribedDelegationTokenRenewer message)

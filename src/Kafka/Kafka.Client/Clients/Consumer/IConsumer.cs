@@ -13,5 +13,6 @@ namespace Kafka.Client.Clients.Consumer
         ValueTask Assign(TopicPartitionOffsets topicPartitionOffsets, CancellationToken cancellationToken = default);
         ValueTask UnAssign(TopicPartitionOffset topicPartitionOffset, CancellationToken cancellationToken = default);
         ValueTask UnAssign(TopicPartitionOffsets topicPartitionOffsets, CancellationToken cancellationToken = default);
+        ValueTask Close(CancellationToken cancellationToken = default);
     }
 }

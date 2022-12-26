@@ -6,13 +6,13 @@ using FeatureUpdateKey = Kafka.Client.Messages.UpdateFeaturesRequest.FeatureUpda
 namespace Kafka.Client.Messages
 {
     /// <summary>
-    /// <param name="timeoutMsField">How long to wait in milliseconds before timing out the request.</param>
+    /// <param name="TimeoutMsField">How long to wait in milliseconds before timing out the request.</param>
     /// <param name="FeatureUpdatesField">The list of updates to finalized features.</param>
     /// <param name="ValidateOnlyField">True if we should validate the request, but not perform the upgrade or downgrade.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record UpdateFeaturesRequest (
-        int timeoutMsField,
+        int TimeoutMsField,
         ImmutableArray<FeatureUpdateKey> FeatureUpdatesField,
         bool ValidateOnlyField
     ) : Request(57,0,1,0)

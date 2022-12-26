@@ -40,12 +40,12 @@ namespace Kafka.Client.Messages
         {
             public static ListPartitionReassignmentsTopics ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionIndexesField
+                    NameField,
+                    PartitionIndexesField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, ListPartitionReassignmentsTopics message)

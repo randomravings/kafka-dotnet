@@ -246,9 +246,16 @@ namespace Kafka.Client.Clients.Producer
                     var offset = new Offset(partitionResponse.BaseOffsetField);
                     var topicPartitionOffset = new TopicPartitionOffset(topicName, new(partition, offset));
                     var timestamp = Timestamp.LogAppend(partitionResponse.LogAppendTimeMsField);
-                    var error = Errors.Translate(partitionResponse.ErrorCodeField);
-                    var recordErrors = $"{partitionResponse.ErrorMessageField}:{string.Join(',',partitionResponse.RecordErrorsField.Select(r => $"[{r.BatchIndexField}]{r.BatchIndexErrorMessageField}"))}";
-
+                    var error = Errors.Known.NONE;
+                    if (partitionResponse.ErrorCodeField != error.Code)
+                        error = Errors.Translate(partitionResponse.ErrorCodeField);
+                    var recordErrors = ImmutableArray<ProduceRecordError>.Empty;
+                    if(partitionResponse.RecordErrorsField.Length > 0)
+                    {
+                        var recordErrorsBuilder = ImmutableArray.CreateBuilder<ProduceRecordError>(partitionResponse.RecordErrorsField.Length);
+                        foreach(var recordError in partitionResponse.RecordErrorsField)
+                            recordErrorsBuilder.Add(new(recordError.BatchIndexField, recordError.BatchIndexErrorMessageField ?? ""));
+                    }
                     var produceCallback = produceCallbacks[j];
                     produceCallback.TaskCompletionSource.SetResult(
                         new ProduceResult<TKey, TValue>(

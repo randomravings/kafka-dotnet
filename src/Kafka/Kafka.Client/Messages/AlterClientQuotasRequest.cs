@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using EntityData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.EntityData;
 using OpData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.OpData;
 using EntryData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData;
+using EntityData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.EntityData;
 
 namespace Kafka.Client.Messages
 {
@@ -35,20 +35,6 @@ namespace Kafka.Client.Messages
                 ImmutableArray<OpData>.Empty
             );
             /// <summary>
-            /// <param name="EntityTypeField">The entity type.</param>
-            /// <param name="EntityNameField">The name of the entity, or null if the default.</param>
-            /// </summary>
-            public sealed record EntityData (
-                string EntityTypeField,
-                string? EntityNameField
-            )
-            {
-                public static EntityData Empty { get; } = new(
-                    "",
-                    default(string?)
-                );
-            };
-            /// <summary>
             /// <param name="KeyField">The quota configuration key.</param>
             /// <param name="ValueField">The value to set, otherwise ignored if the value is to be removed.</param>
             /// <param name="RemoveField">Whether the quota configuration value should be removed, otherwise set.</param>
@@ -63,6 +49,20 @@ namespace Kafka.Client.Messages
                     "",
                     default(double),
                     default(bool)
+                );
+            };
+            /// <summary>
+            /// <param name="EntityTypeField">The entity type.</param>
+            /// <param name="EntityNameField">The name of the entity, or null if the default.</param>
+            /// </summary>
+            public sealed record EntityData (
+                string EntityTypeField,
+                string? EntityNameField
+            )
+            {
+                public static EntityData Empty { get; } = new(
+                    "",
+                    default(string?)
                 );
             };
         };

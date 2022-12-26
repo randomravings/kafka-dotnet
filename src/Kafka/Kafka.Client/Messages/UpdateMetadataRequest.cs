@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using UpdateMetadataTopicState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataTopicState;
 using UpdateMetadataBroker = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker;
+using UpdateMetadataTopicState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataTopicState;
 using UpdateMetadataPartitionState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataPartitionState;
 using UpdateMetadataEndpoint = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker.UpdateMetadataEndpoint;
 
@@ -37,23 +37,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<UpdateMetadataTopicState>.Empty,
             ImmutableArray<UpdateMetadataBroker>.Empty
         );
-        /// <summary>
-        /// <param name="TopicNameField">The topic name.</param>
-        /// <param name="TopicIdField">The topic id.</param>
-        /// <param name="PartitionStatesField">The partition that we would like to update.</param>
-        /// </summary>
-        public sealed record UpdateMetadataTopicState (
-            string TopicNameField,
-            Guid TopicIdField,
-            ImmutableArray<UpdateMetadataPartitionState> PartitionStatesField
-        )
-        {
-            public static UpdateMetadataTopicState Empty { get; } = new(
-                "",
-                default(Guid),
-                ImmutableArray<UpdateMetadataPartitionState>.Empty
-            );
-        };
         /// <summary>
         /// <param name="IdField">The broker id.</param>
         /// <param name="V0HostField">The broker hostname.</param>
@@ -96,6 +79,23 @@ namespace Kafka.Client.Messages
                     default(short)
                 );
             };
+        };
+        /// <summary>
+        /// <param name="TopicNameField">The topic name.</param>
+        /// <param name="TopicIdField">The topic id.</param>
+        /// <param name="PartitionStatesField">The partition that we would like to update.</param>
+        /// </summary>
+        public sealed record UpdateMetadataTopicState (
+            string TopicNameField,
+            Guid TopicIdField,
+            ImmutableArray<UpdateMetadataPartitionState> PartitionStatesField
+        )
+        {
+            public static UpdateMetadataTopicState Empty { get; } = new(
+                "",
+                default(Guid),
+                ImmutableArray<UpdateMetadataPartitionState>.Empty
+            );
         };
         /// <summary>
         /// <param name="TopicNameField">In older versions of this RPC, the topic name.</param>

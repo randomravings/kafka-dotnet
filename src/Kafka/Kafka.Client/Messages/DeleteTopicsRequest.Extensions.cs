@@ -161,12 +161,12 @@ namespace Kafka.Client.Messages
         {
             public static DeleteTopicState ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
+                var NameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    topicIdField
+                    NameField,
+                    TopicIdField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, DeleteTopicState message)

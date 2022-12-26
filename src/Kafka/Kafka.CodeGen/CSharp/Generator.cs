@@ -270,7 +270,7 @@ namespace Kafka.CodeGen.CSharp
                 await writer.WriteLineAsync($"        {{");
                 foreach (var field in message.Fields)
                 {
-                    var variable = $"{char.ToLower(field.Name[0])}{field.Name[1..]}Field";
+                    var variable = FieldVariableNamify(field);
                     variableList.Add(variable);
                     await DecodeField(writer, "            ", flexible, field, version, variable);
                 }
@@ -341,7 +341,7 @@ namespace Kafka.CodeGen.CSharp
                 await writer.WriteLineAsync($"        private static int WriteV{version:0#}(byte[] buffer, int index, {message.Name} message)");
                 await writer.WriteLineAsync($"        {{");
                 foreach (var field in message.Fields.Where(f => f.Properties.Versions.Includes(version)))
-                    await EncodeField(writer, "            ", flexible, field, version, $"message.{field.Name}Field");
+                    await EncodeField(writer, "            ", flexible, field, version, $"message.{FieldPropertyNamify(field)}");
                 if (flexible)
                     await writer.WriteLineAsync("            index = Encoder.WriteVarUInt32(buffer, index, 0);");
                 await writer.WriteLineAsync($"            return index;");
@@ -391,7 +391,7 @@ namespace Kafka.CodeGen.CSharp
                 await writer.WriteLineAsync($"{indent}    {{");
                 foreach (var field in @struct.Fields)
                 {
-                    var variable = $"{char.ToLower(field.Name[0])}{field.Name[1..]}Field";
+                    var variable = FieldPropertyNamify(field);
                     variableList.Add(variable);
                     await DecodeField(writer, $"{indent}        ", flexible, field, version, variable);
                 }
@@ -406,7 +406,7 @@ namespace Kafka.CodeGen.CSharp
                 await writer.WriteLineAsync($"{indent}    public static int WriteV{version:0#}(byte[] buffer, int index, {@struct.Name} message)");
                 await writer.WriteLineAsync($"{indent}    {{");
                 foreach (var field in @struct.Fields.Where(f => f.Properties.Versions.Includes(version)))
-                    await EncodeField(writer, $"{indent}        ", flexible, field, version, $"message.{field.Name}Field");
+                    await EncodeField(writer, $"{indent}        ", flexible, field, version, $"message.{FieldPropertyNamify(field)}");
                 if (flexible)
                     await writer.WriteLineAsync($"{indent}        index = Encoder.WriteVarUInt32(buffer, index, 0);");
                 await writer.WriteLineAsync($"{indent}        return index;");
@@ -858,7 +858,7 @@ namespace Kafka.CodeGen.CSharp
             (fieldType.Name, nullable) switch
             {
                 ("string", false) => @"""""",
-                ("bytes", false) => @"Array.Empty<byte>()",
+                ("bytes", false) => @"ReadOnlyMemory<byte>.Empty",
                 _ => $"default({fieldType.ToSystemType()}{(nullable ? "?" : "")})"
             }
         ;
@@ -1027,7 +1027,7 @@ namespace Kafka.CodeGen.CSharp
         private static string FieldPropertyNamify(
             Field field
         ) =>
-            $"{field.Name}Field"
+            $"{char.ToUpper(field.Name[0])}{field.Name[1..]}Field"
         ;
 
         private static string FieldVariableNamify(

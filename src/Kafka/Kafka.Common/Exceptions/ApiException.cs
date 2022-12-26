@@ -7,11 +7,9 @@ namespace Kafka.Common.Exceptions
         public ApiException(Error error) :
             base(error.Message)
         {
-            ErrorCode = error.ErrorCode;
-            Retriable = error.Retriable;
+            Error = error;
         }
 
-        public ErrorCode ErrorCode { get; init; }
-        public bool Retriable { get; init; }
+        public Error Error { get; init; }
     }
 }

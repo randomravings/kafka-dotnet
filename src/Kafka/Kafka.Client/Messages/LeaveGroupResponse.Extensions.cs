@@ -142,13 +142,13 @@ namespace Kafka.Client.Messages
         {
             public static MemberResponse ReadV03(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var groupInstanceIdField = Decoder.ReadNullableString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var GroupInstanceIdField = Decoder.ReadNullableString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    errorCodeField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, MemberResponse message)
@@ -160,14 +160,14 @@ namespace Kafka.Client.Messages
             }
             public static MemberResponse ReadV04(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var MemberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    errorCodeField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, MemberResponse message)
@@ -180,14 +180,14 @@ namespace Kafka.Client.Messages
             }
             public static MemberResponse ReadV05(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var MemberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    errorCodeField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, MemberResponse message)

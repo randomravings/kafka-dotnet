@@ -40,14 +40,14 @@ namespace Kafka.Client.Messages
         {
             public static AlterUserScramCredentialsResult ReadV00(byte[] buffer, ref int index)
             {
-                var userField = Decoder.ReadCompactString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var UserField = Decoder.ReadCompactString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    userField,
-                    errorCodeField,
-                    errorMessageField
+                    UserField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, AlterUserScramCredentialsResult message)

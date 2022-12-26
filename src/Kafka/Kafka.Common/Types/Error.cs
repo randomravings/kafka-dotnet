@@ -1,7 +1,8 @@
 namespace Kafka.Common.Types
 {
-    public readonly record struct Error(
-        ErrorCode ErrorCode,
+    public sealed record Error(
+        short Code,
+        string Label,
         bool Retriable,
         string Message
     );

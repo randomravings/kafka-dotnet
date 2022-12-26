@@ -1,11 +1,11 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using OffsetFetchResponsePartition = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseTopic.OffsetFetchResponsePartition;
 using OffsetFetchResponseGroup = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseGroup;
-using OffsetFetchResponsePartitions = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseGroup.OffsetFetchResponseTopics.OffsetFetchResponsePartitions;
+using OffsetFetchResponsePartition = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseTopic.OffsetFetchResponsePartition;
 using OffsetFetchResponseTopic = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseTopic;
 using OffsetFetchResponseTopics = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseGroup.OffsetFetchResponseTopics;
+using OffsetFetchResponsePartitions = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseGroup.OffsetFetchResponseTopics.OffsetFetchResponsePartitions;
 
 namespace Kafka.Client.Messages
 {
@@ -30,12 +30,12 @@ namespace Kafka.Client.Messages
             ImmutableArray<OffsetFetchResponseGroup>.Empty
         );
         /// <summary>
-        /// <param name="groupIdField">The group ID.</param>
+        /// <param name="GroupIdField">The group ID.</param>
         /// <param name="TopicsField">The responses per topic.</param>
         /// <param name="ErrorCodeField">The group-level error code, or 0 if there was no error.</param>
         /// </summary>
         public sealed record OffsetFetchResponseGroup (
-            string groupIdField,
+            string GroupIdField,
             ImmutableArray<OffsetFetchResponseTopics> TopicsField,
             short ErrorCodeField
         )

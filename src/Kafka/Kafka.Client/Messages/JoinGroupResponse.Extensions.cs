@@ -405,13 +405,13 @@ namespace Kafka.Client.Messages
         {
             public static JoinGroupResponseMember ReadV00(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var GroupInstanceIdField = default(string?);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, JoinGroupResponseMember message)
@@ -422,13 +422,13 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupResponseMember ReadV01(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var GroupInstanceIdField = default(string?);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, JoinGroupResponseMember message)
@@ -439,13 +439,13 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupResponseMember ReadV02(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var GroupInstanceIdField = default(string?);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, JoinGroupResponseMember message)
@@ -456,13 +456,13 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupResponseMember ReadV03(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var GroupInstanceIdField = default(string?);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, JoinGroupResponseMember message)
@@ -473,13 +473,13 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupResponseMember ReadV04(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var groupInstanceIdField = default(string?);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var GroupInstanceIdField = default(string?);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, JoinGroupResponseMember message)
@@ -490,13 +490,13 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupResponseMember ReadV05(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var groupInstanceIdField = Decoder.ReadNullableString(buffer, ref index);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var GroupInstanceIdField = Decoder.ReadNullableString(buffer, ref index);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, JoinGroupResponseMember message)
@@ -508,14 +508,14 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupResponseMember ReadV06(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var MetadataField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, JoinGroupResponseMember message)
@@ -528,14 +528,14 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupResponseMember ReadV07(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var MetadataField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, JoinGroupResponseMember message)
@@ -548,14 +548,14 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupResponseMember ReadV08(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var MetadataField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, JoinGroupResponseMember message)
@@ -568,14 +568,14 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupResponseMember ReadV09(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
-                var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var MetadataField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    memberIdField,
-                    groupInstanceIdField,
-                    metadataField
+                    MemberIdField,
+                    GroupInstanceIdField,
+                    MetadataField
                 );
             }
             public static int WriteV09(byte[] buffer, int index, JoinGroupResponseMember message)

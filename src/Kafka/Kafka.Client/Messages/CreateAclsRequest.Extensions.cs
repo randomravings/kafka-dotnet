@@ -81,21 +81,21 @@ namespace Kafka.Client.Messages
         {
             public static AclCreation ReadV00(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var resourcePatternTypeField = default(sbyte);
-                var principalField = Decoder.ReadString(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var operationField = Decoder.ReadInt8(buffer, ref index);
-                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ResourcePatternTypeField = default(sbyte);
+                var PrincipalField = Decoder.ReadString(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var OperationField = Decoder.ReadInt8(buffer, ref index);
+                var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    resourcePatternTypeField,
-                    principalField,
-                    hostField,
-                    operationField,
-                    permissionTypeField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ResourcePatternTypeField,
+                    PrincipalField,
+                    HostField,
+                    OperationField,
+                    PermissionTypeField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, AclCreation message)
@@ -110,21 +110,21 @@ namespace Kafka.Client.Messages
             }
             public static AclCreation ReadV01(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var resourcePatternTypeField = Decoder.ReadInt8(buffer, ref index);
-                var principalField = Decoder.ReadString(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var operationField = Decoder.ReadInt8(buffer, ref index);
-                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ResourcePatternTypeField = Decoder.ReadInt8(buffer, ref index);
+                var PrincipalField = Decoder.ReadString(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var OperationField = Decoder.ReadInt8(buffer, ref index);
+                var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    resourcePatternTypeField,
-                    principalField,
-                    hostField,
-                    operationField,
-                    permissionTypeField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ResourcePatternTypeField,
+                    PrincipalField,
+                    HostField,
+                    OperationField,
+                    PermissionTypeField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, AclCreation message)
@@ -140,22 +140,22 @@ namespace Kafka.Client.Messages
             }
             public static AclCreation ReadV02(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
-                var resourcePatternTypeField = Decoder.ReadInt8(buffer, ref index);
-                var principalField = Decoder.ReadCompactString(buffer, ref index);
-                var hostField = Decoder.ReadCompactString(buffer, ref index);
-                var operationField = Decoder.ReadInt8(buffer, ref index);
-                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var ResourcePatternTypeField = Decoder.ReadInt8(buffer, ref index);
+                var PrincipalField = Decoder.ReadCompactString(buffer, ref index);
+                var HostField = Decoder.ReadCompactString(buffer, ref index);
+                var OperationField = Decoder.ReadInt8(buffer, ref index);
+                var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    resourcePatternTypeField,
-                    principalField,
-                    hostField,
-                    operationField,
-                    permissionTypeField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ResourcePatternTypeField,
+                    PrincipalField,
+                    HostField,
+                    OperationField,
+                    PermissionTypeField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, AclCreation message)
@@ -172,22 +172,22 @@ namespace Kafka.Client.Messages
             }
             public static AclCreation ReadV03(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
-                var resourcePatternTypeField = Decoder.ReadInt8(buffer, ref index);
-                var principalField = Decoder.ReadCompactString(buffer, ref index);
-                var hostField = Decoder.ReadCompactString(buffer, ref index);
-                var operationField = Decoder.ReadInt8(buffer, ref index);
-                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var ResourcePatternTypeField = Decoder.ReadInt8(buffer, ref index);
+                var PrincipalField = Decoder.ReadCompactString(buffer, ref index);
+                var HostField = Decoder.ReadCompactString(buffer, ref index);
+                var OperationField = Decoder.ReadInt8(buffer, ref index);
+                var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    resourcePatternTypeField,
-                    principalField,
-                    hostField,
-                    operationField,
-                    permissionTypeField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ResourcePatternTypeField,
+                    PrincipalField,
+                    HostField,
+                    OperationField,
+                    PermissionTypeField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, AclCreation message)

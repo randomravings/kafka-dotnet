@@ -38,7 +38,7 @@ namespace Kafka.Common.Types
         /// </summary>
         /// <returns></returns>
         public static Timestamp Now() =>
-            new(TimestampType.CreateTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+            new(TimestampType.CreateTime, DateTimeOffset.UtcNow.ToUnixTimeMilliseconds())
         ;
 
         public static bool operator >=(Timestamp a, Timestamp b) => a.TimestampMs >= b.TimestampMs;

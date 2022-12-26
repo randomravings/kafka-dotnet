@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
+using PartitionResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse;
 using TopicResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse;
 using ProducerState = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse.ProducerState;
-using PartitionResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse;
 
 namespace Kafka.Client.Messages
 {
@@ -42,12 +42,12 @@ namespace Kafka.Client.Messages
         {
             public static TopicResponse ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<PartitionResponse>(buffer, ref index, PartitionResponseSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionResponse>(buffer, ref index, PartitionResponseSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TopicResponse message)
@@ -61,16 +61,16 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionResponse ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    var activeProducersField = Decoder.ReadCompactArray<ProducerState>(buffer, ref index, ProducerStateSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'ActiveProducers'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var ActiveProducersField = Decoder.ReadCompactArray<ProducerState>(buffer, ref index, ProducerStateSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'ActiveProducers'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        errorMessageField,
-                        activeProducersField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        ErrorMessageField,
+                        ActiveProducersField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionResponse message)
@@ -86,20 +86,20 @@ namespace Kafka.Client.Messages
                 {
                     public static ProducerState ReadV00(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var producerEpochField = Decoder.ReadInt32(buffer, ref index);
-                        var lastSequenceField = Decoder.ReadInt32(buffer, ref index);
-                        var lastTimestampField = Decoder.ReadInt64(buffer, ref index);
-                        var coordinatorEpochField = Decoder.ReadInt32(buffer, ref index);
-                        var currentTxnStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerEpochField = Decoder.ReadInt32(buffer, ref index);
+                        var LastSequenceField = Decoder.ReadInt32(buffer, ref index);
+                        var LastTimestampField = Decoder.ReadInt64(buffer, ref index);
+                        var CoordinatorEpochField = Decoder.ReadInt32(buffer, ref index);
+                        var CurrentTxnStartOffsetField = Decoder.ReadInt64(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            producerIdField,
-                            producerEpochField,
-                            lastSequenceField,
-                            lastTimestampField,
-                            coordinatorEpochField,
-                            currentTxnStartOffsetField
+                            ProducerIdField,
+                            ProducerEpochField,
+                            LastSequenceField,
+                            LastTimestampField,
+                            CoordinatorEpochField,
+                            CurrentTxnStartOffsetField
                         );
                     }
                     public static int WriteV00(byte[] buffer, int index, ProducerState message)

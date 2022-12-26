@@ -1,4 +1,5 @@
-﻿using Kafka.Cli.Verbs;
+﻿using Kafka.Cli.Text;
+using Kafka.Cli.Verbs;
 using Kafka.Client.Clients.Producer;
 using Kafka.Common.Records;
 using Kafka.Common.Serialization;
@@ -31,8 +32,17 @@ namespace Kafka.Cli.Cmd
                 ),
                 cancellationToken
             );
-            Console.WriteLine(produceResult.Error);
-            Console.WriteLine(produceResult.recordError);
+            if (produceResult.Error.Code != 0)
+            {
+                Console.WriteLine(Formatter.Print(produceResult.Error));
+                if(produceResult.RecordErrors.Length > 0)
+                    foreach(var recordError in produceResult.RecordErrors)
+                        Console.WriteLine(Formatter.Print(recordError));
+            }
+            else
+            {
+                Console.WriteLine(Formatter.Print(produceResult.TopicPartitionOffset));
+            }
             return 0;
         }
     }

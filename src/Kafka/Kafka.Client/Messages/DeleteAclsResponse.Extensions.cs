@@ -94,13 +94,13 @@ namespace Kafka.Client.Messages
         {
             public static DeleteAclsFilterResult ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var matchingAclsField = Decoder.ReadArray<DeleteAclsMatchingAcl>(buffer, ref index, DeleteAclsMatchingAclSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'MatchingAcls'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var MatchingAclsField = Decoder.ReadArray<DeleteAclsMatchingAcl>(buffer, ref index, DeleteAclsMatchingAclSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'MatchingAcls'");
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    matchingAclsField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    MatchingAclsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DeleteAclsFilterResult message)
@@ -112,13 +112,13 @@ namespace Kafka.Client.Messages
             }
             public static DeleteAclsFilterResult ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var matchingAclsField = Decoder.ReadArray<DeleteAclsMatchingAcl>(buffer, ref index, DeleteAclsMatchingAclSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'MatchingAcls'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var MatchingAclsField = Decoder.ReadArray<DeleteAclsMatchingAcl>(buffer, ref index, DeleteAclsMatchingAclSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'MatchingAcls'");
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    matchingAclsField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    MatchingAclsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DeleteAclsFilterResult message)
@@ -130,14 +130,14 @@ namespace Kafka.Client.Messages
             }
             public static DeleteAclsFilterResult ReadV02(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var matchingAclsField = Decoder.ReadCompactArray<DeleteAclsMatchingAcl>(buffer, ref index, DeleteAclsMatchingAclSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'MatchingAcls'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var MatchingAclsField = Decoder.ReadCompactArray<DeleteAclsMatchingAcl>(buffer, ref index, DeleteAclsMatchingAclSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'MatchingAcls'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    matchingAclsField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    MatchingAclsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DeleteAclsFilterResult message)
@@ -150,14 +150,14 @@ namespace Kafka.Client.Messages
             }
             public static DeleteAclsFilterResult ReadV03(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var matchingAclsField = Decoder.ReadCompactArray<DeleteAclsMatchingAcl>(buffer, ref index, DeleteAclsMatchingAclSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'MatchingAcls'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var MatchingAclsField = Decoder.ReadCompactArray<DeleteAclsMatchingAcl>(buffer, ref index, DeleteAclsMatchingAclSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'MatchingAcls'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    matchingAclsField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    MatchingAclsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, DeleteAclsFilterResult message)
@@ -172,25 +172,25 @@ namespace Kafka.Client.Messages
             {
                 public static DeleteAclsMatchingAcl ReadV00(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                    var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                    var resourceNameField = Decoder.ReadString(buffer, ref index);
-                    var patternTypeField = default(sbyte);
-                    var principalField = Decoder.ReadString(buffer, ref index);
-                    var hostField = Decoder.ReadString(buffer, ref index);
-                    var operationField = Decoder.ReadInt8(buffer, ref index);
-                    var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                    var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                    var PatternTypeField = default(sbyte);
+                    var PrincipalField = Decoder.ReadString(buffer, ref index);
+                    var HostField = Decoder.ReadString(buffer, ref index);
+                    var OperationField = Decoder.ReadInt8(buffer, ref index);
+                    var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                     return new(
-                        errorCodeField,
-                        errorMessageField,
-                        resourceTypeField,
-                        resourceNameField,
-                        patternTypeField,
-                        principalField,
-                        hostField,
-                        operationField,
-                        permissionTypeField
+                        ErrorCodeField,
+                        ErrorMessageField,
+                        ResourceTypeField,
+                        ResourceNameField,
+                        PatternTypeField,
+                        PrincipalField,
+                        HostField,
+                        OperationField,
+                        PermissionTypeField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, DeleteAclsMatchingAcl message)
@@ -207,25 +207,25 @@ namespace Kafka.Client.Messages
                 }
                 public static DeleteAclsMatchingAcl ReadV01(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                    var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                    var resourceNameField = Decoder.ReadString(buffer, ref index);
-                    var patternTypeField = Decoder.ReadInt8(buffer, ref index);
-                    var principalField = Decoder.ReadString(buffer, ref index);
-                    var hostField = Decoder.ReadString(buffer, ref index);
-                    var operationField = Decoder.ReadInt8(buffer, ref index);
-                    var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                    var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                    var PatternTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var PrincipalField = Decoder.ReadString(buffer, ref index);
+                    var HostField = Decoder.ReadString(buffer, ref index);
+                    var OperationField = Decoder.ReadInt8(buffer, ref index);
+                    var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                     return new(
-                        errorCodeField,
-                        errorMessageField,
-                        resourceTypeField,
-                        resourceNameField,
-                        patternTypeField,
-                        principalField,
-                        hostField,
-                        operationField,
-                        permissionTypeField
+                        ErrorCodeField,
+                        ErrorMessageField,
+                        ResourceTypeField,
+                        ResourceNameField,
+                        PatternTypeField,
+                        PrincipalField,
+                        HostField,
+                        OperationField,
+                        PermissionTypeField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, DeleteAclsMatchingAcl message)
@@ -243,26 +243,26 @@ namespace Kafka.Client.Messages
                 }
                 public static DeleteAclsMatchingAcl ReadV02(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                    var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
-                    var patternTypeField = Decoder.ReadInt8(buffer, ref index);
-                    var principalField = Decoder.ReadCompactString(buffer, ref index);
-                    var hostField = Decoder.ReadCompactString(buffer, ref index);
-                    var operationField = Decoder.ReadInt8(buffer, ref index);
-                    var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var ResourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PatternTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var PrincipalField = Decoder.ReadCompactString(buffer, ref index);
+                    var HostField = Decoder.ReadCompactString(buffer, ref index);
+                    var OperationField = Decoder.ReadInt8(buffer, ref index);
+                    var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        errorCodeField,
-                        errorMessageField,
-                        resourceTypeField,
-                        resourceNameField,
-                        patternTypeField,
-                        principalField,
-                        hostField,
-                        operationField,
-                        permissionTypeField
+                        ErrorCodeField,
+                        ErrorMessageField,
+                        ResourceTypeField,
+                        ResourceNameField,
+                        PatternTypeField,
+                        PrincipalField,
+                        HostField,
+                        OperationField,
+                        PermissionTypeField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, DeleteAclsMatchingAcl message)
@@ -281,26 +281,26 @@ namespace Kafka.Client.Messages
                 }
                 public static DeleteAclsMatchingAcl ReadV03(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                    var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
-                    var patternTypeField = Decoder.ReadInt8(buffer, ref index);
-                    var principalField = Decoder.ReadCompactString(buffer, ref index);
-                    var hostField = Decoder.ReadCompactString(buffer, ref index);
-                    var operationField = Decoder.ReadInt8(buffer, ref index);
-                    var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var ResourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PatternTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var PrincipalField = Decoder.ReadCompactString(buffer, ref index);
+                    var HostField = Decoder.ReadCompactString(buffer, ref index);
+                    var OperationField = Decoder.ReadInt8(buffer, ref index);
+                    var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        errorCodeField,
-                        errorMessageField,
-                        resourceTypeField,
-                        resourceNameField,
-                        patternTypeField,
-                        principalField,
-                        hostField,
-                        operationField,
-                        permissionTypeField
+                        ErrorCodeField,
+                        ErrorMessageField,
+                        ResourceTypeField,
+                        ResourceNameField,
+                        PatternTypeField,
+                        PrincipalField,
+                        HostField,
+                        OperationField,
+                        PermissionTypeField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, DeleteAclsMatchingAcl message)

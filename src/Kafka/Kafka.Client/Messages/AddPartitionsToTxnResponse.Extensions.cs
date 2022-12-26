@@ -92,11 +92,11 @@ namespace Kafka.Client.Messages
         {
             public static AddPartitionsToTxnTopicResult ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var resultsField = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var ResultsField = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Results'");
                 return new(
-                    nameField,
-                    resultsField
+                    NameField,
+                    ResultsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
@@ -107,11 +107,11 @@ namespace Kafka.Client.Messages
             }
             public static AddPartitionsToTxnTopicResult ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var resultsField = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var ResultsField = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Results'");
                 return new(
-                    nameField,
-                    resultsField
+                    NameField,
+                    ResultsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
@@ -122,11 +122,11 @@ namespace Kafka.Client.Messages
             }
             public static AddPartitionsToTxnTopicResult ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var resultsField = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var ResultsField = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Results'");
                 return new(
-                    nameField,
-                    resultsField
+                    NameField,
+                    ResultsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
@@ -137,12 +137,12 @@ namespace Kafka.Client.Messages
             }
             public static AddPartitionsToTxnTopicResult ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var resultsField = Decoder.ReadCompactArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Results'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var ResultsField = Decoder.ReadCompactArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Results'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    resultsField
+                    NameField,
+                    ResultsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
@@ -156,11 +156,11 @@ namespace Kafka.Client.Messages
             {
                 public static AddPartitionsToTxnPartitionResult ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
@@ -171,11 +171,11 @@ namespace Kafka.Client.Messages
                 }
                 public static AddPartitionsToTxnPartitionResult ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
@@ -186,11 +186,11 @@ namespace Kafka.Client.Messages
                 }
                 public static AddPartitionsToTxnPartitionResult ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
@@ -201,12 +201,12 @@ namespace Kafka.Client.Messages
                 }
                 public static AddPartitionsToTxnPartitionResult ReadV03(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)

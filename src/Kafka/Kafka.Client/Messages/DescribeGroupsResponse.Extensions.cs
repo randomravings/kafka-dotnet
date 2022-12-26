@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using DescribedGroup = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup;
 using DescribedGroupMember = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup.DescribedGroupMember;
+using DescribedGroup = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup;
 
 namespace Kafka.Client.Messages
 {
@@ -125,21 +125,21 @@ namespace Kafka.Client.Messages
         {
             public static DescribedGroup ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var groupStateField = Decoder.ReadString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadString(buffer, ref index);
-                var protocolDataField = Decoder.ReadString(buffer, ref index);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-                var authorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var GroupStateField = Decoder.ReadString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadString(buffer, ref index);
+                var ProtocolDataField = Decoder.ReadString(buffer, ref index);
+                var MembersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var AuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    groupIdField,
-                    groupStateField,
-                    protocolTypeField,
-                    protocolDataField,
-                    membersField,
-                    authorizedOperationsField
+                    ErrorCodeField,
+                    GroupIdField,
+                    GroupStateField,
+                    ProtocolTypeField,
+                    ProtocolDataField,
+                    MembersField,
+                    AuthorizedOperationsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DescribedGroup message)
@@ -154,21 +154,21 @@ namespace Kafka.Client.Messages
             }
             public static DescribedGroup ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var groupStateField = Decoder.ReadString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadString(buffer, ref index);
-                var protocolDataField = Decoder.ReadString(buffer, ref index);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-                var authorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var GroupStateField = Decoder.ReadString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadString(buffer, ref index);
+                var ProtocolDataField = Decoder.ReadString(buffer, ref index);
+                var MembersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var AuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    groupIdField,
-                    groupStateField,
-                    protocolTypeField,
-                    protocolDataField,
-                    membersField,
-                    authorizedOperationsField
+                    ErrorCodeField,
+                    GroupIdField,
+                    GroupStateField,
+                    ProtocolTypeField,
+                    ProtocolDataField,
+                    MembersField,
+                    AuthorizedOperationsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DescribedGroup message)
@@ -183,21 +183,21 @@ namespace Kafka.Client.Messages
             }
             public static DescribedGroup ReadV02(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var groupStateField = Decoder.ReadString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadString(buffer, ref index);
-                var protocolDataField = Decoder.ReadString(buffer, ref index);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-                var authorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var GroupStateField = Decoder.ReadString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadString(buffer, ref index);
+                var ProtocolDataField = Decoder.ReadString(buffer, ref index);
+                var MembersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var AuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    groupIdField,
-                    groupStateField,
-                    protocolTypeField,
-                    protocolDataField,
-                    membersField,
-                    authorizedOperationsField
+                    ErrorCodeField,
+                    GroupIdField,
+                    GroupStateField,
+                    ProtocolTypeField,
+                    ProtocolDataField,
+                    MembersField,
+                    AuthorizedOperationsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DescribedGroup message)
@@ -212,21 +212,21 @@ namespace Kafka.Client.Messages
             }
             public static DescribedGroup ReadV03(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var groupStateField = Decoder.ReadString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadString(buffer, ref index);
-                var protocolDataField = Decoder.ReadString(buffer, ref index);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-                var authorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var GroupStateField = Decoder.ReadString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadString(buffer, ref index);
+                var ProtocolDataField = Decoder.ReadString(buffer, ref index);
+                var MembersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var AuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    groupIdField,
-                    groupStateField,
-                    protocolTypeField,
-                    protocolDataField,
-                    membersField,
-                    authorizedOperationsField
+                    ErrorCodeField,
+                    GroupIdField,
+                    GroupStateField,
+                    ProtocolTypeField,
+                    ProtocolDataField,
+                    MembersField,
+                    AuthorizedOperationsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, DescribedGroup message)
@@ -242,21 +242,21 @@ namespace Kafka.Client.Messages
             }
             public static DescribedGroup ReadV04(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var groupStateField = Decoder.ReadString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadString(buffer, ref index);
-                var protocolDataField = Decoder.ReadString(buffer, ref index);
-                var membersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-                var authorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var GroupStateField = Decoder.ReadString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadString(buffer, ref index);
+                var ProtocolDataField = Decoder.ReadString(buffer, ref index);
+                var MembersField = Decoder.ReadArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var AuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    groupIdField,
-                    groupStateField,
-                    protocolTypeField,
-                    protocolDataField,
-                    membersField,
-                    authorizedOperationsField
+                    ErrorCodeField,
+                    GroupIdField,
+                    GroupStateField,
+                    ProtocolTypeField,
+                    ProtocolDataField,
+                    MembersField,
+                    AuthorizedOperationsField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, DescribedGroup message)
@@ -272,22 +272,22 @@ namespace Kafka.Client.Messages
             }
             public static DescribedGroup ReadV05(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
-                var groupStateField = Decoder.ReadCompactString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadCompactString(buffer, ref index);
-                var protocolDataField = Decoder.ReadCompactString(buffer, ref index);
-                var membersField = Decoder.ReadCompactArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Members'");
-                var authorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var GroupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupStateField = Decoder.ReadCompactString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var ProtocolDataField = Decoder.ReadCompactString(buffer, ref index);
+                var MembersField = Decoder.ReadCompactArray<DescribedGroupMember>(buffer, ref index, DescribedGroupMemberSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Members'");
+                var AuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    groupIdField,
-                    groupStateField,
-                    protocolTypeField,
-                    protocolDataField,
-                    membersField,
-                    authorizedOperationsField
+                    ErrorCodeField,
+                    GroupIdField,
+                    GroupStateField,
+                    ProtocolTypeField,
+                    ProtocolDataField,
+                    MembersField,
+                    AuthorizedOperationsField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, DescribedGroup message)
@@ -306,19 +306,19 @@ namespace Kafka.Client.Messages
             {
                 public static DescribedGroupMember ReadV00(byte[] buffer, ref int index)
                 {
-                    var memberIdField = Decoder.ReadString(buffer, ref index);
-                    var groupInstanceIdField = default(string?);
-                    var clientIdField = Decoder.ReadString(buffer, ref index);
-                    var clientHostField = Decoder.ReadString(buffer, ref index);
-                    var memberMetadataField = Decoder.ReadBytes(buffer, ref index);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberIdField = Decoder.ReadString(buffer, ref index);
+                    var GroupInstanceIdField = default(string?);
+                    var ClientIdField = Decoder.ReadString(buffer, ref index);
+                    var ClientHostField = Decoder.ReadString(buffer, ref index);
+                    var MemberMetadataField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberAssignmentField = Decoder.ReadBytes(buffer, ref index);
                     return new(
-                        memberIdField,
-                        groupInstanceIdField,
-                        clientIdField,
-                        clientHostField,
-                        memberMetadataField,
-                        memberAssignmentField
+                        MemberIdField,
+                        GroupInstanceIdField,
+                        ClientIdField,
+                        ClientHostField,
+                        MemberMetadataField,
+                        MemberAssignmentField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, DescribedGroupMember message)
@@ -332,19 +332,19 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribedGroupMember ReadV01(byte[] buffer, ref int index)
                 {
-                    var memberIdField = Decoder.ReadString(buffer, ref index);
-                    var groupInstanceIdField = default(string?);
-                    var clientIdField = Decoder.ReadString(buffer, ref index);
-                    var clientHostField = Decoder.ReadString(buffer, ref index);
-                    var memberMetadataField = Decoder.ReadBytes(buffer, ref index);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberIdField = Decoder.ReadString(buffer, ref index);
+                    var GroupInstanceIdField = default(string?);
+                    var ClientIdField = Decoder.ReadString(buffer, ref index);
+                    var ClientHostField = Decoder.ReadString(buffer, ref index);
+                    var MemberMetadataField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberAssignmentField = Decoder.ReadBytes(buffer, ref index);
                     return new(
-                        memberIdField,
-                        groupInstanceIdField,
-                        clientIdField,
-                        clientHostField,
-                        memberMetadataField,
-                        memberAssignmentField
+                        MemberIdField,
+                        GroupInstanceIdField,
+                        ClientIdField,
+                        ClientHostField,
+                        MemberMetadataField,
+                        MemberAssignmentField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, DescribedGroupMember message)
@@ -358,19 +358,19 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribedGroupMember ReadV02(byte[] buffer, ref int index)
                 {
-                    var memberIdField = Decoder.ReadString(buffer, ref index);
-                    var groupInstanceIdField = default(string?);
-                    var clientIdField = Decoder.ReadString(buffer, ref index);
-                    var clientHostField = Decoder.ReadString(buffer, ref index);
-                    var memberMetadataField = Decoder.ReadBytes(buffer, ref index);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberIdField = Decoder.ReadString(buffer, ref index);
+                    var GroupInstanceIdField = default(string?);
+                    var ClientIdField = Decoder.ReadString(buffer, ref index);
+                    var ClientHostField = Decoder.ReadString(buffer, ref index);
+                    var MemberMetadataField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberAssignmentField = Decoder.ReadBytes(buffer, ref index);
                     return new(
-                        memberIdField,
-                        groupInstanceIdField,
-                        clientIdField,
-                        clientHostField,
-                        memberMetadataField,
-                        memberAssignmentField
+                        MemberIdField,
+                        GroupInstanceIdField,
+                        ClientIdField,
+                        ClientHostField,
+                        MemberMetadataField,
+                        MemberAssignmentField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, DescribedGroupMember message)
@@ -384,19 +384,19 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribedGroupMember ReadV03(byte[] buffer, ref int index)
                 {
-                    var memberIdField = Decoder.ReadString(buffer, ref index);
-                    var groupInstanceIdField = default(string?);
-                    var clientIdField = Decoder.ReadString(buffer, ref index);
-                    var clientHostField = Decoder.ReadString(buffer, ref index);
-                    var memberMetadataField = Decoder.ReadBytes(buffer, ref index);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberIdField = Decoder.ReadString(buffer, ref index);
+                    var GroupInstanceIdField = default(string?);
+                    var ClientIdField = Decoder.ReadString(buffer, ref index);
+                    var ClientHostField = Decoder.ReadString(buffer, ref index);
+                    var MemberMetadataField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberAssignmentField = Decoder.ReadBytes(buffer, ref index);
                     return new(
-                        memberIdField,
-                        groupInstanceIdField,
-                        clientIdField,
-                        clientHostField,
-                        memberMetadataField,
-                        memberAssignmentField
+                        MemberIdField,
+                        GroupInstanceIdField,
+                        ClientIdField,
+                        ClientHostField,
+                        MemberMetadataField,
+                        MemberAssignmentField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, DescribedGroupMember message)
@@ -410,19 +410,19 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribedGroupMember ReadV04(byte[] buffer, ref int index)
                 {
-                    var memberIdField = Decoder.ReadString(buffer, ref index);
-                    var groupInstanceIdField = Decoder.ReadNullableString(buffer, ref index);
-                    var clientIdField = Decoder.ReadString(buffer, ref index);
-                    var clientHostField = Decoder.ReadString(buffer, ref index);
-                    var memberMetadataField = Decoder.ReadBytes(buffer, ref index);
-                    var memberAssignmentField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberIdField = Decoder.ReadString(buffer, ref index);
+                    var GroupInstanceIdField = Decoder.ReadNullableString(buffer, ref index);
+                    var ClientIdField = Decoder.ReadString(buffer, ref index);
+                    var ClientHostField = Decoder.ReadString(buffer, ref index);
+                    var MemberMetadataField = Decoder.ReadBytes(buffer, ref index);
+                    var MemberAssignmentField = Decoder.ReadBytes(buffer, ref index);
                     return new(
-                        memberIdField,
-                        groupInstanceIdField,
-                        clientIdField,
-                        clientHostField,
-                        memberMetadataField,
-                        memberAssignmentField
+                        MemberIdField,
+                        GroupInstanceIdField,
+                        ClientIdField,
+                        ClientHostField,
+                        MemberMetadataField,
+                        MemberAssignmentField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, DescribedGroupMember message)
@@ -437,20 +437,20 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribedGroupMember ReadV05(byte[] buffer, ref int index)
                 {
-                    var memberIdField = Decoder.ReadCompactString(buffer, ref index);
-                    var groupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    var clientIdField = Decoder.ReadCompactString(buffer, ref index);
-                    var clientHostField = Decoder.ReadCompactString(buffer, ref index);
-                    var memberMetadataField = Decoder.ReadCompactBytes(buffer, ref index);
-                    var memberAssignmentField = Decoder.ReadCompactBytes(buffer, ref index);
+                    var MemberIdField = Decoder.ReadCompactString(buffer, ref index);
+                    var GroupInstanceIdField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var ClientIdField = Decoder.ReadCompactString(buffer, ref index);
+                    var ClientHostField = Decoder.ReadCompactString(buffer, ref index);
+                    var MemberMetadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                    var MemberAssignmentField = Decoder.ReadCompactBytes(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        memberIdField,
-                        groupInstanceIdField,
-                        clientIdField,
-                        clientHostField,
-                        memberMetadataField,
-                        memberAssignmentField
+                        MemberIdField,
+                        GroupInstanceIdField,
+                        ClientIdField,
+                        ClientHostField,
+                        MemberMetadataField,
+                        MemberAssignmentField
                     );
                 }
                 public static int WriteV05(byte[] buffer, int index, DescribedGroupMember message)

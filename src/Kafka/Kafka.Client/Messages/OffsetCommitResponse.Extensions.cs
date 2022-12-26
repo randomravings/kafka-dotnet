@@ -174,11 +174,11 @@ namespace Kafka.Client.Messages
         {
             public static OffsetCommitResponseTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, OffsetCommitResponseTopic message)
@@ -189,11 +189,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetCommitResponseTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, OffsetCommitResponseTopic message)
@@ -204,11 +204,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetCommitResponseTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, OffsetCommitResponseTopic message)
@@ -219,11 +219,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetCommitResponseTopic ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, OffsetCommitResponseTopic message)
@@ -234,11 +234,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetCommitResponseTopic ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, OffsetCommitResponseTopic message)
@@ -249,11 +249,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetCommitResponseTopic ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, OffsetCommitResponseTopic message)
@@ -264,11 +264,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetCommitResponseTopic ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, OffsetCommitResponseTopic message)
@@ -279,11 +279,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetCommitResponseTopic ReadV07(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, OffsetCommitResponseTopic message)
@@ -294,12 +294,12 @@ namespace Kafka.Client.Messages
             }
             public static OffsetCommitResponseTopic ReadV08(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<OffsetCommitResponsePartition>(buffer, ref index, OffsetCommitResponsePartitionSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, OffsetCommitResponseTopic message)
@@ -313,11 +313,11 @@ namespace Kafka.Client.Messages
             {
                 public static OffsetCommitResponsePartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, OffsetCommitResponsePartition message)
@@ -328,11 +328,11 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetCommitResponsePartition ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, OffsetCommitResponsePartition message)
@@ -343,11 +343,11 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetCommitResponsePartition ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, OffsetCommitResponsePartition message)
@@ -358,11 +358,11 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetCommitResponsePartition ReadV03(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, OffsetCommitResponsePartition message)
@@ -373,11 +373,11 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetCommitResponsePartition ReadV04(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, OffsetCommitResponsePartition message)
@@ -388,11 +388,11 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetCommitResponsePartition ReadV05(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV05(byte[] buffer, int index, OffsetCommitResponsePartition message)
@@ -403,11 +403,11 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetCommitResponsePartition ReadV06(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV06(byte[] buffer, int index, OffsetCommitResponsePartition message)
@@ -418,11 +418,11 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetCommitResponsePartition ReadV07(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV07(byte[] buffer, int index, OffsetCommitResponsePartition message)
@@ -433,12 +433,12 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetCommitResponsePartition ReadV08(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV08(byte[] buffer, int index, OffsetCommitResponsePartition message)

@@ -54,7 +54,7 @@ namespace Kafka.Client.Messages
             public static JoinGroupResponseMember Empty { get; } = new(
                 "",
                 default(string?),
-                Array.Empty<byte>()
+                ReadOnlyMemory<byte>.Empty
             );
         };
     };

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
+using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreatableReplicaAssignment;
 using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
 using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreateableTopicConfig;
-using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreatableReplicaAssignment;
 
 namespace Kafka.Client.Messages
 {
@@ -49,7 +49,7 @@ namespace Kafka.Client.Messages
         private static int WriteV00(byte[] buffer, int index, CreateTopicsRequest message)
         {
             index = Encoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicSerde.WriteV00);
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
             return index;
         }
         private static CreateTopicsRequest ReadV01(byte[] buffer, ref int index)
@@ -66,8 +66,8 @@ namespace Kafka.Client.Messages
         private static int WriteV01(byte[] buffer, int index, CreateTopicsRequest message)
         {
             index = Encoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicSerde.WriteV01);
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
-            index = Encoder.WriteBoolean(buffer, index, message.validateOnlyField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
             return index;
         }
         private static CreateTopicsRequest ReadV02(byte[] buffer, ref int index)
@@ -84,8 +84,8 @@ namespace Kafka.Client.Messages
         private static int WriteV02(byte[] buffer, int index, CreateTopicsRequest message)
         {
             index = Encoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicSerde.WriteV02);
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
-            index = Encoder.WriteBoolean(buffer, index, message.validateOnlyField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
             return index;
         }
         private static CreateTopicsRequest ReadV03(byte[] buffer, ref int index)
@@ -102,8 +102,8 @@ namespace Kafka.Client.Messages
         private static int WriteV03(byte[] buffer, int index, CreateTopicsRequest message)
         {
             index = Encoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicSerde.WriteV03);
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
-            index = Encoder.WriteBoolean(buffer, index, message.validateOnlyField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
             return index;
         }
         private static CreateTopicsRequest ReadV04(byte[] buffer, ref int index)
@@ -120,8 +120,8 @@ namespace Kafka.Client.Messages
         private static int WriteV04(byte[] buffer, int index, CreateTopicsRequest message)
         {
             index = Encoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicSerde.WriteV04);
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
-            index = Encoder.WriteBoolean(buffer, index, message.validateOnlyField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
             return index;
         }
         private static CreateTopicsRequest ReadV05(byte[] buffer, ref int index)
@@ -139,8 +139,8 @@ namespace Kafka.Client.Messages
         private static int WriteV05(byte[] buffer, int index, CreateTopicsRequest message)
         {
             index = Encoder.WriteCompactArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicSerde.WriteV05);
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
-            index = Encoder.WriteBoolean(buffer, index, message.validateOnlyField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
         }
@@ -159,8 +159,8 @@ namespace Kafka.Client.Messages
         private static int WriteV06(byte[] buffer, int index, CreateTopicsRequest message)
         {
             index = Encoder.WriteCompactArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicSerde.WriteV06);
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
-            index = Encoder.WriteBoolean(buffer, index, message.validateOnlyField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
         }
@@ -179,8 +179,8 @@ namespace Kafka.Client.Messages
         private static int WriteV07(byte[] buffer, int index, CreateTopicsRequest message)
         {
             index = Encoder.WriteCompactArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicSerde.WriteV07);
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
-            index = Encoder.WriteBoolean(buffer, index, message.validateOnlyField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
         }
@@ -188,17 +188,17 @@ namespace Kafka.Client.Messages
         {
             public static CreatableTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var assignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-                var configsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var AssignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+                var ConfigsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    nameField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    assignmentsField,
-                    configsField
+                    NameField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    AssignmentsField,
+                    ConfigsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, CreatableTopic message)
@@ -212,17 +212,17 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var assignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-                var configsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var AssignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+                var ConfigsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    nameField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    assignmentsField,
-                    configsField
+                    NameField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    AssignmentsField,
+                    ConfigsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, CreatableTopic message)
@@ -236,17 +236,17 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var assignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-                var configsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var AssignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+                var ConfigsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    nameField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    assignmentsField,
-                    configsField
+                    NameField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    AssignmentsField,
+                    ConfigsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, CreatableTopic message)
@@ -260,17 +260,17 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopic ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var assignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-                var configsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var AssignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+                var ConfigsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    nameField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    assignmentsField,
-                    configsField
+                    NameField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    AssignmentsField,
+                    ConfigsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, CreatableTopic message)
@@ -284,17 +284,17 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopic ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var assignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-                var configsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var AssignmentsField = Decoder.ReadArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+                var ConfigsField = Decoder.ReadArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    nameField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    assignmentsField,
-                    configsField
+                    NameField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    AssignmentsField,
+                    ConfigsField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, CreatableTopic message)
@@ -308,18 +308,18 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopic ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var assignmentsField = Decoder.ReadCompactArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-                var configsField = Decoder.ReadCompactArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var AssignmentsField = Decoder.ReadCompactArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+                var ConfigsField = Decoder.ReadCompactArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    assignmentsField,
-                    configsField
+                    NameField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    AssignmentsField,
+                    ConfigsField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, CreatableTopic message)
@@ -334,18 +334,18 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopic ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var assignmentsField = Decoder.ReadCompactArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-                var configsField = Decoder.ReadCompactArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var AssignmentsField = Decoder.ReadCompactArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+                var ConfigsField = Decoder.ReadCompactArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    assignmentsField,
-                    configsField
+                    NameField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    AssignmentsField,
+                    ConfigsField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, CreatableTopic message)
@@ -360,18 +360,18 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopic ReadV07(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var assignmentsField = Decoder.ReadCompactArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
-                var configsField = Decoder.ReadCompactArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var AssignmentsField = Decoder.ReadCompactArray<CreatableReplicaAssignment>(buffer, ref index, CreatableReplicaAssignmentSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Assignments'");
+                var ConfigsField = Decoder.ReadCompactArray<CreateableTopicConfig>(buffer, ref index, CreateableTopicConfigSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    assignmentsField,
-                    configsField
+                    NameField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    AssignmentsField,
+                    ConfigsField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, CreatableTopic message)
@@ -384,144 +384,15 @@ namespace Kafka.Client.Messages
                 index = Encoder.WriteVarUInt32(buffer, index, 0);
                 return index;
             }
-            private static class CreateableTopicConfigSerde
-            {
-                public static CreateableTopicConfig ReadV00(byte[] buffer, ref int index)
-                {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
-                    return new(
-                        nameField,
-                        valueField
-                    );
-                }
-                public static int WriteV00(byte[] buffer, int index, CreateableTopicConfig message)
-                {
-                    index = Encoder.WriteString(buffer, index, message.NameField);
-                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
-                }
-                public static CreateableTopicConfig ReadV01(byte[] buffer, ref int index)
-                {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
-                    return new(
-                        nameField,
-                        valueField
-                    );
-                }
-                public static int WriteV01(byte[] buffer, int index, CreateableTopicConfig message)
-                {
-                    index = Encoder.WriteString(buffer, index, message.NameField);
-                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
-                }
-                public static CreateableTopicConfig ReadV02(byte[] buffer, ref int index)
-                {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
-                    return new(
-                        nameField,
-                        valueField
-                    );
-                }
-                public static int WriteV02(byte[] buffer, int index, CreateableTopicConfig message)
-                {
-                    index = Encoder.WriteString(buffer, index, message.NameField);
-                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
-                }
-                public static CreateableTopicConfig ReadV03(byte[] buffer, ref int index)
-                {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
-                    return new(
-                        nameField,
-                        valueField
-                    );
-                }
-                public static int WriteV03(byte[] buffer, int index, CreateableTopicConfig message)
-                {
-                    index = Encoder.WriteString(buffer, index, message.NameField);
-                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
-                }
-                public static CreateableTopicConfig ReadV04(byte[] buffer, ref int index)
-                {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
-                    return new(
-                        nameField,
-                        valueField
-                    );
-                }
-                public static int WriteV04(byte[] buffer, int index, CreateableTopicConfig message)
-                {
-                    index = Encoder.WriteString(buffer, index, message.NameField);
-                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
-                }
-                public static CreateableTopicConfig ReadV05(byte[] buffer, ref int index)
-                {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var valueField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    _ = Decoder.ReadVarUInt32(buffer, ref index);
-                    return new(
-                        nameField,
-                        valueField
-                    );
-                }
-                public static int WriteV05(byte[] buffer, int index, CreateableTopicConfig message)
-                {
-                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                    index = Encoder.WriteCompactNullableString(buffer, index, message.ValueField);
-                    index = Encoder.WriteVarUInt32(buffer, index, 0);
-                    return index;
-                }
-                public static CreateableTopicConfig ReadV06(byte[] buffer, ref int index)
-                {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var valueField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    _ = Decoder.ReadVarUInt32(buffer, ref index);
-                    return new(
-                        nameField,
-                        valueField
-                    );
-                }
-                public static int WriteV06(byte[] buffer, int index, CreateableTopicConfig message)
-                {
-                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                    index = Encoder.WriteCompactNullableString(buffer, index, message.ValueField);
-                    index = Encoder.WriteVarUInt32(buffer, index, 0);
-                    return index;
-                }
-                public static CreateableTopicConfig ReadV07(byte[] buffer, ref int index)
-                {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var valueField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    _ = Decoder.ReadVarUInt32(buffer, ref index);
-                    return new(
-                        nameField,
-                        valueField
-                    );
-                }
-                public static int WriteV07(byte[] buffer, int index, CreateableTopicConfig message)
-                {
-                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                    index = Encoder.WriteCompactNullableString(buffer, index, message.ValueField);
-                    index = Encoder.WriteVarUInt32(buffer, index, 0);
-                    return index;
-                }
-            }
             private static class CreatableReplicaAssignmentSerde
             {
                 public static CreatableReplicaAssignment ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var brokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var BrokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     return new(
-                        partitionIndexField,
-                        brokerIdsField
+                        PartitionIndexField,
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, CreatableReplicaAssignment message)
@@ -532,11 +403,11 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatableReplicaAssignment ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var brokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var BrokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     return new(
-                        partitionIndexField,
-                        brokerIdsField
+                        PartitionIndexField,
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, CreatableReplicaAssignment message)
@@ -547,11 +418,11 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatableReplicaAssignment ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var brokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var BrokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     return new(
-                        partitionIndexField,
-                        brokerIdsField
+                        PartitionIndexField,
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, CreatableReplicaAssignment message)
@@ -562,11 +433,11 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatableReplicaAssignment ReadV03(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var brokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var BrokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     return new(
-                        partitionIndexField,
-                        brokerIdsField
+                        PartitionIndexField,
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, CreatableReplicaAssignment message)
@@ -577,11 +448,11 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatableReplicaAssignment ReadV04(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var brokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var BrokerIdsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     return new(
-                        partitionIndexField,
-                        brokerIdsField
+                        PartitionIndexField,
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, CreatableReplicaAssignment message)
@@ -592,12 +463,12 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatableReplicaAssignment ReadV05(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var brokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var BrokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        brokerIdsField
+                        PartitionIndexField,
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV05(byte[] buffer, int index, CreatableReplicaAssignment message)
@@ -609,12 +480,12 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatableReplicaAssignment ReadV06(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var brokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var BrokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        brokerIdsField
+                        PartitionIndexField,
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV06(byte[] buffer, int index, CreatableReplicaAssignment message)
@@ -626,18 +497,147 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatableReplicaAssignment ReadV07(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var brokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var BrokerIdsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'BrokerIds'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        brokerIdsField
+                        PartitionIndexField,
+                        BrokerIdsField
                     );
                 }
                 public static int WriteV07(byte[] buffer, int index, CreatableReplicaAssignment message)
                 {
                     index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
                     index = Encoder.WriteCompactArray<int>(buffer, index, message.BrokerIdsField, Encoder.WriteInt32);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
+                }
+            }
+            private static class CreateableTopicConfigSerde
+            {
+                public static CreateableTopicConfig ReadV00(byte[] buffer, ref int index)
+                {
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                    return new(
+                        NameField,
+                        ValueField
+                    );
+                }
+                public static int WriteV00(byte[] buffer, int index, CreateableTopicConfig message)
+                {
+                    index = Encoder.WriteString(buffer, index, message.NameField);
+                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
+                    return index;
+                }
+                public static CreateableTopicConfig ReadV01(byte[] buffer, ref int index)
+                {
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                    return new(
+                        NameField,
+                        ValueField
+                    );
+                }
+                public static int WriteV01(byte[] buffer, int index, CreateableTopicConfig message)
+                {
+                    index = Encoder.WriteString(buffer, index, message.NameField);
+                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
+                    return index;
+                }
+                public static CreateableTopicConfig ReadV02(byte[] buffer, ref int index)
+                {
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                    return new(
+                        NameField,
+                        ValueField
+                    );
+                }
+                public static int WriteV02(byte[] buffer, int index, CreateableTopicConfig message)
+                {
+                    index = Encoder.WriteString(buffer, index, message.NameField);
+                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
+                    return index;
+                }
+                public static CreateableTopicConfig ReadV03(byte[] buffer, ref int index)
+                {
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                    return new(
+                        NameField,
+                        ValueField
+                    );
+                }
+                public static int WriteV03(byte[] buffer, int index, CreateableTopicConfig message)
+                {
+                    index = Encoder.WriteString(buffer, index, message.NameField);
+                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
+                    return index;
+                }
+                public static CreateableTopicConfig ReadV04(byte[] buffer, ref int index)
+                {
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                    return new(
+                        NameField,
+                        ValueField
+                    );
+                }
+                public static int WriteV04(byte[] buffer, int index, CreateableTopicConfig message)
+                {
+                    index = Encoder.WriteString(buffer, index, message.NameField);
+                    index = Encoder.WriteNullableString(buffer, index, message.ValueField);
+                    return index;
+                }
+                public static CreateableTopicConfig ReadV05(byte[] buffer, ref int index)
+                {
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var ValueField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
+                    return new(
+                        NameField,
+                        ValueField
+                    );
+                }
+                public static int WriteV05(byte[] buffer, int index, CreateableTopicConfig message)
+                {
+                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                    index = Encoder.WriteCompactNullableString(buffer, index, message.ValueField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
+                }
+                public static CreateableTopicConfig ReadV06(byte[] buffer, ref int index)
+                {
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var ValueField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
+                    return new(
+                        NameField,
+                        ValueField
+                    );
+                }
+                public static int WriteV06(byte[] buffer, int index, CreateableTopicConfig message)
+                {
+                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                    index = Encoder.WriteCompactNullableString(buffer, index, message.ValueField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
+                }
+                public static CreateableTopicConfig ReadV07(byte[] buffer, ref int index)
+                {
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var ValueField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
+                    return new(
+                        NameField,
+                        ValueField
+                    );
+                }
+                public static int WriteV07(byte[] buffer, int index, CreateableTopicConfig message)
+                {
+                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                    index = Encoder.WriteCompactNullableString(buffer, index, message.ValueField);
                     index = Encoder.WriteVarUInt32(buffer, index, 0);
                     return index;
                 }

@@ -75,13 +75,13 @@ namespace Kafka.Client.Messages
         {
             public static AlterConfigsResource ReadV00(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configsField = Decoder.ReadArray<AlterableConfig>(buffer, ref index, AlterableConfigSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigsField = Decoder.ReadArray<AlterableConfig>(buffer, ref index, AlterableConfigSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    configsField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, AlterConfigsResource message)
@@ -93,13 +93,13 @@ namespace Kafka.Client.Messages
             }
             public static AlterConfigsResource ReadV01(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configsField = Decoder.ReadArray<AlterableConfig>(buffer, ref index, AlterableConfigSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigsField = Decoder.ReadArray<AlterableConfig>(buffer, ref index, AlterableConfigSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    configsField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, AlterConfigsResource message)
@@ -111,14 +111,14 @@ namespace Kafka.Client.Messages
             }
             public static AlterConfigsResource ReadV02(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
-                var configsField = Decoder.ReadCompactArray<AlterableConfig>(buffer, ref index, AlterableConfigSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var ConfigsField = Decoder.ReadCompactArray<AlterableConfig>(buffer, ref index, AlterableConfigSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    configsField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, AlterConfigsResource message)
@@ -133,11 +133,11 @@ namespace Kafka.Client.Messages
             {
                 public static AlterableConfig ReadV00(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
-                        nameField,
-                        valueField
+                        NameField,
+                        ValueField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, AlterableConfig message)
@@ -148,11 +148,11 @@ namespace Kafka.Client.Messages
                 }
                 public static AlterableConfig ReadV01(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
-                        nameField,
-                        valueField
+                        NameField,
+                        ValueField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, AlterableConfig message)
@@ -163,12 +163,12 @@ namespace Kafka.Client.Messages
                 }
                 public static AlterableConfig ReadV02(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var valueField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var ValueField = Decoder.ReadCompactNullableString(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        valueField
+                        NameField,
+                        ValueField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, AlterableConfig message)

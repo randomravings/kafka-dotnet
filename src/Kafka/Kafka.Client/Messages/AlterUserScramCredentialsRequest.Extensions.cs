@@ -41,18 +41,18 @@ namespace Kafka.Client.Messages
         {
             public static ScramCredentialUpsertion ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var mechanismField = Decoder.ReadInt8(buffer, ref index);
-                var iterationsField = Decoder.ReadInt32(buffer, ref index);
-                var saltField = Decoder.ReadCompactBytes(buffer, ref index);
-                var saltedPasswordField = Decoder.ReadCompactBytes(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var MechanismField = Decoder.ReadInt8(buffer, ref index);
+                var IterationsField = Decoder.ReadInt32(buffer, ref index);
+                var SaltField = Decoder.ReadCompactBytes(buffer, ref index);
+                var SaltedPasswordField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    mechanismField,
-                    iterationsField,
-                    saltField,
-                    saltedPasswordField
+                    NameField,
+                    MechanismField,
+                    IterationsField,
+                    SaltField,
+                    SaltedPasswordField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, ScramCredentialUpsertion message)
@@ -70,12 +70,12 @@ namespace Kafka.Client.Messages
         {
             public static ScramCredentialDeletion ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var mechanismField = Decoder.ReadInt8(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var MechanismField = Decoder.ReadInt8(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    mechanismField
+                    NameField,
+                    MechanismField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, ScramCredentialDeletion message)

@@ -145,15 +145,15 @@ namespace Kafka.Client.Messages
         {
             public static DeletableTopicResult ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = default(string?);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = default(string?);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DeletableTopicResult message)
@@ -166,15 +166,15 @@ namespace Kafka.Client.Messages
             }
             public static DeletableTopicResult ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = default(string?);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = default(string?);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DeletableTopicResult message)
@@ -187,15 +187,15 @@ namespace Kafka.Client.Messages
             }
             public static DeletableTopicResult ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = default(string?);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = default(string?);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DeletableTopicResult message)
@@ -208,15 +208,15 @@ namespace Kafka.Client.Messages
             }
             public static DeletableTopicResult ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = default(string?);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = default(string?);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, DeletableTopicResult message)
@@ -229,16 +229,16 @@ namespace Kafka.Client.Messages
             }
             public static DeletableTopicResult ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = default(string?);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = default(string?);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, DeletableTopicResult message)
@@ -252,16 +252,16 @@ namespace Kafka.Client.Messages
             }
             public static DeletableTopicResult ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, DeletableTopicResult message)
@@ -276,16 +276,16 @@ namespace Kafka.Client.Messages
             }
             public static DeletableTopicResult ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var NameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, DeletableTopicResult message)

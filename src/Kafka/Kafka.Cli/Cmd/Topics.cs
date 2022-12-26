@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Kafka.Cli.Text;
 using Kafka.Cli.Verbs;
 using Kafka.Client.Clients.Admin;
 using Kafka.Client.Clients.Admin.Model;
@@ -109,7 +110,7 @@ namespace Kafka.Cli.Cmd
                     {
                         Console.Write($"  {topic.Name}");
                         Console.WriteLine();
-                        Console.WriteLine($"    {topic.Error.ErrorCode} - {topic.Error.Message}");
+                        Console.WriteLine($"    {Formatter.Print(topic.Error)}");
                     }
                 }
                 return 0;
@@ -182,13 +183,13 @@ namespace Kafka.Cli.Cmd
                     Console.WriteLine($"Name: {topic.Name}");
                     Console.WriteLine($"Internal: {topic.IsInternal}");
                     Console.WriteLine($"AuthorizedOperations: {topic.TopicAuthorizedOperations}");
-                    Console.WriteLine($"ErrorCode: {topic.ErrorCode}");
+                    Console.WriteLine($"Error: {Formatter.Print(topic.Error)}");
                     foreach (var partition in topic.Partitions.OrderBy(r => r.PartitionIndex))
                     {
                         Console.WriteLine($"Partition: {partition.PartitionIndex}");
                         Console.WriteLine($"  LeaderId: {partition.LeaderId}");
                         Console.WriteLine($"  LeaderEpoch: {partition.LeaderEpoch}");
-                        Console.WriteLine($"  ErrorCode: {partition.ErrorCode}");
+                        Console.WriteLine($"  Error: {Formatter.Print(topic.Error)}");
                         Console.WriteLine($"  ReplicaNodes: [{string.Join(',', partition.ReplicaNodes)}]");
                         Console.WriteLine($"  IsrNodes: [{string.Join(',', partition.IsrNodes)}]");
                         Console.WriteLine($"  OfflineReplicas: [{string.Join(',', partition.OfflineReplicas)}]");

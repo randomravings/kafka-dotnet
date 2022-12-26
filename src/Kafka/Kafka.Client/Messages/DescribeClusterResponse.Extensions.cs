@@ -55,16 +55,16 @@ namespace Kafka.Client.Messages
         {
             public static DescribeClusterBroker ReadV00(byte[] buffer, ref int index)
             {
-                var brokerIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadCompactString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var BrokerIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadCompactString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    brokerIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    BrokerIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DescribeClusterBroker message)

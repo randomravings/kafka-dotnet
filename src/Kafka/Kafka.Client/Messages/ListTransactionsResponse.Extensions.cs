@@ -46,14 +46,14 @@ namespace Kafka.Client.Messages
         {
             public static TransactionState ReadV00(byte[] buffer, ref int index)
             {
-                var transactionalIdField = Decoder.ReadCompactString(buffer, ref index);
-                var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                var transactionStateField = Decoder.ReadCompactString(buffer, ref index);
+                var TransactionalIdField = Decoder.ReadCompactString(buffer, ref index);
+                var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                var TransactionStateField = Decoder.ReadCompactString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    transactionalIdField,
-                    producerIdField,
-                    transactionStateField
+                    TransactionalIdField,
+                    ProducerIdField,
+                    TransactionStateField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TransactionState message)

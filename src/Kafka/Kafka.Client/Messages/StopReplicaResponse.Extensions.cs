@@ -112,13 +112,13 @@ namespace Kafka.Client.Messages
         {
             public static StopReplicaPartitionError ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField,
-                    errorCodeField
+                    TopicNameField,
+                    PartitionIndexField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, StopReplicaPartitionError message)
@@ -130,13 +130,13 @@ namespace Kafka.Client.Messages
             }
             public static StopReplicaPartitionError ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField,
-                    errorCodeField
+                    TopicNameField,
+                    PartitionIndexField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, StopReplicaPartitionError message)
@@ -148,14 +148,14 @@ namespace Kafka.Client.Messages
             }
             public static StopReplicaPartitionError ReadV02(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField,
-                    errorCodeField
+                    TopicNameField,
+                    PartitionIndexField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, StopReplicaPartitionError message)
@@ -168,14 +168,14 @@ namespace Kafka.Client.Messages
             }
             public static StopReplicaPartitionError ReadV03(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField,
-                    errorCodeField
+                    TopicNameField,
+                    PartitionIndexField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, StopReplicaPartitionError message)
@@ -188,14 +188,14 @@ namespace Kafka.Client.Messages
             }
             public static StopReplicaPartitionError ReadV04(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField,
-                    errorCodeField
+                    TopicNameField,
+                    PartitionIndexField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, StopReplicaPartitionError message)

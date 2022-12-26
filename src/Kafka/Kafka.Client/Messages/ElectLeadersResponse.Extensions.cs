@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using ReplicaElectionResult = Kafka.Client.Messages.ElectLeadersResponse.ReplicaElectionResult;
 using PartitionResult = Kafka.Client.Messages.ElectLeadersResponse.ReplicaElectionResult.PartitionResult;
+using ReplicaElectionResult = Kafka.Client.Messages.ElectLeadersResponse.ReplicaElectionResult;
 
 namespace Kafka.Client.Messages
 {
@@ -83,11 +83,11 @@ namespace Kafka.Client.Messages
         {
             public static ReplicaElectionResult ReadV00(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionResultField = Decoder.ReadArray<PartitionResult>(buffer, ref index, PartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'PartitionResult'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionResultField = Decoder.ReadArray<PartitionResult>(buffer, ref index, PartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'PartitionResult'");
                 return new(
-                    topicField,
-                    partitionResultField
+                    TopicField,
+                    PartitionResultField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, ReplicaElectionResult message)
@@ -98,11 +98,11 @@ namespace Kafka.Client.Messages
             }
             public static ReplicaElectionResult ReadV01(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionResultField = Decoder.ReadArray<PartitionResult>(buffer, ref index, PartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'PartitionResult'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionResultField = Decoder.ReadArray<PartitionResult>(buffer, ref index, PartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'PartitionResult'");
                 return new(
-                    topicField,
-                    partitionResultField
+                    TopicField,
+                    PartitionResultField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, ReplicaElectionResult message)
@@ -113,12 +113,12 @@ namespace Kafka.Client.Messages
             }
             public static ReplicaElectionResult ReadV02(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionResultField = Decoder.ReadCompactArray<PartitionResult>(buffer, ref index, PartitionResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'PartitionResult'");
+                var TopicField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionResultField = Decoder.ReadCompactArray<PartitionResult>(buffer, ref index, PartitionResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'PartitionResult'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicField,
-                    partitionResultField
+                    TopicField,
+                    PartitionResultField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, ReplicaElectionResult message)
@@ -132,13 +132,13 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionResult ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIdField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                    var PartitionIdField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
-                        partitionIdField,
-                        errorCodeField,
-                        errorMessageField
+                        PartitionIdField,
+                        ErrorCodeField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionResult message)
@@ -150,13 +150,13 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionResult ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIdField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                    var PartitionIdField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
-                        partitionIdField,
-                        errorCodeField,
-                        errorMessageField
+                        PartitionIdField,
+                        ErrorCodeField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, PartitionResult message)
@@ -168,14 +168,14 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionResult ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIdField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var PartitionIdField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIdField,
-                        errorCodeField,
-                        errorMessageField
+                        PartitionIdField,
+                        ErrorCodeField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, PartitionResult message)

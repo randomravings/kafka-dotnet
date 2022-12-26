@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using EntityData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.EntityData;
 using OpData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.OpData;
 using EntryData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData;
+using EntityData = Kafka.Client.Messages.AlterClientQuotasRequest.EntryData.EntityData;
 
 namespace Kafka.Client.Messages
 {
@@ -59,11 +59,11 @@ namespace Kafka.Client.Messages
         {
             public static EntryData ReadV00(byte[] buffer, ref int index)
             {
-                var entityField = Decoder.ReadArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
-                var opsField = Decoder.ReadArray<OpData>(buffer, ref index, OpDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Ops'");
+                var EntityField = Decoder.ReadArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
+                var OpsField = Decoder.ReadArray<OpData>(buffer, ref index, OpDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Ops'");
                 return new(
-                    entityField,
-                    opsField
+                    EntityField,
+                    OpsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, EntryData message)
@@ -74,12 +74,12 @@ namespace Kafka.Client.Messages
             }
             public static EntryData ReadV01(byte[] buffer, ref int index)
             {
-                var entityField = Decoder.ReadCompactArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
-                var opsField = Decoder.ReadCompactArray<OpData>(buffer, ref index, OpDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Ops'");
+                var EntityField = Decoder.ReadCompactArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
+                var OpsField = Decoder.ReadCompactArray<OpData>(buffer, ref index, OpDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Ops'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    entityField,
-                    opsField
+                    EntityField,
+                    OpsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, EntryData message)
@@ -89,52 +89,17 @@ namespace Kafka.Client.Messages
                 index = Encoder.WriteVarUInt32(buffer, index, 0);
                 return index;
             }
-            private static class EntityDataSerde
-            {
-                public static EntityData ReadV00(byte[] buffer, ref int index)
-                {
-                    var entityTypeField = Decoder.ReadString(buffer, ref index);
-                    var entityNameField = Decoder.ReadNullableString(buffer, ref index);
-                    return new(
-                        entityTypeField,
-                        entityNameField
-                    );
-                }
-                public static int WriteV00(byte[] buffer, int index, EntityData message)
-                {
-                    index = Encoder.WriteString(buffer, index, message.EntityTypeField);
-                    index = Encoder.WriteNullableString(buffer, index, message.EntityNameField);
-                    return index;
-                }
-                public static EntityData ReadV01(byte[] buffer, ref int index)
-                {
-                    var entityTypeField = Decoder.ReadCompactString(buffer, ref index);
-                    var entityNameField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    _ = Decoder.ReadVarUInt32(buffer, ref index);
-                    return new(
-                        entityTypeField,
-                        entityNameField
-                    );
-                }
-                public static int WriteV01(byte[] buffer, int index, EntityData message)
-                {
-                    index = Encoder.WriteCompactString(buffer, index, message.EntityTypeField);
-                    index = Encoder.WriteCompactNullableString(buffer, index, message.EntityNameField);
-                    index = Encoder.WriteVarUInt32(buffer, index, 0);
-                    return index;
-                }
-            }
             private static class OpDataSerde
             {
                 public static OpData ReadV00(byte[] buffer, ref int index)
                 {
-                    var keyField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadFloat64(buffer, ref index);
-                    var removeField = Decoder.ReadBoolean(buffer, ref index);
+                    var KeyField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadFloat64(buffer, ref index);
+                    var RemoveField = Decoder.ReadBoolean(buffer, ref index);
                     return new(
-                        keyField,
-                        valueField,
-                        removeField
+                        KeyField,
+                        ValueField,
+                        RemoveField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, OpData message)
@@ -146,14 +111,14 @@ namespace Kafka.Client.Messages
                 }
                 public static OpData ReadV01(byte[] buffer, ref int index)
                 {
-                    var keyField = Decoder.ReadCompactString(buffer, ref index);
-                    var valueField = Decoder.ReadFloat64(buffer, ref index);
-                    var removeField = Decoder.ReadBoolean(buffer, ref index);
+                    var KeyField = Decoder.ReadCompactString(buffer, ref index);
+                    var ValueField = Decoder.ReadFloat64(buffer, ref index);
+                    var RemoveField = Decoder.ReadBoolean(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        keyField,
-                        valueField,
-                        removeField
+                        KeyField,
+                        ValueField,
+                        RemoveField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, OpData message)
@@ -161,6 +126,41 @@ namespace Kafka.Client.Messages
                     index = Encoder.WriteCompactString(buffer, index, message.KeyField);
                     index = Encoder.WriteFloat64(buffer, index, message.ValueField);
                     index = Encoder.WriteBoolean(buffer, index, message.RemoveField);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
+                }
+            }
+            private static class EntityDataSerde
+            {
+                public static EntityData ReadV00(byte[] buffer, ref int index)
+                {
+                    var EntityTypeField = Decoder.ReadString(buffer, ref index);
+                    var EntityNameField = Decoder.ReadNullableString(buffer, ref index);
+                    return new(
+                        EntityTypeField,
+                        EntityNameField
+                    );
+                }
+                public static int WriteV00(byte[] buffer, int index, EntityData message)
+                {
+                    index = Encoder.WriteString(buffer, index, message.EntityTypeField);
+                    index = Encoder.WriteNullableString(buffer, index, message.EntityNameField);
+                    return index;
+                }
+                public static EntityData ReadV01(byte[] buffer, ref int index)
+                {
+                    var EntityTypeField = Decoder.ReadCompactString(buffer, ref index);
+                    var EntityNameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
+                    return new(
+                        EntityTypeField,
+                        EntityNameField
+                    );
+                }
+                public static int WriteV01(byte[] buffer, int index, EntityData message)
+                {
+                    index = Encoder.WriteCompactString(buffer, index, message.EntityTypeField);
+                    index = Encoder.WriteCompactNullableString(buffer, index, message.EntityNameField);
                     index = Encoder.WriteVarUInt32(buffer, index, 0);
                     return index;
                 }

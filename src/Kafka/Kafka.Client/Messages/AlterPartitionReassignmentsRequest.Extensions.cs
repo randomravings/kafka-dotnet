@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using ReassignableTopic = Kafka.Client.Messages.AlterPartitionReassignmentsRequest.ReassignableTopic;
 using ReassignablePartition = Kafka.Client.Messages.AlterPartitionReassignmentsRequest.ReassignableTopic.ReassignablePartition;
+using ReassignableTopic = Kafka.Client.Messages.AlterPartitionReassignmentsRequest.ReassignableTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -41,12 +41,12 @@ namespace Kafka.Client.Messages
         {
             public static ReassignableTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<ReassignablePartition>(buffer, ref index, ReassignablePartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<ReassignablePartition>(buffer, ref index, ReassignablePartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, ReassignableTopic message)
@@ -60,12 +60,12 @@ namespace Kafka.Client.Messages
             {
                 public static ReassignablePartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var replicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        replicasField
+                        PartitionIndexField,
+                        ReplicasField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, ReassignablePartition message)

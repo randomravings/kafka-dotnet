@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using EntityData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData.EntityData;
 using EntryData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData;
+using EntityData = Kafka.Client.Messages.AlterClientQuotasResponse.EntryData.EntityData;
 
 namespace Kafka.Client.Messages
 {
@@ -58,13 +58,13 @@ namespace Kafka.Client.Messages
         {
             public static EntryData ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var entityField = Decoder.ReadArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var EntityField = Decoder.ReadArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    entityField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    EntityField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, EntryData message)
@@ -76,14 +76,14 @@ namespace Kafka.Client.Messages
             }
             public static EntryData ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var entityField = Decoder.ReadCompactArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var EntityField = Decoder.ReadCompactArray<EntityData>(buffer, ref index, EntityDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Entity'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    entityField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    EntityField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, EntryData message)
@@ -98,11 +98,11 @@ namespace Kafka.Client.Messages
             {
                 public static EntityData ReadV00(byte[] buffer, ref int index)
                 {
-                    var entityTypeField = Decoder.ReadString(buffer, ref index);
-                    var entityNameField = Decoder.ReadNullableString(buffer, ref index);
+                    var EntityTypeField = Decoder.ReadString(buffer, ref index);
+                    var EntityNameField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
-                        entityTypeField,
-                        entityNameField
+                        EntityTypeField,
+                        EntityNameField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, EntityData message)
@@ -113,12 +113,12 @@ namespace Kafka.Client.Messages
                 }
                 public static EntityData ReadV01(byte[] buffer, ref int index)
                 {
-                    var entityTypeField = Decoder.ReadCompactString(buffer, ref index);
-                    var entityNameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var EntityTypeField = Decoder.ReadCompactString(buffer, ref index);
+                    var EntityNameField = Decoder.ReadCompactNullableString(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        entityTypeField,
-                        entityNameField
+                        EntityTypeField,
+                        EntityNameField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, EntityData message)

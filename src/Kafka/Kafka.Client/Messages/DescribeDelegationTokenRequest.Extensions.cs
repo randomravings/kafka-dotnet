@@ -81,11 +81,11 @@ namespace Kafka.Client.Messages
         {
             public static DescribeDelegationTokenOwner ReadV00(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadString(buffer, ref index);
-                var principalNameField = Decoder.ReadString(buffer, ref index);
+                var PrincipalTypeField = Decoder.ReadString(buffer, ref index);
+                var PrincipalNameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    principalTypeField,
-                    principalNameField
+                    PrincipalTypeField,
+                    PrincipalNameField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DescribeDelegationTokenOwner message)
@@ -96,11 +96,11 @@ namespace Kafka.Client.Messages
             }
             public static DescribeDelegationTokenOwner ReadV01(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadString(buffer, ref index);
-                var principalNameField = Decoder.ReadString(buffer, ref index);
+                var PrincipalTypeField = Decoder.ReadString(buffer, ref index);
+                var PrincipalNameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    principalTypeField,
-                    principalNameField
+                    PrincipalTypeField,
+                    PrincipalNameField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DescribeDelegationTokenOwner message)
@@ -111,12 +111,12 @@ namespace Kafka.Client.Messages
             }
             public static DescribeDelegationTokenOwner ReadV02(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
-                var principalNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PrincipalTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var PrincipalNameField = Decoder.ReadCompactString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    principalTypeField,
-                    principalNameField
+                    PrincipalTypeField,
+                    PrincipalNameField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DescribeDelegationTokenOwner message)
@@ -128,12 +128,12 @@ namespace Kafka.Client.Messages
             }
             public static DescribeDelegationTokenOwner ReadV03(byte[] buffer, ref int index)
             {
-                var principalTypeField = Decoder.ReadCompactString(buffer, ref index);
-                var principalNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PrincipalTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var PrincipalNameField = Decoder.ReadCompactString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    principalTypeField,
-                    principalNameField
+                    PrincipalTypeField,
+                    PrincipalNameField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, DescribeDelegationTokenOwner message)

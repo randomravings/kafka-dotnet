@@ -14,7 +14,7 @@ namespace Kafka.Client.Messages
     ) : Request(39,0,2,2)
     {
         public static RenewDelegationTokenRequest Empty { get; } = new(
-            Array.Empty<byte>(),
+            ReadOnlyMemory<byte>.Empty,
             default(long)
         );
     };

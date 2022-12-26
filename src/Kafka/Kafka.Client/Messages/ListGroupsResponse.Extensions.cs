@@ -124,13 +124,13 @@ namespace Kafka.Client.Messages
         {
             public static ListedGroup ReadV00(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadString(buffer, ref index);
-                var groupStateField = "";
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadString(buffer, ref index);
+                var GroupStateField = "";
                 return new(
-                    groupIdField,
-                    protocolTypeField,
-                    groupStateField
+                    GroupIdField,
+                    ProtocolTypeField,
+                    GroupStateField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, ListedGroup message)
@@ -141,13 +141,13 @@ namespace Kafka.Client.Messages
             }
             public static ListedGroup ReadV01(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadString(buffer, ref index);
-                var groupStateField = "";
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadString(buffer, ref index);
+                var GroupStateField = "";
                 return new(
-                    groupIdField,
-                    protocolTypeField,
-                    groupStateField
+                    GroupIdField,
+                    ProtocolTypeField,
+                    GroupStateField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, ListedGroup message)
@@ -158,13 +158,13 @@ namespace Kafka.Client.Messages
             }
             public static ListedGroup ReadV02(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadString(buffer, ref index);
-                var groupStateField = "";
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadString(buffer, ref index);
+                var GroupStateField = "";
                 return new(
-                    groupIdField,
-                    protocolTypeField,
-                    groupStateField
+                    GroupIdField,
+                    ProtocolTypeField,
+                    GroupStateField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, ListedGroup message)
@@ -175,14 +175,14 @@ namespace Kafka.Client.Messages
             }
             public static ListedGroup ReadV03(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadCompactString(buffer, ref index);
-                var groupStateField = "";
+                var GroupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupStateField = "";
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    groupIdField,
-                    protocolTypeField,
-                    groupStateField
+                    GroupIdField,
+                    ProtocolTypeField,
+                    GroupStateField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, ListedGroup message)
@@ -194,14 +194,14 @@ namespace Kafka.Client.Messages
             }
             public static ListedGroup ReadV04(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
-                var protocolTypeField = Decoder.ReadCompactString(buffer, ref index);
-                var groupStateField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var ProtocolTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var GroupStateField = Decoder.ReadCompactString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    groupIdField,
-                    protocolTypeField,
-                    groupStateField
+                    GroupIdField,
+                    ProtocolTypeField,
+                    GroupStateField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, ListedGroup message)

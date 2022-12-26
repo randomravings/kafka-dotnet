@@ -39,11 +39,11 @@ namespace Kafka.Client.Messages
         {
             public static TopicData ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicNameField,
-                    partitionsField
+                    TopicNameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TopicData message)
@@ -56,15 +56,15 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionData ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        leaderIdField,
-                        leaderEpochField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        LeaderIdField,
+                        LeaderEpochField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionData message)

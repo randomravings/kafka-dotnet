@@ -35,7 +35,7 @@ namespace Kafka.Client.Messages
         }
         private static int WriteV00(byte[] buffer, int index, UpdateFeaturesRequest message)
         {
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
             index = Encoder.WriteCompactArray<FeatureUpdateKey>(buffer, index, message.FeatureUpdatesField, FeatureUpdateKeySerde.WriteV00);
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
@@ -54,7 +54,7 @@ namespace Kafka.Client.Messages
         }
         private static int WriteV01(byte[] buffer, int index, UpdateFeaturesRequest message)
         {
-            index = Encoder.WriteInt32(buffer, index, message.timeoutMsField);
+            index = Encoder.WriteInt32(buffer, index, message.TimeoutMsField);
             index = Encoder.WriteCompactArray<FeatureUpdateKey>(buffer, index, message.FeatureUpdatesField, FeatureUpdateKeySerde.WriteV01);
             index = Encoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
             index = Encoder.WriteVarUInt32(buffer, index, 0);
@@ -64,16 +64,16 @@ namespace Kafka.Client.Messages
         {
             public static FeatureUpdateKey ReadV00(byte[] buffer, ref int index)
             {
-                var featureField = Decoder.ReadCompactString(buffer, ref index);
-                var maxVersionLevelField = Decoder.ReadInt16(buffer, ref index);
-                var allowDowngradeField = Decoder.ReadBoolean(buffer, ref index);
-                var upgradeTypeField = default(sbyte);
+                var FeatureField = Decoder.ReadCompactString(buffer, ref index);
+                var MaxVersionLevelField = Decoder.ReadInt16(buffer, ref index);
+                var AllowDowngradeField = Decoder.ReadBoolean(buffer, ref index);
+                var UpgradeTypeField = default(sbyte);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    featureField,
-                    maxVersionLevelField,
-                    allowDowngradeField,
-                    upgradeTypeField
+                    FeatureField,
+                    MaxVersionLevelField,
+                    AllowDowngradeField,
+                    UpgradeTypeField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, FeatureUpdateKey message)
@@ -86,16 +86,16 @@ namespace Kafka.Client.Messages
             }
             public static FeatureUpdateKey ReadV01(byte[] buffer, ref int index)
             {
-                var featureField = Decoder.ReadCompactString(buffer, ref index);
-                var maxVersionLevelField = Decoder.ReadInt16(buffer, ref index);
-                var allowDowngradeField = default(bool);
-                var upgradeTypeField = Decoder.ReadInt8(buffer, ref index);
+                var FeatureField = Decoder.ReadCompactString(buffer, ref index);
+                var MaxVersionLevelField = Decoder.ReadInt16(buffer, ref index);
+                var AllowDowngradeField = default(bool);
+                var UpgradeTypeField = Decoder.ReadInt8(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    featureField,
-                    maxVersionLevelField,
-                    allowDowngradeField,
-                    upgradeTypeField
+                    FeatureField,
+                    MaxVersionLevelField,
+                    AllowDowngradeField,
+                    UpgradeTypeField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, FeatureUpdateKey message)

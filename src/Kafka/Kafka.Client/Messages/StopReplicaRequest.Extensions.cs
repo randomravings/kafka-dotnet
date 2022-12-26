@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
 using StopReplicaTopicState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState;
+using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
 
 namespace Kafka.Client.Messages
@@ -185,51 +185,16 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
         }
-        private static class StopReplicaTopicV1Serde
-        {
-            public static StopReplicaTopicV1 ReadV01(byte[] buffer, ref int index)
-            {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
-                return new(
-                    nameField,
-                    partitionIndexesField
-                );
-            }
-            public static int WriteV01(byte[] buffer, int index, StopReplicaTopicV1 message)
-            {
-                index = Encoder.WriteString(buffer, index, message.NameField);
-                index = Encoder.WriteArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
-                return index;
-            }
-            public static StopReplicaTopicV1 ReadV02(byte[] buffer, ref int index)
-            {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    nameField,
-                    partitionIndexesField
-                );
-            }
-            public static int WriteV02(byte[] buffer, int index, StopReplicaTopicV1 message)
-            {
-                index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-        }
         private static class StopReplicaTopicStateSerde
         {
             public static StopReplicaTopicState ReadV03(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionStatesField = Decoder.ReadCompactArray<StopReplicaPartitionState>(buffer, ref index, StopReplicaPartitionStateSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionStatesField = Decoder.ReadCompactArray<StopReplicaPartitionState>(buffer, ref index, StopReplicaPartitionStateSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionStatesField
+                    TopicNameField,
+                    PartitionStatesField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, StopReplicaTopicState message)
@@ -241,12 +206,12 @@ namespace Kafka.Client.Messages
             }
             public static StopReplicaTopicState ReadV04(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionStatesField = Decoder.ReadCompactArray<StopReplicaPartitionState>(buffer, ref index, StopReplicaPartitionStateSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionStatesField = Decoder.ReadCompactArray<StopReplicaPartitionState>(buffer, ref index, StopReplicaPartitionStateSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'PartitionStates'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionStatesField
+                    TopicNameField,
+                    PartitionStatesField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, StopReplicaTopicState message)
@@ -260,14 +225,14 @@ namespace Kafka.Client.Messages
             {
                 public static StopReplicaPartitionState ReadV03(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var deletePartitionField = Decoder.ReadBoolean(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var DeletePartitionField = Decoder.ReadBoolean(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        leaderEpochField,
-                        deletePartitionField
+                        PartitionIndexField,
+                        LeaderEpochField,
+                        DeletePartitionField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, StopReplicaPartitionState message)
@@ -280,14 +245,14 @@ namespace Kafka.Client.Messages
                 }
                 public static StopReplicaPartitionState ReadV04(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var deletePartitionField = Decoder.ReadBoolean(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var DeletePartitionField = Decoder.ReadBoolean(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        leaderEpochField,
-                        deletePartitionField
+                        PartitionIndexField,
+                        LeaderEpochField,
+                        DeletePartitionField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, StopReplicaPartitionState message)
@@ -300,15 +265,50 @@ namespace Kafka.Client.Messages
                 }
             }
         }
+        private static class StopReplicaTopicV1Serde
+        {
+            public static StopReplicaTopicV1 ReadV01(byte[] buffer, ref int index)
+            {
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                return new(
+                    NameField,
+                    PartitionIndexesField
+                );
+            }
+            public static int WriteV01(byte[] buffer, int index, StopReplicaTopicV1 message)
+            {
+                index = Encoder.WriteString(buffer, index, message.NameField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
+                return index;
+            }
+            public static StopReplicaTopicV1 ReadV02(byte[] buffer, ref int index)
+            {
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionIndexesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'PartitionIndexes'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    NameField,
+                    PartitionIndexesField
+                );
+            }
+            public static int WriteV02(byte[] buffer, int index, StopReplicaTopicV1 message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+        }
         private static class StopReplicaPartitionV0Serde
         {
             public static StopReplicaPartitionV0 ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField
+                    TopicNameField,
+                    PartitionIndexField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, StopReplicaPartitionV0 message)

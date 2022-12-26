@@ -6,6 +6,7 @@ using Kafka.Common.Network.Tcp;
 using Kafka.Common.Protocol;
 using Kafka.Common.Types;
 using Kafka.Common.Types.Comparison;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Net;
 
@@ -22,9 +23,20 @@ namespace Kafka.Client.Clients
         private int _coorelationIds = 0;
         private bool _disposed;
         private readonly ITransport _transport;
+        private readonly BlockingCollection<SendCallback> _requestQueue = new();
+        private readonly Task _requestLoop;
+
+        protected readonly CancellationTokenSource _clientCts = new();
         protected readonly TConfig _config;
         protected ImmutableSortedDictionary<short, ApiVersion> _apiVersions = ImmutableSortedDictionary<short, ApiVersion>.Empty;
         protected Cluster _cluster = Cluster.Empty;
+
+        private sealed record SendCallback(
+            byte[] Request,
+            int Offset,
+            int Length,
+            TaskCompletionSource<byte[]> Response
+        );
 
         protected Client(
             TConfig config
@@ -33,6 +45,7 @@ namespace Kafka.Client.Clients
             _config = config;
             var endpoint = ParseBoostrap(config.BootstrapServers).First();
             _transport = new PlaintextTransport(endpoint);
+            _requestLoop = Task.Run(async () => await ReceiveLoop(_clientCts.Token), CancellationToken.None);
         }
 
         protected async ValueTask EnsureConnection(CancellationToken cancellationToken)
@@ -63,12 +76,14 @@ namespace Kafka.Client.Clients
             );
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual async void Dispose(bool disposing)
         {
             if (!_disposed)
             {
                 if (disposing)
                 {
+                    _clientCts.Cancel();
+                    await _requestLoop;
                     _transport.Dispose();
                 }
                 _disposed = true;
@@ -110,7 +125,7 @@ namespace Kafka.Client.Clients
         {
             var correlationId = Interlocked.Increment(ref _coorelationIds);
             var version = request.MaxVersion;
-            if(_apiVersions.TryGetValue(request.Api, out var storedVersion))
+            if (_apiVersions.TryGetValue(request.Api, out var storedVersion))
                 version = Math.Min(request.MaxVersion, storedVersion.Version.Max);
             var flexible = version >= request.FlexibleVersion;
             var requestHeader = new RequestHeader(
@@ -119,18 +134,47 @@ namespace Kafka.Client.Clients
                 correlationId,
                 _config.ClientId
             );
-            var requestBuffer = new byte[1024 * 1024];
-            var requestIndex = 4;
-            requestIndex = RequestHeaderSerde.Write(requestBuffer, requestIndex, requestHeader, REQUEST_HEADER_VERSION, flexible);
-            requestIndex = requestWriter(requestBuffer, requestIndex, request, version);
-            Encoder.WriteInt32(requestBuffer, 0, requestIndex - 4);
-            var responseBuffer = await _transport.HandleRequest(requestBuffer, 0, requestIndex, cancellationToken);
+
+
+            var requestBytes = new byte[1024 * 1024];
+            var offset = 0;
+            offset = RequestHeaderSerde.Write(requestBytes, offset, requestHeader, REQUEST_HEADER_VERSION, flexible);
+            offset = requestWriter(requestBytes, offset, request, requestHeader.RequestApiVersionField);
+
+            var callback = new SendCallback(
+                requestBytes,
+                0,
+                offset,
+                new TaskCompletionSource<byte[]>()
+            );
+            _requestQueue.Add(callback);
+            var responseBytes = await callback.Response.Task;
+
             var responseIndex = 0;
-            var responseHeader = ResponseHeaderSerde.Read(responseBuffer, ref responseIndex, RESPONSE_HEADER_VERSION, flexible && !ignoreHeaderTaggedFields);
+            var responseHeader = ResponseHeaderSerde.Read(responseBytes, ref responseIndex, RESPONSE_HEADER_VERSION, flexible && !ignoreHeaderTaggedFields);
             if (responseHeader.CorrelationIdField != requestHeader.CorrelationIdField)
                 throw new Exception($"Correlation Id mismath - Request: {requestHeader.CorrelationIdField} - Response: {responseHeader.CorrelationIdField}");
-            var response = responseReader(responseBuffer, ref responseIndex, version);
+            var response = responseReader(responseBytes, ref responseIndex, version);
             return response;
+        }
+
+        private async Task ReceiveLoop(
+            CancellationToken cancellationToken
+        )
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
+                {
+                    var request = _requestQueue.Take(cancellationToken);
+                    var response = await _transport.HandleRequest(request.Request, request.Offset, request.Length, cancellationToken);
+                    request.Response.SetResult(response);
+                }
+                catch(OperationCanceledException)
+                {
+                    // Noop
+                }
+            }
         }
 
         private async ValueTask<ImmutableSortedDictionary<short, ApiVersion>> GetApiVersions(

@@ -47,12 +47,12 @@ namespace Kafka.Client.Messages
         {
             public static ReassignableTopicResponse ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<ReassignablePartitionResponse>(buffer, ref index, ReassignablePartitionResponseSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<ReassignablePartitionResponse>(buffer, ref index, ReassignablePartitionResponseSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, ReassignableTopicResponse message)
@@ -66,14 +66,14 @@ namespace Kafka.Client.Messages
             {
                 public static ReassignablePartitionResponse ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        errorMessageField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, ReassignablePartitionResponse message)

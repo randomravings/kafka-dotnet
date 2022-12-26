@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
+using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
 using PartitionProduceResponse = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse;
 using TopicProduceResponse = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse;
-using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
 
 namespace Kafka.Client.Messages
 {
@@ -195,11 +195,11 @@ namespace Kafka.Client.Messages
         {
             public static TopicProduceResponse ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TopicProduceResponse message)
@@ -210,11 +210,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceResponse ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, TopicProduceResponse message)
@@ -225,11 +225,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceResponse ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, TopicProduceResponse message)
@@ -240,11 +240,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceResponse ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, TopicProduceResponse message)
@@ -255,11 +255,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceResponse ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, TopicProduceResponse message)
@@ -270,11 +270,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceResponse ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, TopicProduceResponse message)
@@ -285,11 +285,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceResponse ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, TopicProduceResponse message)
@@ -300,11 +300,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceResponse ReadV07(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, TopicProduceResponse message)
@@ -315,11 +315,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceResponse ReadV08(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, TopicProduceResponse message)
@@ -330,12 +330,12 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceResponse ReadV09(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionResponsesField = Decoder.ReadCompactArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionResponsesField = Decoder.ReadCompactArray<PartitionProduceResponse>(buffer, ref index, PartitionProduceResponseSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionResponsesField
+                    NameField,
+                    PartitionResponsesField
                 );
             }
             public static int WriteV09(byte[] buffer, int index, TopicProduceResponse message)
@@ -349,21 +349,21 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionProduceResponse ReadV00(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = default(long);
-                    var logStartOffsetField = default(long);
-                    var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
-                    var errorMessageField = default(string?);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = default(long);
+                    var LogStartOffsetField = default(long);
+                    var RecordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
+                    var ErrorMessageField = default(string?);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionProduceResponse message)
@@ -375,21 +375,21 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceResponse ReadV01(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = default(long);
-                    var logStartOffsetField = default(long);
-                    var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
-                    var errorMessageField = default(string?);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = default(long);
+                    var LogStartOffsetField = default(long);
+                    var RecordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
+                    var ErrorMessageField = default(string?);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, PartitionProduceResponse message)
@@ -401,21 +401,21 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceResponse ReadV02(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = default(long);
-                    var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
-                    var errorMessageField = default(string?);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = default(long);
+                    var RecordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
+                    var ErrorMessageField = default(string?);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, PartitionProduceResponse message)
@@ -428,21 +428,21 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceResponse ReadV03(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = default(long);
-                    var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
-                    var errorMessageField = default(string?);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = default(long);
+                    var RecordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
+                    var ErrorMessageField = default(string?);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, PartitionProduceResponse message)
@@ -455,21 +455,21 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceResponse ReadV04(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = default(long);
-                    var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
-                    var errorMessageField = default(string?);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = default(long);
+                    var RecordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
+                    var ErrorMessageField = default(string?);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, PartitionProduceResponse message)
@@ -482,21 +482,21 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceResponse ReadV05(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
-                    var errorMessageField = default(string?);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var RecordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
+                    var ErrorMessageField = default(string?);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV05(byte[] buffer, int index, PartitionProduceResponse message)
@@ -510,21 +510,21 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceResponse ReadV06(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
-                    var errorMessageField = default(string?);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var RecordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
+                    var ErrorMessageField = default(string?);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV06(byte[] buffer, int index, PartitionProduceResponse message)
@@ -538,21 +538,21 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceResponse ReadV07(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var recordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
-                    var errorMessageField = default(string?);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var RecordErrorsField = ImmutableArray<BatchIndexAndErrorMessage>.Empty;
+                    var ErrorMessageField = default(string?);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV07(byte[] buffer, int index, PartitionProduceResponse message)
@@ -566,21 +566,21 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceResponse ReadV08(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var recordErrorsField = Decoder.ReadArray<BatchIndexAndErrorMessage>(buffer, ref index, BatchIndexAndErrorMessageSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'RecordErrors'");
-                    var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var RecordErrorsField = Decoder.ReadArray<BatchIndexAndErrorMessage>(buffer, ref index, BatchIndexAndErrorMessageSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'RecordErrors'");
+                    var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV08(byte[] buffer, int index, PartitionProduceResponse message)
@@ -596,22 +596,22 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceResponse ReadV09(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var baseOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var recordErrorsField = Decoder.ReadCompactArray<BatchIndexAndErrorMessage>(buffer, ref index, BatchIndexAndErrorMessageSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'RecordErrors'");
-                    var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var BaseOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogAppendTimeMsField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var RecordErrorsField = Decoder.ReadCompactArray<BatchIndexAndErrorMessage>(buffer, ref index, BatchIndexAndErrorMessageSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'RecordErrors'");
+                    var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        baseOffsetField,
-                        logAppendTimeMsField,
-                        logStartOffsetField,
-                        recordErrorsField,
-                        errorMessageField
+                        IndexField,
+                        ErrorCodeField,
+                        BaseOffsetField,
+                        LogAppendTimeMsField,
+                        LogStartOffsetField,
+                        RecordErrorsField,
+                        ErrorMessageField
                     );
                 }
                 public static int WriteV09(byte[] buffer, int index, PartitionProduceResponse message)
@@ -630,11 +630,11 @@ namespace Kafka.Client.Messages
                 {
                     public static BatchIndexAndErrorMessage ReadV08(byte[] buffer, ref int index)
                     {
-                        var batchIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var batchIndexErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                        var BatchIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var BatchIndexErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
                         return new(
-                            batchIndexField,
-                            batchIndexErrorMessageField
+                            BatchIndexField,
+                            BatchIndexErrorMessageField
                         );
                     }
                     public static int WriteV08(byte[] buffer, int index, BatchIndexAndErrorMessage message)
@@ -645,12 +645,12 @@ namespace Kafka.Client.Messages
                     }
                     public static BatchIndexAndErrorMessage ReadV09(byte[] buffer, ref int index)
                     {
-                        var batchIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var batchIndexErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                        var BatchIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var BatchIndexErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            batchIndexField,
-                            batchIndexErrorMessageField
+                            BatchIndexField,
+                            BatchIndexErrorMessageField
                         );
                     }
                     public static int WriteV09(byte[] buffer, int index, BatchIndexAndErrorMessage message)

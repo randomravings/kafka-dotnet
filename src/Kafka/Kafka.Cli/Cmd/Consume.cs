@@ -1,6 +1,8 @@
 ﻿using Kafka.Cli.Verbs;
 using Kafka.Client.Clients.Consumer;
 using Kafka.Common.Serialization;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd
 {
@@ -20,7 +22,11 @@ namespace Kafka.Cli.Cmd
                 "test",
                 cancellationToken
             );
-            var x = await consumer.Poll(cancellationToken);
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                var consumeResult = await consumer.Poll(cancellationToken);
+                Console.WriteLine($"{consumeResult.Record.Key}:{consumeResult.Record.Value}");
+            }
             return 0;
         }
 
@@ -30,6 +36,13 @@ namespace Kafka.Cli.Cmd
             IDeserializer<TValue> valueDeserializer
         )
         {
+            var logger = LoggerFactory
+                .Create(builder => builder
+                    .AddNLog()
+                    .SetMinimumLevel(LogLevel.Warning)
+                )
+                .CreateLogger<SubscribedConsumer<TKey, TValue>>()
+            ;
             var groupId = verb.GroupId;
             if (string.IsNullOrEmpty(groupId))
                 groupId = $"{Guid.NewGuid()}";
@@ -42,7 +55,8 @@ namespace Kafka.Cli.Cmd
             return new SubscribedConsumer<TKey, TValue>(
                 config,
                 keyDeserializer,
-                valueDeserializer
+                valueDeserializer,
+                logger
             );
         }
     }

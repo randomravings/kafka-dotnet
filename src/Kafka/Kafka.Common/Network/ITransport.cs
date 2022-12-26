@@ -8,5 +8,8 @@
         ValueTask Disconnect(CancellationToken cancellationToken = default);
         ValueTask Handshake(CancellationToken cancellationToken = default);
         ValueTask<byte[]> HandleRequest(byte[] requestBytes, int offset, int length, CancellationToken cancellationToken = default);
+
+        ValueTask Send(byte[] requestBytes, int offset, int length, CancellationToken cancellationToken = default);
+        ValueTask<byte[]> Receive(CancellationToken cancellationToken = default);
     }
 }

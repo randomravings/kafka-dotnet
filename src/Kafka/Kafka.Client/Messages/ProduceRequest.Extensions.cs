@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using Kafka.Common.Records;
-using PartitionProduceData = Kafka.Client.Messages.ProduceRequest.TopicProduceData.PartitionProduceData;
 using TopicProduceData = Kafka.Client.Messages.ProduceRequest.TopicProduceData;
+using PartitionProduceData = Kafka.Client.Messages.ProduceRequest.TopicProduceData.PartitionProduceData;
 
 namespace Kafka.Client.Messages
 {
@@ -252,11 +252,11 @@ namespace Kafka.Client.Messages
         {
             public static TopicProduceData ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TopicProduceData message)
@@ -267,11 +267,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceData ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, TopicProduceData message)
@@ -282,11 +282,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceData ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, TopicProduceData message)
@@ -297,11 +297,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceData ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, TopicProduceData message)
@@ -312,11 +312,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceData ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, TopicProduceData message)
@@ -327,11 +327,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceData ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, TopicProduceData message)
@@ -342,11 +342,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceData ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, TopicProduceData message)
@@ -357,11 +357,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceData ReadV07(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, TopicProduceData message)
@@ -372,11 +372,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceData ReadV08(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, TopicProduceData message)
@@ -387,12 +387,12 @@ namespace Kafka.Client.Messages
             }
             public static TopicProduceData ReadV09(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionDataField = Decoder.ReadCompactArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionDataField = Decoder.ReadCompactArray<PartitionProduceData>(buffer, ref index, PartitionProduceDataSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'PartitionData'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionDataField
+                    NameField,
+                    PartitionDataField
                 );
             }
             public static int WriteV09(byte[] buffer, int index, TopicProduceData message)
@@ -406,11 +406,11 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionProduceData ReadV00(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionProduceData message)
@@ -421,11 +421,11 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceData ReadV01(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, PartitionProduceData message)
@@ -436,11 +436,11 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceData ReadV02(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, PartitionProduceData message)
@@ -451,11 +451,11 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceData ReadV03(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, PartitionProduceData message)
@@ -466,11 +466,11 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceData ReadV04(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, PartitionProduceData message)
@@ -481,11 +481,11 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceData ReadV05(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV05(byte[] buffer, int index, PartitionProduceData message)
@@ -496,11 +496,11 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceData ReadV06(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV06(byte[] buffer, int index, PartitionProduceData message)
@@ -511,11 +511,11 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceData ReadV07(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV07(byte[] buffer, int index, PartitionProduceData message)
@@ -526,11 +526,11 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceData ReadV08(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV08(byte[] buffer, int index, PartitionProduceData message)
@@ -541,12 +541,12 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionProduceData ReadV09(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        indexField,
-                        recordsField
+                        IndexField,
+                        RecordsField
                     );
                 }
                 public static int WriteV09(byte[] buffer, int index, PartitionProduceData message)

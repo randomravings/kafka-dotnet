@@ -48,7 +48,7 @@ namespace Kafka.Client.Messages
         {
             public static JoinGroupRequestProtocol Empty { get; } = new(
                 "",
-                Array.Empty<byte>()
+                ReadOnlyMemory<byte>.Empty
             );
         };
     };

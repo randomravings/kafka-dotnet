@@ -74,15 +74,15 @@ namespace Kafka.Client.Messages
         {
             public static AlterConfigsResourceResponse ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    resourceTypeField,
-                    resourceNameField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    ResourceTypeField,
+                    ResourceNameField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, AlterConfigsResourceResponse message)
@@ -95,15 +95,15 @@ namespace Kafka.Client.Messages
             }
             public static AlterConfigsResourceResponse ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    resourceTypeField,
-                    resourceNameField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    ResourceTypeField,
+                    ResourceNameField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, AlterConfigsResourceResponse message)
@@ -116,16 +116,16 @@ namespace Kafka.Client.Messages
             }
             public static AlterConfigsResourceResponse ReadV02(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadCompactString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    resourceTypeField,
-                    resourceNameField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    ResourceTypeField,
+                    ResourceNameField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, AlterConfigsResourceResponse message)

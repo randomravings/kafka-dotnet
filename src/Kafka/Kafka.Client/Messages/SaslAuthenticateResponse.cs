@@ -20,7 +20,7 @@ namespace Kafka.Client.Messages
         public static SaslAuthenticateResponse Empty { get; } = new(
             default(short),
             default(string?),
-            Array.Empty<byte>(),
+            ReadOnlyMemory<byte>.Empty,
             default(long)
         );
     };

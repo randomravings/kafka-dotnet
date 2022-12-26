@@ -93,11 +93,11 @@ namespace Kafka.Client.Messages
         {
             public static AclCreationResult ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, AclCreationResult message)
@@ -108,11 +108,11 @@ namespace Kafka.Client.Messages
             }
             public static AclCreationResult ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, AclCreationResult message)
@@ -123,12 +123,12 @@ namespace Kafka.Client.Messages
             }
             public static AclCreationResult ReadV02(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, AclCreationResult message)
@@ -140,12 +140,12 @@ namespace Kafka.Client.Messages
             }
             public static AclCreationResult ReadV03(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, AclCreationResult message)

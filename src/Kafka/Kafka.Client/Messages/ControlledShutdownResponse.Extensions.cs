@@ -91,11 +91,11 @@ namespace Kafka.Client.Messages
         {
             public static RemainingPartition ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField
+                    TopicNameField,
+                    PartitionIndexField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, RemainingPartition message)
@@ -106,11 +106,11 @@ namespace Kafka.Client.Messages
             }
             public static RemainingPartition ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField
+                    TopicNameField,
+                    PartitionIndexField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, RemainingPartition message)
@@ -121,11 +121,11 @@ namespace Kafka.Client.Messages
             }
             public static RemainingPartition ReadV02(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField
+                    TopicNameField,
+                    PartitionIndexField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, RemainingPartition message)
@@ -136,12 +136,12 @@ namespace Kafka.Client.Messages
             }
             public static RemainingPartition ReadV03(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionIndexField
+                    TopicNameField,
+                    PartitionIndexField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, RemainingPartition message)

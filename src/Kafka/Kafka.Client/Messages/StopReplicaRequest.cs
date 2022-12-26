@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
 using StopReplicaTopicState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState;
+using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
 
 namespace Kafka.Client.Messages
@@ -41,20 +41,6 @@ namespace Kafka.Client.Messages
             ImmutableArray<StopReplicaTopicState>.Empty
         );
         /// <summary>
-        /// <param name="NameField">The topic name.</param>
-        /// <param name="PartitionIndexesField">The partition indexes.</param>
-        /// </summary>
-        public sealed record StopReplicaTopicV1 (
-            string NameField,
-            ImmutableArray<int> PartitionIndexesField
-        )
-        {
-            public static StopReplicaTopicV1 Empty { get; } = new(
-                "",
-                ImmutableArray<int>.Empty
-            );
-        };
-        /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionStatesField">The state of each partition</param>
         /// </summary>
@@ -84,6 +70,20 @@ namespace Kafka.Client.Messages
                     default(bool)
                 );
             };
+        };
+        /// <summary>
+        /// <param name="NameField">The topic name.</param>
+        /// <param name="PartitionIndexesField">The partition indexes.</param>
+        /// </summary>
+        public sealed record StopReplicaTopicV1 (
+            string NameField,
+            ImmutableArray<int> PartitionIndexesField
+        )
+        {
+            public static StopReplicaTopicV1 Empty { get; } = new(
+                "",
+                ImmutableArray<int>.Empty
+            );
         };
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>

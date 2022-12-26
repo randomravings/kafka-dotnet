@@ -57,13 +57,13 @@ namespace Kafka.Client.Messages
         {
             public static ComponentData ReadV00(byte[] buffer, ref int index)
             {
-                var entityTypeField = Decoder.ReadString(buffer, ref index);
-                var matchTypeField = Decoder.ReadInt8(buffer, ref index);
-                var matchField = Decoder.ReadNullableString(buffer, ref index);
+                var EntityTypeField = Decoder.ReadString(buffer, ref index);
+                var MatchTypeField = Decoder.ReadInt8(buffer, ref index);
+                var MatchField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    entityTypeField,
-                    matchTypeField,
-                    matchField
+                    EntityTypeField,
+                    MatchTypeField,
+                    MatchField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, ComponentData message)
@@ -75,14 +75,14 @@ namespace Kafka.Client.Messages
             }
             public static ComponentData ReadV01(byte[] buffer, ref int index)
             {
-                var entityTypeField = Decoder.ReadCompactString(buffer, ref index);
-                var matchTypeField = Decoder.ReadInt8(buffer, ref index);
-                var matchField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var EntityTypeField = Decoder.ReadCompactString(buffer, ref index);
+                var MatchTypeField = Decoder.ReadInt8(buffer, ref index);
+                var MatchField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    entityTypeField,
-                    matchTypeField,
-                    matchField
+                    EntityTypeField,
+                    MatchTypeField,
+                    MatchField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, ComponentData message)

@@ -88,14 +88,14 @@ namespace Kafka.Client.Messages
         {
             public static TopicData ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    topicIdField,
-                    partitionsField
+                    TopicNameField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TopicData message)
@@ -107,14 +107,14 @@ namespace Kafka.Client.Messages
             }
             public static TopicData ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    topicIdField,
-                    partitionsField
+                    TopicNameField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, TopicData message)
@@ -126,14 +126,14 @@ namespace Kafka.Client.Messages
             }
             public static TopicData ReadV02(byte[] buffer, ref int index)
             {
-                var topicNameField = "";
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = "";
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    topicIdField,
-                    partitionsField
+                    TopicNameField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, TopicData message)
@@ -147,18 +147,18 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionData ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var newIsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'NewIsr'");
-                    var leaderRecoveryStateField = default(sbyte);
-                    var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var NewIsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'NewIsr'");
+                    var LeaderRecoveryStateField = default(sbyte);
+                    var PartitionEpochField = Decoder.ReadInt32(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        leaderEpochField,
-                        newIsrField,
-                        leaderRecoveryStateField,
-                        partitionEpochField
+                        PartitionIndexField,
+                        LeaderEpochField,
+                        NewIsrField,
+                        LeaderRecoveryStateField,
+                        PartitionEpochField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionData message)
@@ -172,18 +172,18 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var newIsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'NewIsr'");
-                    var leaderRecoveryStateField = Decoder.ReadInt8(buffer, ref index);
-                    var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var NewIsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'NewIsr'");
+                    var LeaderRecoveryStateField = Decoder.ReadInt8(buffer, ref index);
+                    var PartitionEpochField = Decoder.ReadInt32(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        leaderEpochField,
-                        newIsrField,
-                        leaderRecoveryStateField,
-                        partitionEpochField
+                        PartitionIndexField,
+                        LeaderEpochField,
+                        NewIsrField,
+                        LeaderRecoveryStateField,
+                        PartitionEpochField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, PartitionData message)
@@ -198,18 +198,18 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var newIsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'NewIsr'");
-                    var leaderRecoveryStateField = Decoder.ReadInt8(buffer, ref index);
-                    var partitionEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var NewIsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'NewIsr'");
+                    var LeaderRecoveryStateField = Decoder.ReadInt8(buffer, ref index);
+                    var PartitionEpochField = Decoder.ReadInt32(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        leaderEpochField,
-                        newIsrField,
-                        leaderRecoveryStateField,
-                        partitionEpochField
+                        PartitionIndexField,
+                        LeaderEpochField,
+                        NewIsrField,
+                        LeaderRecoveryStateField,
+                        PartitionEpochField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, PartitionData message)

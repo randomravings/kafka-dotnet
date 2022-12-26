@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using DeleteRecordsPartition = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic.DeleteRecordsPartition;
 using DeleteRecordsTopic = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic;
+using DeleteRecordsPartition = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic.DeleteRecordsPartition;
 
 namespace Kafka.Client.Messages
 {
@@ -75,11 +75,11 @@ namespace Kafka.Client.Messages
         {
             public static DeleteRecordsTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<DeleteRecordsPartition>(buffer, ref index, DeleteRecordsPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<DeleteRecordsPartition>(buffer, ref index, DeleteRecordsPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DeleteRecordsTopic message)
@@ -90,11 +90,11 @@ namespace Kafka.Client.Messages
             }
             public static DeleteRecordsTopic ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<DeleteRecordsPartition>(buffer, ref index, DeleteRecordsPartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<DeleteRecordsPartition>(buffer, ref index, DeleteRecordsPartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DeleteRecordsTopic message)
@@ -105,12 +105,12 @@ namespace Kafka.Client.Messages
             }
             public static DeleteRecordsTopic ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<DeleteRecordsPartition>(buffer, ref index, DeleteRecordsPartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<DeleteRecordsPartition>(buffer, ref index, DeleteRecordsPartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DeleteRecordsTopic message)
@@ -124,11 +124,11 @@ namespace Kafka.Client.Messages
             {
                 public static DeleteRecordsPartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var offsetField = Decoder.ReadInt64(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var OffsetField = Decoder.ReadInt64(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        offsetField
+                        PartitionIndexField,
+                        OffsetField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, DeleteRecordsPartition message)
@@ -139,11 +139,11 @@ namespace Kafka.Client.Messages
                 }
                 public static DeleteRecordsPartition ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var offsetField = Decoder.ReadInt64(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var OffsetField = Decoder.ReadInt64(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        offsetField
+                        PartitionIndexField,
+                        OffsetField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, DeleteRecordsPartition message)
@@ -154,12 +154,12 @@ namespace Kafka.Client.Messages
                 }
                 public static DeleteRecordsPartition ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var offsetField = Decoder.ReadInt64(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var OffsetField = Decoder.ReadInt64(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        offsetField
+                        PartitionIndexField,
+                        OffsetField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, DeleteRecordsPartition message)

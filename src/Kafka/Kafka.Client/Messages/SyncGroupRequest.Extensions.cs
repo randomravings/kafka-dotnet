@@ -204,11 +204,11 @@ namespace Kafka.Client.Messages
         {
             public static SyncGroupRequestAssignment ReadV00(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var assignmentField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var AssignmentField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    assignmentField
+                    MemberIdField,
+                    AssignmentField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, SyncGroupRequestAssignment message)
@@ -219,11 +219,11 @@ namespace Kafka.Client.Messages
             }
             public static SyncGroupRequestAssignment ReadV01(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var assignmentField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var AssignmentField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    assignmentField
+                    MemberIdField,
+                    AssignmentField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, SyncGroupRequestAssignment message)
@@ -234,11 +234,11 @@ namespace Kafka.Client.Messages
             }
             public static SyncGroupRequestAssignment ReadV02(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var assignmentField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var AssignmentField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    assignmentField
+                    MemberIdField,
+                    AssignmentField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, SyncGroupRequestAssignment message)
@@ -249,11 +249,11 @@ namespace Kafka.Client.Messages
             }
             public static SyncGroupRequestAssignment ReadV03(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadString(buffer, ref index);
-                var assignmentField = Decoder.ReadBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadString(buffer, ref index);
+                var AssignmentField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    memberIdField,
-                    assignmentField
+                    MemberIdField,
+                    AssignmentField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, SyncGroupRequestAssignment message)
@@ -264,12 +264,12 @@ namespace Kafka.Client.Messages
             }
             public static SyncGroupRequestAssignment ReadV04(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
-                var assignmentField = Decoder.ReadCompactBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var AssignmentField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    memberIdField,
-                    assignmentField
+                    MemberIdField,
+                    AssignmentField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, SyncGroupRequestAssignment message)
@@ -281,12 +281,12 @@ namespace Kafka.Client.Messages
             }
             public static SyncGroupRequestAssignment ReadV05(byte[] buffer, ref int index)
             {
-                var memberIdField = Decoder.ReadCompactString(buffer, ref index);
-                var assignmentField = Decoder.ReadCompactBytes(buffer, ref index);
+                var MemberIdField = Decoder.ReadCompactString(buffer, ref index);
+                var AssignmentField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    memberIdField,
-                    assignmentField
+                    MemberIdField,
+                    AssignmentField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, SyncGroupRequestAssignment message)

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using WritableTxnMarkerPartitionResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult.WritableTxnMarkerPartitionResult;
-using WritableTxnMarkerTopicResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult;
 using WritableTxnMarkerResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult;
+using WritableTxnMarkerTopicResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult;
+using WritableTxnMarkerPartitionResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult.WritableTxnMarkerPartitionResult;
 
 namespace Kafka.Client.Messages
 {
@@ -53,11 +53,11 @@ namespace Kafka.Client.Messages
         {
             public static WritableTxnMarkerResult ReadV00(byte[] buffer, ref int index)
             {
-                var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                var topicsField = Decoder.ReadArray<WritableTxnMarkerTopicResult>(buffer, ref index, WritableTxnMarkerTopicResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                var TopicsField = Decoder.ReadArray<WritableTxnMarkerTopicResult>(buffer, ref index, WritableTxnMarkerTopicResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
                 return new(
-                    producerIdField,
-                    topicsField
+                    ProducerIdField,
+                    TopicsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, WritableTxnMarkerResult message)
@@ -68,12 +68,12 @@ namespace Kafka.Client.Messages
             }
             public static WritableTxnMarkerResult ReadV01(byte[] buffer, ref int index)
             {
-                var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                var topicsField = Decoder.ReadCompactArray<WritableTxnMarkerTopicResult>(buffer, ref index, WritableTxnMarkerTopicResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                var TopicsField = Decoder.ReadCompactArray<WritableTxnMarkerTopicResult>(buffer, ref index, WritableTxnMarkerTopicResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    producerIdField,
-                    topicsField
+                    ProducerIdField,
+                    TopicsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, WritableTxnMarkerResult message)
@@ -87,11 +87,11 @@ namespace Kafka.Client.Messages
             {
                 public static WritableTxnMarkerTopicResult ReadV00(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var partitionsField = Decoder.ReadArray<WritableTxnMarkerPartitionResult>(buffer, ref index, WritableTxnMarkerPartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var PartitionsField = Decoder.ReadArray<WritableTxnMarkerPartitionResult>(buffer, ref index, WritableTxnMarkerPartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     return new(
-                        nameField,
-                        partitionsField
+                        NameField,
+                        PartitionsField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, WritableTxnMarkerTopicResult message)
@@ -102,12 +102,12 @@ namespace Kafka.Client.Messages
                 }
                 public static WritableTxnMarkerTopicResult ReadV01(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var partitionsField = Decoder.ReadCompactArray<WritableTxnMarkerPartitionResult>(buffer, ref index, WritableTxnMarkerPartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PartitionsField = Decoder.ReadCompactArray<WritableTxnMarkerPartitionResult>(buffer, ref index, WritableTxnMarkerPartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        partitionsField
+                        NameField,
+                        PartitionsField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, WritableTxnMarkerTopicResult message)
@@ -121,11 +121,11 @@ namespace Kafka.Client.Messages
                 {
                     public static WritableTxnMarkerPartitionResult ReadV00(byte[] buffer, ref int index)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                        var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                         return new(
-                            partitionIndexField,
-                            errorCodeField
+                            PartitionIndexField,
+                            ErrorCodeField
                         );
                     }
                     public static int WriteV00(byte[] buffer, int index, WritableTxnMarkerPartitionResult message)
@@ -136,12 +136,12 @@ namespace Kafka.Client.Messages
                     }
                     public static WritableTxnMarkerPartitionResult ReadV01(byte[] buffer, ref int index)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                        var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            partitionIndexField,
-                            errorCodeField
+                            PartitionIndexField,
+                            ErrorCodeField
                         );
                     }
                     public static int WriteV01(byte[] buffer, int index, WritableTxnMarkerPartitionResult message)

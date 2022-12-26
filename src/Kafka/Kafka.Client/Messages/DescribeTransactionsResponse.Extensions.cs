@@ -41,24 +41,24 @@ namespace Kafka.Client.Messages
         {
             public static TransactionState ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var transactionalIdField = Decoder.ReadCompactString(buffer, ref index);
-                var transactionStateField = Decoder.ReadCompactString(buffer, ref index);
-                var transactionTimeoutMsField = Decoder.ReadInt32(buffer, ref index);
-                var transactionStartTimeMsField = Decoder.ReadInt64(buffer, ref index);
-                var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                var producerEpochField = Decoder.ReadInt16(buffer, ref index);
-                var topicsField = Decoder.ReadCompactArray<TopicData>(buffer, ref index, TopicDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var TransactionalIdField = Decoder.ReadCompactString(buffer, ref index);
+                var TransactionStateField = Decoder.ReadCompactString(buffer, ref index);
+                var TransactionTimeoutMsField = Decoder.ReadInt32(buffer, ref index);
+                var TransactionStartTimeMsField = Decoder.ReadInt64(buffer, ref index);
+                var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                var ProducerEpochField = Decoder.ReadInt16(buffer, ref index);
+                var TopicsField = Decoder.ReadCompactArray<TopicData>(buffer, ref index, TopicDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    transactionalIdField,
-                    transactionStateField,
-                    transactionTimeoutMsField,
-                    transactionStartTimeMsField,
-                    producerIdField,
-                    producerEpochField,
-                    topicsField
+                    ErrorCodeField,
+                    TransactionalIdField,
+                    TransactionStateField,
+                    TransactionTimeoutMsField,
+                    TransactionStartTimeMsField,
+                    ProducerIdField,
+                    ProducerEpochField,
+                    TopicsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TransactionState message)
@@ -78,12 +78,12 @@ namespace Kafka.Client.Messages
             {
                 public static TopicData ReadV00(byte[] buffer, ref int index)
                 {
-                    var topicField = Decoder.ReadCompactString(buffer, ref index);
-                    var partitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var TopicField = Decoder.ReadCompactString(buffer, ref index);
+                    var PartitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        topicField,
-                        partitionsField
+                        TopicField,
+                        PartitionsField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, TopicData message)

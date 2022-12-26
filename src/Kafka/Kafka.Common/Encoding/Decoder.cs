@@ -277,11 +277,11 @@ namespace Kafka.Common.Encoding
             var key = default(ReadOnlyMemory<byte>?);
             var keyLength = ReadVarInt32(buffer, ref index);
             if (keyLength >= 0)
-                key = buffer[index..(index += keyLength)];
+                key = buffer[index..(index += keyLength)].AsMemory();
             var value = default(ReadOnlyMemory<byte>?);
             var valueLength = ReadVarInt32(buffer, ref index);
             if (valueLength >= 0)
-                value = buffer[index..(index += valueLength)];
+                value = buffer[index..(index += valueLength)].AsMemory();
             var headers = ImmutableArray<RecordHeader>.Empty;
             var headerCount = ReadVarInt32(buffer, ref index);
             if(headerCount > 0)

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using CreatableTopicConfigs = Kafka.Client.Messages.CreateTopicsResponse.CreatableTopicResult.CreatableTopicConfigs;
 using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponse.CreatableTopicResult;
+using CreatableTopicConfigs = Kafka.Client.Messages.CreateTopicsResponse.CreatableTopicResult.CreatableTopicConfigs;
 
 namespace Kafka.Client.Messages
 {
@@ -163,23 +163,23 @@ namespace Kafka.Client.Messages
         {
             public static CreatableTopicResult ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = default(string?);
-                var topicConfigErrorCodeField = default(short);
-                var numPartitionsField = default(int);
-                var replicationFactorField = default(short);
-                var configsField = ImmutableArray<CreatableTopicConfigs>.Empty;
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = default(string?);
+                var TopicConfigErrorCodeField = default(short);
+                var NumPartitionsField = default(int);
+                var ReplicationFactorField = default(short);
+                var ConfigsField = ImmutableArray<CreatableTopicConfigs>.Empty;
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField,
-                    topicConfigErrorCodeField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    configsField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    TopicConfigErrorCodeField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    ConfigsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, CreatableTopicResult message)
@@ -190,23 +190,23 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopicResult ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var topicConfigErrorCodeField = default(short);
-                var numPartitionsField = default(int);
-                var replicationFactorField = default(short);
-                var configsField = ImmutableArray<CreatableTopicConfigs>.Empty;
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var TopicConfigErrorCodeField = default(short);
+                var NumPartitionsField = default(int);
+                var ReplicationFactorField = default(short);
+                var ConfigsField = ImmutableArray<CreatableTopicConfigs>.Empty;
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField,
-                    topicConfigErrorCodeField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    configsField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    TopicConfigErrorCodeField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    ConfigsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, CreatableTopicResult message)
@@ -218,23 +218,23 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopicResult ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var topicConfigErrorCodeField = default(short);
-                var numPartitionsField = default(int);
-                var replicationFactorField = default(short);
-                var configsField = ImmutableArray<CreatableTopicConfigs>.Empty;
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var TopicConfigErrorCodeField = default(short);
+                var NumPartitionsField = default(int);
+                var ReplicationFactorField = default(short);
+                var ConfigsField = ImmutableArray<CreatableTopicConfigs>.Empty;
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField,
-                    topicConfigErrorCodeField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    configsField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    TopicConfigErrorCodeField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    ConfigsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, CreatableTopicResult message)
@@ -246,23 +246,23 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopicResult ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var topicConfigErrorCodeField = default(short);
-                var numPartitionsField = default(int);
-                var replicationFactorField = default(short);
-                var configsField = ImmutableArray<CreatableTopicConfigs>.Empty;
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var TopicConfigErrorCodeField = default(short);
+                var NumPartitionsField = default(int);
+                var ReplicationFactorField = default(short);
+                var ConfigsField = ImmutableArray<CreatableTopicConfigs>.Empty;
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField,
-                    topicConfigErrorCodeField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    configsField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    TopicConfigErrorCodeField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    ConfigsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, CreatableTopicResult message)
@@ -274,23 +274,23 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopicResult ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var topicConfigErrorCodeField = default(short);
-                var numPartitionsField = default(int);
-                var replicationFactorField = default(short);
-                var configsField = ImmutableArray<CreatableTopicConfigs>.Empty;
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var TopicConfigErrorCodeField = default(short);
+                var NumPartitionsField = default(int);
+                var ReplicationFactorField = default(short);
+                var ConfigsField = ImmutableArray<CreatableTopicConfigs>.Empty;
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField,
-                    topicConfigErrorCodeField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    configsField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    TopicConfigErrorCodeField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    ConfigsField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, CreatableTopicResult message)
@@ -302,24 +302,24 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopicResult ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var topicConfigErrorCodeField = default(short);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var configsField = Decoder.ReadCompactArray<CreatableTopicConfigs>(buffer, ref index, CreatableTopicConfigsSerde.ReadV05);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var TopicConfigErrorCodeField = default(short);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var ConfigsField = Decoder.ReadCompactArray<CreatableTopicConfigs>(buffer, ref index, CreatableTopicConfigsSerde.ReadV05);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField,
-                    topicConfigErrorCodeField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    configsField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    TopicConfigErrorCodeField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    ConfigsField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, CreatableTopicResult message)
@@ -336,24 +336,24 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopicResult ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var topicConfigErrorCodeField = default(short);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var configsField = Decoder.ReadCompactArray<CreatableTopicConfigs>(buffer, ref index, CreatableTopicConfigsSerde.ReadV06);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var TopicConfigErrorCodeField = default(short);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var ConfigsField = Decoder.ReadCompactArray<CreatableTopicConfigs>(buffer, ref index, CreatableTopicConfigsSerde.ReadV06);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField,
-                    topicConfigErrorCodeField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    configsField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    TopicConfigErrorCodeField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    ConfigsField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, CreatableTopicResult message)
@@ -370,24 +370,24 @@ namespace Kafka.Client.Messages
             }
             public static CreatableTopicResult ReadV07(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var topicConfigErrorCodeField = default(short);
-                var numPartitionsField = Decoder.ReadInt32(buffer, ref index);
-                var replicationFactorField = Decoder.ReadInt16(buffer, ref index);
-                var configsField = Decoder.ReadCompactArray<CreatableTopicConfigs>(buffer, ref index, CreatableTopicConfigsSerde.ReadV07);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var TopicConfigErrorCodeField = default(short);
+                var NumPartitionsField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicationFactorField = Decoder.ReadInt16(buffer, ref index);
+                var ConfigsField = Decoder.ReadCompactArray<CreatableTopicConfigs>(buffer, ref index, CreatableTopicConfigsSerde.ReadV07);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    topicIdField,
-                    errorCodeField,
-                    errorMessageField,
-                    topicConfigErrorCodeField,
-                    numPartitionsField,
-                    replicationFactorField,
-                    configsField
+                    NameField,
+                    TopicIdField,
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    TopicConfigErrorCodeField,
+                    NumPartitionsField,
+                    ReplicationFactorField,
+                    ConfigsField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, CreatableTopicResult message)
@@ -407,18 +407,18 @@ namespace Kafka.Client.Messages
             {
                 public static CreatableTopicConfigs ReadV05(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var valueField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    var readOnlyField = Decoder.ReadBoolean(buffer, ref index);
-                    var configSourceField = Decoder.ReadInt8(buffer, ref index);
-                    var isSensitiveField = Decoder.ReadBoolean(buffer, ref index);
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var ValueField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var ReadOnlyField = Decoder.ReadBoolean(buffer, ref index);
+                    var ConfigSourceField = Decoder.ReadInt8(buffer, ref index);
+                    var IsSensitiveField = Decoder.ReadBoolean(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        valueField,
-                        readOnlyField,
-                        configSourceField,
-                        isSensitiveField
+                        NameField,
+                        ValueField,
+                        ReadOnlyField,
+                        ConfigSourceField,
+                        IsSensitiveField
                     );
                 }
                 public static int WriteV05(byte[] buffer, int index, CreatableTopicConfigs message)
@@ -433,18 +433,18 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatableTopicConfigs ReadV06(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var valueField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    var readOnlyField = Decoder.ReadBoolean(buffer, ref index);
-                    var configSourceField = Decoder.ReadInt8(buffer, ref index);
-                    var isSensitiveField = Decoder.ReadBoolean(buffer, ref index);
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var ValueField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var ReadOnlyField = Decoder.ReadBoolean(buffer, ref index);
+                    var ConfigSourceField = Decoder.ReadInt8(buffer, ref index);
+                    var IsSensitiveField = Decoder.ReadBoolean(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        valueField,
-                        readOnlyField,
-                        configSourceField,
-                        isSensitiveField
+                        NameField,
+                        ValueField,
+                        ReadOnlyField,
+                        ConfigSourceField,
+                        IsSensitiveField
                     );
                 }
                 public static int WriteV06(byte[] buffer, int index, CreatableTopicConfigs message)
@@ -459,18 +459,18 @@ namespace Kafka.Client.Messages
                 }
                 public static CreatableTopicConfigs ReadV07(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var valueField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    var readOnlyField = Decoder.ReadBoolean(buffer, ref index);
-                    var configSourceField = Decoder.ReadInt8(buffer, ref index);
-                    var isSensitiveField = Decoder.ReadBoolean(buffer, ref index);
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var ValueField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var ReadOnlyField = Decoder.ReadBoolean(buffer, ref index);
+                    var ConfigSourceField = Decoder.ReadInt8(buffer, ref index);
+                    var IsSensitiveField = Decoder.ReadBoolean(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        valueField,
-                        readOnlyField,
-                        configSourceField,
-                        isSensitiveField
+                        NameField,
+                        ValueField,
+                        ReadOnlyField,
+                        ConfigSourceField,
+                        IsSensitiveField
                     );
                 }
                 public static int WriteV07(byte[] buffer, int index, CreatableTopicConfigs message)

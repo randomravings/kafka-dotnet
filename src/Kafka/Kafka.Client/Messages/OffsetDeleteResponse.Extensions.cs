@@ -42,11 +42,11 @@ namespace Kafka.Client.Messages
         {
             public static OffsetDeleteResponseTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetDeleteResponsePartition>(buffer, ref index, OffsetDeleteResponsePartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetDeleteResponsePartition>(buffer, ref index, OffsetDeleteResponsePartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, OffsetDeleteResponseTopic message)
@@ -59,11 +59,11 @@ namespace Kafka.Client.Messages
             {
                 public static OffsetDeleteResponsePartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, OffsetDeleteResponsePartition message)

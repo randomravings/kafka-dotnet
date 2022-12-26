@@ -82,11 +82,11 @@ namespace Kafka.Client.Messages
         {
             public static TopicPartitions ReadV00(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TopicPartitions message)
@@ -97,11 +97,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicPartitions ReadV01(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, TopicPartitions message)
@@ -112,12 +112,12 @@ namespace Kafka.Client.Messages
             }
             public static TopicPartitions ReadV02(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, TopicPartitions message)

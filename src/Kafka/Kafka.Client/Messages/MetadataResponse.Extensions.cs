@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic.MetadataResponsePartition;
 using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic;
+using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic.MetadataResponsePartition;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponse.MetadataResponseBroker;
 
 namespace Kafka.Client.Messages
@@ -393,19 +393,19 @@ namespace Kafka.Client.Messages
         {
             public static MetadataResponseTopic ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = default(bool);
-                var partitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = default(bool);
+                var PartitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, MetadataResponseTopic message)
@@ -419,19 +419,19 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, MetadataResponseTopic message)
@@ -446,19 +446,19 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV02(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, MetadataResponseTopic message)
@@ -473,19 +473,19 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV03(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, MetadataResponseTopic message)
@@ -500,19 +500,19 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV04(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, MetadataResponseTopic message)
@@ -527,19 +527,19 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV05(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, MetadataResponseTopic message)
@@ -554,19 +554,19 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV06(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, MetadataResponseTopic message)
@@ -581,19 +581,19 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV07(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = default(int);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = default(int);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, MetadataResponseTopic message)
@@ -608,19 +608,19 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV08(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, MetadataResponseTopic message)
@@ -636,20 +636,20 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV09(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV09(byte[] buffer, int index, MetadataResponseTopic message)
@@ -666,20 +666,20 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV10(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV10) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV10) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV10(byte[] buffer, int index, MetadataResponseTopic message)
@@ -697,20 +697,20 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV11(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV11) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV11) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV11(byte[] buffer, int index, MetadataResponseTopic message)
@@ -728,20 +728,20 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseTopic ReadV12(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var isInternalField = Decoder.ReadBoolean(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV12) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                var topicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var NameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var IsInternalField = Decoder.ReadBoolean(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<MetadataResponsePartition>(buffer, ref index, MetadataResponsePartitionSerde.ReadV12) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicAuthorizedOperationsField = Decoder.ReadInt32(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    nameField,
-                    topicIdField,
-                    isInternalField,
-                    partitionsField,
-                    topicAuthorizedOperationsField
+                    ErrorCodeField,
+                    NameField,
+                    TopicIdField,
+                    IsInternalField,
+                    PartitionsField,
+                    TopicAuthorizedOperationsField
                 );
             }
             public static int WriteV12(byte[] buffer, int index, MetadataResponseTopic message)
@@ -759,21 +759,21 @@ namespace Kafka.Client.Messages
             {
                 public static MetadataResponsePartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = default(int);
-                    var replicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = ImmutableArray<int>.Empty;
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = default(int);
+                    var ReplicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = ImmutableArray<int>.Empty;
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, MetadataResponsePartition message)
@@ -787,21 +787,21 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV01(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = default(int);
-                    var replicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = ImmutableArray<int>.Empty;
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = default(int);
+                    var ReplicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = ImmutableArray<int>.Empty;
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, MetadataResponsePartition message)
@@ -815,21 +815,21 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV02(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = default(int);
-                    var replicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = ImmutableArray<int>.Empty;
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = default(int);
+                    var ReplicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = ImmutableArray<int>.Empty;
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, MetadataResponsePartition message)
@@ -843,21 +843,21 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV03(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = default(int);
-                    var replicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = ImmutableArray<int>.Empty;
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = default(int);
+                    var ReplicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = ImmutableArray<int>.Empty;
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, MetadataResponsePartition message)
@@ -871,21 +871,21 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV04(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = default(int);
-                    var replicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = ImmutableArray<int>.Empty;
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = default(int);
+                    var ReplicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = ImmutableArray<int>.Empty;
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, MetadataResponsePartition message)
@@ -899,21 +899,21 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV05(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = default(int);
-                    var replicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = default(int);
+                    var ReplicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV05(byte[] buffer, int index, MetadataResponsePartition message)
@@ -928,21 +928,21 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV06(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = default(int);
-                    var replicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = default(int);
+                    var ReplicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV06(byte[] buffer, int index, MetadataResponsePartition message)
@@ -957,21 +957,21 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV07(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var replicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var ReplicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV07(byte[] buffer, int index, MetadataResponsePartition message)
@@ -987,21 +987,21 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV08(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var replicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var ReplicaNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV08(byte[] buffer, int index, MetadataResponsePartition message)
@@ -1017,22 +1017,22 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV09(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var replicaNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var ReplicaNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV09(byte[] buffer, int index, MetadataResponsePartition message)
@@ -1049,22 +1049,22 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV10(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var replicaNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var ReplicaNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV10(byte[] buffer, int index, MetadataResponsePartition message)
@@ -1081,22 +1081,22 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV11(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var replicaNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var ReplicaNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV11(byte[] buffer, int index, MetadataResponsePartition message)
@@ -1113,22 +1113,22 @@ namespace Kafka.Client.Messages
                 }
                 public static MetadataResponsePartition ReadV12(byte[] buffer, ref int index)
                 {
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var replicaNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    var isrNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    var offlineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var ReplicaNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
+                    var IsrNodesField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'IsrNodes'");
+                    var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        errorCodeField,
-                        partitionIndexField,
-                        leaderIdField,
-                        leaderEpochField,
-                        replicaNodesField,
-                        isrNodesField,
-                        offlineReplicasField
+                        ErrorCodeField,
+                        PartitionIndexField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        ReplicaNodesField,
+                        IsrNodesField,
+                        OfflineReplicasField
                     );
                 }
                 public static int WriteV12(byte[] buffer, int index, MetadataResponsePartition message)
@@ -1149,15 +1149,15 @@ namespace Kafka.Client.Messages
         {
             public static MetadataResponseBroker ReadV00(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = default(string?);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = default(string?);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1169,15 +1169,15 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV01(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1190,15 +1190,15 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV02(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1211,15 +1211,15 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV03(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1232,15 +1232,15 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV04(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1253,15 +1253,15 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV05(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1274,15 +1274,15 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV06(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1295,15 +1295,15 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV07(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1316,15 +1316,15 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV08(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1337,16 +1337,16 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV09(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadCompactString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadCompactString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV09(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1360,16 +1360,16 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV10(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadCompactString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadCompactString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV10(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1383,16 +1383,16 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV11(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadCompactString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadCompactString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV11(byte[] buffer, int index, MetadataResponseBroker message)
@@ -1406,16 +1406,16 @@ namespace Kafka.Client.Messages
             }
             public static MetadataResponseBroker ReadV12(byte[] buffer, ref int index)
             {
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadCompactString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var rackField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadCompactString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var RackField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    rackField
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    RackField
                 );
             }
             public static int WriteV12(byte[] buffer, int index, MetadataResponseBroker message)

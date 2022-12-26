@@ -16,9 +16,9 @@ namespace Kafka.Client.Messages
     ) : Request(58,0,0,0)
     {
         public static EnvelopeRequest Empty { get; } = new(
-            Array.Empty<byte>(),
+            ReadOnlyMemory<byte>.Empty,
             default(ReadOnlyMemory<byte>?),
-            Array.Empty<byte>()
+            ReadOnlyMemory<byte>.Empty
         );
     };
 }

@@ -81,21 +81,21 @@ namespace Kafka.Client.Messages
         {
             public static DeleteAclsFilter ReadV00(byte[] buffer, ref int index)
             {
-                var resourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameFilterField = Decoder.ReadNullableString(buffer, ref index);
-                var patternTypeFilterField = default(sbyte);
-                var principalFilterField = Decoder.ReadNullableString(buffer, ref index);
-                var hostFilterField = Decoder.ReadNullableString(buffer, ref index);
-                var operationField = Decoder.ReadInt8(buffer, ref index);
-                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var PatternTypeFilterField = default(sbyte);
+                var PrincipalFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var HostFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var OperationField = Decoder.ReadInt8(buffer, ref index);
+                var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 return new(
-                    resourceTypeFilterField,
-                    resourceNameFilterField,
-                    patternTypeFilterField,
-                    principalFilterField,
-                    hostFilterField,
-                    operationField,
-                    permissionTypeField
+                    ResourceTypeFilterField,
+                    ResourceNameFilterField,
+                    PatternTypeFilterField,
+                    PrincipalFilterField,
+                    HostFilterField,
+                    OperationField,
+                    PermissionTypeField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DeleteAclsFilter message)
@@ -110,21 +110,21 @@ namespace Kafka.Client.Messages
             }
             public static DeleteAclsFilter ReadV01(byte[] buffer, ref int index)
             {
-                var resourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameFilterField = Decoder.ReadNullableString(buffer, ref index);
-                var patternTypeFilterField = Decoder.ReadInt8(buffer, ref index);
-                var principalFilterField = Decoder.ReadNullableString(buffer, ref index);
-                var hostFilterField = Decoder.ReadNullableString(buffer, ref index);
-                var operationField = Decoder.ReadInt8(buffer, ref index);
-                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var PatternTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var PrincipalFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var HostFilterField = Decoder.ReadNullableString(buffer, ref index);
+                var OperationField = Decoder.ReadInt8(buffer, ref index);
+                var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 return new(
-                    resourceTypeFilterField,
-                    resourceNameFilterField,
-                    patternTypeFilterField,
-                    principalFilterField,
-                    hostFilterField,
-                    operationField,
-                    permissionTypeField
+                    ResourceTypeFilterField,
+                    ResourceNameFilterField,
+                    PatternTypeFilterField,
+                    PrincipalFilterField,
+                    HostFilterField,
+                    OperationField,
+                    PermissionTypeField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DeleteAclsFilter message)
@@ -140,22 +140,22 @@ namespace Kafka.Client.Messages
             }
             public static DeleteAclsFilter ReadV02(byte[] buffer, ref int index)
             {
-                var resourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var patternTypeFilterField = Decoder.ReadInt8(buffer, ref index);
-                var principalFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var hostFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var operationField = Decoder.ReadInt8(buffer, ref index);
-                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var PatternTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var PrincipalFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var HostFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var OperationField = Decoder.ReadInt8(buffer, ref index);
+                var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    resourceTypeFilterField,
-                    resourceNameFilterField,
-                    patternTypeFilterField,
-                    principalFilterField,
-                    hostFilterField,
-                    operationField,
-                    permissionTypeField
+                    ResourceTypeFilterField,
+                    ResourceNameFilterField,
+                    PatternTypeFilterField,
+                    PrincipalFilterField,
+                    HostFilterField,
+                    OperationField,
+                    PermissionTypeField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DeleteAclsFilter message)
@@ -172,22 +172,22 @@ namespace Kafka.Client.Messages
             }
             public static DeleteAclsFilter ReadV03(byte[] buffer, ref int index)
             {
-                var resourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var patternTypeFilterField = Decoder.ReadInt8(buffer, ref index);
-                var principalFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var hostFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var operationField = Decoder.ReadInt8(buffer, ref index);
-                var permissionTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var PatternTypeFilterField = Decoder.ReadInt8(buffer, ref index);
+                var PrincipalFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var HostFilterField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var OperationField = Decoder.ReadInt8(buffer, ref index);
+                var PermissionTypeField = Decoder.ReadInt8(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    resourceTypeFilterField,
-                    resourceNameFilterField,
-                    patternTypeFilterField,
-                    principalFilterField,
-                    hostFilterField,
-                    operationField,
-                    permissionTypeField
+                    ResourceTypeFilterField,
+                    ResourceNameFilterField,
+                    PatternTypeFilterField,
+                    PrincipalFilterField,
+                    HostFilterField,
+                    OperationField,
+                    PermissionTypeField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, DeleteAclsFilter message)

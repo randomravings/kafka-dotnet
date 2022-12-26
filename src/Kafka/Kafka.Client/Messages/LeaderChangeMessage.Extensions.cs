@@ -46,10 +46,10 @@ namespace Kafka.Client.Messages
         {
             public static Voter ReadV00(byte[] buffer, ref int index)
             {
-                var voterIdField = Decoder.ReadInt32(buffer, ref index);
+                var VoterIdField = Decoder.ReadInt32(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    voterIdField
+                    VoterIdField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, Voter message)

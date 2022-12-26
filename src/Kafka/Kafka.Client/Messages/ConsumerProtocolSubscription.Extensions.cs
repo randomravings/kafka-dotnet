@@ -88,11 +88,11 @@ namespace Kafka.Client.Messages
         {
             public static TopicPartition ReadV01(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, TopicPartition message)
@@ -103,11 +103,11 @@ namespace Kafka.Client.Messages
             }
             public static TopicPartition ReadV02(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, TopicPartition message)

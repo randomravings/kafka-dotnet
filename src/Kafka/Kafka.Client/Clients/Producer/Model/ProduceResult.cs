@@ -11,6 +11,6 @@ namespace Kafka.Client.Clients.Producer.Model
         TKey Key,
         TValue Value,
         Error Error,
-        string recordError
+        ImmutableArray<ProduceRecordError> RecordErrors
     );
 }

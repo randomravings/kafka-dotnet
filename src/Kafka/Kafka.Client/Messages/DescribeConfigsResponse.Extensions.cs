@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using DescribeConfigsResourceResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult;
 using DescribeConfigsSynonym = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult.DescribeConfigsSynonym;
+using DescribeConfigsResourceResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult;
 using DescribeConfigsResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult;
 
 namespace Kafka.Client.Messages
@@ -111,17 +111,17 @@ namespace Kafka.Client.Messages
         {
             public static DescribeConfigsResult ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configsField = Decoder.ReadArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigsField = Decoder.ReadArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    resourceTypeField,
-                    resourceNameField,
-                    configsField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DescribeConfigsResult message)
@@ -135,17 +135,17 @@ namespace Kafka.Client.Messages
             }
             public static DescribeConfigsResult ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configsField = Decoder.ReadArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigsField = Decoder.ReadArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    resourceTypeField,
-                    resourceNameField,
-                    configsField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DescribeConfigsResult message)
@@ -159,17 +159,17 @@ namespace Kafka.Client.Messages
             }
             public static DescribeConfigsResult ReadV02(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configsField = Decoder.ReadArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigsField = Decoder.ReadArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    resourceTypeField,
-                    resourceNameField,
-                    configsField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DescribeConfigsResult message)
@@ -183,17 +183,17 @@ namespace Kafka.Client.Messages
             }
             public static DescribeConfigsResult ReadV03(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configsField = Decoder.ReadArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigsField = Decoder.ReadArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    resourceTypeField,
-                    resourceNameField,
-                    configsField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, DescribeConfigsResult message)
@@ -207,18 +207,18 @@ namespace Kafka.Client.Messages
             }
             public static DescribeConfigsResult ReadV04(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
-                var configsField = Decoder.ReadCompactArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var ConfigsField = Decoder.ReadCompactArray<DescribeConfigsResourceResult>(buffer, ref index, DescribeConfigsResourceResultSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Configs'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    errorMessageField,
-                    resourceTypeField,
-                    resourceNameField,
-                    configsField
+                    ErrorCodeField,
+                    ErrorMessageField,
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigsField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, DescribeConfigsResult message)
@@ -235,25 +235,25 @@ namespace Kafka.Client.Messages
             {
                 public static DescribeConfigsResourceResult ReadV00(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
-                    var readOnlyField = Decoder.ReadBoolean(buffer, ref index);
-                    var isDefaultField = Decoder.ReadBoolean(buffer, ref index);
-                    var configSourceField = default(sbyte);
-                    var isSensitiveField = Decoder.ReadBoolean(buffer, ref index);
-                    var synonymsField = ImmutableArray<DescribeConfigsSynonym>.Empty;
-                    var configTypeField = default(sbyte);
-                    var documentationField = default(string?);
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                    var ReadOnlyField = Decoder.ReadBoolean(buffer, ref index);
+                    var IsDefaultField = Decoder.ReadBoolean(buffer, ref index);
+                    var ConfigSourceField = default(sbyte);
+                    var IsSensitiveField = Decoder.ReadBoolean(buffer, ref index);
+                    var SynonymsField = ImmutableArray<DescribeConfigsSynonym>.Empty;
+                    var ConfigTypeField = default(sbyte);
+                    var DocumentationField = default(string?);
                     return new(
-                        nameField,
-                        valueField,
-                        readOnlyField,
-                        isDefaultField,
-                        configSourceField,
-                        isSensitiveField,
-                        synonymsField,
-                        configTypeField,
-                        documentationField
+                        NameField,
+                        ValueField,
+                        ReadOnlyField,
+                        IsDefaultField,
+                        ConfigSourceField,
+                        IsSensitiveField,
+                        SynonymsField,
+                        ConfigTypeField,
+                        DocumentationField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, DescribeConfigsResourceResult message)
@@ -267,25 +267,25 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribeConfigsResourceResult ReadV01(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
-                    var readOnlyField = Decoder.ReadBoolean(buffer, ref index);
-                    var isDefaultField = default(bool);
-                    var configSourceField = Decoder.ReadInt8(buffer, ref index);
-                    var isSensitiveField = Decoder.ReadBoolean(buffer, ref index);
-                    var synonymsField = Decoder.ReadArray<DescribeConfigsSynonym>(buffer, ref index, DescribeConfigsSynonymSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Synonyms'");
-                    var configTypeField = default(sbyte);
-                    var documentationField = default(string?);
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                    var ReadOnlyField = Decoder.ReadBoolean(buffer, ref index);
+                    var IsDefaultField = default(bool);
+                    var ConfigSourceField = Decoder.ReadInt8(buffer, ref index);
+                    var IsSensitiveField = Decoder.ReadBoolean(buffer, ref index);
+                    var SynonymsField = Decoder.ReadArray<DescribeConfigsSynonym>(buffer, ref index, DescribeConfigsSynonymSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Synonyms'");
+                    var ConfigTypeField = default(sbyte);
+                    var DocumentationField = default(string?);
                     return new(
-                        nameField,
-                        valueField,
-                        readOnlyField,
-                        isDefaultField,
-                        configSourceField,
-                        isSensitiveField,
-                        synonymsField,
-                        configTypeField,
-                        documentationField
+                        NameField,
+                        ValueField,
+                        ReadOnlyField,
+                        IsDefaultField,
+                        ConfigSourceField,
+                        IsSensitiveField,
+                        SynonymsField,
+                        ConfigTypeField,
+                        DocumentationField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, DescribeConfigsResourceResult message)
@@ -300,25 +300,25 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribeConfigsResourceResult ReadV02(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
-                    var readOnlyField = Decoder.ReadBoolean(buffer, ref index);
-                    var isDefaultField = default(bool);
-                    var configSourceField = Decoder.ReadInt8(buffer, ref index);
-                    var isSensitiveField = Decoder.ReadBoolean(buffer, ref index);
-                    var synonymsField = Decoder.ReadArray<DescribeConfigsSynonym>(buffer, ref index, DescribeConfigsSynonymSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Synonyms'");
-                    var configTypeField = default(sbyte);
-                    var documentationField = default(string?);
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                    var ReadOnlyField = Decoder.ReadBoolean(buffer, ref index);
+                    var IsDefaultField = default(bool);
+                    var ConfigSourceField = Decoder.ReadInt8(buffer, ref index);
+                    var IsSensitiveField = Decoder.ReadBoolean(buffer, ref index);
+                    var SynonymsField = Decoder.ReadArray<DescribeConfigsSynonym>(buffer, ref index, DescribeConfigsSynonymSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Synonyms'");
+                    var ConfigTypeField = default(sbyte);
+                    var DocumentationField = default(string?);
                     return new(
-                        nameField,
-                        valueField,
-                        readOnlyField,
-                        isDefaultField,
-                        configSourceField,
-                        isSensitiveField,
-                        synonymsField,
-                        configTypeField,
-                        documentationField
+                        NameField,
+                        ValueField,
+                        ReadOnlyField,
+                        IsDefaultField,
+                        ConfigSourceField,
+                        IsSensitiveField,
+                        SynonymsField,
+                        ConfigTypeField,
+                        DocumentationField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, DescribeConfigsResourceResult message)
@@ -333,25 +333,25 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribeConfigsResourceResult ReadV03(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var valueField = Decoder.ReadNullableString(buffer, ref index);
-                    var readOnlyField = Decoder.ReadBoolean(buffer, ref index);
-                    var isDefaultField = default(bool);
-                    var configSourceField = Decoder.ReadInt8(buffer, ref index);
-                    var isSensitiveField = Decoder.ReadBoolean(buffer, ref index);
-                    var synonymsField = Decoder.ReadArray<DescribeConfigsSynonym>(buffer, ref index, DescribeConfigsSynonymSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Synonyms'");
-                    var configTypeField = Decoder.ReadInt8(buffer, ref index);
-                    var documentationField = Decoder.ReadNullableString(buffer, ref index);
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                    var ReadOnlyField = Decoder.ReadBoolean(buffer, ref index);
+                    var IsDefaultField = default(bool);
+                    var ConfigSourceField = Decoder.ReadInt8(buffer, ref index);
+                    var IsSensitiveField = Decoder.ReadBoolean(buffer, ref index);
+                    var SynonymsField = Decoder.ReadArray<DescribeConfigsSynonym>(buffer, ref index, DescribeConfigsSynonymSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Synonyms'");
+                    var ConfigTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var DocumentationField = Decoder.ReadNullableString(buffer, ref index);
                     return new(
-                        nameField,
-                        valueField,
-                        readOnlyField,
-                        isDefaultField,
-                        configSourceField,
-                        isSensitiveField,
-                        synonymsField,
-                        configTypeField,
-                        documentationField
+                        NameField,
+                        ValueField,
+                        ReadOnlyField,
+                        IsDefaultField,
+                        ConfigSourceField,
+                        IsSensitiveField,
+                        SynonymsField,
+                        ConfigTypeField,
+                        DocumentationField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, DescribeConfigsResourceResult message)
@@ -368,26 +368,26 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribeConfigsResourceResult ReadV04(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var valueField = Decoder.ReadCompactNullableString(buffer, ref index);
-                    var readOnlyField = Decoder.ReadBoolean(buffer, ref index);
-                    var isDefaultField = default(bool);
-                    var configSourceField = Decoder.ReadInt8(buffer, ref index);
-                    var isSensitiveField = Decoder.ReadBoolean(buffer, ref index);
-                    var synonymsField = Decoder.ReadCompactArray<DescribeConfigsSynonym>(buffer, ref index, DescribeConfigsSynonymSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Synonyms'");
-                    var configTypeField = Decoder.ReadInt8(buffer, ref index);
-                    var documentationField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var ValueField = Decoder.ReadCompactNullableString(buffer, ref index);
+                    var ReadOnlyField = Decoder.ReadBoolean(buffer, ref index);
+                    var IsDefaultField = default(bool);
+                    var ConfigSourceField = Decoder.ReadInt8(buffer, ref index);
+                    var IsSensitiveField = Decoder.ReadBoolean(buffer, ref index);
+                    var SynonymsField = Decoder.ReadCompactArray<DescribeConfigsSynonym>(buffer, ref index, DescribeConfigsSynonymSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Synonyms'");
+                    var ConfigTypeField = Decoder.ReadInt8(buffer, ref index);
+                    var DocumentationField = Decoder.ReadCompactNullableString(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        valueField,
-                        readOnlyField,
-                        isDefaultField,
-                        configSourceField,
-                        isSensitiveField,
-                        synonymsField,
-                        configTypeField,
-                        documentationField
+                        NameField,
+                        ValueField,
+                        ReadOnlyField,
+                        IsDefaultField,
+                        ConfigSourceField,
+                        IsSensitiveField,
+                        SynonymsField,
+                        ConfigTypeField,
+                        DocumentationField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, DescribeConfigsResourceResult message)
@@ -407,13 +407,13 @@ namespace Kafka.Client.Messages
                 {
                     public static DescribeConfigsSynonym ReadV01(byte[] buffer, ref int index)
                     {
-                        var nameField = Decoder.ReadString(buffer, ref index);
-                        var valueField = Decoder.ReadNullableString(buffer, ref index);
-                        var sourceField = Decoder.ReadInt8(buffer, ref index);
+                        var NameField = Decoder.ReadString(buffer, ref index);
+                        var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                        var SourceField = Decoder.ReadInt8(buffer, ref index);
                         return new(
-                            nameField,
-                            valueField,
-                            sourceField
+                            NameField,
+                            ValueField,
+                            SourceField
                         );
                     }
                     public static int WriteV01(byte[] buffer, int index, DescribeConfigsSynonym message)
@@ -425,13 +425,13 @@ namespace Kafka.Client.Messages
                     }
                     public static DescribeConfigsSynonym ReadV02(byte[] buffer, ref int index)
                     {
-                        var nameField = Decoder.ReadString(buffer, ref index);
-                        var valueField = Decoder.ReadNullableString(buffer, ref index);
-                        var sourceField = Decoder.ReadInt8(buffer, ref index);
+                        var NameField = Decoder.ReadString(buffer, ref index);
+                        var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                        var SourceField = Decoder.ReadInt8(buffer, ref index);
                         return new(
-                            nameField,
-                            valueField,
-                            sourceField
+                            NameField,
+                            ValueField,
+                            SourceField
                         );
                     }
                     public static int WriteV02(byte[] buffer, int index, DescribeConfigsSynonym message)
@@ -443,13 +443,13 @@ namespace Kafka.Client.Messages
                     }
                     public static DescribeConfigsSynonym ReadV03(byte[] buffer, ref int index)
                     {
-                        var nameField = Decoder.ReadString(buffer, ref index);
-                        var valueField = Decoder.ReadNullableString(buffer, ref index);
-                        var sourceField = Decoder.ReadInt8(buffer, ref index);
+                        var NameField = Decoder.ReadString(buffer, ref index);
+                        var ValueField = Decoder.ReadNullableString(buffer, ref index);
+                        var SourceField = Decoder.ReadInt8(buffer, ref index);
                         return new(
-                            nameField,
-                            valueField,
-                            sourceField
+                            NameField,
+                            ValueField,
+                            SourceField
                         );
                     }
                     public static int WriteV03(byte[] buffer, int index, DescribeConfigsSynonym message)
@@ -461,14 +461,14 @@ namespace Kafka.Client.Messages
                     }
                     public static DescribeConfigsSynonym ReadV04(byte[] buffer, ref int index)
                     {
-                        var nameField = Decoder.ReadCompactString(buffer, ref index);
-                        var valueField = Decoder.ReadCompactNullableString(buffer, ref index);
-                        var sourceField = Decoder.ReadInt8(buffer, ref index);
+                        var NameField = Decoder.ReadCompactString(buffer, ref index);
+                        var ValueField = Decoder.ReadCompactNullableString(buffer, ref index);
+                        var SourceField = Decoder.ReadInt8(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            nameField,
-                            valueField,
-                            sourceField
+                            NameField,
+                            ValueField,
+                            SourceField
                         );
                     }
                     public static int WriteV04(byte[] buffer, int index, DescribeConfigsSynonym message)

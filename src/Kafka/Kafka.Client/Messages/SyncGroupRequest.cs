@@ -45,7 +45,7 @@ namespace Kafka.Client.Messages
         {
             public static SyncGroupRequestAssignment Empty { get; } = new(
                 "",
-                Array.Empty<byte>()
+                ReadOnlyMemory<byte>.Empty
             );
         };
     };

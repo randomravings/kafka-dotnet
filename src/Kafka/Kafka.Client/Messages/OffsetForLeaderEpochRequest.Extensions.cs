@@ -106,11 +106,11 @@ namespace Kafka.Client.Messages
         {
             public static OffsetForLeaderTopic ReadV00(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, OffsetForLeaderTopic message)
@@ -121,11 +121,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetForLeaderTopic ReadV01(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, OffsetForLeaderTopic message)
@@ -136,11 +136,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetForLeaderTopic ReadV02(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, OffsetForLeaderTopic message)
@@ -151,11 +151,11 @@ namespace Kafka.Client.Messages
             }
             public static OffsetForLeaderTopic ReadV03(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, OffsetForLeaderTopic message)
@@ -166,12 +166,12 @@ namespace Kafka.Client.Messages
             }
             public static OffsetForLeaderTopic ReadV04(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<OffsetForLeaderPartition>(buffer, ref index, OffsetForLeaderPartitionSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicField,
-                    partitionsField
+                    TopicField,
+                    PartitionsField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, OffsetForLeaderTopic message)
@@ -185,13 +185,13 @@ namespace Kafka.Client.Messages
             {
                 public static OffsetForLeaderPartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionField = Decoder.ReadInt32(buffer, ref index);
-                    var currentLeaderEpochField = default(int);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionField = Decoder.ReadInt32(buffer, ref index);
+                    var CurrentLeaderEpochField = default(int);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
                     return new(
-                        partitionField,
-                        currentLeaderEpochField,
-                        leaderEpochField
+                        PartitionField,
+                        CurrentLeaderEpochField,
+                        LeaderEpochField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, OffsetForLeaderPartition message)
@@ -202,13 +202,13 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetForLeaderPartition ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionField = Decoder.ReadInt32(buffer, ref index);
-                    var currentLeaderEpochField = default(int);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionField = Decoder.ReadInt32(buffer, ref index);
+                    var CurrentLeaderEpochField = default(int);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
                     return new(
-                        partitionField,
-                        currentLeaderEpochField,
-                        leaderEpochField
+                        PartitionField,
+                        CurrentLeaderEpochField,
+                        LeaderEpochField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, OffsetForLeaderPartition message)
@@ -219,13 +219,13 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetForLeaderPartition ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionField = Decoder.ReadInt32(buffer, ref index);
-                    var currentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionField = Decoder.ReadInt32(buffer, ref index);
+                    var CurrentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
                     return new(
-                        partitionField,
-                        currentLeaderEpochField,
-                        leaderEpochField
+                        PartitionField,
+                        CurrentLeaderEpochField,
+                        LeaderEpochField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, OffsetForLeaderPartition message)
@@ -237,13 +237,13 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetForLeaderPartition ReadV03(byte[] buffer, ref int index)
                 {
-                    var partitionField = Decoder.ReadInt32(buffer, ref index);
-                    var currentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionField = Decoder.ReadInt32(buffer, ref index);
+                    var CurrentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
                     return new(
-                        partitionField,
-                        currentLeaderEpochField,
-                        leaderEpochField
+                        PartitionField,
+                        CurrentLeaderEpochField,
+                        LeaderEpochField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, OffsetForLeaderPartition message)
@@ -255,14 +255,14 @@ namespace Kafka.Client.Messages
                 }
                 public static OffsetForLeaderPartition ReadV04(byte[] buffer, ref int index)
                 {
-                    var partitionField = Decoder.ReadInt32(buffer, ref index);
-                    var currentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionField = Decoder.ReadInt32(buffer, ref index);
+                    var CurrentLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionField,
-                        currentLeaderEpochField,
-                        leaderEpochField
+                        PartitionField,
+                        CurrentLeaderEpochField,
+                        LeaderEpochField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, OffsetForLeaderPartition message)

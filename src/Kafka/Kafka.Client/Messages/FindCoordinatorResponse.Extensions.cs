@@ -175,20 +175,20 @@ namespace Kafka.Client.Messages
         {
             public static Coordinator ReadV04(byte[] buffer, ref int index)
             {
-                var keyField = Decoder.ReadCompactString(buffer, ref index);
-                var nodeIdField = Decoder.ReadInt32(buffer, ref index);
-                var hostField = Decoder.ReadCompactString(buffer, ref index);
-                var portField = Decoder.ReadInt32(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var KeyField = Decoder.ReadCompactString(buffer, ref index);
+                var NodeIdField = Decoder.ReadInt32(buffer, ref index);
+                var HostField = Decoder.ReadCompactString(buffer, ref index);
+                var PortField = Decoder.ReadInt32(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    keyField,
-                    nodeIdField,
-                    hostField,
-                    portField,
-                    errorCodeField,
-                    errorMessageField
+                    KeyField,
+                    NodeIdField,
+                    HostField,
+                    PortField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, Coordinator message)

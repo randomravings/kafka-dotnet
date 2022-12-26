@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using OffsetDeleteRequestPartition = Kafka.Client.Messages.OffsetDeleteRequest.OffsetDeleteRequestTopic.OffsetDeleteRequestPartition;
 using OffsetDeleteRequestTopic = Kafka.Client.Messages.OffsetDeleteRequest.OffsetDeleteRequestTopic;
+using OffsetDeleteRequestPartition = Kafka.Client.Messages.OffsetDeleteRequest.OffsetDeleteRequestTopic.OffsetDeleteRequestPartition;
 
 namespace Kafka.Client.Messages
 {
@@ -39,11 +39,11 @@ namespace Kafka.Client.Messages
         {
             public static OffsetDeleteRequestTopic ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<OffsetDeleteRequestPartition>(buffer, ref index, OffsetDeleteRequestPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<OffsetDeleteRequestPartition>(buffer, ref index, OffsetDeleteRequestPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, OffsetDeleteRequestTopic message)
@@ -56,9 +56,9 @@ namespace Kafka.Client.Messages
             {
                 public static OffsetDeleteRequestPartition ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
                     return new(
-                        partitionIndexField
+                        PartitionIndexField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, OffsetDeleteRequestPartition message)

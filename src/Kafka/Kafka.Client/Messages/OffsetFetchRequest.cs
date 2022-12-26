@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup;
 using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
+using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup;
 using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestTopic;
 
 namespace Kafka.Client.Messages
@@ -28,11 +28,11 @@ namespace Kafka.Client.Messages
             default(bool)
         );
         /// <summary>
-        /// <param name="groupIdField">The group ID.</param>
+        /// <param name="GroupIdField">The group ID.</param>
         /// <param name="TopicsField">Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.</param>
         /// </summary>
         public sealed record OffsetFetchRequestGroup (
-            string groupIdField,
+            string GroupIdField,
             ImmutableArray<OffsetFetchRequestTopics>? TopicsField
         )
         {

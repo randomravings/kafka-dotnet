@@ -119,13 +119,13 @@ namespace Kafka.Client.Messages
         {
             public static DescribeConfigsResource ReadV00(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    configurationKeysField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigurationKeysField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DescribeConfigsResource message)
@@ -137,13 +137,13 @@ namespace Kafka.Client.Messages
             }
             public static DescribeConfigsResource ReadV01(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    configurationKeysField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigurationKeysField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DescribeConfigsResource message)
@@ -155,13 +155,13 @@ namespace Kafka.Client.Messages
             }
             public static DescribeConfigsResource ReadV02(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    configurationKeysField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigurationKeysField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DescribeConfigsResource message)
@@ -173,13 +173,13 @@ namespace Kafka.Client.Messages
             }
             public static DescribeConfigsResource ReadV03(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadString(buffer, ref index);
-                var configurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadString(buffer, ref index);
+                var ConfigurationKeysField = Decoder.ReadArray<string>(buffer, ref index, Decoder.ReadCompactString);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    configurationKeysField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigurationKeysField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, DescribeConfigsResource message)
@@ -191,14 +191,14 @@ namespace Kafka.Client.Messages
             }
             public static DescribeConfigsResource ReadV04(byte[] buffer, ref int index)
             {
-                var resourceTypeField = Decoder.ReadInt8(buffer, ref index);
-                var resourceNameField = Decoder.ReadCompactString(buffer, ref index);
-                var configurationKeysField = Decoder.ReadCompactArray<string>(buffer, ref index, Decoder.ReadCompactString);
+                var ResourceTypeField = Decoder.ReadInt8(buffer, ref index);
+                var ResourceNameField = Decoder.ReadCompactString(buffer, ref index);
+                var ConfigurationKeysField = Decoder.ReadCompactArray<string>(buffer, ref index, Decoder.ReadCompactString);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    resourceTypeField,
-                    resourceNameField,
-                    configurationKeysField
+                    ResourceTypeField,
+                    ResourceNameField,
+                    ConfigurationKeysField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, DescribeConfigsResource message)

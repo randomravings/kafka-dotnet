@@ -24,7 +24,7 @@ namespace Kafka.Client.Messages
             default(short),
             default(string?),
             default(string?),
-            Array.Empty<byte>()
+            ReadOnlyMemory<byte>.Empty
         );
     };
 }

@@ -2,12 +2,12 @@ using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
 using PartitionData = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData;
 using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
 using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
 using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
 
 namespace Kafka.Client.Messages
 {
@@ -339,13 +339,13 @@ namespace Kafka.Client.Messages
         {
             public static FetchableTopicResponse ReadV00(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, FetchableTopicResponse message)
@@ -356,13 +356,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV01(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, FetchableTopicResponse message)
@@ -373,13 +373,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV02(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, FetchableTopicResponse message)
@@ -390,13 +390,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV03(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, FetchableTopicResponse message)
@@ -407,13 +407,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV04(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, FetchableTopicResponse message)
@@ -424,13 +424,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV05(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV05) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, FetchableTopicResponse message)
@@ -441,13 +441,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV06(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV06) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, FetchableTopicResponse message)
@@ -458,13 +458,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV07(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV07) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, FetchableTopicResponse message)
@@ -475,13 +475,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV08(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, FetchableTopicResponse message)
@@ -492,13 +492,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV09(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV09) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV09(byte[] buffer, int index, FetchableTopicResponse message)
@@ -509,13 +509,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV10(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV10) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV10) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV10(byte[] buffer, int index, FetchableTopicResponse message)
@@ -526,13 +526,13 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV11(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV11) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV11) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV11(byte[] buffer, int index, FetchableTopicResponse message)
@@ -543,14 +543,14 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV12(byte[] buffer, ref int index)
             {
-                var topicField = Decoder.ReadCompactString(buffer, ref index);
-                var topicIdField = default(Guid);
-                var partitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV12) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV12) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV12(byte[] buffer, int index, FetchableTopicResponse message)
@@ -562,14 +562,14 @@ namespace Kafka.Client.Messages
             }
             public static FetchableTopicResponse ReadV13(byte[] buffer, ref int index)
             {
-                var topicField = "";
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV13) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicField = "";
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV13) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicField,
-                    topicIdField,
-                    partitionsField
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
                 );
             }
             public static int WriteV13(byte[] buffer, int index, FetchableTopicResponse message)
@@ -583,29 +583,29 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionData ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = default(long);
-                    var logStartOffsetField = default(long);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = default(long);
+                    var LogStartOffsetField = default(long);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionData message)
@@ -618,29 +618,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = default(long);
-                    var logStartOffsetField = default(long);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = default(long);
+                    var LogStartOffsetField = default(long);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, PartitionData message)
@@ -653,29 +653,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = default(long);
-                    var logStartOffsetField = default(long);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = default(long);
+                    var LogStartOffsetField = default(long);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, PartitionData message)
@@ -688,29 +688,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV03(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = default(long);
-                    var logStartOffsetField = default(long);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = default(long);
+                    var LogStartOffsetField = default(long);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = ImmutableArray<AbortedTransaction>.Empty;
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, PartitionData message)
@@ -723,29 +723,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV04(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = default(long);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV04);
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = default(long);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV04);
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, PartitionData message)
@@ -760,29 +760,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV05(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV05);
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV05);
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV05(byte[] buffer, int index, PartitionData message)
@@ -798,29 +798,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV06(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV06);
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV06);
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV06(byte[] buffer, int index, PartitionData message)
@@ -836,29 +836,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV07(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV07);
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV07);
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV07(byte[] buffer, int index, PartitionData message)
@@ -874,29 +874,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV08(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV08);
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV08);
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV08(byte[] buffer, int index, PartitionData message)
@@ -912,29 +912,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV09(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV09);
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV09);
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV09(byte[] buffer, int index, PartitionData message)
@@ -950,29 +950,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV10(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV10);
-                    var preferredReadReplicaField = default(int);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV10);
+                    var PreferredReadReplicaField = default(int);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV10(byte[] buffer, int index, PartitionData message)
@@ -988,29 +988,29 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV11(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV11);
-                    var preferredReadReplicaField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV11);
+                    var PreferredReadReplicaField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV11(byte[] buffer, int index, PartitionData message)
@@ -1027,30 +1027,30 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV12(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadCompactArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV12);
-                    var preferredReadReplicaField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadCompactArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV12);
+                    var PreferredReadReplicaField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV12(byte[] buffer, int index, PartitionData message)
@@ -1071,30 +1071,30 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV13(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var lastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var logStartOffsetField = Decoder.ReadInt64(buffer, ref index);
-                    var divergingEpochField = EpochEndOffset.Empty;
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var snapshotIdField = SnapshotId.Empty;
-                    var abortedTransactionsField = Decoder.ReadCompactArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV13);
-                    var preferredReadReplicaField = Decoder.ReadInt32(buffer, ref index);
-                    var recordsField = Decoder.ReadRecords(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var LastStableOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var LogStartOffsetField = Decoder.ReadInt64(buffer, ref index);
+                    var DivergingEpochField = EpochEndOffset.Empty;
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SnapshotIdField = SnapshotId.Empty;
+                    var AbortedTransactionsField = Decoder.ReadCompactArray<AbortedTransaction>(buffer, ref index, AbortedTransactionSerde.ReadV13);
+                    var PreferredReadReplicaField = Decoder.ReadInt32(buffer, ref index);
+                    var RecordsField = Decoder.ReadRecords(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        highWatermarkField,
-                        lastStableOffsetField,
-                        logStartOffsetField,
-                        divergingEpochField,
-                        currentLeaderField,
-                        snapshotIdField,
-                        abortedTransactionsField,
-                        preferredReadReplicaField,
-                        recordsField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        HighWatermarkField,
+                        LastStableOffsetField,
+                        LogStartOffsetField,
+                        DivergingEpochField,
+                        CurrentLeaderField,
+                        SnapshotIdField,
+                        AbortedTransactionsField,
+                        PreferredReadReplicaField,
+                        RecordsField
                     );
                 }
                 public static int WriteV13(byte[] buffer, int index, PartitionData message)
@@ -1117,12 +1117,12 @@ namespace Kafka.Client.Messages
                 {
                     public static SnapshotId ReadV12(byte[] buffer, ref int index)
                     {
-                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
-                        var epochField = Decoder.ReadInt32(buffer, ref index);
+                        var EndOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var EpochField = Decoder.ReadInt32(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            endOffsetField,
-                            epochField
+                            EndOffsetField,
+                            EpochField
                         );
                     }
                     public static int WriteV12(byte[] buffer, int index, SnapshotId message)
@@ -1134,12 +1134,12 @@ namespace Kafka.Client.Messages
                     }
                     public static SnapshotId ReadV13(byte[] buffer, ref int index)
                     {
-                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
-                        var epochField = Decoder.ReadInt32(buffer, ref index);
+                        var EndOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var EpochField = Decoder.ReadInt32(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            endOffsetField,
-                            epochField
+                            EndOffsetField,
+                            EpochField
                         );
                     }
                     public static int WriteV13(byte[] buffer, int index, SnapshotId message)
@@ -1154,11 +1154,11 @@ namespace Kafka.Client.Messages
                 {
                     public static AbortedTransaction ReadV04(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV04(byte[] buffer, int index, AbortedTransaction message)
@@ -1169,11 +1169,11 @@ namespace Kafka.Client.Messages
                     }
                     public static AbortedTransaction ReadV05(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV05(byte[] buffer, int index, AbortedTransaction message)
@@ -1184,11 +1184,11 @@ namespace Kafka.Client.Messages
                     }
                     public static AbortedTransaction ReadV06(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV06(byte[] buffer, int index, AbortedTransaction message)
@@ -1199,11 +1199,11 @@ namespace Kafka.Client.Messages
                     }
                     public static AbortedTransaction ReadV07(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV07(byte[] buffer, int index, AbortedTransaction message)
@@ -1214,11 +1214,11 @@ namespace Kafka.Client.Messages
                     }
                     public static AbortedTransaction ReadV08(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV08(byte[] buffer, int index, AbortedTransaction message)
@@ -1229,11 +1229,11 @@ namespace Kafka.Client.Messages
                     }
                     public static AbortedTransaction ReadV09(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV09(byte[] buffer, int index, AbortedTransaction message)
@@ -1244,11 +1244,11 @@ namespace Kafka.Client.Messages
                     }
                     public static AbortedTransaction ReadV10(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV10(byte[] buffer, int index, AbortedTransaction message)
@@ -1259,11 +1259,11 @@ namespace Kafka.Client.Messages
                     }
                     public static AbortedTransaction ReadV11(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV11(byte[] buffer, int index, AbortedTransaction message)
@@ -1274,12 +1274,12 @@ namespace Kafka.Client.Messages
                     }
                     public static AbortedTransaction ReadV12(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV12(byte[] buffer, int index, AbortedTransaction message)
@@ -1291,12 +1291,12 @@ namespace Kafka.Client.Messages
                     }
                     public static AbortedTransaction ReadV13(byte[] buffer, ref int index)
                     {
-                        var producerIdField = Decoder.ReadInt64(buffer, ref index);
-                        var firstOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var ProducerIdField = Decoder.ReadInt64(buffer, ref index);
+                        var FirstOffsetField = Decoder.ReadInt64(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            producerIdField,
-                            firstOffsetField
+                            ProducerIdField,
+                            FirstOffsetField
                         );
                     }
                     public static int WriteV13(byte[] buffer, int index, AbortedTransaction message)
@@ -1311,12 +1311,12 @@ namespace Kafka.Client.Messages
                 {
                     public static LeaderIdAndEpoch ReadV12(byte[] buffer, ref int index)
                     {
-                        var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                        var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                        var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                        var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            leaderIdField,
-                            leaderEpochField
+                            LeaderIdField,
+                            LeaderEpochField
                         );
                     }
                     public static int WriteV12(byte[] buffer, int index, LeaderIdAndEpoch message)
@@ -1328,12 +1328,12 @@ namespace Kafka.Client.Messages
                     }
                     public static LeaderIdAndEpoch ReadV13(byte[] buffer, ref int index)
                     {
-                        var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                        var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                        var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                        var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            leaderIdField,
-                            leaderEpochField
+                            LeaderIdField,
+                            LeaderEpochField
                         );
                     }
                     public static int WriteV13(byte[] buffer, int index, LeaderIdAndEpoch message)
@@ -1348,12 +1348,12 @@ namespace Kafka.Client.Messages
                 {
                     public static EpochEndOffset ReadV12(byte[] buffer, ref int index)
                     {
-                        var epochField = Decoder.ReadInt32(buffer, ref index);
-                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var EpochField = Decoder.ReadInt32(buffer, ref index);
+                        var EndOffsetField = Decoder.ReadInt64(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            epochField,
-                            endOffsetField
+                            EpochField,
+                            EndOffsetField
                         );
                     }
                     public static int WriteV12(byte[] buffer, int index, EpochEndOffset message)
@@ -1365,12 +1365,12 @@ namespace Kafka.Client.Messages
                     }
                     public static EpochEndOffset ReadV13(byte[] buffer, ref int index)
                     {
-                        var epochField = Decoder.ReadInt32(buffer, ref index);
-                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var EpochField = Decoder.ReadInt32(buffer, ref index);
+                        var EndOffsetField = Decoder.ReadInt64(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            epochField,
-                            endOffsetField
+                            EpochField,
+                            EndOffsetField
                         );
                     }
                     public static int WriteV13(byte[] buffer, int index, EpochEndOffset message)

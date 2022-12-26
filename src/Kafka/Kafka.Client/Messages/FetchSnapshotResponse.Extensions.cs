@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using Kafka.Common.Records;
-using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
-using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
 using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
+using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
+using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
 
 namespace Kafka.Client.Messages
 {
@@ -47,12 +47,12 @@ namespace Kafka.Client.Messages
         {
             public static TopicSnapshot ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<PartitionSnapshot>(buffer, ref index, PartitionSnapshotSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionSnapshot>(buffer, ref index, PartitionSnapshotSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    partitionsField
+                    NameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TopicSnapshot message)
@@ -66,22 +66,22 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionSnapshot ReadV00(byte[] buffer, ref int index)
                 {
-                    var indexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var snapshotIdField = SnapshotIdSerde.ReadV00(buffer, ref index);
-                    var currentLeaderField = LeaderIdAndEpoch.Empty;
-                    var sizeField = Decoder.ReadInt64(buffer, ref index);
-                    var positionField = Decoder.ReadInt64(buffer, ref index);
-                    var unalignedRecordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'UnalignedRecords'");
+                    var IndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var SnapshotIdField = SnapshotIdSerde.ReadV00(buffer, ref index);
+                    var CurrentLeaderField = LeaderIdAndEpoch.Empty;
+                    var SizeField = Decoder.ReadInt64(buffer, ref index);
+                    var PositionField = Decoder.ReadInt64(buffer, ref index);
+                    var UnalignedRecordsField = Decoder.ReadRecords(buffer, ref index) ?? throw new NullReferenceException("Null not allowed for 'UnalignedRecords'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        indexField,
-                        errorCodeField,
-                        snapshotIdField,
-                        currentLeaderField,
-                        sizeField,
-                        positionField,
-                        unalignedRecordsField
+                        IndexField,
+                        ErrorCodeField,
+                        SnapshotIdField,
+                        CurrentLeaderField,
+                        SizeField,
+                        PositionField,
+                        UnalignedRecordsField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionSnapshot message)
@@ -100,12 +100,12 @@ namespace Kafka.Client.Messages
                 {
                     public static SnapshotId ReadV00(byte[] buffer, ref int index)
                     {
-                        var endOffsetField = Decoder.ReadInt64(buffer, ref index);
-                        var epochField = Decoder.ReadInt32(buffer, ref index);
+                        var EndOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var EpochField = Decoder.ReadInt32(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            endOffsetField,
-                            epochField
+                            EndOffsetField,
+                            EpochField
                         );
                     }
                     public static int WriteV00(byte[] buffer, int index, SnapshotId message)
@@ -120,12 +120,12 @@ namespace Kafka.Client.Messages
                 {
                     public static LeaderIdAndEpoch ReadV00(byte[] buffer, ref int index)
                     {
-                        var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                        var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                        var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                        var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            leaderIdField,
-                            leaderEpochField
+                            LeaderIdField,
+                            LeaderEpochField
                         );
                     }
                     public static int WriteV00(byte[] buffer, int index, LeaderIdAndEpoch message)

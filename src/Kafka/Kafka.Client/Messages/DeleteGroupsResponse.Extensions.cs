@@ -74,11 +74,11 @@ namespace Kafka.Client.Messages
         {
             public static DeletableGroupResult ReadV00(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
-                    groupIdField,
-                    errorCodeField
+                    GroupIdField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DeletableGroupResult message)
@@ -89,11 +89,11 @@ namespace Kafka.Client.Messages
             }
             public static DeletableGroupResult ReadV01(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var GroupIdField = Decoder.ReadString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 return new(
-                    groupIdField,
-                    errorCodeField
+                    GroupIdField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DeletableGroupResult message)
@@ -104,12 +104,12 @@ namespace Kafka.Client.Messages
             }
             public static DeletableGroupResult ReadV02(byte[] buffer, ref int index)
             {
-                var groupIdField = Decoder.ReadCompactString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var GroupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    groupIdField,
-                    errorCodeField
+                    GroupIdField,
+                    ErrorCodeField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DeletableGroupResult message)

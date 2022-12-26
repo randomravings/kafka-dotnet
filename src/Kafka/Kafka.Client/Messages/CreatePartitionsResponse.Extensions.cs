@@ -93,13 +93,13 @@ namespace Kafka.Client.Messages
         {
             public static CreatePartitionsTopicResult ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nameField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, CreatePartitionsTopicResult message)
@@ -111,13 +111,13 @@ namespace Kafka.Client.Messages
             }
             public static CreatePartitionsTopicResult ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadNullableString(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadNullableString(buffer, ref index);
                 return new(
-                    nameField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, CreatePartitionsTopicResult message)
@@ -129,14 +129,14 @@ namespace Kafka.Client.Messages
             }
             public static CreatePartitionsTopicResult ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, CreatePartitionsTopicResult message)
@@ -149,14 +149,14 @@ namespace Kafka.Client.Messages
             }
             public static CreatePartitionsTopicResult ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    errorCodeField,
-                    errorMessageField
+                    NameField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, CreatePartitionsTopicResult message)

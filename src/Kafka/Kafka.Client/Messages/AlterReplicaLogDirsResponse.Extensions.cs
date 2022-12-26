@@ -75,11 +75,11 @@ namespace Kafka.Client.Messages
         {
             public static AlterReplicaLogDirTopicResult ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<AlterReplicaLogDirPartitionResult>(buffer, ref index, AlterReplicaLogDirPartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<AlterReplicaLogDirPartitionResult>(buffer, ref index, AlterReplicaLogDirPartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicNameField,
-                    partitionsField
+                    TopicNameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, AlterReplicaLogDirTopicResult message)
@@ -90,11 +90,11 @@ namespace Kafka.Client.Messages
             }
             public static AlterReplicaLogDirTopicResult ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadString(buffer, ref index);
-                var partitionsField = Decoder.ReadArray<AlterReplicaLogDirPartitionResult>(buffer, ref index, AlterReplicaLogDirPartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionsField = Decoder.ReadArray<AlterReplicaLogDirPartitionResult>(buffer, ref index, AlterReplicaLogDirPartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 return new(
-                    topicNameField,
-                    partitionsField
+                    TopicNameField,
+                    PartitionsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, AlterReplicaLogDirTopicResult message)
@@ -105,12 +105,12 @@ namespace Kafka.Client.Messages
             }
             public static AlterReplicaLogDirTopicResult ReadV02(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<AlterReplicaLogDirPartitionResult>(buffer, ref index, AlterReplicaLogDirPartitionResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<AlterReplicaLogDirPartitionResult>(buffer, ref index, AlterReplicaLogDirPartitionResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionsField
+                    TopicNameField,
+                    PartitionsField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, AlterReplicaLogDirTopicResult message)
@@ -124,11 +124,11 @@ namespace Kafka.Client.Messages
             {
                 public static AlterReplicaLogDirPartitionResult ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, AlterReplicaLogDirPartitionResult message)
@@ -139,11 +139,11 @@ namespace Kafka.Client.Messages
                 }
                 public static AlterReplicaLogDirPartitionResult ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, AlterReplicaLogDirPartitionResult message)
@@ -154,12 +154,12 @@ namespace Kafka.Client.Messages
                 }
                 public static AlterReplicaLogDirPartitionResult ReadV02(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField
+                        PartitionIndexField,
+                        ErrorCodeField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, AlterReplicaLogDirPartitionResult message)

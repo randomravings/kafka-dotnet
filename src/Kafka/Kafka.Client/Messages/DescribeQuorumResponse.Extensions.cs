@@ -61,16 +61,16 @@ namespace Kafka.Client.Messages
         {
             public static ReplicaState ReadV00(byte[] buffer, ref int index)
             {
-                var replicaIdField = Decoder.ReadInt32(buffer, ref index);
-                var logEndOffsetField = Decoder.ReadInt64(buffer, ref index);
-                var lastFetchTimestampField = default(long);
-                var lastCaughtUpTimestampField = default(long);
+                var ReplicaIdField = Decoder.ReadInt32(buffer, ref index);
+                var LogEndOffsetField = Decoder.ReadInt64(buffer, ref index);
+                var LastFetchTimestampField = default(long);
+                var LastCaughtUpTimestampField = default(long);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    replicaIdField,
-                    logEndOffsetField,
-                    lastFetchTimestampField,
-                    lastCaughtUpTimestampField
+                    ReplicaIdField,
+                    LogEndOffsetField,
+                    LastFetchTimestampField,
+                    LastCaughtUpTimestampField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, ReplicaState message)
@@ -82,16 +82,16 @@ namespace Kafka.Client.Messages
             }
             public static ReplicaState ReadV01(byte[] buffer, ref int index)
             {
-                var replicaIdField = Decoder.ReadInt32(buffer, ref index);
-                var logEndOffsetField = Decoder.ReadInt64(buffer, ref index);
-                var lastFetchTimestampField = Decoder.ReadInt64(buffer, ref index);
-                var lastCaughtUpTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var ReplicaIdField = Decoder.ReadInt32(buffer, ref index);
+                var LogEndOffsetField = Decoder.ReadInt64(buffer, ref index);
+                var LastFetchTimestampField = Decoder.ReadInt64(buffer, ref index);
+                var LastCaughtUpTimestampField = Decoder.ReadInt64(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    replicaIdField,
-                    logEndOffsetField,
-                    lastFetchTimestampField,
-                    lastCaughtUpTimestampField
+                    ReplicaIdField,
+                    LogEndOffsetField,
+                    LastFetchTimestampField,
+                    LastCaughtUpTimestampField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, ReplicaState message)
@@ -108,12 +108,12 @@ namespace Kafka.Client.Messages
         {
             public static TopicData ReadV00(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionsField
+                    TopicNameField,
+                    PartitionsField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, TopicData message)
@@ -125,12 +125,12 @@ namespace Kafka.Client.Messages
             }
             public static TopicData ReadV01(byte[] buffer, ref int index)
             {
-                var topicNameField = Decoder.ReadCompactString(buffer, ref index);
-                var partitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                var TopicNameField = Decoder.ReadCompactString(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<PartitionData>(buffer, ref index, PartitionDataSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicNameField,
-                    partitionsField
+                    TopicNameField,
+                    PartitionsField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, TopicData message)
@@ -144,22 +144,22 @@ namespace Kafka.Client.Messages
             {
                 public static PartitionData ReadV00(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var currentVotersField = Decoder.ReadCompactArray<ReplicaState>(buffer, ref index, ReplicaStateSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'CurrentVoters'");
-                    var observersField = Decoder.ReadCompactArray<ReplicaState>(buffer, ref index, ReplicaStateSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Observers'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var CurrentVotersField = Decoder.ReadCompactArray<ReplicaState>(buffer, ref index, ReplicaStateSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'CurrentVoters'");
+                    var ObserversField = Decoder.ReadCompactArray<ReplicaState>(buffer, ref index, ReplicaStateSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Observers'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        leaderIdField,
-                        leaderEpochField,
-                        highWatermarkField,
-                        currentVotersField,
-                        observersField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        HighWatermarkField,
+                        CurrentVotersField,
+                        ObserversField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, PartitionData message)
@@ -176,22 +176,22 @@ namespace Kafka.Client.Messages
                 }
                 public static PartitionData ReadV01(byte[] buffer, ref int index)
                 {
-                    var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    var leaderIdField = Decoder.ReadInt32(buffer, ref index);
-                    var leaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                    var highWatermarkField = Decoder.ReadInt64(buffer, ref index);
-                    var currentVotersField = Decoder.ReadCompactArray<ReplicaState>(buffer, ref index, ReplicaStateSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'CurrentVoters'");
-                    var observersField = Decoder.ReadCompactArray<ReplicaState>(buffer, ref index, ReplicaStateSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Observers'");
+                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                    var LeaderIdField = Decoder.ReadInt32(buffer, ref index);
+                    var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                    var HighWatermarkField = Decoder.ReadInt64(buffer, ref index);
+                    var CurrentVotersField = Decoder.ReadCompactArray<ReplicaState>(buffer, ref index, ReplicaStateSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'CurrentVoters'");
+                    var ObserversField = Decoder.ReadCompactArray<ReplicaState>(buffer, ref index, ReplicaStateSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Observers'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        partitionIndexField,
-                        errorCodeField,
-                        leaderIdField,
-                        leaderEpochField,
-                        highWatermarkField,
-                        currentVotersField,
-                        observersField
+                        PartitionIndexField,
+                        ErrorCodeField,
+                        LeaderIdField,
+                        LeaderEpochField,
+                        HighWatermarkField,
+                        CurrentVotersField,
+                        ObserversField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, PartitionData message)

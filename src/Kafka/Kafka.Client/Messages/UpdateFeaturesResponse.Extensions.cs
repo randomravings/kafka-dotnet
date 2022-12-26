@@ -71,14 +71,14 @@ namespace Kafka.Client.Messages
         {
             public static UpdatableFeatureResult ReadV00(byte[] buffer, ref int index)
             {
-                var featureField = Decoder.ReadCompactString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var FeatureField = Decoder.ReadCompactString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    featureField,
-                    errorCodeField,
-                    errorMessageField
+                    FeatureField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, UpdatableFeatureResult message)
@@ -91,14 +91,14 @@ namespace Kafka.Client.Messages
             }
             public static UpdatableFeatureResult ReadV01(byte[] buffer, ref int index)
             {
-                var featureField = Decoder.ReadCompactString(buffer, ref index);
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var errorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var FeatureField = Decoder.ReadCompactString(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var ErrorMessageField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    featureField,
-                    errorCodeField,
-                    errorMessageField
+                    FeatureField,
+                    ErrorCodeField,
+                    ErrorMessageField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, UpdatableFeatureResult message)

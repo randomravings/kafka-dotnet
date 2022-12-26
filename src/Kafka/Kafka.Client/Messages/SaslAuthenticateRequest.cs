@@ -12,7 +12,7 @@ namespace Kafka.Client.Messages
     ) : Request(36,0,2,2)
     {
         public static SaslAuthenticateRequest Empty { get; } = new(
-            Array.Empty<byte>()
+            ReadOnlyMemory<byte>.Empty
         );
     };
 }

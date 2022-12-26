@@ -365,11 +365,11 @@ namespace Kafka.Client.Messages
         {
             public static JoinGroupRequestProtocol ReadV00(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, JoinGroupRequestProtocol message)
@@ -380,11 +380,11 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupRequestProtocol ReadV01(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, JoinGroupRequestProtocol message)
@@ -395,11 +395,11 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupRequestProtocol ReadV02(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, JoinGroupRequestProtocol message)
@@ -410,11 +410,11 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupRequestProtocol ReadV03(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, JoinGroupRequestProtocol message)
@@ -425,11 +425,11 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupRequestProtocol ReadV04(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, JoinGroupRequestProtocol message)
@@ -440,11 +440,11 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupRequestProtocol ReadV05(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadString(buffer, ref index);
-                var metadataField = Decoder.ReadBytes(buffer, ref index);
+                var NameField = Decoder.ReadString(buffer, ref index);
+                var MetadataField = Decoder.ReadBytes(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, JoinGroupRequestProtocol message)
@@ -455,12 +455,12 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupRequestProtocol ReadV06(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var MetadataField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, JoinGroupRequestProtocol message)
@@ -472,12 +472,12 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupRequestProtocol ReadV07(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var MetadataField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, JoinGroupRequestProtocol message)
@@ -489,12 +489,12 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupRequestProtocol ReadV08(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var MetadataField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, JoinGroupRequestProtocol message)
@@ -506,12 +506,12 @@ namespace Kafka.Client.Messages
             }
             public static JoinGroupRequestProtocol ReadV09(byte[] buffer, ref int index)
             {
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
-                var metadataField = Decoder.ReadCompactBytes(buffer, ref index);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var MetadataField = Decoder.ReadCompactBytes(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    nameField,
-                    metadataField
+                    NameField,
+                    MetadataField
                 );
             }
             public static int WriteV09(byte[] buffer, int index, JoinGroupRequestProtocol message)

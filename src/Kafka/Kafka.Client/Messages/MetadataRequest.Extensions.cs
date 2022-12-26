@@ -308,11 +308,11 @@ namespace Kafka.Client.Messages
         {
             public static MetadataRequestTopic ReadV00(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, MetadataRequestTopic message)
@@ -324,11 +324,11 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV01(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, MetadataRequestTopic message)
@@ -340,11 +340,11 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV02(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, MetadataRequestTopic message)
@@ -356,11 +356,11 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV03(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, MetadataRequestTopic message)
@@ -372,11 +372,11 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV04(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, MetadataRequestTopic message)
@@ -388,11 +388,11 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV05(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV05(byte[] buffer, int index, MetadataRequestTopic message)
@@ -404,11 +404,11 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV06(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV06(byte[] buffer, int index, MetadataRequestTopic message)
@@ -420,11 +420,11 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV07(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV07(byte[] buffer, int index, MetadataRequestTopic message)
@@ -436,11 +436,11 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV08(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadString(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV08(byte[] buffer, int index, MetadataRequestTopic message)
@@ -452,12 +452,12 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV09(byte[] buffer, ref int index)
             {
-                var topicIdField = default(Guid);
-                var nameField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV09(byte[] buffer, int index, MetadataRequestTopic message)
@@ -470,12 +470,12 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV10(byte[] buffer, ref int index)
             {
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var NameField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV10(byte[] buffer, int index, MetadataRequestTopic message)
@@ -487,12 +487,12 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV11(byte[] buffer, ref int index)
             {
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var NameField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV11(byte[] buffer, int index, MetadataRequestTopic message)
@@ -504,12 +504,12 @@ namespace Kafka.Client.Messages
             }
             public static MetadataRequestTopic ReadV12(byte[] buffer, ref int index)
             {
-                var topicIdField = Decoder.ReadUuid(buffer, ref index);
-                var nameField = Decoder.ReadCompactNullableString(buffer, ref index);
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var NameField = Decoder.ReadCompactNullableString(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    topicIdField,
-                    nameField
+                    TopicIdField,
+                    NameField
                 );
             }
             public static int WriteV12(byte[] buffer, int index, MetadataRequestTopic message)

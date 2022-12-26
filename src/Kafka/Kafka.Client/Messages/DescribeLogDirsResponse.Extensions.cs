@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
+using DescribeLogDirsTopic = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic;
 using DescribeLogDirsResult = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult;
 using DescribeLogDirsPartition = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic.DescribeLogDirsPartition;
-using DescribeLogDirsTopic = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -126,17 +126,17 @@ namespace Kafka.Client.Messages
         {
             public static DescribeLogDirsResult ReadV00(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var logDirField = Decoder.ReadString(buffer, ref index);
-                var topicsField = Decoder.ReadArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-                var totalBytesField = default(long);
-                var usableBytesField = default(long);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var LogDirField = Decoder.ReadString(buffer, ref index);
+                var TopicsField = Decoder.ReadArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var TotalBytesField = default(long);
+                var UsableBytesField = default(long);
                 return new(
-                    errorCodeField,
-                    logDirField,
-                    topicsField,
-                    totalBytesField,
-                    usableBytesField
+                    ErrorCodeField,
+                    LogDirField,
+                    TopicsField,
+                    TotalBytesField,
+                    UsableBytesField
                 );
             }
             public static int WriteV00(byte[] buffer, int index, DescribeLogDirsResult message)
@@ -148,17 +148,17 @@ namespace Kafka.Client.Messages
             }
             public static DescribeLogDirsResult ReadV01(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var logDirField = Decoder.ReadString(buffer, ref index);
-                var topicsField = Decoder.ReadArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-                var totalBytesField = default(long);
-                var usableBytesField = default(long);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var LogDirField = Decoder.ReadString(buffer, ref index);
+                var TopicsField = Decoder.ReadArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var TotalBytesField = default(long);
+                var UsableBytesField = default(long);
                 return new(
-                    errorCodeField,
-                    logDirField,
-                    topicsField,
-                    totalBytesField,
-                    usableBytesField
+                    ErrorCodeField,
+                    LogDirField,
+                    TopicsField,
+                    TotalBytesField,
+                    UsableBytesField
                 );
             }
             public static int WriteV01(byte[] buffer, int index, DescribeLogDirsResult message)
@@ -170,18 +170,18 @@ namespace Kafka.Client.Messages
             }
             public static DescribeLogDirsResult ReadV02(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var logDirField = Decoder.ReadCompactString(buffer, ref index);
-                var topicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-                var totalBytesField = default(long);
-                var usableBytesField = default(long);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var LogDirField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var TotalBytesField = default(long);
+                var UsableBytesField = default(long);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    logDirField,
-                    topicsField,
-                    totalBytesField,
-                    usableBytesField
+                    ErrorCodeField,
+                    LogDirField,
+                    TopicsField,
+                    TotalBytesField,
+                    UsableBytesField
                 );
             }
             public static int WriteV02(byte[] buffer, int index, DescribeLogDirsResult message)
@@ -194,18 +194,18 @@ namespace Kafka.Client.Messages
             }
             public static DescribeLogDirsResult ReadV03(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var logDirField = Decoder.ReadCompactString(buffer, ref index);
-                var topicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-                var totalBytesField = default(long);
-                var usableBytesField = default(long);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var LogDirField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var TotalBytesField = default(long);
+                var UsableBytesField = default(long);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    logDirField,
-                    topicsField,
-                    totalBytesField,
-                    usableBytesField
+                    ErrorCodeField,
+                    LogDirField,
+                    TopicsField,
+                    TotalBytesField,
+                    UsableBytesField
                 );
             }
             public static int WriteV03(byte[] buffer, int index, DescribeLogDirsResult message)
@@ -218,18 +218,18 @@ namespace Kafka.Client.Messages
             }
             public static DescribeLogDirsResult ReadV04(byte[] buffer, ref int index)
             {
-                var errorCodeField = Decoder.ReadInt16(buffer, ref index);
-                var logDirField = Decoder.ReadCompactString(buffer, ref index);
-                var topicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-                var totalBytesField = Decoder.ReadInt64(buffer, ref index);
-                var usableBytesField = Decoder.ReadInt64(buffer, ref index);
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                var LogDirField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicsField = Decoder.ReadCompactArray<DescribeLogDirsTopic>(buffer, ref index, DescribeLogDirsTopicSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var TotalBytesField = Decoder.ReadInt64(buffer, ref index);
+                var UsableBytesField = Decoder.ReadInt64(buffer, ref index);
                 _ = Decoder.ReadVarUInt32(buffer, ref index);
                 return new(
-                    errorCodeField,
-                    logDirField,
-                    topicsField,
-                    totalBytesField,
-                    usableBytesField
+                    ErrorCodeField,
+                    LogDirField,
+                    TopicsField,
+                    TotalBytesField,
+                    UsableBytesField
                 );
             }
             public static int WriteV04(byte[] buffer, int index, DescribeLogDirsResult message)
@@ -246,11 +246,11 @@ namespace Kafka.Client.Messages
             {
                 public static DescribeLogDirsTopic ReadV00(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var partitionsField = Decoder.ReadArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var PartitionsField = Decoder.ReadArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     return new(
-                        nameField,
-                        partitionsField
+                        NameField,
+                        PartitionsField
                     );
                 }
                 public static int WriteV00(byte[] buffer, int index, DescribeLogDirsTopic message)
@@ -261,11 +261,11 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribeLogDirsTopic ReadV01(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadString(buffer, ref index);
-                    var partitionsField = Decoder.ReadArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var NameField = Decoder.ReadString(buffer, ref index);
+                    var PartitionsField = Decoder.ReadArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     return new(
-                        nameField,
-                        partitionsField
+                        NameField,
+                        PartitionsField
                     );
                 }
                 public static int WriteV01(byte[] buffer, int index, DescribeLogDirsTopic message)
@@ -276,12 +276,12 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribeLogDirsTopic ReadV02(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var partitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PartitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        partitionsField
+                        NameField,
+                        PartitionsField
                     );
                 }
                 public static int WriteV02(byte[] buffer, int index, DescribeLogDirsTopic message)
@@ -293,12 +293,12 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribeLogDirsTopic ReadV03(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var partitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PartitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        partitionsField
+                        NameField,
+                        PartitionsField
                     );
                 }
                 public static int WriteV03(byte[] buffer, int index, DescribeLogDirsTopic message)
@@ -310,12 +310,12 @@ namespace Kafka.Client.Messages
                 }
                 public static DescribeLogDirsTopic ReadV04(byte[] buffer, ref int index)
                 {
-                    var nameField = Decoder.ReadCompactString(buffer, ref index);
-                    var partitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PartitionsField = Decoder.ReadCompactArray<DescribeLogDirsPartition>(buffer, ref index, DescribeLogDirsPartitionSerde.ReadV04) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
                     _ = Decoder.ReadVarUInt32(buffer, ref index);
                     return new(
-                        nameField,
-                        partitionsField
+                        NameField,
+                        PartitionsField
                     );
                 }
                 public static int WriteV04(byte[] buffer, int index, DescribeLogDirsTopic message)
@@ -329,15 +329,15 @@ namespace Kafka.Client.Messages
                 {
                     public static DescribeLogDirsPartition ReadV00(byte[] buffer, ref int index)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var partitionSizeField = Decoder.ReadInt64(buffer, ref index);
-                        var offsetLagField = Decoder.ReadInt64(buffer, ref index);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
+                        var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var PartitionSizeField = Decoder.ReadInt64(buffer, ref index);
+                        var OffsetLagField = Decoder.ReadInt64(buffer, ref index);
+                        var IsFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
                         return new(
-                            partitionIndexField,
-                            partitionSizeField,
-                            offsetLagField,
-                            isFutureKeyField
+                            PartitionIndexField,
+                            PartitionSizeField,
+                            OffsetLagField,
+                            IsFutureKeyField
                         );
                     }
                     public static int WriteV00(byte[] buffer, int index, DescribeLogDirsPartition message)
@@ -350,15 +350,15 @@ namespace Kafka.Client.Messages
                     }
                     public static DescribeLogDirsPartition ReadV01(byte[] buffer, ref int index)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var partitionSizeField = Decoder.ReadInt64(buffer, ref index);
-                        var offsetLagField = Decoder.ReadInt64(buffer, ref index);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
+                        var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var PartitionSizeField = Decoder.ReadInt64(buffer, ref index);
+                        var OffsetLagField = Decoder.ReadInt64(buffer, ref index);
+                        var IsFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
                         return new(
-                            partitionIndexField,
-                            partitionSizeField,
-                            offsetLagField,
-                            isFutureKeyField
+                            PartitionIndexField,
+                            PartitionSizeField,
+                            OffsetLagField,
+                            IsFutureKeyField
                         );
                     }
                     public static int WriteV01(byte[] buffer, int index, DescribeLogDirsPartition message)
@@ -371,16 +371,16 @@ namespace Kafka.Client.Messages
                     }
                     public static DescribeLogDirsPartition ReadV02(byte[] buffer, ref int index)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var partitionSizeField = Decoder.ReadInt64(buffer, ref index);
-                        var offsetLagField = Decoder.ReadInt64(buffer, ref index);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
+                        var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var PartitionSizeField = Decoder.ReadInt64(buffer, ref index);
+                        var OffsetLagField = Decoder.ReadInt64(buffer, ref index);
+                        var IsFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            partitionIndexField,
-                            partitionSizeField,
-                            offsetLagField,
-                            isFutureKeyField
+                            PartitionIndexField,
+                            PartitionSizeField,
+                            OffsetLagField,
+                            IsFutureKeyField
                         );
                     }
                     public static int WriteV02(byte[] buffer, int index, DescribeLogDirsPartition message)
@@ -394,16 +394,16 @@ namespace Kafka.Client.Messages
                     }
                     public static DescribeLogDirsPartition ReadV03(byte[] buffer, ref int index)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var partitionSizeField = Decoder.ReadInt64(buffer, ref index);
-                        var offsetLagField = Decoder.ReadInt64(buffer, ref index);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
+                        var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var PartitionSizeField = Decoder.ReadInt64(buffer, ref index);
+                        var OffsetLagField = Decoder.ReadInt64(buffer, ref index);
+                        var IsFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            partitionIndexField,
-                            partitionSizeField,
-                            offsetLagField,
-                            isFutureKeyField
+                            PartitionIndexField,
+                            PartitionSizeField,
+                            OffsetLagField,
+                            IsFutureKeyField
                         );
                     }
                     public static int WriteV03(byte[] buffer, int index, DescribeLogDirsPartition message)
@@ -417,16 +417,16 @@ namespace Kafka.Client.Messages
                     }
                     public static DescribeLogDirsPartition ReadV04(byte[] buffer, ref int index)
                     {
-                        var partitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var partitionSizeField = Decoder.ReadInt64(buffer, ref index);
-                        var offsetLagField = Decoder.ReadInt64(buffer, ref index);
-                        var isFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
+                        var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var PartitionSizeField = Decoder.ReadInt64(buffer, ref index);
+                        var OffsetLagField = Decoder.ReadInt64(buffer, ref index);
+                        var IsFutureKeyField = Decoder.ReadBoolean(buffer, ref index);
                         _ = Decoder.ReadVarUInt32(buffer, ref index);
                         return new(
-                            partitionIndexField,
-                            partitionSizeField,
-                            offsetLagField,
-                            isFutureKeyField
+                            PartitionIndexField,
+                            PartitionSizeField,
+                            OffsetLagField,
+                            IsFutureKeyField
                         );
                     }
                     public static int WriteV04(byte[] buffer, int index, DescribeLogDirsPartition message)
