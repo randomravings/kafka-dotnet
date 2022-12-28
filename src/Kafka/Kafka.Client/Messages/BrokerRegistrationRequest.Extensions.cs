@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using Listener = Kafka.Client.Messages.BrokerRegistrationRequest.Listener;
 using Feature = Kafka.Client.Messages.BrokerRegistrationRequest.Feature;
+using Listener = Kafka.Client.Messages.BrokerRegistrationRequest.Listener;
 
 namespace Kafka.Client.Messages
 {
@@ -52,6 +52,29 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
         }
+        private static class FeatureSerde
+        {
+            public static Feature ReadV00(byte[] buffer, ref int index)
+            {
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var MinSupportedVersionField = Decoder.ReadInt16(buffer, ref index);
+                var MaxSupportedVersionField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    NameField,
+                    MinSupportedVersionField,
+                    MaxSupportedVersionField
+                );
+            }
+            public static int WriteV00(byte[] buffer, int index, Feature message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt16(buffer, index, message.MinSupportedVersionField);
+                index = Encoder.WriteInt16(buffer, index, message.MaxSupportedVersionField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+        }
         private static class ListenerSerde
         {
             public static Listener ReadV00(byte[] buffer, ref int index)
@@ -74,29 +97,6 @@ namespace Kafka.Client.Messages
                 index = Encoder.WriteCompactString(buffer, index, message.HostField);
                 index = Encoder.WriteUInt16(buffer, index, message.PortField);
                 index = Encoder.WriteInt16(buffer, index, message.SecurityProtocolField);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-        }
-        private static class FeatureSerde
-        {
-            public static Feature ReadV00(byte[] buffer, ref int index)
-            {
-                var NameField = Decoder.ReadCompactString(buffer, ref index);
-                var MinSupportedVersionField = Decoder.ReadInt16(buffer, ref index);
-                var MaxSupportedVersionField = Decoder.ReadInt16(buffer, ref index);
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    NameField,
-                    MinSupportedVersionField,
-                    MaxSupportedVersionField
-                );
-            }
-            public static int WriteV00(byte[] buffer, int index, Feature message)
-            {
-                index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                index = Encoder.WriteInt16(buffer, index, message.MinSupportedVersionField);
-                index = Encoder.WriteInt16(buffer, index, message.MaxSupportedVersionField);
                 index = Encoder.WriteVarUInt32(buffer, index, 0);
                 return index;
             }

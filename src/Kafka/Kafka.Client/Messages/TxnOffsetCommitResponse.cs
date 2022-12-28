@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TxnOffsetCommitResponseTopic = Kafka.Client.Messages.TxnOffsetCommitResponse.TxnOffsetCommitResponseTopic;
 using TxnOffsetCommitResponsePartition = Kafka.Client.Messages.TxnOffsetCommitResponse.TxnOffsetCommitResponseTopic.TxnOffsetCommitResponsePartition;
+using TxnOffsetCommitResponseTopic = Kafka.Client.Messages.TxnOffsetCommitResponse.TxnOffsetCommitResponseTopic;
 
 namespace Kafka.Client.Messages
 {

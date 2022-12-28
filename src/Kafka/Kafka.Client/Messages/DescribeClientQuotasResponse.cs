@@ -2,8 +2,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 using ValueData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.ValueData;
-using EntryData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData;
 using EntityData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.EntityData;
+using EntryData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData;
 
 namespace Kafka.Client.Messages
 {

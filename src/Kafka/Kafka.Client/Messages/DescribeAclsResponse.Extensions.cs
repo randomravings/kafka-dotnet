@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using DescribeAclsResource = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource;
 using AclDescription = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource.AclDescription;
+using DescribeAclsResource = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource;
 
 namespace Kafka.Client.Messages
 {

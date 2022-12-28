@@ -46,12 +46,12 @@ namespace Kafka.Client.Messages
             /// </summary>
             public sealed record PartitionProduceData (
                 int IndexField,
-                IRecords? RecordsField
+                ImmutableArray<IRecords>? RecordsField
             )
             {
                 public static PartitionProduceData Empty { get; } = new(
                     default(int),
-                    default(IRecords)
+                    default(ImmutableArray<IRecords>)
                 );
             };
         };

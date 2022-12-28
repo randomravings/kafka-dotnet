@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
+using ForgottenTopic = Kafka.Client.Messages.FetchRequest.ForgottenTopic;
 using FetchPartition = Kafka.Client.Messages.FetchRequest.FetchTopic.FetchPartition;
 using FetchTopic = Kafka.Client.Messages.FetchRequest.FetchTopic;
-using ForgottenTopic = Kafka.Client.Messages.FetchRequest.ForgottenTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -588,6 +588,132 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteCompactString(buffer, index, message.RackIdField);
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
+        }
+        private static class ForgottenTopicSerde
+        {
+            public static ForgottenTopic ReadV07(byte[] buffer, ref int index)
+            {
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                return new(
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
+                );
+            }
+            public static int WriteV07(byte[] buffer, int index, ForgottenTopic message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
+            }
+            public static ForgottenTopic ReadV08(byte[] buffer, ref int index)
+            {
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                return new(
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
+                );
+            }
+            public static int WriteV08(byte[] buffer, int index, ForgottenTopic message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
+            }
+            public static ForgottenTopic ReadV09(byte[] buffer, ref int index)
+            {
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                return new(
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
+                );
+            }
+            public static int WriteV09(byte[] buffer, int index, ForgottenTopic message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
+            }
+            public static ForgottenTopic ReadV10(byte[] buffer, ref int index)
+            {
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                return new(
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
+                );
+            }
+            public static int WriteV10(byte[] buffer, int index, ForgottenTopic message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
+            }
+            public static ForgottenTopic ReadV11(byte[] buffer, ref int index)
+            {
+                var TopicField = Decoder.ReadString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                return new(
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
+                );
+            }
+            public static int WriteV11(byte[] buffer, int index, ForgottenTopic message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicField);
+                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                return index;
+            }
+            public static ForgottenTopic ReadV12(byte[] buffer, ref int index)
+            {
+                var TopicField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicIdField = default(Guid);
+                var PartitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
+                );
+            }
+            public static int WriteV12(byte[] buffer, int index, ForgottenTopic message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.TopicField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static ForgottenTopic ReadV13(byte[] buffer, ref int index)
+            {
+                var TopicField = "";
+                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
+                var PartitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    TopicField,
+                    TopicIdField,
+                    PartitionsField
+                );
+            }
+            public static int WriteV13(byte[] buffer, int index, ForgottenTopic message)
+            {
+                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
         }
         private static class FetchTopicSerde
         {
@@ -1191,132 +1317,6 @@ namespace Kafka.Client.Messages
                     index = Encoder.WriteVarUInt32(buffer, index, 0);
                     return index;
                 }
-            }
-        }
-        private static class ForgottenTopicSerde
-        {
-            public static ForgottenTopic ReadV07(byte[] buffer, ref int index)
-            {
-                var TopicField = Decoder.ReadString(buffer, ref index);
-                var TopicIdField = default(Guid);
-                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                return new(
-                    TopicField,
-                    TopicIdField,
-                    PartitionsField
-                );
-            }
-            public static int WriteV07(byte[] buffer, int index, ForgottenTopic message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicField);
-                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
-                return index;
-            }
-            public static ForgottenTopic ReadV08(byte[] buffer, ref int index)
-            {
-                var TopicField = Decoder.ReadString(buffer, ref index);
-                var TopicIdField = default(Guid);
-                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                return new(
-                    TopicField,
-                    TopicIdField,
-                    PartitionsField
-                );
-            }
-            public static int WriteV08(byte[] buffer, int index, ForgottenTopic message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicField);
-                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
-                return index;
-            }
-            public static ForgottenTopic ReadV09(byte[] buffer, ref int index)
-            {
-                var TopicField = Decoder.ReadString(buffer, ref index);
-                var TopicIdField = default(Guid);
-                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                return new(
-                    TopicField,
-                    TopicIdField,
-                    PartitionsField
-                );
-            }
-            public static int WriteV09(byte[] buffer, int index, ForgottenTopic message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicField);
-                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
-                return index;
-            }
-            public static ForgottenTopic ReadV10(byte[] buffer, ref int index)
-            {
-                var TopicField = Decoder.ReadString(buffer, ref index);
-                var TopicIdField = default(Guid);
-                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                return new(
-                    TopicField,
-                    TopicIdField,
-                    PartitionsField
-                );
-            }
-            public static int WriteV10(byte[] buffer, int index, ForgottenTopic message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicField);
-                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
-                return index;
-            }
-            public static ForgottenTopic ReadV11(byte[] buffer, ref int index)
-            {
-                var TopicField = Decoder.ReadString(buffer, ref index);
-                var TopicIdField = default(Guid);
-                var PartitionsField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                return new(
-                    TopicField,
-                    TopicIdField,
-                    PartitionsField
-                );
-            }
-            public static int WriteV11(byte[] buffer, int index, ForgottenTopic message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicField);
-                index = Encoder.WriteArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
-                return index;
-            }
-            public static ForgottenTopic ReadV12(byte[] buffer, ref int index)
-            {
-                var TopicField = Decoder.ReadCompactString(buffer, ref index);
-                var TopicIdField = default(Guid);
-                var PartitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    TopicField,
-                    TopicIdField,
-                    PartitionsField
-                );
-            }
-            public static int WriteV12(byte[] buffer, int index, ForgottenTopic message)
-            {
-                index = Encoder.WriteCompactString(buffer, index, message.TopicField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-            public static ForgottenTopic ReadV13(byte[] buffer, ref int index)
-            {
-                var TopicField = "";
-                var TopicIdField = Decoder.ReadUuid(buffer, ref index);
-                var PartitionsField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    TopicField,
-                    TopicIdField,
-                    PartitionsField
-                );
-            }
-            public static int WriteV13(byte[] buffer, int index, ForgottenTopic message)
-            {
-                index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, Encoder.WriteInt32);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
             }
         }
     }

@@ -1,8 +1,10 @@
 ﻿using CommandLine;
+using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Cli.Verbs;
 using Kafka.Client.Clients.Admin;
 using Kafka.Client.Clients.Admin.Model;
+using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd
 {
@@ -29,11 +31,7 @@ namespace Kafka.Cli.Cmd
         {
             try
             {
-                var adminClientConfig = new AdminClientConfig
-                {
-                    BootstrapServers = verb.BootstrapServer
-                };
-                using var adminClient = (IAdminClient)new Client.Clients.Admin.AdminClient(adminClientConfig);
+                using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
                 var options = new ListTopicsOptionsBuilder(adminClientConfig)
                     .IncludeInternal(!verb.ExcludeInternal)
                     .Build()
@@ -60,11 +58,7 @@ namespace Kafka.Cli.Cmd
         {
             try
             {
-                var adminClientConfig = new AdminClientConfig
-                {
-                    BootstrapServers = verb.BootstrapServer
-                };
-                using var adminClient = (IAdminClient)new Client.Clients.Admin.AdminClient(adminClientConfig);
+                using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
                 var replicaAssinment = new Dictionary<int, int[]>();
                 var partitionReplicaAssignments = verb.ReplicaAssignment.Split(';', StringSplitOptions.RemoveEmptyEntries);
                 foreach (var partitionReplicaAssignment in partitionReplicaAssignments)
@@ -113,6 +107,7 @@ namespace Kafka.Cli.Cmd
                         Console.WriteLine($"    {Formatter.Print(topic.Error)}");
                     }
                 }
+                await adminClient.Close(CancellationToken.None);
                 return 0;
             }
             catch (Exception ex)
@@ -129,11 +124,7 @@ namespace Kafka.Cli.Cmd
         {
             try
             {
-                var adminClientConfig = new AdminClientConfig
-                {
-                    BootstrapServers = verb.BootstrapServer
-                };
-                using var adminClient = (IAdminClient)new Client.Clients.Admin.AdminClient(adminClientConfig);
+                using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
                 var options = new DeleteTopicsOptionsBuilder(adminClientConfig)
                     .TopicName(verb.TopicName)
                     .TopicId(verb.TopicId)
@@ -163,11 +154,7 @@ namespace Kafka.Cli.Cmd
         {
             try
             {
-                var adminClientConfig = new AdminClientConfig
-                {
-                    BootstrapServers = verb.BootstrapServer
-                };
-                using var adminClient = (IAdminClient)new Client.Clients.Admin.AdminClient(adminClientConfig);
+                using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
                 var options = new DescribeTopicsOptionsBuilder(adminClientConfig)
                     .TopicName(verb.TopicName)
                     .TopicId(verb.TopicId)
@@ -202,6 +189,25 @@ namespace Kafka.Cli.Cmd
                 Console.WriteLine(ex.ToString());
                 return -1;
             }
+        }
+
+        private static IAdminClient CreateAdminClient(
+            OptionsBase optionsBase,
+            out AdminClientConfig adminClientConfig
+        )
+        {
+            adminClientConfig = new AdminClientConfig
+            {
+                BootstrapServers = optionsBase.BootstrapServer
+            };
+            var logger = LoggerFactory
+                .Create(builder => builder
+                    .AddConsole()
+                    .SetMinimumLevel(LogLevel.Trace)
+                )
+                .CreateLogger<AdminClient>()
+            ;
+            return new AdminClient(adminClientConfig, logger);
         }
     }
 }

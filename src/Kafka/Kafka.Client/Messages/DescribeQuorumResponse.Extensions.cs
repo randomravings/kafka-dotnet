@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using PartitionData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData.PartitionData;
 using ReplicaState = Kafka.Client.Messages.DescribeQuorumResponse.ReplicaState;
 using TopicData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData;
+using PartitionData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData.PartitionData;
 
 namespace Kafka.Client.Messages
 {

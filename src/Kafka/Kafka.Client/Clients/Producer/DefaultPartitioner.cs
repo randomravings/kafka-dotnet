@@ -3,7 +3,7 @@ using Kafka.Common.Types;
 
 namespace Kafka.Client.Clients.Producer
 {
-    internal class DefaultPartitioner :
+    public class DefaultPartitioner :
         IPartitioner
     {
         private DefaultPartitioner() { }

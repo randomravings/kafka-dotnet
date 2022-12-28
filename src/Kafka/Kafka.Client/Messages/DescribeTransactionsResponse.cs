@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TransactionState = Kafka.Client.Messages.DescribeTransactionsResponse.TransactionState;
 using TopicData = Kafka.Client.Messages.DescribeTransactionsResponse.TransactionState.TopicData;
+using TransactionState = Kafka.Client.Messages.DescribeTransactionsResponse.TransactionState;
 
 namespace Kafka.Client.Messages
 {

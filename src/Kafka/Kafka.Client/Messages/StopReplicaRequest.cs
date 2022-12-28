@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
+using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
 using StopReplicaTopicState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState;
 using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
-using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
+using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
 
 namespace Kafka.Client.Messages
 {
@@ -40,6 +40,20 @@ namespace Kafka.Client.Messages
             ImmutableArray<StopReplicaTopicV1>.Empty,
             ImmutableArray<StopReplicaTopicState>.Empty
         );
+        /// <summary>
+        /// <param name="TopicNameField">The topic name.</param>
+        /// <param name="PartitionIndexField">The partition index.</param>
+        /// </summary>
+        public sealed record StopReplicaPartitionV0 (
+            string TopicNameField,
+            int PartitionIndexField
+        )
+        {
+            public static StopReplicaPartitionV0 Empty { get; } = new(
+                "",
+                default(int)
+            );
+        };
         /// <summary>
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionStatesField">The state of each partition</param>
@@ -83,20 +97,6 @@ namespace Kafka.Client.Messages
             public static StopReplicaTopicV1 Empty { get; } = new(
                 "",
                 ImmutableArray<int>.Empty
-            );
-        };
-        /// <summary>
-        /// <param name="TopicNameField">The topic name.</param>
-        /// <param name="PartitionIndexField">The partition index.</param>
-        /// </summary>
-        public sealed record StopReplicaPartitionV0 (
-            string TopicNameField,
-            int PartitionIndexField
-        )
-        {
-            public static StopReplicaPartitionV0 Empty { get; } = new(
-                "",
-                default(int)
             );
         };
     };

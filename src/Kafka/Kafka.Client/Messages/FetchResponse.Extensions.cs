@@ -2,12 +2,12 @@ using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
-using PartitionData = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData;
 using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
 using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
 using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
+using PartitionData = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData;
 
 namespace Kafka.Client.Messages
 {

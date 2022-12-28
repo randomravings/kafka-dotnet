@@ -3,6 +3,7 @@ using Kafka.Client.Messages;
 using Kafka.Common;
 using Kafka.Common.Types;
 using Kafka.Common.Types.Comparison;
+using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 using static Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
 
@@ -12,8 +13,11 @@ namespace Kafka.Client.Clients.Admin
         Client<AdminClientConfig>,
         IAdminClient
     {
-        public AdminClient(AdminClientConfig config)
-            : base(config) { }
+        public AdminClient(
+            AdminClientConfig config,
+            ILogger<IAdminClient> logger
+        )
+            : base(config, logger) { }
 
         async ValueTask<ApiVersionsResult> IAdminClient.GetApiVersions(
             ApiVersionsOptions options,
@@ -249,5 +253,9 @@ namespace Kafka.Client.Clients.Admin
                 )
             );
         }
+
+        protected override async ValueTask OnClose(CancellationToken cancellationToken) =>
+            await ValueTask.CompletedTask
+        ;
     }
 }

@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using UpdateMetadataBroker = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker;
-using UpdateMetadataTopicState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataTopicState;
 using UpdateMetadataPartitionState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataPartitionState;
+using UpdateMetadataBroker = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker;
 using UpdateMetadataEndpoint = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker.UpdateMetadataEndpoint;
+using UpdateMetadataTopicState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataTopicState;
 
 namespace Kafka.Client.Messages
 {
@@ -37,6 +37,41 @@ namespace Kafka.Client.Messages
             ImmutableArray<UpdateMetadataTopicState>.Empty,
             ImmutableArray<UpdateMetadataBroker>.Empty
         );
+        /// <summary>
+        /// <param name="TopicNameField">In older versions of this RPC, the topic name.</param>
+        /// <param name="PartitionIndexField">The partition index.</param>
+        /// <param name="ControllerEpochField">The controller epoch.</param>
+        /// <param name="LeaderField">The ID of the broker which is the current partition leader.</param>
+        /// <param name="LeaderEpochField">The leader epoch of this partition.</param>
+        /// <param name="IsrField">The brokers which are in the ISR for this partition.</param>
+        /// <param name="ZkVersionField">The Zookeeper version.</param>
+        /// <param name="ReplicasField">All the replicas of this partition.</param>
+        /// <param name="OfflineReplicasField">The replicas of this partition which are offline.</param>
+        /// </summary>
+        public sealed record UpdateMetadataPartitionState (
+            string TopicNameField,
+            int PartitionIndexField,
+            int ControllerEpochField,
+            int LeaderField,
+            int LeaderEpochField,
+            ImmutableArray<int> IsrField,
+            int ZkVersionField,
+            ImmutableArray<int> ReplicasField,
+            ImmutableArray<int> OfflineReplicasField
+        )
+        {
+            public static UpdateMetadataPartitionState Empty { get; } = new(
+                "",
+                default(int),
+                default(int),
+                default(int),
+                default(int),
+                ImmutableArray<int>.Empty,
+                default(int),
+                ImmutableArray<int>.Empty,
+                ImmutableArray<int>.Empty
+            );
+        };
         /// <summary>
         /// <param name="IdField">The broker id.</param>
         /// <param name="V0HostField">The broker hostname.</param>
@@ -95,41 +130,6 @@ namespace Kafka.Client.Messages
                 "",
                 default(Guid),
                 ImmutableArray<UpdateMetadataPartitionState>.Empty
-            );
-        };
-        /// <summary>
-        /// <param name="TopicNameField">In older versions of this RPC, the topic name.</param>
-        /// <param name="PartitionIndexField">The partition index.</param>
-        /// <param name="ControllerEpochField">The controller epoch.</param>
-        /// <param name="LeaderField">The ID of the broker which is the current partition leader.</param>
-        /// <param name="LeaderEpochField">The leader epoch of this partition.</param>
-        /// <param name="IsrField">The brokers which are in the ISR for this partition.</param>
-        /// <param name="ZkVersionField">The Zookeeper version.</param>
-        /// <param name="ReplicasField">All the replicas of this partition.</param>
-        /// <param name="OfflineReplicasField">The replicas of this partition which are offline.</param>
-        /// </summary>
-        public sealed record UpdateMetadataPartitionState (
-            string TopicNameField,
-            int PartitionIndexField,
-            int ControllerEpochField,
-            int LeaderField,
-            int LeaderEpochField,
-            ImmutableArray<int> IsrField,
-            int ZkVersionField,
-            ImmutableArray<int> ReplicasField,
-            ImmutableArray<int> OfflineReplicasField
-        )
-        {
-            public static UpdateMetadataPartitionState Empty { get; } = new(
-                "",
-                default(int),
-                default(int),
-                default(int),
-                default(int),
-                ImmutableArray<int>.Empty,
-                default(int),
-                ImmutableArray<int>.Empty,
-                ImmutableArray<int>.Empty
             );
         };
     };

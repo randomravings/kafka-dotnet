@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
+using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
 using StopReplicaTopicState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState;
 using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
-using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
+using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
 
 namespace Kafka.Client.Messages
 {
@@ -185,6 +185,24 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
         }
+        private static class StopReplicaPartitionV0Serde
+        {
+            public static StopReplicaPartitionV0 ReadV00(byte[] buffer, ref int index)
+            {
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                return new(
+                    TopicNameField,
+                    PartitionIndexField
+                );
+            }
+            public static int WriteV00(byte[] buffer, int index, StopReplicaPartitionV0 message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                return index;
+            }
+        }
         private static class StopReplicaTopicStateSerde
         {
             public static StopReplicaTopicState ReadV03(byte[] buffer, ref int index)
@@ -297,24 +315,6 @@ namespace Kafka.Client.Messages
                 index = Encoder.WriteCompactString(buffer, index, message.NameField);
                 index = Encoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, Encoder.WriteInt32);
                 index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-        }
-        private static class StopReplicaPartitionV0Serde
-        {
-            public static StopReplicaPartitionV0 ReadV00(byte[] buffer, ref int index)
-            {
-                var TopicNameField = Decoder.ReadString(buffer, ref index);
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                return new(
-                    TopicNameField,
-                    PartitionIndexField
-                );
-            }
-            public static int WriteV00(byte[] buffer, int index, StopReplicaPartitionV0 message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicNameField);
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
                 return index;
             }
         }

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using Listener = Kafka.Client.Messages.BrokerRegistrationRequest.Listener;
 using Feature = Kafka.Client.Messages.BrokerRegistrationRequest.Feature;
+using Listener = Kafka.Client.Messages.BrokerRegistrationRequest.Listener;
 
 namespace Kafka.Client.Messages
 {
@@ -36,6 +36,23 @@ namespace Kafka.Client.Messages
             default(sbyte)
         );
         /// <summary>
+        /// <param name="NameField">The feature name.</param>
+        /// <param name="MinSupportedVersionField">The minimum supported feature level.</param>
+        /// <param name="MaxSupportedVersionField">The maximum supported feature level.</param>
+        /// </summary>
+        public sealed record Feature (
+            string NameField,
+            short MinSupportedVersionField,
+            short MaxSupportedVersionField
+        )
+        {
+            public static Feature Empty { get; } = new(
+                "",
+                default(short),
+                default(short)
+            );
+        };
+        /// <summary>
         /// <param name="NameField">The name of the endpoint.</param>
         /// <param name="HostField">The hostname.</param>
         /// <param name="PortField">The port.</param>
@@ -52,23 +69,6 @@ namespace Kafka.Client.Messages
                 "",
                 "",
                 default(ushort),
-                default(short)
-            );
-        };
-        /// <summary>
-        /// <param name="NameField">The feature name.</param>
-        /// <param name="MinSupportedVersionField">The minimum supported feature level.</param>
-        /// <param name="MaxSupportedVersionField">The maximum supported feature level.</param>
-        /// </summary>
-        public sealed record Feature (
-            string NameField,
-            short MinSupportedVersionField,
-            short MaxSupportedVersionField
-        )
-        {
-            public static Feature Empty { get; } = new(
-                "",
-                default(short),
                 default(short)
             );
         };

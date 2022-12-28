@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreatableReplicaAssignment;
-using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
 using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreateableTopicConfig;
+using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
 
 namespace Kafka.Client.Messages
 {

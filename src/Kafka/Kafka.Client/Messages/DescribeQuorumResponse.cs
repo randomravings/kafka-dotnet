@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using PartitionData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData.PartitionData;
 using ReplicaState = Kafka.Client.Messages.DescribeQuorumResponse.ReplicaState;
 using TopicData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData;
+using PartitionData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData.PartitionData;
 
 namespace Kafka.Client.Messages
 {

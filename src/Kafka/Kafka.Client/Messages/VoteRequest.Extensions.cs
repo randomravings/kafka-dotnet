@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using PartitionData = Kafka.Client.Messages.VoteRequest.TopicData.PartitionData;
 using TopicData = Kafka.Client.Messages.VoteRequest.TopicData;
+using PartitionData = Kafka.Client.Messages.VoteRequest.TopicData.PartitionData;
 
 namespace Kafka.Client.Messages
 {

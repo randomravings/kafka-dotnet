@@ -3,8 +3,8 @@
     "Kafka.Cli": {
       "commandName": "Project",
       //"commandLineArgs": "topic create --topic test --bootstrap-server localhost:9092 --client-id me.org"
-      //"commandLineArgs": "produce --topic test --bootstrap-server localhost:9092 --client-id me.org",
-      "commandLineArgs": "consume --topic test --bootstrap-server localhost:9092 --client-id me.org --group-id test-2"
+      //"commandLineArgs": "produce --topic test --bootstrap-server localhost:9092 --client-id me.org --property key=value"
+      "commandLineArgs": "consume --topic test --bootstrap-server localhost:9092 --client-id me.org --group-id test-3 --log-level Trace"
     }
   }
 }

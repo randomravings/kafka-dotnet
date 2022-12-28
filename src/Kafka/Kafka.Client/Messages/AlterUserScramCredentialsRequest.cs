@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using ScramCredentialUpsertion = Kafka.Client.Messages.AlterUserScramCredentialsRequest.ScramCredentialUpsertion;
 using ScramCredentialDeletion = Kafka.Client.Messages.AlterUserScramCredentialsRequest.ScramCredentialDeletion;
+using ScramCredentialUpsertion = Kafka.Client.Messages.AlterUserScramCredentialsRequest.ScramCredentialUpsertion;
 
 namespace Kafka.Client.Messages
 {
@@ -20,6 +20,20 @@ namespace Kafka.Client.Messages
             ImmutableArray<ScramCredentialDeletion>.Empty,
             ImmutableArray<ScramCredentialUpsertion>.Empty
         );
+        /// <summary>
+        /// <param name="NameField">The user name.</param>
+        /// <param name="MechanismField">The SCRAM mechanism.</param>
+        /// </summary>
+        public sealed record ScramCredentialDeletion (
+            string NameField,
+            sbyte MechanismField
+        )
+        {
+            public static ScramCredentialDeletion Empty { get; } = new(
+                "",
+                default(sbyte)
+            );
+        };
         /// <summary>
         /// <param name="NameField">The user name.</param>
         /// <param name="MechanismField">The SCRAM mechanism.</param>
@@ -41,20 +55,6 @@ namespace Kafka.Client.Messages
                 default(int),
                 ReadOnlyMemory<byte>.Empty,
                 ReadOnlyMemory<byte>.Empty
-            );
-        };
-        /// <summary>
-        /// <param name="NameField">The user name.</param>
-        /// <param name="MechanismField">The SCRAM mechanism.</param>
-        /// </summary>
-        public sealed record ScramCredentialDeletion (
-            string NameField,
-            sbyte MechanismField
-        )
-        {
-            public static ScramCredentialDeletion Empty { get; } = new(
-                "",
-                default(sbyte)
             );
         };
     };

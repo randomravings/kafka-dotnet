@@ -1,8 +1,8 @@
 ﻿using Kafka.Cli.Verbs;
 using Kafka.Client.Clients.Consumer;
+using Kafka.Client.Clients.Consumer.Models;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd
 {
@@ -13,19 +13,33 @@ namespace Kafka.Cli.Cmd
             CancellationToken cancellationToken
         )
         {
-            var consumer = CreateConsumer(
+            using var consumer = CreateConsumer(
                 verb,
                 Deserializers.Utf8,
                 Deserializers.Utf8
             );
-            await consumer.Subscribe(
-                "test",
-                cancellationToken
-            );
-            while (!cancellationToken.IsCancellationRequested)
+            var topic = new TopicList("test");
+            try
             {
-                var consumeResult = await consumer.Poll(cancellationToken);
-                Console.WriteLine($"{consumeResult.Record.Key}:{consumeResult.Record.Value}");
+                var topicWatermarks = await consumer.QueryWatermarks(
+                    topic,
+                    cancellationToken
+                );
+                foreach (var topicWatermark in topicWatermarks)
+                {
+                    Console.WriteLine(topicWatermark.Key.Value);
+                    foreach (var partitionWatermark in topicWatermark.Value)
+                        Console.WriteLine(partitionWatermark);
+                    Console.WriteLine();
+                }
+
+                await foreach (var consumeResult in consumer.Read(topic, cancellationToken))
+                    Console.WriteLine($"{consumeResult.Record.Key}:{consumeResult.Record.Value}");
+            }
+            catch (OperationCanceledException) { }
+            finally
+            {
+                await consumer.Close(CancellationToken.None);
             }
             return 0;
         }
@@ -38,8 +52,8 @@ namespace Kafka.Cli.Cmd
         {
             var logger = LoggerFactory
                 .Create(builder => builder
-                    .AddNLog()
-                    .SetMinimumLevel(LogLevel.Warning)
+                    .AddConsole()
+                    .SetMinimumLevel(verb.LogLevel)
                 )
                 .CreateLogger<SubscribedConsumer<TKey, TValue>>()
             ;

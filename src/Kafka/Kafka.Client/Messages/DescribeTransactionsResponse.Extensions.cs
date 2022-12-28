@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using TransactionState = Kafka.Client.Messages.DescribeTransactionsResponse.TransactionState;
 using TopicData = Kafka.Client.Messages.DescribeTransactionsResponse.TransactionState.TopicData;
+using TransactionState = Kafka.Client.Messages.DescribeTransactionsResponse.TransactionState;
 
 namespace Kafka.Client.Messages
 {

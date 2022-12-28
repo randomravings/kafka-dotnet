@@ -6,6 +6,7 @@ using Kafka.Common.Network.Tcp;
 using Kafka.Common.Protocol;
 using Kafka.Common.Types;
 using Kafka.Common.Types.Comparison;
+using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Net;
@@ -20,32 +21,46 @@ namespace Kafka.Client.Clients
         private const string CLIENT_VERSION = "1.9.2";
         private const short REQUEST_HEADER_VERSION = 2;
         private const short RESPONSE_HEADER_VERSION = 1;
+        private readonly ITransport _transport;
+        private readonly BlockingCollection<SendCallback> _pendingRequests = new();
+        private readonly CancellationTokenSource _clientCts = new();
+        private readonly Task _requestHandler;
+        protected readonly TConfig _config;
+        protected readonly ILogger _logger;
+
         private int _coorelationIds = 0;
         private bool _disposed;
-        private readonly ITransport _transport;
-        private readonly BlockingCollection<SendCallback> _requestQueue = new();
-        private readonly Task _requestLoop;
 
-        protected readonly CancellationTokenSource _clientCts = new();
-        protected readonly TConfig _config;
         protected ImmutableSortedDictionary<short, ApiVersion> _apiVersions = ImmutableSortedDictionary<short, ApiVersion>.Empty;
         protected Cluster _cluster = Cluster.Empty;
 
         private sealed record SendCallback(
+            RequestHeader RequestHeader,
+            bool Flexible,
+            bool IgnoreHeaderTaggedFields,
             byte[] Request,
             int Offset,
             int Length,
-            TaskCompletionSource<byte[]> Response
+            TaskCompletionSource<ReceivePackage> Response
+        );
+
+        private sealed record ReceivePackage(
+            ResponseHeader ResponseHeader,
+            byte[] Response,
+            int Offset,
+            int Length
         );
 
         protected Client(
-            TConfig config
+            TConfig config,
+            ILogger logger
         )
         {
             _config = config;
+            _logger = logger;
             var endpoint = ParseBoostrap(config.BootstrapServers).First();
-            _transport = new PlaintextTransport(endpoint);
-            _requestLoop = Task.Run(async () => await ReceiveLoop(_clientCts.Token), CancellationToken.None);
+            _transport = new PlaintextTransport(endpoint, logger);
+            _requestHandler = Task.Run(async () => await Do(_clientCts.Token), CancellationToken.None);
         }
 
         protected async ValueTask EnsureConnection(CancellationToken cancellationToken)
@@ -76,18 +91,26 @@ namespace Kafka.Client.Clients
             );
         }
 
-        protected virtual async void Dispose(bool disposing)
+        public async ValueTask Close(CancellationToken cancellationToken)
         {
-            if (!_disposed)
+            await OnClose(cancellationToken);
+            _clientCts.Cancel();
+            await _requestHandler;
+            await _transport.Close(cancellationToken);
+        }
+
+        protected abstract ValueTask OnClose(CancellationToken cancellationToken);
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed)
+                return;
+            if (disposing)
             {
-                if (disposing)
-                {
-                    _clientCts.Cancel();
-                    await _requestLoop;
-                    _transport.Dispose();
-                }
-                _disposed = true;
+                _requestHandler.Dispose();
+                _transport.Dispose();
             }
+            _disposed = true;
         }
 
         public void Dispose()
@@ -134,31 +157,36 @@ namespace Kafka.Client.Clients
                 correlationId,
                 _config.ClientId
             );
-
-
             var requestBytes = new byte[1024 * 1024];
             var offset = 0;
             offset = RequestHeaderSerde.Write(requestBytes, offset, requestHeader, REQUEST_HEADER_VERSION, flexible);
             offset = requestWriter(requestBytes, offset, request, requestHeader.RequestApiVersionField);
 
             var callback = new SendCallback(
+                requestHeader,
+                flexible,
+                ignoreHeaderTaggedFields,
                 requestBytes,
                 0,
                 offset,
-                new TaskCompletionSource<byte[]>()
+                new TaskCompletionSource<ReceivePackage>()
             );
-            _requestQueue.Add(callback);
-            var responseBytes = await callback.Response.Task;
-
-            var responseIndex = 0;
-            var responseHeader = ResponseHeaderSerde.Read(responseBytes, ref responseIndex, RESPONSE_HEADER_VERSION, flexible && !ignoreHeaderTaggedFields);
-            if (responseHeader.CorrelationIdField != requestHeader.CorrelationIdField)
-                throw new Exception($"Correlation Id mismath - Request: {requestHeader.CorrelationIdField} - Response: {responseHeader.CorrelationIdField}");
-            var response = responseReader(responseBytes, ref responseIndex, version);
+            _pendingRequests.Add(callback, cancellationToken);
+            var response = await callback.Response.Task.ContinueWith(
+                r =>
+                {
+                    offset = r.Result.Offset;
+                    if (r.Result.ResponseHeader.CorrelationIdField != callback.RequestHeader.CorrelationIdField)
+                        throw new Exception($"Correlation Id mismath - Request: {callback.RequestHeader.CorrelationIdField} - Response: {callback.RequestHeader.CorrelationIdField}");
+                    var response = responseReader(r.Result.Response, ref offset, version);
+                    return response;
+                },
+                CancellationToken.None
+            );
             return response;
         }
 
-        private async Task ReceiveLoop(
+        private async Task Do(
             CancellationToken cancellationToken
         )
         {
@@ -166,14 +194,14 @@ namespace Kafka.Client.Clients
             {
                 try
                 {
-                    var request = _requestQueue.Take(cancellationToken);
-                    var response = await _transport.HandleRequest(request.Request, request.Offset, request.Length, cancellationToken);
-                    request.Response.SetResult(response);
+                    var sendCallback = _pendingRequests.Take(cancellationToken);
+                    var responseBytes = await _transport.HandleRequest(sendCallback.Request, sendCallback.Offset, sendCallback.Length, cancellationToken);
+                    var offset = 0;
+                    var responseHeader = ResponseHeaderSerde.Read(responseBytes, ref offset, RESPONSE_HEADER_VERSION, sendCallback.Flexible && !sendCallback.IgnoreHeaderTaggedFields);
+                    var receivePackage = new ReceivePackage(responseHeader, responseBytes, offset, responseBytes.Length - offset);
+                    sendCallback.Response.SetResult(receivePackage);
                 }
-                catch(OperationCanceledException)
-                {
-                    // Noop
-                }
+                catch (OperationCanceledException) { }
             }
         }
 

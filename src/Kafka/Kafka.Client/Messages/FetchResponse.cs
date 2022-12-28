@@ -2,12 +2,12 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
 using Kafka.Common.Protocol;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
-using PartitionData = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData;
 using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
 using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
 using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
+using PartitionData = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData;
 
 namespace Kafka.Client.Messages
 {
@@ -71,7 +71,7 @@ namespace Kafka.Client.Messages
                 SnapshotId SnapshotIdField,
                 ImmutableArray<AbortedTransaction>? AbortedTransactionsField,
                 int PreferredReadReplicaField,
-                IRecords? RecordsField
+                ImmutableArray<IRecords>? RecordsField
             )
             {
                 public static PartitionData Empty { get; } = new(
@@ -85,7 +85,7 @@ namespace Kafka.Client.Messages
                     SnapshotId.Empty,
                     default(ImmutableArray<AbortedTransaction>?),
                     default(int),
-                    default(IRecords)
+                    default(ImmutableArray<IRecords>)
                 );
                 /// <summary>
                 /// <param name="EndOffsetField"></param>

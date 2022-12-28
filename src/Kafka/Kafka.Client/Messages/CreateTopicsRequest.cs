@@ -2,8 +2,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreatableReplicaAssignment;
-using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
 using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreateableTopicConfig;
+using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
 
 namespace Kafka.Client.Messages
 {

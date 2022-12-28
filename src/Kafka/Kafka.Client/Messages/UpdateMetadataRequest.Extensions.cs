@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using UpdateMetadataBroker = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker;
-using UpdateMetadataTopicState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataTopicState;
 using UpdateMetadataPartitionState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataPartitionState;
+using UpdateMetadataBroker = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker;
 using UpdateMetadataEndpoint = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataBroker.UpdateMetadataEndpoint;
+using UpdateMetadataTopicState = Kafka.Client.Messages.UpdateMetadataRequest.UpdateMetadataTopicState;
 
 namespace Kafka.Client.Messages
 {
@@ -292,6 +292,331 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteCompactArray<UpdateMetadataBroker>(buffer, index, message.LiveBrokersField, UpdateMetadataBrokerSerde.WriteV08);
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
+        }
+        private static class UpdateMetadataPartitionStateSerde
+        {
+            public static UpdateMetadataPartitionState ReadV00(byte[] buffer, ref int index)
+            {
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var OfflineReplicasField = ImmutableArray<int>.Empty;
+                return new(
+                    TopicNameField,
+                    PartitionIndexField,
+                    ControllerEpochField,
+                    LeaderField,
+                    LeaderEpochField,
+                    IsrField,
+                    ZkVersionField,
+                    ReplicasField,
+                    OfflineReplicasField
+                );
+            }
+            public static int WriteV00(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV01(byte[] buffer, ref int index)
+            {
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var OfflineReplicasField = ImmutableArray<int>.Empty;
+                return new(
+                    TopicNameField,
+                    PartitionIndexField,
+                    ControllerEpochField,
+                    LeaderField,
+                    LeaderEpochField,
+                    IsrField,
+                    ZkVersionField,
+                    ReplicasField,
+                    OfflineReplicasField
+                );
+            }
+            public static int WriteV01(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV02(byte[] buffer, ref int index)
+            {
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var OfflineReplicasField = ImmutableArray<int>.Empty;
+                return new(
+                    TopicNameField,
+                    PartitionIndexField,
+                    ControllerEpochField,
+                    LeaderField,
+                    LeaderEpochField,
+                    IsrField,
+                    ZkVersionField,
+                    ReplicasField,
+                    OfflineReplicasField
+                );
+            }
+            public static int WriteV02(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV03(byte[] buffer, ref int index)
+            {
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var OfflineReplicasField = ImmutableArray<int>.Empty;
+                return new(
+                    TopicNameField,
+                    PartitionIndexField,
+                    ControllerEpochField,
+                    LeaderField,
+                    LeaderEpochField,
+                    IsrField,
+                    ZkVersionField,
+                    ReplicasField,
+                    OfflineReplicasField
+                );
+            }
+            public static int WriteV03(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV04(byte[] buffer, ref int index)
+            {
+                var TopicNameField = Decoder.ReadString(buffer, ref index);
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var OfflineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                return new(
+                    TopicNameField,
+                    PartitionIndexField,
+                    ControllerEpochField,
+                    LeaderField,
+                    LeaderEpochField,
+                    IsrField,
+                    ZkVersionField,
+                    ReplicasField,
+                    OfflineReplicasField
+                );
+            }
+            public static int WriteV04(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteString(buffer, index, message.TopicNameField);
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV05(byte[] buffer, ref int index)
+            {
+                var TopicNameField = "";
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var OfflineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                return new(
+                    TopicNameField,
+                    PartitionIndexField,
+                    ControllerEpochField,
+                    LeaderField,
+                    LeaderEpochField,
+                    IsrField,
+                    ZkVersionField,
+                    ReplicasField,
+                    OfflineReplicasField
+                );
+            }
+            public static int WriteV05(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV06(byte[] buffer, ref int index)
+            {
+                var TopicNameField = "";
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var IsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    TopicNameField,
+                    PartitionIndexField,
+                    ControllerEpochField,
+                    LeaderField,
+                    LeaderEpochField,
+                    IsrField,
+                    ZkVersionField,
+                    ReplicasField,
+                    OfflineReplicasField
+                );
+            }
+            public static int WriteV06(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV07(byte[] buffer, ref int index)
+            {
+                var TopicNameField = "";
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var IsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    TopicNameField,
+                    PartitionIndexField,
+                    ControllerEpochField,
+                    LeaderField,
+                    LeaderEpochField,
+                    IsrField,
+                    ZkVersionField,
+                    ReplicasField,
+                    OfflineReplicasField
+                );
+            }
+            public static int WriteV07(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            public static UpdateMetadataPartitionState ReadV08(byte[] buffer, ref int index)
+            {
+                var TopicNameField = "";
+                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderField = Decoder.ReadInt32(buffer, ref index);
+                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                var IsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
+                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
+                var ReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
+                var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    TopicNameField,
+                    PartitionIndexField,
+                    ControllerEpochField,
+                    LeaderField,
+                    LeaderEpochField,
+                    IsrField,
+                    ZkVersionField,
+                    ReplicasField,
+                    OfflineReplicasField
+                );
+            }
+            public static int WriteV08(byte[] buffer, int index, UpdateMetadataPartitionState message)
+            {
+                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
+                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
+                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteCompactArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
         }
         private static class UpdateMetadataBrokerSerde
         {
@@ -749,331 +1074,6 @@ namespace Kafka.Client.Messages
                 index = Encoder.WriteCompactString(buffer, index, message.TopicNameField);
                 index = Encoder.WriteUuid(buffer, index, message.TopicIdField);
                 index = Encoder.WriteCompactArray<UpdateMetadataPartitionState>(buffer, index, message.PartitionStatesField, UpdateMetadataPartitionStateSerde.WriteV08);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-        }
-        private static class UpdateMetadataPartitionStateSerde
-        {
-            public static UpdateMetadataPartitionState ReadV00(byte[] buffer, ref int index)
-            {
-                var TopicNameField = Decoder.ReadString(buffer, ref index);
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
-                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var OfflineReplicasField = ImmutableArray<int>.Empty;
-                return new(
-                    TopicNameField,
-                    PartitionIndexField,
-                    ControllerEpochField,
-                    LeaderField,
-                    LeaderEpochField,
-                    IsrField,
-                    ZkVersionField,
-                    ReplicasField,
-                    OfflineReplicasField
-                );
-            }
-            public static int WriteV00(byte[] buffer, int index, UpdateMetadataPartitionState message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicNameField);
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
-                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
-                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
-                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
-                return index;
-            }
-            public static UpdateMetadataPartitionState ReadV01(byte[] buffer, ref int index)
-            {
-                var TopicNameField = Decoder.ReadString(buffer, ref index);
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
-                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var OfflineReplicasField = ImmutableArray<int>.Empty;
-                return new(
-                    TopicNameField,
-                    PartitionIndexField,
-                    ControllerEpochField,
-                    LeaderField,
-                    LeaderEpochField,
-                    IsrField,
-                    ZkVersionField,
-                    ReplicasField,
-                    OfflineReplicasField
-                );
-            }
-            public static int WriteV01(byte[] buffer, int index, UpdateMetadataPartitionState message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicNameField);
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
-                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
-                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
-                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
-                return index;
-            }
-            public static UpdateMetadataPartitionState ReadV02(byte[] buffer, ref int index)
-            {
-                var TopicNameField = Decoder.ReadString(buffer, ref index);
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
-                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var OfflineReplicasField = ImmutableArray<int>.Empty;
-                return new(
-                    TopicNameField,
-                    PartitionIndexField,
-                    ControllerEpochField,
-                    LeaderField,
-                    LeaderEpochField,
-                    IsrField,
-                    ZkVersionField,
-                    ReplicasField,
-                    OfflineReplicasField
-                );
-            }
-            public static int WriteV02(byte[] buffer, int index, UpdateMetadataPartitionState message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicNameField);
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
-                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
-                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
-                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
-                return index;
-            }
-            public static UpdateMetadataPartitionState ReadV03(byte[] buffer, ref int index)
-            {
-                var TopicNameField = Decoder.ReadString(buffer, ref index);
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
-                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var OfflineReplicasField = ImmutableArray<int>.Empty;
-                return new(
-                    TopicNameField,
-                    PartitionIndexField,
-                    ControllerEpochField,
-                    LeaderField,
-                    LeaderEpochField,
-                    IsrField,
-                    ZkVersionField,
-                    ReplicasField,
-                    OfflineReplicasField
-                );
-            }
-            public static int WriteV03(byte[] buffer, int index, UpdateMetadataPartitionState message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicNameField);
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
-                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
-                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
-                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
-                return index;
-            }
-            public static UpdateMetadataPartitionState ReadV04(byte[] buffer, ref int index)
-            {
-                var TopicNameField = Decoder.ReadString(buffer, ref index);
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
-                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var OfflineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                return new(
-                    TopicNameField,
-                    PartitionIndexField,
-                    ControllerEpochField,
-                    LeaderField,
-                    LeaderEpochField,
-                    IsrField,
-                    ZkVersionField,
-                    ReplicasField,
-                    OfflineReplicasField
-                );
-            }
-            public static int WriteV04(byte[] buffer, int index, UpdateMetadataPartitionState message)
-            {
-                index = Encoder.WriteString(buffer, index, message.TopicNameField);
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
-                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
-                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
-                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
-                index = Encoder.WriteArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
-                return index;
-            }
-            public static UpdateMetadataPartitionState ReadV05(byte[] buffer, ref int index)
-            {
-                var TopicNameField = "";
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                var IsrField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
-                var ReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var OfflineReplicasField = Decoder.ReadArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                return new(
-                    TopicNameField,
-                    PartitionIndexField,
-                    ControllerEpochField,
-                    LeaderField,
-                    LeaderEpochField,
-                    IsrField,
-                    ZkVersionField,
-                    ReplicasField,
-                    OfflineReplicasField
-                );
-            }
-            public static int WriteV05(byte[] buffer, int index, UpdateMetadataPartitionState message)
-            {
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
-                index = Encoder.WriteArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
-                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
-                index = Encoder.WriteArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
-                index = Encoder.WriteArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
-                return index;
-            }
-            public static UpdateMetadataPartitionState ReadV06(byte[] buffer, ref int index)
-            {
-                var TopicNameField = "";
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                var IsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
-                var ReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    TopicNameField,
-                    PartitionIndexField,
-                    ControllerEpochField,
-                    LeaderField,
-                    LeaderEpochField,
-                    IsrField,
-                    ZkVersionField,
-                    ReplicasField,
-                    OfflineReplicasField
-                );
-            }
-            public static int WriteV06(byte[] buffer, int index, UpdateMetadataPartitionState message)
-            {
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
-                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-            public static UpdateMetadataPartitionState ReadV07(byte[] buffer, ref int index)
-            {
-                var TopicNameField = "";
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                var IsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
-                var ReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    TopicNameField,
-                    PartitionIndexField,
-                    ControllerEpochField,
-                    LeaderField,
-                    LeaderEpochField,
-                    IsrField,
-                    ZkVersionField,
-                    ReplicasField,
-                    OfflineReplicasField
-                );
-            }
-            public static int WriteV07(byte[] buffer, int index, UpdateMetadataPartitionState message)
-            {
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
-                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-            public static UpdateMetadataPartitionState ReadV08(byte[] buffer, ref int index)
-            {
-                var TopicNameField = "";
-                var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                var ControllerEpochField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderField = Decoder.ReadInt32(buffer, ref index);
-                var LeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                var IsrField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Isr'");
-                var ZkVersionField = Decoder.ReadInt32(buffer, ref index);
-                var ReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'Replicas'");
-                var OfflineReplicasField = Decoder.ReadCompactArray<int>(buffer, ref index, Decoder.ReadInt32) ?? throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    TopicNameField,
-                    PartitionIndexField,
-                    ControllerEpochField,
-                    LeaderField,
-                    LeaderEpochField,
-                    IsrField,
-                    ZkVersionField,
-                    ReplicasField,
-                    OfflineReplicasField
-                );
-            }
-            public static int WriteV08(byte[] buffer, int index, UpdateMetadataPartitionState message)
-            {
-                index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                index = Encoder.WriteInt32(buffer, index, message.ControllerEpochField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderField);
-                index = Encoder.WriteInt32(buffer, index, message.LeaderEpochField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.IsrField, Encoder.WriteInt32);
-                index = Encoder.WriteInt32(buffer, index, message.ZkVersionField);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.ReplicasField, Encoder.WriteInt32);
-                index = Encoder.WriteCompactArray<int>(buffer, index, message.OfflineReplicasField, Encoder.WriteInt32);
                 index = Encoder.WriteVarUInt32(buffer, index, 0);
                 return index;
             }

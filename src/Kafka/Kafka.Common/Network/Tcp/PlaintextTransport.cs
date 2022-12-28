@@ -1,4 +1,5 @@
 ﻿using Kafka.Common.Encoding;
+using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
 
@@ -9,13 +10,16 @@ namespace Kafka.Common.Network.Tcp
     {
         private readonly DnsEndPoint _endPoint;
         private readonly TcpClient _tcpClient;
-        private readonly SemaphoreSlim _sendSemaphore = new(1, 1);
-        private readonly SemaphoreSlim _receiveSemaphore = new(1, 1);
+        private readonly ILogger _logger;
 
-        public PlaintextTransport(DnsEndPoint endPoint)
+        public PlaintextTransport(
+            DnsEndPoint endPoint,
+            ILogger logger
+        )
         {
             _endPoint = endPoint;
             _tcpClient = new TcpClient();
+            _logger = logger;
         }
         bool ITransport.IsConnected =>
             _tcpClient.Connected
@@ -72,50 +76,16 @@ namespace Kafka.Common.Network.Tcp
             }
         }
 
-        void IDisposable.Dispose()
+        public async ValueTask Close(CancellationToken cancellationToken)
         {
-            if (_tcpClient == null)
-                return;
             if (_tcpClient.Connected)
                 _tcpClient.Close();
+            await ValueTask.CompletedTask;
+        }
+
+        void IDisposable.Dispose()
+        {
             _tcpClient.Dispose();
-        }
-
-        async ValueTask ITransport.Send(byte[] requestBytes, int offset, int length, CancellationToken cancellationToken)
-        {
-            await _sendSemaphore.WaitAsync(cancellationToken);
-            try
-            {
-                var networkStream = _tcpClient.GetStream();
-                var memory = requestBytes.AsMemory(offset, length);
-                Encoder.WriteInt32(networkStream, memory.Length);
-                await networkStream.WriteAsync(memory, cancellationToken);
-                await networkStream.FlushAsync(cancellationToken);
-            }
-            finally
-            {
-                _sendSemaphore.Release();
-            }
-        }
-
-        async ValueTask<byte[]> ITransport.Receive(CancellationToken cancellationToken)
-        {
-            await _receiveSemaphore.WaitAsync(cancellationToken);
-            try
-            {
-                var sizeBytes = new byte[4];
-                var networkStream = _tcpClient.GetStream();
-                await ReadBytesFromNetwork(networkStream, sizeBytes, cancellationToken);
-                var index = 0;
-                var messageLen = Decoder.ReadInt32(sizeBytes, ref index);
-                var responseBytes = new byte[messageLen];
-                await ReadBytesFromNetwork(networkStream, responseBytes, cancellationToken);
-                return responseBytes;
-            }
-            finally
-            {
-                _receiveSemaphore.Release();
-            }
         }
     }
 }

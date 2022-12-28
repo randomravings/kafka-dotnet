@@ -213,25 +213,34 @@ namespace Kafka.Common.Encoding
             );
         }
 
-        public static IRecords? ReadRecords(byte[] buffer, ref int index)
+        public static ImmutableArray<IRecords>? ReadRecords(byte[] buffer, ref int index)
         {
             var length = ReadInt32(buffer, ref index);
-            if (length == 0)
-                return default;
-            CheckRemaining(buffer, index, length);
-            return ReadRecordsInternal(buffer, ref index);
+            return ReadRecordBatches(buffer, length, ref index);
         }
 
-        public static IRecords? ReadCompactRecords(byte[] buffer, ref int index)
+        public static ImmutableArray<IRecords>? ReadCompactRecords(byte[] buffer, ref int index)
         {
-            var length = ReadVarUInt32(buffer, ref index);
+            var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index));
+            return ReadRecordBatches(buffer, length, ref index);
+        }
+        
+        private static ImmutableArray<IRecords>? ReadRecordBatches(byte[] buffer, int length, ref int index)
+        {
             if (length == 0)
                 return default;
             CheckRemaining(buffer, index, length);
-            return ReadRecordsInternal(buffer, ref index);
+            var recordBatchesBuilder = ImmutableArray.CreateBuilder<IRecords>();
+            var limit = length + index;
+            while(index < limit)
+            {
+                var recordBatch = ReadRecordBatch(buffer, ref index);
+                recordBatchesBuilder.Add(recordBatch);
+            }
+            return recordBatchesBuilder.ToImmutable();
         }
 
-        private static IRecords? ReadRecordsInternal(byte[] buffer, ref int index)
+        private static IRecords ReadRecordBatch(byte[] buffer, ref int index)
         {
             var baseOffset = ReadInt64(buffer, ref index);
             var size = ReadInt32(buffer, ref index);

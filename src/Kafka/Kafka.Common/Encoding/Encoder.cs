@@ -1,6 +1,6 @@
 ﻿using Kafka.Common.Hashing;
 using Kafka.Common.Records;
-using System;
+using System.Linq;
 using System.Collections.Immutable;
 using System.Numerics;
 
@@ -193,25 +193,25 @@ namespace Kafka.Common.Encoding
             return index;
         }
 
-        public static int WriteRecords(byte[] buffer, int index, IRecords? records)
+        public static int WriteRecords(byte[] buffer, int index, ImmutableArray<IRecords>? records)
         {
             if (records == null)
                 return WriteInt32(buffer, index, -1);
-            var totalBytes = records.Size + 61;
+            var totalBytes = records.Value.Sum(r => r.Size + RECORDS_HEADER_SIZE);
             index = WriteInt32(buffer, index, totalBytes);
-            var x = index;
-            index = WriteRecordsInternal(buffer, index, records);
-            var y = index - x;
+            foreach(var record in records.Value)
+                index = WriteRecordBatch(buffer, index, record);
             return index;
         }
 
-        public static int WriteCompactRecords(byte[] buffer, int index, IRecords? records)
+        public static int WriteCompactRecords(byte[] buffer, int index, ImmutableArray<IRecords>? records)
         {
             if (records == null)
                 return WriteVarUInt32(buffer, index, 0);
-            var totalBytes = Convert.ToUInt32(records.Size + RECORDS_HEADER_SIZE);
+            var totalBytes = Convert.ToUInt32(records.Value.Sum(r => r.Size + RECORDS_HEADER_SIZE));
             index = WriteVarUInt32(buffer, index, totalBytes + 1);
-            index = WriteRecordsInternal(buffer, index, records);
+            foreach (var record in records.Value)
+                index = WriteRecordBatch(buffer, index, record);
             return index;
         }
 
@@ -219,7 +219,7 @@ namespace Kafka.Common.Encoding
         private const int RECORDS_LOG_OVERHEAD = 12;
         private const int RECORDS_SIZE_PADDING = RECORDS_HEADER_SIZE - RECORDS_LOG_OVERHEAD;
 
-        private static int WriteRecordsInternal(byte[] buffer, int index, IRecords records)
+        private static int WriteRecordBatch(byte[] buffer, int index, IRecords records)
         {
             // Write batch header.
             index = WriteInt64(buffer, index, records.Offset);

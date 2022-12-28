@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using PartitionData = Kafka.Client.Messages.AlterPartitionRequest.TopicData.PartitionData;
 using TopicData = Kafka.Client.Messages.AlterPartitionRequest.TopicData;
+using PartitionData = Kafka.Client.Messages.AlterPartitionRequest.TopicData.PartitionData;
 
 namespace Kafka.Client.Messages
 {

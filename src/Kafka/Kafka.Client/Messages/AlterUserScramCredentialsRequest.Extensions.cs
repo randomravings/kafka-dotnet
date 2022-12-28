@@ -1,7 +1,7 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
-using ScramCredentialUpsertion = Kafka.Client.Messages.AlterUserScramCredentialsRequest.ScramCredentialUpsertion;
 using ScramCredentialDeletion = Kafka.Client.Messages.AlterUserScramCredentialsRequest.ScramCredentialDeletion;
+using ScramCredentialUpsertion = Kafka.Client.Messages.AlterUserScramCredentialsRequest.ScramCredentialUpsertion;
 
 namespace Kafka.Client.Messages
 {
@@ -37,6 +37,26 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
         }
+        private static class ScramCredentialDeletionSerde
+        {
+            public static ScramCredentialDeletion ReadV00(byte[] buffer, ref int index)
+            {
+                var NameField = Decoder.ReadCompactString(buffer, ref index);
+                var MechanismField = Decoder.ReadInt8(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    NameField,
+                    MechanismField
+                );
+            }
+            public static int WriteV00(byte[] buffer, int index, ScramCredentialDeletion message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                index = Encoder.WriteInt8(buffer, index, message.MechanismField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+        }
         private static class ScramCredentialUpsertionSerde
         {
             public static ScramCredentialUpsertion ReadV00(byte[] buffer, ref int index)
@@ -62,26 +82,6 @@ namespace Kafka.Client.Messages
                 index = Encoder.WriteInt32(buffer, index, message.IterationsField);
                 index = Encoder.WriteCompactBytes(buffer, index, message.SaltField);
                 index = Encoder.WriteCompactBytes(buffer, index, message.SaltedPasswordField);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-        }
-        private static class ScramCredentialDeletionSerde
-        {
-            public static ScramCredentialDeletion ReadV00(byte[] buffer, ref int index)
-            {
-                var NameField = Decoder.ReadCompactString(buffer, ref index);
-                var MechanismField = Decoder.ReadInt8(buffer, ref index);
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    NameField,
-                    MechanismField
-                );
-            }
-            public static int WriteV00(byte[] buffer, int index, ScramCredentialDeletion message)
-            {
-                index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                index = Encoder.WriteInt8(buffer, index, message.MechanismField);
                 index = Encoder.WriteVarUInt32(buffer, index, 0);
                 return index;
             }

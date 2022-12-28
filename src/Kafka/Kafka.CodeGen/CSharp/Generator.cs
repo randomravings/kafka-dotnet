@@ -493,7 +493,7 @@ namespace Kafka.CodeGen.CSharp
             {
                 StructFieldType f => f.Name,
                 ArrayFieldType f => $"ImmutableArray<{QualifyType(f.ItemType)}>",
-                RecordsFieldType => "IRecords",
+                RecordsFieldType => "ImmutableArray<IRecords>",
                 FieldType f => f.ToSystemType()
             }
         ;
@@ -795,7 +795,7 @@ namespace Kafka.CodeGen.CSharp
             if (!fieldProperties.Versions.Includes(version) || fieldProperties.TaggedVersions.Includes(version))
             {
                 if (fieldProperties.NullableVersions.Includes(version))
-                    await writer.WriteLineAsync($"default({nameof(IRecords)});");
+                    await writer.WriteLineAsync($"default(ImmutableArray<{nameof(IRecords)}>);");
                 else
                     await writer.WriteLineAsync($"{nameof(RecordBatch)}.{nameof(RecordBatch.Empty)};");
             }
@@ -846,8 +846,8 @@ namespace Kafka.CodeGen.CSharp
         ) =>
             nullable switch
             {
-                true => $"default({nameof(IRecords)})",
-                false => $"{nameof(RecordBatch)}.{nameof(RecordBatch.Empty)}"
+                true => $"default(ImmutableArray<{nameof(IRecords)}>)",
+                false => $"ImmutableArray<{nameof(IRecords)}>.Empty"
             }
         ;
 

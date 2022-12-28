@@ -1,10 +1,10 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using Kafka.Common.Records;
-using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
 using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
+using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
 using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
 
 namespace Kafka.Client.Messages
 {

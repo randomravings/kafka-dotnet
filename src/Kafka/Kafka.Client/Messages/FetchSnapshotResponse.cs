@@ -2,10 +2,10 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
 using Kafka.Common.Protocol;
-using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
 using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
+using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
 using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
 
 namespace Kafka.Client.Messages
 {
@@ -55,7 +55,7 @@ namespace Kafka.Client.Messages
                 LeaderIdAndEpoch CurrentLeaderField,
                 long SizeField,
                 long PositionField,
-                IRecords UnalignedRecordsField
+                ImmutableArray<IRecords> UnalignedRecordsField
             )
             {
                 public static PartitionSnapshot Empty { get; } = new(
@@ -65,7 +65,7 @@ namespace Kafka.Client.Messages
                     LeaderIdAndEpoch.Empty,
                     default(long),
                     default(long),
-                    RecordBatch.Empty
+                    ImmutableArray<IRecords>.Empty
                 );
                 /// <summary>
                 /// <param name="EndOffsetField"></param>

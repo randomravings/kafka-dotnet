@@ -1,18 +1,13 @@
-﻿using Kafka.Common;
+﻿using Kafka.Client.Clients.Consumer.Models;
 using Kafka.Common.Types;
+using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Consumer
 {
     public interface IConsumer<TKey, TValue> :
         IClient
     {
-        ValueTask<ConsumeResult<TKey, TValue>> Poll(CancellationToken cancellationToken = default);
-        ValueTask Subscribe(TopicName topic, CancellationToken cancellationToken = default);
-        ValueTask Unsubscribe(TopicName topic, CancellationToken cancellationToken = default);
-        ValueTask Assign(TopicPartitionOffset topicPartitionOffset, CancellationToken cancellationToken = default);
-        ValueTask Assign(TopicPartitionOffsets topicPartitionOffsets, CancellationToken cancellationToken = default);
-        ValueTask UnAssign(TopicPartitionOffset topicPartitionOffset, CancellationToken cancellationToken = default);
-        ValueTask UnAssign(TopicPartitionOffsets topicPartitionOffsets, CancellationToken cancellationToken = default);
-        ValueTask Close(CancellationToken cancellationToken = default);
+        ValueTask<ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionWatermark>>> QueryWatermarks(TopicList topics, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<ConsumeResult<TKey, TValue>> Read(TopicList topics, CancellationToken cancellationToken = default);
     }
 }

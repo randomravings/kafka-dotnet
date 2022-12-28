@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using Kafka.Common.Encoding;
 using System.Collections.Immutable;
-using OffsetFetchResponseGroup = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseGroup;
-using OffsetFetchResponsePartition = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseTopic.OffsetFetchResponsePartition;
 using OffsetFetchResponseTopic = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseTopic;
+using OffsetFetchResponsePartition = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseTopic.OffsetFetchResponsePartition;
+using OffsetFetchResponseGroup = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseGroup;
 using OffsetFetchResponseTopics = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseGroup.OffsetFetchResponseTopics;
 using OffsetFetchResponsePartitions = Kafka.Client.Messages.OffsetFetchResponse.OffsetFetchResponseGroup.OffsetFetchResponseTopics.OffsetFetchResponsePartitions;
 
@@ -219,78 +219,6 @@ namespace Kafka.Client.Messages
             index = Encoder.WriteCompactArray<OffsetFetchResponseGroup>(buffer, index, message.GroupsField, OffsetFetchResponseGroupSerde.WriteV08);
             index = Encoder.WriteVarUInt32(buffer, index, 0);
             return index;
-        }
-        private static class OffsetFetchResponseGroupSerde
-        {
-            public static OffsetFetchResponseGroup ReadV08(byte[] buffer, ref int index)
-            {
-                var GroupIdField = Decoder.ReadCompactString(buffer, ref index);
-                var TopicsField = Decoder.ReadCompactArray<OffsetFetchResponseTopics>(buffer, ref index, OffsetFetchResponseTopicsSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
-                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    GroupIdField,
-                    TopicsField,
-                    ErrorCodeField
-                );
-            }
-            public static int WriteV08(byte[] buffer, int index, OffsetFetchResponseGroup message)
-            {
-                index = Encoder.WriteCompactString(buffer, index, message.GroupIdField);
-                index = Encoder.WriteCompactArray<OffsetFetchResponseTopics>(buffer, index, message.TopicsField, OffsetFetchResponseTopicsSerde.WriteV08);
-                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-            private static class OffsetFetchResponseTopicsSerde
-            {
-                public static OffsetFetchResponseTopics ReadV08(byte[] buffer, ref int index)
-                {
-                    var NameField = Decoder.ReadCompactString(buffer, ref index);
-                    var PartitionsField = Decoder.ReadCompactArray<OffsetFetchResponsePartitions>(buffer, ref index, OffsetFetchResponsePartitionsSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
-                    _ = Decoder.ReadVarUInt32(buffer, ref index);
-                    return new(
-                        NameField,
-                        PartitionsField
-                    );
-                }
-                public static int WriteV08(byte[] buffer, int index, OffsetFetchResponseTopics message)
-                {
-                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                    index = Encoder.WriteCompactArray<OffsetFetchResponsePartitions>(buffer, index, message.PartitionsField, OffsetFetchResponsePartitionsSerde.WriteV08);
-                    index = Encoder.WriteVarUInt32(buffer, index, 0);
-                    return index;
-                }
-                private static class OffsetFetchResponsePartitionsSerde
-                {
-                    public static OffsetFetchResponsePartitions ReadV08(byte[] buffer, ref int index)
-                    {
-                        var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                        var CommittedOffsetField = Decoder.ReadInt64(buffer, ref index);
-                        var CommittedLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
-                        var MetadataField = Decoder.ReadCompactNullableString(buffer, ref index);
-                        var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
-                        _ = Decoder.ReadVarUInt32(buffer, ref index);
-                        return new(
-                            PartitionIndexField,
-                            CommittedOffsetField,
-                            CommittedLeaderEpochField,
-                            MetadataField,
-                            ErrorCodeField
-                        );
-                    }
-                    public static int WriteV08(byte[] buffer, int index, OffsetFetchResponsePartitions message)
-                    {
-                        index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                        index = Encoder.WriteInt64(buffer, index, message.CommittedOffsetField);
-                        index = Encoder.WriteInt32(buffer, index, message.CommittedLeaderEpochField);
-                        index = Encoder.WriteCompactNullableString(buffer, index, message.MetadataField);
-                        index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
-                        index = Encoder.WriteVarUInt32(buffer, index, 0);
-                        return index;
-                    }
-                }
-            }
         }
         private static class OffsetFetchResponseTopicSerde
         {
@@ -610,6 +538,78 @@ namespace Kafka.Client.Messages
                     index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
                     index = Encoder.WriteVarUInt32(buffer, index, 0);
                     return index;
+                }
+            }
+        }
+        private static class OffsetFetchResponseGroupSerde
+        {
+            public static OffsetFetchResponseGroup ReadV08(byte[] buffer, ref int index)
+            {
+                var GroupIdField = Decoder.ReadCompactString(buffer, ref index);
+                var TopicsField = Decoder.ReadCompactArray<OffsetFetchResponseTopics>(buffer, ref index, OffsetFetchResponseTopicsSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Topics'");
+                var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                _ = Decoder.ReadVarUInt32(buffer, ref index);
+                return new(
+                    GroupIdField,
+                    TopicsField,
+                    ErrorCodeField
+                );
+            }
+            public static int WriteV08(byte[] buffer, int index, OffsetFetchResponseGroup message)
+            {
+                index = Encoder.WriteCompactString(buffer, index, message.GroupIdField);
+                index = Encoder.WriteCompactArray<OffsetFetchResponseTopics>(buffer, index, message.TopicsField, OffsetFetchResponseTopicsSerde.WriteV08);
+                index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                index = Encoder.WriteVarUInt32(buffer, index, 0);
+                return index;
+            }
+            private static class OffsetFetchResponseTopicsSerde
+            {
+                public static OffsetFetchResponseTopics ReadV08(byte[] buffer, ref int index)
+                {
+                    var NameField = Decoder.ReadCompactString(buffer, ref index);
+                    var PartitionsField = Decoder.ReadCompactArray<OffsetFetchResponsePartitions>(buffer, ref index, OffsetFetchResponsePartitionsSerde.ReadV08) ?? throw new NullReferenceException("Null not allowed for 'Partitions'");
+                    _ = Decoder.ReadVarUInt32(buffer, ref index);
+                    return new(
+                        NameField,
+                        PartitionsField
+                    );
+                }
+                public static int WriteV08(byte[] buffer, int index, OffsetFetchResponseTopics message)
+                {
+                    index = Encoder.WriteCompactString(buffer, index, message.NameField);
+                    index = Encoder.WriteCompactArray<OffsetFetchResponsePartitions>(buffer, index, message.PartitionsField, OffsetFetchResponsePartitionsSerde.WriteV08);
+                    index = Encoder.WriteVarUInt32(buffer, index, 0);
+                    return index;
+                }
+                private static class OffsetFetchResponsePartitionsSerde
+                {
+                    public static OffsetFetchResponsePartitions ReadV08(byte[] buffer, ref int index)
+                    {
+                        var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
+                        var CommittedOffsetField = Decoder.ReadInt64(buffer, ref index);
+                        var CommittedLeaderEpochField = Decoder.ReadInt32(buffer, ref index);
+                        var MetadataField = Decoder.ReadCompactNullableString(buffer, ref index);
+                        var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
+                        _ = Decoder.ReadVarUInt32(buffer, ref index);
+                        return new(
+                            PartitionIndexField,
+                            CommittedOffsetField,
+                            CommittedLeaderEpochField,
+                            MetadataField,
+                            ErrorCodeField
+                        );
+                    }
+                    public static int WriteV08(byte[] buffer, int index, OffsetFetchResponsePartitions message)
+                    {
+                        index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                        index = Encoder.WriteInt64(buffer, index, message.CommittedOffsetField);
+                        index = Encoder.WriteInt32(buffer, index, message.CommittedLeaderEpochField);
+                        index = Encoder.WriteCompactNullableString(buffer, index, message.MetadataField);
+                        index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                        index = Encoder.WriteVarUInt32(buffer, index, 0);
+                        return index;
+                    }
                 }
             }
         }

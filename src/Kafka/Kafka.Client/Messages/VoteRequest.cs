@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using PartitionData = Kafka.Client.Messages.VoteRequest.TopicData.PartitionData;
 using TopicData = Kafka.Client.Messages.VoteRequest.TopicData;
+using PartitionData = Kafka.Client.Messages.VoteRequest.TopicData.PartitionData;
 
 namespace Kafka.Client.Messages
 {

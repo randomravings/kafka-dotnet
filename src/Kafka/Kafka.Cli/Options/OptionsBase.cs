@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Options
 {
@@ -9,5 +10,8 @@ namespace Kafka.Cli.Options
 
         [Option("client-id")]
         public string ClientId { get; set; } = "";
+
+        [Option("log-level", Required = false, Default = LogLevel.Warning)]
+        public LogLevel LogLevel { get; set; } = LogLevel.Warning;
     }
 }
