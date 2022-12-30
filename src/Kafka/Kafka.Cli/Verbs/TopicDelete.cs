@@ -3,8 +3,8 @@ using Kafka.Cli.Options;
 
 namespace Kafka.Cli.Verbs
 {
-    [Verb("describe")]
-    public sealed class VerbTopicDescribe
+    [Verb("delete")]
+    public sealed class TopicDelete
         : OptionsBaseTopic
     { }
 }

@@ -42,8 +42,5 @@ namespace Kafka.Cli.Text
                 return $"unset";
             return "unknown";
         }
-        public static string Print(ProduceRecordError produceRecordError) =>
-            $"{produceRecordError.Index}:{produceRecordError.ErrorMessage}"
-        ;
     }
 }

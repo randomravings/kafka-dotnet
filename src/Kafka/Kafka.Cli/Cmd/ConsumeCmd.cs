@@ -6,10 +6,10 @@ using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd
 {
-    internal static class Consume
+    internal static class ConsumeCmd
     {
         public static async ValueTask<int> Parse(
-            VerbConsume verb,
+            Consume verb,
             CancellationToken cancellationToken
         )
         {
@@ -18,7 +18,7 @@ namespace Kafka.Cli.Cmd
                 Deserializers.Utf8,
                 Deserializers.Utf8
             );
-            var topic = new TopicList("test");
+            var topic = new Client.Clients.Consumer.Models.TopicList("test");
             try
             {
                 var topicWatermarks = await consumer.QueryWatermarks(
@@ -45,7 +45,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static IConsumer<TKey, TValue> CreateConsumer<TKey, TValue>(
-            VerbConsume verb,
+            Consume verb,
             IDeserializer<TKey> keyDeserializer,
             IDeserializer<TValue> valueDeserializer
         )

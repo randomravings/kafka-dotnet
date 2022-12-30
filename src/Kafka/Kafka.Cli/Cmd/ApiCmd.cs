@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd
 {
-    internal static class Api
+    internal static class ApiCmd
     {
         public static async ValueTask<int> Parse(
             VerbApiVersions verb,

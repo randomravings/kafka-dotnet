@@ -22,13 +22,17 @@ namespace Kafka.Client.Clients
         private const short REQUEST_HEADER_VERSION = 2;
         private const short RESPONSE_HEADER_VERSION = 1;
         private readonly ITransport _transport;
-        private readonly BlockingCollection<SendCallback> _pendingRequests = new();
+
+        private readonly BlockingCollection<RequestData> _requestQueue = new();
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]>> _pendingRequests = new();
+
         private readonly CancellationTokenSource _clientCts = new();
-        private readonly Task _requestHandler;
+        private readonly Task _sender;
         protected readonly TConfig _config;
         protected readonly ILogger _logger;
 
         private int _coorelationIds = 0;
+        private bool _metadataInitialized = false;
         private bool _disposed;
 
         protected ImmutableSortedDictionary<short, ApiVersion> _apiVersions = ImmutableSortedDictionary<short, ApiVersion>.Empty;
@@ -41,12 +45,12 @@ namespace Kafka.Client.Clients
             byte[] Request,
             int Offset,
             int Length,
-            TaskCompletionSource<ReceivePackage> Response
+            TaskCompletionSource<byte[]> Response
         );
 
-        private sealed record ReceivePackage(
-            ResponseHeader ResponseHeader,
-            byte[] Response,
+        private readonly record struct RequestData(
+            int CorrelationId,
+            byte[] Data,
             int Offset,
             int Length
         );
@@ -59,18 +63,17 @@ namespace Kafka.Client.Clients
             _config = config;
             _logger = logger;
             var endpoint = ParseBoostrap(config.BootstrapServers).First();
-            _transport = new PlaintextTransport(endpoint, logger);
-            _requestHandler = Task.Run(async () => await Do(_clientCts.Token), CancellationToken.None);
+            _transport = new PlaintextTransport(endpoint);
+            _sender = Task.Run(async () => await SendLoop(_clientCts.Token), CancellationToken.None);
         }
 
-        protected async ValueTask EnsureConnection(CancellationToken cancellationToken)
+        protected async ValueTask EnsureMetadata(CancellationToken cancellationToken)
         {
-            if (_transport.IsConnected)
+            if (_metadataInitialized)
                 return;
-            await _transport.Connect(cancellationToken);
-            await _transport.Handshake(cancellationToken);
             _apiVersions = await GetApiVersions(cancellationToken);
             _cluster = await GetCluster(_apiVersions[ApiKey.Metadata].Version.Max, cancellationToken);
+            _metadataInitialized = true;
         }
 
         protected async ValueTask<TResponse> HandleRequest<TRequest, TResponse>(
@@ -82,7 +85,7 @@ namespace Kafka.Client.Clients
             where TRequest : notnull, Request
             where TResponse : notnull, Response
         {
-            await EnsureConnection(cancellationToken);
+            await EnsureMetadata(cancellationToken);
             return await ExecuteRequest(
                 request,
                 requestWriter,
@@ -95,7 +98,7 @@ namespace Kafka.Client.Clients
         {
             await OnClose(cancellationToken);
             _clientCts.Cancel();
-            await _requestHandler;
+            await _sender;
             await _transport.Close(cancellationToken);
         }
 
@@ -107,7 +110,7 @@ namespace Kafka.Client.Clients
                 return;
             if (disposing)
             {
-                _requestHandler.Dispose();
+                _sender.Dispose();
                 _transport.Dispose();
             }
             _disposed = true;
@@ -162,31 +165,24 @@ namespace Kafka.Client.Clients
             offset = RequestHeaderSerde.Write(requestBytes, offset, requestHeader, REQUEST_HEADER_VERSION, flexible);
             offset = requestWriter(requestBytes, offset, request, requestHeader.RequestApiVersionField);
 
-            var callback = new SendCallback(
-                requestHeader,
-                flexible,
-                ignoreHeaderTaggedFields,
-                requestBytes,
-                0,
-                offset,
-                new TaskCompletionSource<ReceivePackage>()
-            );
-            _pendingRequests.Add(callback, cancellationToken);
-            var response = await callback.Response.Task.ContinueWith(
-                r =>
-                {
-                    offset = r.Result.Offset;
-                    if (r.Result.ResponseHeader.CorrelationIdField != callback.RequestHeader.CorrelationIdField)
-                        throw new Exception($"Correlation Id mismath - Request: {callback.RequestHeader.CorrelationIdField} - Response: {callback.RequestHeader.CorrelationIdField}");
-                    var response = responseReader(r.Result.Response, ref offset, version);
-                    return response;
-                },
-                CancellationToken.None
-            );
+            var completionSource = new TaskCompletionSource<byte[]>();
+            _pendingRequests.TryAdd(correlationId, completionSource);
+            _requestQueue.Add(new(correlationId, requestBytes, 0, offset), cancellationToken);
+            _logger.LogTrace("Adding request id: {correlationId}, apiKey: {apiKey}, version: {version} type: {request}/{response}", correlationId, request.Api, version, typeof(TRequest).Name, typeof(TResponse).Name);
+            var responseBytes = await completionSource.Task;
+            if (responseBytes.Length == 0)
+                throw new EndOfStreamException("No bytes received from server");
+            _pendingRequests.TryRemove(correlationId, out _);
+
+            offset = 0;
+            var responeHeader = ResponseHeaderSerde.Read(responseBytes, ref offset, RESPONSE_HEADER_VERSION, flexible && !ignoreHeaderTaggedFields);
+            if (responeHeader.CorrelationIdField != requestHeader.CorrelationIdField)
+                throw new Exception($"Correlation Id mismath - Request: {requestHeader.CorrelationIdField} - Response: {responeHeader.CorrelationIdField}");
+            var response = responseReader(responseBytes, ref offset, version);
             return response;
         }
 
-        private async Task Do(
+        private async Task SendLoop(
             CancellationToken cancellationToken
         )
         {
@@ -194,14 +190,30 @@ namespace Kafka.Client.Clients
             {
                 try
                 {
-                    var sendCallback = _pendingRequests.Take(cancellationToken);
-                    var responseBytes = await _transport.HandleRequest(sendCallback.Request, sendCallback.Offset, sendCallback.Length, cancellationToken);
-                    var offset = 0;
-                    var responseHeader = ResponseHeaderSerde.Read(responseBytes, ref offset, RESPONSE_HEADER_VERSION, sendCallback.Flexible && !sendCallback.IgnoreHeaderTaggedFields);
-                    var receivePackage = new ReceivePackage(responseHeader, responseBytes, offset, responseBytes.Length - offset);
-                    sendCallback.Response.SetResult(receivePackage);
+                    await EnsureConnection(cancellationToken);
+                    (var correlationId, var requestBytes, int offset, int length) = _requestQueue.Take(cancellationToken);
+                    var responseBytes = await _transport.HandleRequest(requestBytes, offset, length, cancellationToken);
+                    if (_pendingRequests.TryGetValue(correlationId, out var taskCompletionSource))
+                        taskCompletionSource.SetResult(responseBytes);
                 }
                 catch (OperationCanceledException) { }
+            }
+        }
+
+        private async ValueTask EnsureConnection(CancellationToken cancellationToken)
+        {
+            while (!_transport.IsConnected)
+            {
+                try
+                {
+                    await _transport.Connect(cancellationToken);
+                    await _transport.Handshake(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.Message);
+                    await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                }
             }
         }
 

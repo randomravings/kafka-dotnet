@@ -8,24 +8,30 @@ using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd
 {
-    internal static class Topics
+    internal static class TopicCmd
     {
         public static async ValueTask<int> Parse(
             IEnumerable<string> args,
             CancellationToken cancellationToken
         ) =>
-            await Parser.Default.ParseArguments<VerbTopicsList, VerbTopicCreate, VerbTopicDescribe, VerbTopicDelete>(args)
+            await new Parser(with =>
+            {
+                with.CaseSensitive = true;
+                with.HelpWriter = Console.Out;
+                with.IgnoreUnknownArguments = true;
+                with.CaseInsensitiveEnumValues = true;
+            }).ParseArguments<TopicList, TopicCreate, TopicDescribe, TopicDelete>(args)
                 .MapResult(
-                    (VerbTopicsList verb) => List(verb, cancellationToken),
-                    (VerbTopicCreate verb) => Create(verb, cancellationToken),
-                    (VerbTopicDescribe verb) => Describe(verb, cancellationToken),
-                    (VerbTopicDelete verb) => Delete(verb, cancellationToken),
+                    (TopicList verb) => List(verb, cancellationToken),
+                    (TopicCreate verb) => Create(verb, cancellationToken),
+                    (TopicDescribe verb) => Describe(verb, cancellationToken),
+                    (TopicDelete verb) => Delete(verb, cancellationToken),
                     errs => new ValueTask<int>(-1)
                 )
             ;
 
         public static async ValueTask<int> List(
-            VerbTopicsList verb,
+            TopicList verb,
             CancellationToken cancellationToken
         )
         {
@@ -42,6 +48,7 @@ namespace Kafka.Cli.Cmd
                 );
                 foreach (var topic in result.Topics)
                     Console.WriteLine(topic.Name);
+                await adminClient.Close(CancellationToken.None);
                 return 0;
             }
             catch (Exception ex)
@@ -52,7 +59,7 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> Create(
-            VerbTopicCreate verb,
+            TopicCreate verb,
             CancellationToken cancellationToken
         )
         {
@@ -118,7 +125,7 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> Delete(
-            VerbTopicDelete verb,
+            TopicDelete verb,
             CancellationToken cancellationToken
         )
         {
@@ -138,6 +145,7 @@ namespace Kafka.Cli.Cmd
                     Console.WriteLine(topic);
                 foreach (var error in result.ErrorTopics)
                     Console.WriteLine(error);
+                await adminClient.Close(CancellationToken.None);
                 return 0;
             }
             catch (Exception ex)
@@ -148,7 +156,7 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> Describe(
-            VerbTopicDescribe verb,
+            TopicDescribe verb,
             CancellationToken cancellationToken
         )
         {
@@ -182,6 +190,7 @@ namespace Kafka.Cli.Cmd
                         Console.WriteLine($"  OfflineReplicas: [{string.Join(',', partition.OfflineReplicas)}]");
                     }
                 }
+                await adminClient.Close(CancellationToken.None);
                 return 0;
             }
             catch (Exception ex)
@@ -192,18 +201,18 @@ namespace Kafka.Cli.Cmd
         }
 
         private static IAdminClient CreateAdminClient(
-            OptionsBase optionsBase,
+            OptionsBase options,
             out AdminClientConfig adminClientConfig
         )
         {
             adminClientConfig = new AdminClientConfig
             {
-                BootstrapServers = optionsBase.BootstrapServer
+                BootstrapServers = options.BootstrapServer
             };
             var logger = LoggerFactory
                 .Create(builder => builder
                     .AddConsole()
-                    .SetMinimumLevel(LogLevel.Trace)
+                    .SetMinimumLevel(options.LogLevel)
                 )
                 .CreateLogger<AdminClient>()
             ;

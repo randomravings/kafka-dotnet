@@ -10,16 +10,13 @@ namespace Kafka.Common.Network.Tcp
     {
         private readonly DnsEndPoint _endPoint;
         private readonly TcpClient _tcpClient;
-        private readonly ILogger _logger;
 
         public PlaintextTransport(
-            DnsEndPoint endPoint,
-            ILogger logger
+            DnsEndPoint endPoint
         )
         {
             _endPoint = endPoint;
             _tcpClient = new TcpClient();
-            _logger = logger;
         }
         bool ITransport.IsConnected =>
             _tcpClient.Connected
@@ -52,15 +49,17 @@ namespace Kafka.Common.Network.Tcp
             await networkStream.WriteAsync(memory, cancellationToken);
             await networkStream.FlushAsync(cancellationToken);
             var sizeBytes = new byte[4];
-            await ReadBytesFromNetwork(networkStream, sizeBytes, cancellationToken);
+            if (!await ReadBytesFromNetwork(networkStream, sizeBytes, cancellationToken))
+                return Array.Empty<byte>();
             var index = 0;
             var messageLen = Decoder.ReadInt32(sizeBytes, ref index);
             var responseBytes = new byte[messageLen];
-            await ReadBytesFromNetwork(networkStream, responseBytes, cancellationToken);
+            if (!await ReadBytesFromNetwork(networkStream, responseBytes, cancellationToken))
+                return Array.Empty<byte>();
             return responseBytes;
         }
 
-        private static async ValueTask ReadBytesFromNetwork(
+        private static async ValueTask<bool> ReadBytesFromNetwork(
             NetworkStream stream,
             byte[] bytes,
             CancellationToken cancellationToken
@@ -71,9 +70,10 @@ namespace Kafka.Common.Network.Tcp
             {
                 var bytesReceived = await stream.ReadAsync(bytes.AsMemory(offset, bytes.Length - offset), cancellationToken);
                 if (bytesReceived == 0)
-                    throw new IOException("No bytes received");
+                    return false;
                 offset += bytesReceived;
             }
+            return true;
         }
 
         public async ValueTask Close(CancellationToken cancellationToken)

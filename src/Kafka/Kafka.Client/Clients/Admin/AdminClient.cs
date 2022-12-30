@@ -24,7 +24,7 @@ namespace Kafka.Client.Clients.Admin
             CancellationToken cancellationToken
         )
         {
-            await EnsureConnection(cancellationToken);
+            await EnsureMetadata(cancellationToken);
             return new(
                 _apiVersions
                 .ToImmutableSortedDictionary(

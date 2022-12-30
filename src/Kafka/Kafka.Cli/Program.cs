@@ -12,12 +12,12 @@ await new Parser(with =>
         with.IgnoreUnknownArguments = true;
         with.CaseInsensitiveEnumValues = true;
     })
-    .ParseArguments<VerbApiVersions, VerbTopic, VerbProduce, VerbConsume>(args)
+    .ParseArguments<VerbApiVersions, Topic, Produce, Consume>(args)
     .MapResult(
-        (VerbApiVersions verb) => Api.Parse(verb, cts.Token),
-        (VerbTopic verb) => Topics.Parse(args.Skip(1), cts.Token),
-        (VerbProduce verb) => Produce.Parse(verb, cts.Token),
-        (VerbConsume verb) => Consume.Parse(verb, cts.Token),
+        (VerbApiVersions verb) => ApiCmd.Parse(verb, cts.Token),
+        (Topic verb) => TopicCmd.Parse(args.Skip(1), cts.Token),
+        (Produce verb) => ProduceCmd.Parse(verb, cts.Token),
+        (Consume verb) => ConsumeCmd.Parse(verb, cts.Token),
         errs => new ValueTask<int>(-1)
     );
 ;

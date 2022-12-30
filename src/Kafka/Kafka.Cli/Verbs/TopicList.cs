@@ -4,7 +4,7 @@ using Kafka.Cli.Options;
 namespace Kafka.Cli.Verbs
 {
     [Verb("list")]
-    public sealed class VerbTopicsList
+    public sealed class TopicList
         : OptionsBase
     {
         [Option("exclude-internal")]

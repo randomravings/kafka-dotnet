@@ -3,5 +3,5 @@
 namespace Kafka.Cli.Verbs
 {
     [Verb("topic")]
-    public sealed class VerbTopic { }
+    public sealed class Topic { }
 }

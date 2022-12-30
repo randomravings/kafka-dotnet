@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using Kafka.Common.Protocol;
+using System.Text.Json.Serialization;
 
 namespace Kafka.Client.Clients.Producer
 {
@@ -16,6 +17,8 @@ namespace Kafka.Client.Clients.Producer
         [JsonPropertyName("max.request.size")]
         public int MaxRequestSize { get; set; } = 1048576;
         [JsonPropertyName("linger.ms")]
-        public long LingerMs { get; set; } = 0;
+        public long LingerMs { get; set; } = 50;
+        [JsonPropertyName("acks")]
+        public string Acks { get; set; } = "all";
     }
 }

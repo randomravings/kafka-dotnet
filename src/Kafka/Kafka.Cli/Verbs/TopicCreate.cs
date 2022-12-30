@@ -4,7 +4,7 @@ using Kafka.Cli.Options;
 namespace Kafka.Cli.Verbs
 {
     [Verb("create")]
-    public sealed class VerbTopicCreate
+    public sealed class TopicCreate
         : OptionsBase
     {
         [Option("topic", Required = true)]
