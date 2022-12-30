@@ -1,5 +1,7 @@
 ﻿using Kafka.Common.Protocol;
+using System.Data.Common;
 using System.Text.Json.Serialization;
+using System.Transactions;
 
 namespace Kafka.Client.Clients.Producer
 {
@@ -20,5 +22,12 @@ namespace Kafka.Client.Clients.Producer
         public long LingerMs { get; set; } = 50;
         [JsonPropertyName("acks")]
         public string Acks { get; set; } = "all";
+        [JsonPropertyName("enable.idempotence")]
+        public bool EnableIdempotence { get; set; } = true;
+        [JsonPropertyName("transactional.id")]
+        public string? TransactionalId { get; set; } = null;
+        [JsonPropertyName("transaction.timeout.ms")]
+        public int TransactionTimeoutMs { get; set; } = 60000;
+
     }
 }

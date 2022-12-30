@@ -36,7 +36,7 @@ namespace Kafka.Client.Clients.Producer
             _keySerializer = keySerializer;
             _valueSerializer = valueSerializer;
             _partitioner = partitioner;
-            _recordsBuilderTask = Task.Run(() => RunDispatch(_internalCts.Token));
+            _recordsBuilderTask = Task.Run(async () => await RunDispatch(_internalCts.Token));
             _recordsAccumulatorTask = Task.Run(() => RunCollector(_internalCts.Token));
         }
 
@@ -222,11 +222,12 @@ namespace Kafka.Client.Clients.Producer
 
             var taskCompletionSource = new TaskCompletionSource<ProduceResult<TKey, TValue>>();
             return new ProduceCallback<TKey, TValue>(
-                    produceRecord,
-                    timestamp,
+                    produceRecord.Topic,
                     partition,
+                    timestamp,
                     keyBytes,
                     valueBytes,
+                    produceRecord.Headers,
                     taskCompletionSource
                 )
             ;
@@ -317,99 +318,177 @@ namespace Kafka.Client.Clients.Producer
             }
         }
 
-        public void RunDispatch(
+        public async Task RunDispatch(
             CancellationToken cancellationToken
         )
         {
             var acks = ParseAcks(_config, _logger);
             var requestTimeoutMs = _config.RequestTimeoutMs;
-            while (!cancellationToken.IsCancellationRequested)
+            var enableIdempotence = _config.EnableIdempotence;
+            var producerId = -1L;
+            var producerEpoch = (short)-1;
+            var baseSequence = -1;
+            var sequencer = () => baseSequence;
+            var transactionId = _config.TransactionalId;
+            var transactionTimeoutMs = string.IsNullOrEmpty(transactionId) ? -1 : _config.TransactionTimeoutMs;
+
+            try
             {
-                try
+                if (enableIdempotence || !string.IsNullOrEmpty(transactionId))
+                {
+                    var request = new InitProducerIdRequest(
+                        transactionId,
+                        transactionTimeoutMs,
+                        producerId,
+                        producerEpoch
+                    );
+                    var response = await HandleRequest(
+                        request,
+                        InitProducerIdRequestSerde.Write,
+                        InitProducerIdResponseSerde.Read,
+                        cancellationToken
+                    );
+                    producerId = response.ProducerIdField;
+                    producerEpoch = response.ProducerEpochField;
+                    sequencer = () => Interlocked.Increment(ref baseSequence);
+                }
+
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     var dispatchItems = _dispatchQueue.Take(cancellationToken);
-
                     _logger.LogTrace("Record Builder dequeued {count} records", dispatchItems.Length);
-                    var topicPartitions = dispatchItems
-                        .Select((r, i) => new { Sequence = i, Callback = r })
-                        .GroupBy(
-                            g => new TopicPartition(g.Callback.Record.Topic, g.Callback.Partition)
-                        )
-                        .ToImmutableDictionary(
-                            k => k.Key,
-                            v => v.Select(r => r.Callback)
-                                .ToImmutableArray()
-                        )
-                    ;
-                    var index = 0;
-                    var tasks = new Task[topicPartitions.Count];
-                    foreach (var topicPartition in topicPartitions)
-                    {
-                        var batchSize = 0;
-                        int offsetDelta = 0;
-                        var minTimestamp = long.MaxValue;
-                        var maxTimestamp = long.MinValue;
-                        foreach (var x in topicPartition.Value)
-                        {
-                            minTimestamp = Math.Min(minTimestamp, x.Timestamp.TimestampMs);
-                            maxTimestamp = Math.Max(maxTimestamp, x.Timestamp.TimestampMs);
-                        }
-                        var recordArrayBuilder = ImmutableArray.CreateBuilder<IRecord>();
-                        foreach (var callback in topicPartition.Value)
-                        {
-                            var timestampDelta = callback.Timestamp.TimestampMs - minTimestamp;
-                            var recordSize = ComputeRecordSize(
-                                timestampDelta,
-                                offsetDelta,
-                                callback.KeyBytes,
-                                callback.ValueBytes,
-                                callback.Record.Headers
-                            );
-                            var record = new Record(
-                                Length: recordSize,
-                                Attributes: Attributes.None,
-                                TimestampDelta: timestampDelta,
-                                OffsetDelta: offsetDelta,
-                                Key: callback.KeyBytes,
-                                Value: callback.ValueBytes,
-                                Headers: callback.Record.Headers
-                            );
-                            recordArrayBuilder.Add(record);
-                            batchSize += recordSize;
-                            batchSize += Encoder.SizeOfInt32(recordSize);
-                            offsetDelta++;
-                        }
-                        var recordArray = recordArrayBuilder.ToImmutable();
-                        var records = new RecordBatch(
-                            BaseOffset: 0,
-                            BatchLength: batchSize,
-                            PartitionLeaderEpoch: 0,
-                            Magic: 2,
-                            Crc: 0, // Crc computation deferred to encoder.
-                            Attributes.None,
-                            LastOffsetDelta: recordArray.Length - 1,
-                            BaseTimestamp: minTimestamp,
-                            MaxTimestamp: maxTimestamp,
-                            ProducerId: -1,
-                            ProducerEpoch: -1,
-                            BaseSequence: -1,
-                            recordArray
-                        );
-                        var recordBatchesBuilder = ImmutableArray.CreateBuilder<IRecords>(1);
-                        recordBatchesBuilder.Add(records);
-                        tasks[index++] = HandleRecordSend(
-                            topicPartition.Key,
-                            recordBatchesBuilder.ToImmutableArray(),
-                            topicPartition.Value,
-                            acks,
-                            requestTimeoutMs,
-                            cancellationToken
-                        );
-                    }
-                    Task.WaitAll(tasks, cancellationToken);
+                    var topicPartitions = CreateTopicPartitionTree(dispatchItems);
+                    var tasks = CreateTopicPartitionSends(
+                        topicPartitions,
+                        acks,
+                        requestTimeoutMs,
+                        producerId,
+                        producerEpoch,
+                        sequencer,
+                        cancellationToken
+                    );
+                    await Task.WhenAll(tasks);
                 }
-                catch (OperationCanceledException) { }
             }
+            catch (OperationCanceledException) { }
+        }
+
+        private ImmutableSortedDictionary<TopicPartition, ImmutableArray<ProduceCallback<TKey, TValue>>> CreateTopicPartitionTree(
+            ImmutableArray<ProduceCallback<TKey, TValue>> dispatchItems
+        ) =>
+            dispatchItems
+                .Select((r, i) => new { Sequence = i, Callback = r })
+                .GroupBy(
+                    g => new TopicPartition(g.Callback.Topic, g.Callback.Partition)
+                )
+                .ToImmutableSortedDictionary(
+                    k => k.Key,
+                    v => v.Select(r => r.Callback)
+                        .ToImmutableArray()
+                )
+            ;
+
+        private ImmutableArray<Task> CreateTopicPartitionSends(
+            ImmutableSortedDictionary<TopicPartition, ImmutableArray<ProduceCallback<TKey, TValue>>> topicPartitions,
+            short acks,
+            int requestTimeoutMs,
+            long producerId,
+            short producerEpoch,
+            Func<int> sequencer,
+            CancellationToken cancellationToken
+        )
+        {
+            var tasks = ImmutableArray.CreateBuilder<Task>(topicPartitions.Count);
+            foreach (var topicPartition in topicPartitions)
+            {
+                var batchSize = 0;
+                var minTimestamp = long.MaxValue;
+                var maxTimestamp = long.MinValue;
+                foreach (var x in topicPartition.Value)
+                {
+                    minTimestamp = Math.Min(minTimestamp, x.Timestamp.TimestampMs);
+                    maxTimestamp = Math.Max(maxTimestamp, x.Timestamp.TimestampMs);
+                }
+                (var sizeDelta, var recordList) = BuildRecordArray(topicPartition.Value, minTimestamp);
+                var records = new RecordBatch(
+                    BaseOffset: 0,
+                    BatchLength: batchSize,
+                    PartitionLeaderEpoch: 0,
+                    Magic: 2,
+                    Crc: 0, // Crc computation deferred to encoder.
+                    Attributes.None,
+                    LastOffsetDelta: recordList.Length - 1,
+                    BaseTimestamp: minTimestamp,
+                    MaxTimestamp: maxTimestamp,
+                    ProducerId: producerId,
+                    ProducerEpoch: producerEpoch,
+                    BaseSequence: sequencer(),
+                    recordList
+                );
+                var recordBatchesBuilder = ImmutableArray.CreateBuilder<IRecords>(1);
+                recordBatchesBuilder.Add(records);
+                tasks.Add(
+                    HandleRecordSend(
+                        topicPartition.Key,
+                        recordBatchesBuilder.ToImmutableArray(),
+                        topicPartition.Value,
+                        acks,
+                        requestTimeoutMs,
+                        cancellationToken
+                    )
+                );
+            }
+            return tasks.ToImmutable();
+        }
+
+        //private static ImmutableArray<Task> CreateTopicPartitionSends()
+
+        private static (int SizeDelta, ImmutableArray<IRecord> Records) BuildRecordArray(ImmutableArray<ProduceCallback<TKey, TValue>> value, long minTimestampMs)
+        {
+            var sizeDelta = 0;
+            var recordArrayBuilder = ImmutableArray.CreateBuilder<IRecord>();
+            for (int i = 0; i < value.Length; i++)
+            {
+                var callback = value[i];
+                var timestampDelta = callback.Timestamp.TimestampMs - minTimestampMs;
+                var record = CreateRecord(
+                    timestampDelta,
+                    i,
+                    callback.Key,
+                    callback.Value,
+                    callback.Headers
+                );
+                recordArrayBuilder.Add(record);
+                sizeDelta += record.SizeInBytes;
+                sizeDelta += Encoder.SizeOfInt32(record.SizeInBytes);
+            }
+            return (sizeDelta, recordArrayBuilder.ToImmutable());
+        }
+
+        private static IRecord CreateRecord(
+            long timestampDelta,
+            int offsetDelta,
+            ReadOnlyMemory<byte>? key,
+            ReadOnlyMemory<byte>? value,
+            ImmutableArray<RecordHeader> headers
+        )
+        {
+            var recordSize = ComputeRecordSize(
+                timestampDelta,
+                offsetDelta,
+                key,
+                value,
+                headers
+            );
+            return new Record(
+                Length: recordSize,
+                Attributes: Attributes.None,
+                TimestampDelta: timestampDelta,
+                OffsetDelta: offsetDelta,
+                Key: key,
+                Value: value,
+                Headers: headers
+            );
         }
 
         private async Task HandleRecordSend(
@@ -467,9 +546,6 @@ namespace Kafka.Client.Clients.Producer
                                 new ProduceResult<TKey, TValue>(
                                     topicPartitionOffset,
                                     timestamp,
-                                    produceCallback.Record.Headers,
-                                    produceCallback.Record.Key,
-                                    produceCallback.Record.Value,
                                     error,
                                     ""
                                 )
@@ -477,7 +553,7 @@ namespace Kafka.Client.Clients.Producer
                         }
                         continue;
                     }
-                    
+
                     error = Errors.Translate(partitionResponse.ErrorCodeField);
                     var recordErrors = partitionResponse
                         .RecordErrorsField
@@ -500,9 +576,6 @@ namespace Kafka.Client.Clients.Producer
                                 new ProduceResult<TKey, TValue>(
                                     topicPartitionOffset,
                                     timestamp,
-                                    produceCallback.Record.Headers,
-                                    produceCallback.Record.Key,
-                                    produceCallback.Record.Value,
                                     error,
                                     recordError
                                 )
@@ -521,9 +594,9 @@ namespace Kafka.Client.Clients.Producer
         /// <param name="produceCallback"></param>
         /// <returns></returns>
         private static int EstimateRecordSize(ProduceCallback<TKey, TValue> produceCallback) =>
-            (produceCallback.KeyBytes?.Length ?? 0) +
-            (produceCallback.KeyBytes?.Length ?? 0) +
-            ComputeHeadersSize(produceCallback.Record.Headers) +
+            (produceCallback.Key?.Length ?? 0) +
+            (produceCallback.Key?.Length ?? 0) +
+            ComputeHeadersSize(produceCallback.Headers) +
             40 // Add some overhead to accout for overhead varint stuff.
         ;
 

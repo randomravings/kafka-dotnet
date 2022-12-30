@@ -1,13 +1,16 @@
-﻿using Kafka.Common.Types;
+﻿using Kafka.Common.Records;
+using Kafka.Common.Types;
+using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Producer.Model
 {
     public record ProduceCallback<TKey, TValue>(
-        ProduceRecord<TKey, TValue> Record,
-        Timestamp Timestamp,
+        TopicName Topic,
         Partition Partition,
-        ReadOnlyMemory<byte>? KeyBytes,
-        ReadOnlyMemory<byte>? ValueBytes,
+        Timestamp Timestamp,
+        ReadOnlyMemory<byte>? Key,
+        ReadOnlyMemory<byte>? Value,
+        ImmutableArray<RecordHeader> Headers,
         TaskCompletionSource<ProduceResult<TKey, TValue>> TaskCompletionSource
     );
 }
