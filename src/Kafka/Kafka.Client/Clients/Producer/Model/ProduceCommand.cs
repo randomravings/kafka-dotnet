@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Producer.Model
 {
-    public record ProduceCallback<TKey, TValue>(
+    public record ProduceCommand<TKey, TValue>(
         TopicName Topic,
         Partition Partition,
         Timestamp Timestamp,
@@ -12,5 +12,5 @@ namespace Kafka.Client.Clients.Producer.Model
         ReadOnlyMemory<byte>? Value,
         ImmutableArray<RecordHeader> Headers,
         TaskCompletionSource<ProduceResult<TKey, TValue>> TaskCompletionSource
-    );
+    ) : IProducerCommand;
 }

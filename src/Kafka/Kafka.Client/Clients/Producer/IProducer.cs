@@ -109,5 +109,7 @@ namespace Kafka.Client.Clients.Producer
             int chunkSize,
             CancellationToken cancellationToken
         );
+
+        Task<ITransaction> BeginTransaction(CancellationToken cancellationToken);
     }
 }

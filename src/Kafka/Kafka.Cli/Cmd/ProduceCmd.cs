@@ -20,7 +20,8 @@ namespace Kafka.Cli.Cmd
             var config = new ProducerConfig
             {
                 ClientId = options.ClientId,
-                BootstrapServers = options.BootstrapServer
+                BootstrapServers = options.BootstrapServer,
+                TransactionalId = "txnator"
             };
             var logger = LoggerFactory
                 .Create(builder => builder
@@ -97,6 +98,7 @@ namespace Kafka.Cli.Cmd
             Console.WriteLine($"Running in batch record mode with batch size {options.BatchSize}. Empty new line will terminate session.");
             var records = new List<ProduceRecord<string, string>>(options.BatchSize);
             var running = true;
+            var txn = await  producer.BeginTransaction(cancellationToken);
             while (running && !cancellationToken.IsCancellationRequested)
             {
                 while (records.Count < options.BatchSize)
@@ -131,6 +133,17 @@ namespace Kafka.Cli.Cmd
                     );
                 records.Clear();
             }
+            try
+            {
+                await txn.Commit(cancellationToken);
+            }
+            catch(Exception)
+            {
+                var cts = new CancellationTokenSource();
+                cts.CancelAfter(5000);
+                await txn.Rollback(cts.Token);
+            }
+            await producer.Close(CancellationToken.None);
             return 0;
         }
 

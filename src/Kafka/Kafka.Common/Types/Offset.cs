@@ -8,6 +8,7 @@
         public static readonly Offset End = new(-1L);
         public static readonly Offset Stored = new(-1000L);
         public static readonly Offset Unset = new(-1001L);
+        public static readonly Offset Zero = new(0L);
         public static implicit operator Offset(long value) => new(value);
         public static implicit operator long(Offset value) => value.Value;
         public static bool operator >=(Offset a, Offset b) => a.Value >= b.Value;

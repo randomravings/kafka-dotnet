@@ -101,9 +101,10 @@ namespace Kafka.Client.Clients.Producer
                 return this;
             }
 
-            IProducer<TKey, TValue> IProducerBuilder<TKey, TValue>.Build() =>
-                new KafkaProducer<TKey, TValue>(_keySerializer, _valueSerializer, _partitioner, _producerConfig, _logger)
-            ;
+            IProducer<TKey, TValue> IProducerBuilder<TKey, TValue>.Build()
+            {
+                return new KafkaProducer<TKey, TValue>(_keySerializer, _valueSerializer, _partitioner, _producerConfig, _logger);
+            }
         }
     }
 }
