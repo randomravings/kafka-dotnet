@@ -148,7 +148,7 @@ namespace Kafka.Common.Encoding
 
         public static byte[] ReadCompactBytes(byte[] buffer, ref int index)
         {
-            var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index)) - 1;
+            var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index));
             CheckRemaining(buffer, index, length);
             return buffer[index..(index += length)];
         }
