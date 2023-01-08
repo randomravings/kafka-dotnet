@@ -1,6 +1,5 @@
 ﻿using Kafka.Cli.Verbs;
 using Kafka.Client.Clients.Consumer;
-using Kafka.Client.Clients.Consumer.Models;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
 

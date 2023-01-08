@@ -19,21 +19,6 @@ namespace Kafka.Client.Clients.Admin
         )
             : base(config, logger) { }
 
-        async ValueTask<ApiVersionsResult> IAdminClient.GetApiVersions(
-            ApiVersionsOptions options,
-            CancellationToken cancellationToken
-        )
-        {
-            await EnsureMetadata(cancellationToken);
-            return new(
-                _apiVersions
-                .ToImmutableSortedDictionary(
-                    k => new ApiKey(k.Key),
-                    v => v.Value
-                )
-            );
-        }
-
         async ValueTask<ListTopicsResult> IAdminClient.ListTopics(
             ListTopicsOptions options,
             CancellationToken cancellationToken
@@ -45,7 +30,8 @@ namespace Kafka.Client.Clients.Admin
                 false,
                 false
             );
-            var response = await HandleRequest(
+            using var connection = await _connectionPool.AquireControllerConnection(cancellationToken);
+            var response = await connection.ExecuteRequest(
                 request,
                 MetadataRequestSerde.Write,
                 MetadataResponseSerde.Read,
@@ -71,8 +57,8 @@ namespace Kafka.Client.Clients.Admin
                 options.Topics.Select(t =>
                     new CreateTopicsRequest.CreatableTopic(
                         t.Name,
-                        t.NumPartitions ?? -1,
-                        t.ReplicationFactor ?? -1,
+                        t.NumPartitions,
+                        t.ReplicationFactor,
                         t.ReplicasAssignments.Select(r =>
                             new CreatableReplicaAssignment(
                                 r.Key,
@@ -90,7 +76,8 @@ namespace Kafka.Client.Clients.Admin
                 options.TimeoutMs,
                 options.ValidateOnly
             );
-            var response = await HandleRequest(
+            using var connection = await _connectionPool.AquireControllerConnection(cancellationToken);
+            var response = await connection.ExecuteRequest(
                 request,
                 CreateTopicsRequestSerde.Write,
                 CreateTopicsResponseSerde.Read,
@@ -157,7 +144,8 @@ namespace Kafka.Client.Clients.Admin
                 options.TopicNames,
                 options.TimeoutMs
             );
-            var response = await HandleRequest(
+            using var connection = await _connectionPool.AquireControllerConnection(cancellationToken);
+            var response = await connection.ExecuteRequest(
                 request,
                 DeleteTopicsRequestSerde.Write,
                 DeleteTopicsResponseSerde.Read,
@@ -219,7 +207,8 @@ namespace Kafka.Client.Clients.Admin
                 false,
                 true
             );
-            var response = await HandleRequest(
+            using var connection = await _connectionPool.AquireControllerConnection(cancellationToken);
+            var response = await connection.ExecuteRequest(
                 request,
                 MetadataRequestSerde.Write,
                 MetadataResponseSerde.Read,

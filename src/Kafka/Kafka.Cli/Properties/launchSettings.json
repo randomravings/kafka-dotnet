@@ -2,10 +2,10 @@
   "profiles": {
     "Kafka.Cli": {
       "commandName": "Project",
-      //"commandLineArgs": "topic create --topic test --bootstrap-server localhost:9092 --client-id me.org --log-level trace"
-      //"commandLineArgs": "produce --topic test --bootstrap-server localhost:9092 --client-id me.org --log-level trace --batch-size 5"
+      //"commandLineArgs": "topic create --topic test --bootstrap-server localhost:9092 --client-id me.org --partition-count 6 --replication-factor 2 --log-level trace"
+      //"commandLineArgs": "produce --topic test --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --client-id me.org --log-level trace --batch-size 5"
       //"commandLineArgs": "produce --topic test --bootstrap-server localhost:9092 --client-id me.org --log-level trace"
-      "commandLineArgs": "consume --topic test --bootstrap-server localhost:9092 --client-id me.org --group-id test-3 --log-level trace --batch-size 10"
+      "commandLineArgs": "consume --topic test --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --client-id me.org --group-id test --log-level trace"
       //"commandLineArgs": "topic delete --topic test --bootstrap-server localhost:9092 --client-id me.org --log-level trace"
     }
   }

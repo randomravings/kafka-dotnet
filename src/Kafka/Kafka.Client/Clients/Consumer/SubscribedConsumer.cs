@@ -2,12 +2,14 @@
 using Kafka.Client.Messages;
 using Kafka.Common;
 using Kafka.Common.Exceptions;
+using Kafka.Common.Records;
 using Kafka.Common.Serialization;
 using Kafka.Common.Types;
 using Kafka.Common.Types.Comparison;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 
 namespace Kafka.Client.Clients.Consumer
@@ -33,7 +35,11 @@ namespace Kafka.Client.Clients.Consumer
             _valueDeserializer = valueDeserializer;
         }
 
-        private async Task HeartBeatLoop(SubscriptionMetadata subscriptionMetadata, CancellationToken cancellationToken)
+        private async Task HeartBeatLoop(
+            IConnection connection,
+            SubscriptionMetadata subscriptionMetadata,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -48,7 +54,7 @@ namespace Kafka.Client.Clients.Consumer
                         subscriptionMetadata.MemberId,
                         subscriptionMetadata.GroupInstanceId
                     );
-                    var response = await HandleRequest(
+                    var response = await connection.ExecuteRequest(
                         request,
                         HeartbeatRequestSerde.Write,
                         HeartbeatResponseSerde.Read,
@@ -58,14 +64,19 @@ namespace Kafka.Client.Clients.Consumer
                     if (response.ErrorCodeField != 0)
                     {
                         var error = Errors.Translate(response.ErrorCodeField);
-                        _logger.LogWarning($"{error}");
+                        _logger.LogWarning("{error}", error);
                     }
                 }
             }
             catch (OperationCanceledException) { }
         }
 
-        private async Task CommitLoop(ConcurrentQueue<ConsumeResult<TKey, TValue>> commitQueue, SubscriptionMetadata subscriptionMetadata, CancellationToken cancellationToken)
+        private async Task CommitLoop(
+            IConnection connection,
+            ConcurrentQueue<TopicPartitionOffset> commitQueue,
+            SubscriptionMetadata subscriptionMetadata,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
@@ -111,7 +122,7 @@ namespace Kafka.Client.Clients.Consumer
                         offsetCommitRequestTopic
                     );
                     commitState.Clear();
-                    var response = await HandleRequest(
+                    var response = await connection.ExecuteRequest(
                         request,
                         OffsetCommitRequestSerde.Write,
                         OffsetCommitResponseSerde.Read,
@@ -123,19 +134,45 @@ namespace Kafka.Client.Clients.Consumer
             catch (OperationCanceledException) { }
         }
 
-        private async ValueTask<FetchResponse> Fetch(SortedList<TopicPartition, Offset> topicPartitionOffsets, CancellationToken cancellationToken)
+        private static async ValueTask<ImmutableArray<FetchResponse>> Fetch(
+            IEnumerable<(IConnection Connection, IEnumerable<TopicPartitionOffset> TopicPartitionOffsets)> assignments,
+            CancellationToken cancellationToken
+        )
+        {
+            var tasks = assignments
+                .Select(
+                    r => r.Connection.ExecuteRequest(
+                        CreateFetchRequest(r.TopicPartitionOffsets) with { MaxVersion = 11 },
+                        FetchRequestSerde.Write,
+                        FetchResponseSerde.Read,
+                        cancellationToken
+                    )
+                )
+            ;
+
+            await Task.WhenAll(tasks);
+
+            return tasks
+                .Select(r => r.Result)
+                .ToImmutableArray()
+            ;
+        }
+
+        private static FetchRequest CreateFetchRequest(
+            IEnumerable<TopicPartitionOffset> topicPartitionOffsets
+        )
         {
             var fetchTopics = topicPartitionOffsets
-                .GroupBy(g => g.Key.Topic)
+                .GroupBy(g => g.TopicPartition.Topic)
                 .Select(t =>
                     new FetchRequest.FetchTopic(
                         t.Key.Value ?? "",
                         Guid.Empty,
                         t.Select(p =>
                             new FetchRequest.FetchTopic.FetchPartition(
-                                PartitionField: p.Key.Partition,
+                                PartitionField: p.TopicPartition.Partition,
                                 CurrentLeaderEpochField: -1,
-                                FetchOffsetField: p.Value,
+                                FetchOffsetField: p.Offset,
                                 LastFetchedEpochField: -1,
                                 LogStartOffsetField: -1,
                                 PartitionMaxBytesField: 1048576
@@ -147,7 +184,7 @@ namespace Kafka.Client.Clients.Consumer
                 .ToImmutableArray()
             ;
 
-            var request = new FetchRequest(
+            return new FetchRequest(
                 ClusterIdField: null,
                 ReplicaIdField: -1,
                 MaxWaitMsField: 500,
@@ -160,14 +197,6 @@ namespace Kafka.Client.Clients.Consumer
                 ForgottenTopicsDataField: ImmutableArray<FetchRequest.ForgottenTopic>.Empty,
                 RackIdField: ""
             );
-            var response = await HandleRequest(
-                request with { MaxVersion = 11 },
-                FetchRequestSerde.Write,
-                FetchResponseSerde.Read,
-                cancellationToken
-            );
-
-            return response;
         }
 
         private static SortedList<TopicPartition, Offset> CreateTopicPartitionOffsets(MetadataResponse metadataResponse)
@@ -179,20 +208,52 @@ namespace Kafka.Client.Clients.Consumer
             return topicPartitionOffsets;
         }
 
-        private static void UpdateFromOffsetListResponse(SortedList<TopicPartition, Offset> topicPartitionOffsets, ListOffsetsResponse offsetListResponse)
+        private static ImmutableSortedDictionary<ClusterNodeId, ImmutableArray<TopicPartition>> CreateTopicPartitionMap(MetadataResponse metadataResponse) =>
+            metadataResponse.TopicsField.SelectMany(t =>
+                    t.PartitionsField.Select(
+                        p => (p.LeaderIdField, t.NameField, p.PartitionIndexField)
+                    )
+                )
+                .GroupBy(g => g.LeaderIdField)
+                .ToImmutableSortedDictionary(
+                    k => new ClusterNodeId(k.Key),
+                    v => v.Select(r => new TopicPartition(r.NameField, r.PartitionIndexField))
+                        .ToImmutableArray()
+                )
+            ;
+
+        private static void UpdateFromOffsetListResponse(SortedList<TopicPartition, Offset> topicPartitionOffsets, ImmutableArray<ListOffsetsResponse> offsetListResponses)
         {
-            foreach (var topic in offsetListResponse.TopicsField)
-                foreach (var partition in topic.PartitionsField)
-                    topicPartitionOffsets[new(topic.NameField, partition.PartitionIndexField)] = partition.OffsetField;
+            foreach (var offsetListResponse in offsetListResponses)
+                foreach (var topic in offsetListResponse.TopicsField)
+                    foreach (var partition in topic.PartitionsField)
+                        topicPartitionOffsets[new(topic.NameField, partition.PartitionIndexField)] = partition.OffsetField;
         }
 
-        private static void UpdateFromOffsetFetchResponse(SortedList<TopicPartition, Offset> topicPartitionOffsets, OffsetFetchResponse offsetFetchResponse)
+        private static void UpdateFromOffsetFetchResponse(
+            SortedList<TopicPartition, Offset> topicPartitionOffsets,
+            ImmutableSortedDictionary<ClusterNodeId, OffsetFetchResponse> offsetFetchResponses
+        )
         {
-            // Check if stored by group. This assumes one and only one group.
-            var group = offsetFetchResponse.GroupsField.FirstOrDefault();
-            if (group != null)
+            foreach (var offsetFetchResponse in offsetFetchResponses.Values)
             {
-                foreach (var topic in group.TopicsField)
+                // Check if stored by group. This assumes one and only one group.
+                var group = offsetFetchResponse.GroupsField.FirstOrDefault();
+                if (group != null)
+                {
+                    foreach (var topic in group.TopicsField)
+                    {
+                        foreach (var partition in topic.PartitionsField)
+                        {
+                            var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
+                            if (partition.CommittedOffsetField >= 0)
+                                topicPartitionOffsets[topicPartition] = partition.CommittedOffsetField;
+                        }
+                    }
+                }
+
+                // Check if stored by topic.
+                foreach (var topic in offsetFetchResponse.TopicsField)
                 {
                     foreach (var partition in topic.PartitionsField)
                     {
@@ -202,23 +263,59 @@ namespace Kafka.Client.Clients.Consumer
                     }
                 }
             }
-
-            // Check if stored by topic.
-            foreach (var topic in offsetFetchResponse.TopicsField)
-            {
-                foreach (var partition in topic.PartitionsField)
-                {
-                    var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
-                    if (partition.CommittedOffsetField >= 0)
-                        topicPartitionOffsets[topicPartition] = partition.CommittedOffsetField;
-                }
-            }
         }
 
-        private ValueTask<ListOffsetsResponse> ListOffsets(
+        private static async ValueTask<ImmutableArray<ListOffsetsResponse>> ListOffsets(
+            ImmutableSortedDictionary<ClusterNodeId, IConnection> brokerConnections,
+            ImmutableSortedDictionary<ClusterNodeId, ImmutableArray<TopicPartition>> topicPartitionLeaders,
             IEnumerable<TopicPartition> topicPartitions,
             Offset defaultOffset,
             CancellationToken cancellationToken
+        )
+        {
+            var filteredTopicPartitionLeaders = topicPartitionLeaders
+                .Select(kv =>
+                    (kv.Key, Value: kv.Value.Intersect(topicPartitions))
+                )
+                .Where(r => r.Value.Any())
+                .ToImmutableSortedDictionary(
+                    k => k.Key,
+                    v => v.Value
+                )
+            ;
+
+            if (!filteredTopicPartitionLeaders.Any())
+                return ImmutableArray<ListOffsetsResponse>.Empty;
+
+            var tasks =
+                topicPartitionLeaders
+                .Join(
+                    brokerConnections,
+                    t => t.Key,
+                    c => c.Key,
+                    (t, c) => c.Value.ExecuteRequest(
+                        CreateListOffsetsReques(
+                            t.Value,
+                            defaultOffset
+                        ),
+                        ListOffsetsRequestSerde.Write,
+                        ListOffsetsResponseSerde.Read,
+                        cancellationToken
+                    )
+                )
+            ;
+
+            await Task.WhenAll(tasks);
+
+            return tasks
+                .Select(r => r.Result)
+                .ToImmutableArray()
+            ;
+        }
+
+        private static ListOffsetsRequest CreateListOffsetsReques(
+            IEnumerable<TopicPartition> topicPartitions,
+            Offset defaultOffset
         )
         {
             var topics = topicPartitions
@@ -238,26 +335,21 @@ namespace Kafka.Client.Clients.Consumer
                 )
                 .ToImmutableArray()
             ;
-            var request = new ListOffsetsRequest(
+            return new ListOffsetsRequest(
                 -1,
                 1,
                 topics
             );
-            return HandleRequest(
-                request,
-                ListOffsetsRequestSerde.Write,
-                ListOffsetsResponseSerde.Read,
-                cancellationToken
-            );
         }
 
-        private async ValueTask LeaveGroup(
+        private static async ValueTask LeaveGroup(
+            IConnection connection,
             SubscriptionMetadata subscriptionMetadata,
             CancellationToken cancellationToken
         )
         {
             var request = CreateLeaveRequest(subscriptionMetadata);
-            var response = await HandleRequest(
+            var response = await connection.ExecuteRequest(
                 request,
                 LeaveGroupRequestSerde.Write,
                 LeaveGroupResponseSerde.Read,
@@ -270,14 +362,15 @@ namespace Kafka.Client.Clients.Consumer
             }
         }
 
-        private async ValueTask<SubscriptionMetadata> JoinGroup(
+        private static async ValueTask<SubscriptionMetadata> JoinGroup(
+            IConnection connection,
             SubscriptionMetadata subscriptionMetadata,
             CancellationToken cancellationToken
         )
         {
             var metadata = subscriptionMetadata;
             var request = CreateJoinRequest(metadata);
-            var response = await HandleRequest(
+            var response = await connection.ExecuteRequest(
                 request,
                 JoinGroupRequestSerde.Write,
                 JoinGroupResponseSerde.Read,
@@ -287,7 +380,7 @@ namespace Kafka.Client.Clients.Consumer
             {
                 metadata = metadata with { MemberId = response.MemberIdField };
                 request = CreateJoinRequest(metadata);
-                response = await HandleRequest(
+                response = await connection.ExecuteRequest(
                     request,
                     JoinGroupRequestSerde.Write,
                     JoinGroupResponseSerde.Read,
@@ -318,7 +411,8 @@ namespace Kafka.Client.Clients.Consumer
             };
         }
 
-        private async ValueTask<MetadataResponse> TopicMetadata(
+        private static async ValueTask<MetadataResponse> TopicMetadata(
+            IConnection connection,
             ImmutableArray<TopicName> topics,
             CancellationToken cancellationToken
         )
@@ -336,7 +430,7 @@ namespace Kafka.Client.Clients.Consumer
                 false,
                 false
             );
-            return await HandleRequest(
+            return await connection.ExecuteRequest(
                 request,
                 MetadataRequestSerde.Write,
                 MetadataResponseSerde.Read,
@@ -344,56 +438,91 @@ namespace Kafka.Client.Clients.Consumer
             );
         }
 
-        private async ValueTask<OffsetFetchResponse> FetchOffsets(
-            IEnumerable<TopicPartition> topicPartitions,
+        private async ValueTask<ImmutableSortedDictionary<ClusterNodeId, OffsetFetchResponse>> FetchOffsets(
+            ImmutableSortedDictionary<ClusterNodeId, IConnection> brokerConnections,
+            ImmutableSortedDictionary<ClusterNodeId, ImmutableArray<TopicPartition>> topicPartitionLeaders,
             CancellationToken cancellationToken
         )
         {
-            var topicsToFetch = topicPartitions
-                .GroupBy(g => g.Topic)
-                .Select(r => new OffsetFetchRequest.OffsetFetchRequestTopic(
-                    r.Key.Value ?? "",
-                    r.Select(r =>
-                        r.Partition.Value
-                    )
-                    .ToImmutableArray()
-                ))
-                .ToImmutableArray()
+            var offsetFetchRequestsBuilder = ImmutableSortedDictionary
+                .CreateBuilder<ClusterNodeId, (OffsetFetchRequest Request, IConnection Connection)>()
             ;
 
-            var topicsInGroupToFetch = topicPartitions
-                .GroupBy(g => g.Topic)
-                .Select(r => new OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
-                    r.Key.Value ?? "",
-                    r.Select(r =>
-                        r.Partition.Value
+            foreach (var topicPartitionLeader in topicPartitionLeaders)
+            {
+                var topicsToFetch = topicPartitionLeader
+                    .Value
+                    .GroupBy(g => g.Topic)
+                    .Select(
+                        r => new OffsetFetchRequest.OffsetFetchRequestTopic(
+                            r.Key.Value ?? "",
+                            r.Select(r =>
+                                r.Partition.Value
+                            )
+                            .ToImmutableArray()
+                        )
                     )
                     .ToImmutableArray()
-                ))
-                .ToImmutableArray()
-            ;
-            var groupsBuilder = ImmutableArray.CreateBuilder<OffsetFetchRequest.OffsetFetchRequestGroup>(1);
-            groupsBuilder.Add(new OffsetFetchRequest.OffsetFetchRequestGroup(
-                _config.GroupId ?? "",
-                topicsInGroupToFetch
-            ));
-            var groupsToFetch = groupsBuilder.ToImmutable();
+                ;
 
-            var request = new OffsetFetchRequest(
-                _config.GroupId ?? "",
-                topicsToFetch,
-                groupsToFetch,
-                false
-            );
-            return await HandleRequest(
-                request,
-                OffsetFetchRequestSerde.Write,
-                OffsetFetchResponseSerde.Read,
-                cancellationToken
-            );
+                var topicsInGroupToFetch =
+                    new[]
+                    {
+                        new OffsetFetchRequest.OffsetFetchRequestGroup(
+                            _config.GroupId ?? "",
+                            topicPartitionLeader
+                                .Value
+                                .GroupBy(g => g.Topic)
+                                .Select(r =>
+                                    new OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
+                                        r.Key.Value ?? "",
+                                        r.Select(p =>
+                                            p.Partition.Value
+                                        ).ToImmutableArray()
+                                    )
+                                ).ToImmutableArray()
+                        )
+                    }
+                    .ToImmutableArray();
+
+                var offsetFetchRequest = new OffsetFetchRequest(
+                    _config.GroupId ?? "",
+                    topicsToFetch,
+                    topicsInGroupToFetch,
+                    false
+                );
+
+                offsetFetchRequestsBuilder.Add(topicPartitionLeader.Key, (offsetFetchRequest, brokerConnections[topicPartitionLeader.Key]));
+            }
+
+            var offsetFetchRequests = offsetFetchRequestsBuilder.ToImmutableArray();
+
+            var tasks = offsetFetchRequestsBuilder
+                .ToImmutableSortedDictionary(
+                    k => k.Key,
+                    v => v.Value
+                        .Connection
+                        .ExecuteRequest(
+                            v.Value.Request,
+                            OffsetFetchRequestSerde.Write,
+                            OffsetFetchResponseSerde.Read,
+                            cancellationToken
+                        )
+                )
+            ;
+
+            await Task.WhenAll(tasks.Values);
+
+            return tasks
+                .ToImmutableSortedDictionary(
+                    k => k.Key,
+                    v => v.Value.Result
+                )
+            ;
         }
 
-        private async ValueTask<SyncGroupResponse> SyncGroup(
+        private static async ValueTask<SyncGroupResponse> SyncGroup(
+            IConnection connection,
             SubscriptionMetadata subscriptionMetadata,
             CancellationToken cancellationToken
         )
@@ -414,7 +543,7 @@ namespace Kafka.Client.Clients.Consumer
                 subscriptionMetadata.ProtocolName,
                 assignments
             );
-            return await HandleRequest(
+            return await connection.ExecuteRequest(
                 request,
                 SyncGroupRequestSerde.Write,
                 SyncGroupResponseSerde.Read,
@@ -422,38 +551,7 @@ namespace Kafka.Client.Clients.Consumer
             );
         }
 
-        private static IDeserializer<TKey> GetKeyDeserializer(
-            ConsumerConfig producerConfig
-        ) =>
-            Resolve<IDeserializer<TKey>>(
-                producerConfig.KeyDeserializer
-            )
-        ;
-
-        private static IDeserializer<TValue> GetValueDeserializer(
-            ConsumerConfig producerConfig
-        ) =>
-            Resolve<IDeserializer<TValue>>(
-                producerConfig.ValueDeserializer
-            )
-        ;
-
-        private static TType Resolve<TType>(
-            string fullName
-        )
-        {
-            var type = Type.GetType(fullName);
-            if (type == null)
-                throw new TypeLoadException(fullName);
-            if (!typeof(TType).IsAssignableFrom(type))
-                throw new TypeLoadException(fullName);
-            var instance = Activator.CreateInstance(type);
-            if (instance == null)
-                throw new TypeLoadException(fullName);
-            return (TType)instance;
-        }
-
-        private JoinGroupRequest CreateJoinRequest(
+        private static JoinGroupRequest CreateJoinRequest(
             SubscriptionMetadata subscriptionMetadata
         )
         {
@@ -475,7 +573,7 @@ namespace Kafka.Client.Clients.Consumer
             );
         }
 
-        private LeaveGroupRequest CreateLeaveRequest( SubscriptionMetadata subscriptionMetadata)
+        private static LeaveGroupRequest CreateLeaveRequest(SubscriptionMetadata subscriptionMetadata)
         {
             return new LeaveGroupRequest(
                 subscriptionMetadata.GroupId,
@@ -484,24 +582,53 @@ namespace Kafka.Client.Clients.Consumer
             );
         }
 
-        async ValueTask<ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionWatermark>>> IConsumer<TKey, TValue>.QueryWatermarks(TopicList topics, CancellationToken cancellationToken)
+        async ValueTask<ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionWatermark>>> IConsumer<TKey, TValue>.QueryWatermarks(
+            TopicList topics,
+            CancellationToken cancellationToken
+        )
         {
             var newTopics = topics
                 .Names
                 .Where(r => !string.IsNullOrEmpty(r.Value))
                 .ToImmutableArray()
             ;
-            var metadataResponse = await TopicMetadata(newTopics, cancellationToken);
-            var topicPartitions = CreateTopicPartitionOffsets(metadataResponse);
+            if (!newTopics.Any())
+                return ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionWatermark>>.Empty;
 
-            var lowListOffsetsResponse = await ListOffsets(
+            var brokerConnections = await _connectionPool.AquireBrokerConnections(cancellationToken);
+            var coordinatorConnection = brokerConnections.Values.First();
+
+            var findCoordinatorRequest = new FindCoordinatorRequest(
+                _config.GroupId ?? "",
+                0,
+                ImmutableArray<string>.Empty
+            );
+            var findCoordinatorResponse = await coordinatorConnection.ExecuteRequest(
+                findCoordinatorRequest,
+                FindCoordinatorRequestSerde.Write,
+                FindCoordinatorResponseSerde.Read,
+                cancellationToken
+            );
+            var metadataResponse = await TopicMetadata(
+                coordinatorConnection,
+                newTopics,
+                cancellationToken
+            );
+            var topicPartitions = CreateTopicPartitionOffsets(metadataResponse);
+            var topicPartitionMap = CreateTopicPartitionMap(metadataResponse);
+            var topicPartitionOffsets = CreateTopicPartitionOffsets(metadataResponse);
+            var lowListOffsetsResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
+                brokerConnections,
+                topicPartitionMap,
                 topicPartitions.Keys,
                 Offset.Beginning,
                 cancellationToken
             );
             var lowWatermarks = GetTopicPartitionOffsets(lowListOffsetsResponse);
 
-            var highListOffsetsResponse = await ListOffsets(
+            var highListOffsetsResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
+                brokerConnections,
+                topicPartitionMap,
                 topicPartitions.Keys,
                 Offset.End,
                 cancellationToken
@@ -509,10 +636,11 @@ namespace Kafka.Client.Clients.Consumer
             var highWatermarks = GetTopicPartitionOffsets(highListOffsetsResponse);
 
             var fetchOffsetsResponse = await FetchOffsets(
-                topicPartitions.Keys,
+                brokerConnections,
+                topicPartitionMap,
                 cancellationToken
             );
-            var storedOffsets = GetTopicPartitionOffsets(fetchOffsetsResponse);
+            var storedOffsets = GetTopicPartitionOffsets(fetchOffsetsResponse.Values);
 
             var topicWatermarksBuilder = ImmutableSortedDictionary.CreateBuilder<TopicName, ImmutableArray<PartitionWatermark>>(TopicNameCompare.Instance);
             foreach (var topic in topicPartitions.Keys.GroupBy(g => g.Topic))
@@ -568,9 +696,9 @@ namespace Kafka.Client.Clients.Consumer
             ReadOnlyMemory<byte> Metadata
         );
 
-        private static ImmutableSortedDictionary<TopicName, ImmutableSortedDictionary<Partition, Offset>> GetTopicPartitionOffsets(ListOffsetsResponse listOffsetsResponse) =>
-            listOffsetsResponse
-                .TopicsField
+        private static ImmutableSortedDictionary<TopicName, ImmutableSortedDictionary<Partition, Offset>> GetTopicPartitionOffsets(IEnumerable<ListOffsetsResponse> listOffsetsResponses) =>
+            listOffsetsResponses
+                .SelectMany(r => r.TopicsField)
                 .ToImmutableSortedDictionary(
                     k => new TopicName(k.NameField),
                     v => v.PartitionsField.ToImmutableSortedDictionary(
@@ -582,14 +710,24 @@ namespace Kafka.Client.Clients.Consumer
                 )
             ;
 
-        private static ImmutableSortedDictionary<TopicName, ImmutableSortedDictionary<Partition, Offset>> GetTopicPartitionOffsets(OffsetFetchResponse offsetFetchResponse)
+        private static ImmutableSortedDictionary<TopicName, ImmutableSortedDictionary<Partition, Offset>> GetTopicPartitionOffsets(IEnumerable<OffsetFetchResponse> offsetFetchResponses)
         {
             var storedOffsetsBuilder = ImmutableSortedDictionary.CreateBuilder<TopicName, ImmutableSortedDictionary<Partition, Offset>>(TopicNameCompare.Instance);
-            // Check if stored by group. This assumes one and only one group.
-            var group = offsetFetchResponse.GroupsField.FirstOrDefault();
-            if (group != null)
+            foreach (var offsetFetchResponse in offsetFetchResponses)
             {
-                foreach (var topic in group.TopicsField)
+                var group = offsetFetchResponse.GroupsField.FirstOrDefault();
+                if (group != null)
+                {
+                    foreach (var topic in group.TopicsField)
+                    {
+                        var partitionOffsetsBuilder = ImmutableSortedDictionary.CreateBuilder<Partition, Offset>(PartitionCompare.Instance);
+                        foreach (var partition in topic.PartitionsField)
+                            partitionOffsetsBuilder.Add(new Partition(partition.PartitionIndexField), new Offset(partition.CommittedOffsetField));
+                        storedOffsetsBuilder.Add(new TopicName(topic.NameField), partitionOffsetsBuilder.ToImmutable());
+                    }
+                }
+                // Check if stored by topic.
+                foreach (var topic in offsetFetchResponse.TopicsField)
                 {
                     var partitionOffsetsBuilder = ImmutableSortedDictionary.CreateBuilder<Partition, Offset>(PartitionCompare.Instance);
                     foreach (var partition in topic.PartitionsField)
@@ -597,29 +735,54 @@ namespace Kafka.Client.Clients.Consumer
                     storedOffsetsBuilder.Add(new TopicName(topic.NameField), partitionOffsetsBuilder.ToImmutable());
                 }
             }
-            // Check if stored by topic.
-            foreach (var topic in offsetFetchResponse.TopicsField)
-            {
-                var partitionOffsetsBuilder = ImmutableSortedDictionary.CreateBuilder<Partition, Offset>(PartitionCompare.Instance);
-                foreach (var partition in topic.PartitionsField)
-                    partitionOffsetsBuilder.Add(new Partition(partition.PartitionIndexField), new Offset(partition.CommittedOffsetField));
-                storedOffsetsBuilder.Add(new TopicName(topic.NameField), partitionOffsetsBuilder.ToImmutable());
-            }
             return storedOffsetsBuilder.ToImmutable();
         }
 
-        private async ValueTask<ImmutableArray<FetchResponse.FetchableTopicResponse>> FetchUntilCancelled(SortedList<TopicPartition, Offset> topicPartitionOffsets, CancellationToken cancellationToken)
+        private static async ValueTask<ImmutableArray<FetchResponse.FetchableTopicResponse>> FetchUntilCancelled(
+            ImmutableSortedDictionary<ClusterNodeId, IConnection> brokerConnections,
+            ImmutableSortedDictionary<ClusterNodeId, ImmutableArray<TopicPartition>> topicPartitionLeaders,
+            SortedList<TopicPartition, Offset> topicPartitionOffsets,
+            CancellationToken cancellationToken
+        )
         {
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    var response = await Fetch(topicPartitionOffsets, cancellationToken)
-                        .ConfigureAwait(false)
+
+
+                    var connectionAssignments =
+                        brokerConnections
+                        .Join(
+                            topicPartitionLeaders,
+                            b => b.Key,
+                            t => t.Key,
+                            (b, t) => (
+                                Connection: b.Value,
+                                TopicPartitionOffsets: t.Value
+                                    .Join(
+                                        topicPartitionOffsets,
+                                        p => p,
+                                        o => o.Key,
+                                        (p, o) => new TopicPartitionOffset(new(p.Topic, p.Partition), o.Value)
+                                    )
+                            )
+                        )
                     ;
-                    // Todo Error handling.
-                    if(response.ResponsesField.Length > 0)
-                        return response.ResponsesField;
+
+
+                    var responses =
+                        await SubscribedConsumer<TKey, TValue>.Fetch(
+                            connectionAssignments,
+                            cancellationToken
+                        )
+                    ;
+                    return responses
+                        .SelectMany(r =>
+                            r.ResponsesField
+                        )
+                        .ToImmutableArray()
+                    ;
                 }
                 catch (OperationCanceledException) { }
             }
@@ -638,15 +801,45 @@ namespace Kafka.Client.Clients.Consumer
                 GroupId = _config.GroupId ?? "",
                 GroupInstanceId = _config.GroupInstanceId,
             };
-            var autoCommitterTask = Task.CompletedTask;
-            var hearbeatTask = Task.CompletedTask;
             if (!newTopics.Any())
                 throw new ArgumentException("Must specify at least one topic", nameof(topics));
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            var autoCommitterTask = Task.CompletedTask;
+            var hearbeatTask = Task.CompletedTask;
+            var brokerConnections = await _connectionPool.AquireBrokerConnections(cancellationToken);
+            var coordinatorConnection = brokerConnections.Values.First();
+
+            var findCoordinatorRequest = new FindCoordinatorRequest(
+                subscriptionMetadata.GroupId,
+                (sbyte)CoordinatorType.GROUP,
+                new[] { subscriptionMetadata.GroupId }.ToImmutableArray()
+            );
+            var findCoordinatorResponse = await coordinatorConnection.ExecuteRequest(
+                findCoordinatorRequest,
+                FindCoordinatorRequestSerde.Write,
+                FindCoordinatorResponseSerde.Read,
+                cancellationToken
+            );
+            var nodeId = new ClusterNodeId(findCoordinatorResponse.NodeIdField);
+            var host = findCoordinatorResponse.HostField;
+            var port = findCoordinatorResponse.PortField;
+            if (string.IsNullOrEmpty(host))
+            {
+                nodeId = new ClusterNodeId(findCoordinatorResponse.CoordinatorsField[0].NodeIdField);
+                host = findCoordinatorResponse.CoordinatorsField[0].HostField;
+                port = findCoordinatorResponse.CoordinatorsField[0].PortField;
+            }
+            if(nodeId != coordinatorConnection.NodeId)
+                coordinatorConnection = await _connectionPool.AquireConnection(host, port, cancellationToken);
             try
             {
-                subscriptionMetadata = await JoinGroup(subscriptionMetadata, cancellationToken);
+                subscriptionMetadata = await SubscribedConsumer<TKey, TValue>.JoinGroup(
+                    coordinatorConnection,
+                    subscriptionMetadata,
+                    cancellationToken
+                );
                 var metadataResponse = await TopicMetadata(
+                    coordinatorConnection,
                     newTopics,
                     cancellationToken
                 );
@@ -656,13 +849,17 @@ namespace Kafka.Client.Clients.Consumer
                         _logger.LogWarning("Unable to find topic: {TopicName}", notFoundTopic);
                 if (metadataResponse.TopicsField.IsEmpty)
                     throw new Exception("No topics to subscribe to");
-                var syncResponse = await SyncGroup(
+
+                var syncResponse = await SubscribedConsumer<TKey, TValue>.SyncGroup(
+                    coordinatorConnection,
                     subscriptionMetadata,
                     cancellationToken
                 );
+                var topicPartitionMap = CreateTopicPartitionMap(metadataResponse);
                 var topicPartitionOffsets = CreateTopicPartitionOffsets(metadataResponse);
                 var offsetFetchResponse = await FetchOffsets(
-                    topicPartitionOffsets.Keys,
+                    brokerConnections,
+                    topicPartitionMap,
                     cancellationToken
                 );
                 UpdateFromOffsetFetchResponse(
@@ -675,7 +872,9 @@ namespace Kafka.Client.Clients.Consumer
                 ;
                 if (unsetTopicPartitions.Any())
                 {
-                    var offsetListResponse = await ListOffsets(
+                    var offsetListResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
+                        brokerConnections,
+                        topicPartitionMap,
                         unsetTopicPartitions,
                         Offset.Beginning,
                         cancellationToken
@@ -685,13 +884,31 @@ namespace Kafka.Client.Clients.Consumer
                         offsetListResponse
                     );
                 }
-                var commitQueue = new ConcurrentQueue<ConsumeResult<TKey, TValue>>();
-                autoCommitterTask = Task.Run(async () => await CommitLoop(commitQueue, subscriptionMetadata, cancellationToken), CancellationToken.None);
-                hearbeatTask = Task.Run(async () => await HeartBeatLoop(subscriptionMetadata, cancellationToken), CancellationToken.None);
+                var commitQueue = new ConcurrentQueue<TopicPartitionOffset>();
+                autoCommitterTask = Task.Run(async () => await CommitLoop(
+                        coordinatorConnection,
+                        commitQueue,
+                        subscriptionMetadata,
+                        cancellationToken
+                    ),
+                    CancellationToken.None
+                );
+                hearbeatTask = Task.Run(async () => await HeartBeatLoop(
+                        coordinatorConnection,
+                        subscriptionMetadata,
+                        cancellationToken
+                    ),
+                    CancellationToken.None
+                );
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var fetchableTopicResponses = await FetchUntilCancelled(topicPartitionOffsets, cancellationToken);
+                    var fetchableTopicResponses = await SubscribedConsumer<TKey, TValue>.FetchUntilCancelled(
+                        brokerConnections,
+                        topicPartitionMap,
+                        topicPartitionOffsets,
+                        cancellationToken
+                    );
                     foreach (var topic in fetchableTopicResponses)
                     {
                         foreach (var partition in topic.PartitionsField)
@@ -703,29 +920,42 @@ namespace Kafka.Client.Clients.Consumer
                                 continue;
                             foreach (var records in partition.RecordsField)
                             {
-                                foreach (var record in records)
+                                if (records.IsControlBatch)
                                 {
-                                    var offset = records.Offset + record.OffsetDelta;
-                                    var timestamp = records.BaseTimestamp + record.TimestampDelta;
-                                    var key = _keyDeserializer.Read(record.Key);
-                                    var value = _valueDeserializer.Read(record.Value);
-                                    var consumeResult = new ConsumeResult<TKey, TValue>(
-                                        TopicPartition: topicPartition,
-                                        Offset: offset,
-                                        LastStableOffset: partition.LastStableOffsetField,
-                                        LogStartOffset: partition.LogStartOffsetField,
-                                        HighWatermark: partition.HighWatermarkField,
-                                        Errors.Known.NONE,
-                                        Record: new(
-                                            Timestamp: new(Common.Records.TimestampType.CreateTime, timestamp),
-                                            Headers: record.Headers,
-                                            Key: key,
-                                            Value: value
-                                        )
-                                    );
-                                    yield return consumeResult;
-                                    topicPartitionOffsets[topicPartition] = offset + 1;
-                                    commitQueue.Enqueue(consumeResult);
+                                    var controlRecord = records.ControlRecord;
+                                    topicPartitionOffsets[topicPartition] = records.Offset + 1;
+                                    _logger.LogTrace("control record received {version}:{type}", controlRecord.Version, controlRecord.Type);
+                                    var newOffset = records.Offset + 1;
+                                    topicPartitionOffsets[topicPartition] = newOffset;
+                                    commitQueue.Enqueue(new(topicPartition, newOffset));
+                                }
+                                else
+                                {
+                                    foreach (var record in records)
+                                    {
+                                        var offset = records.Offset + record.OffsetDelta;
+                                        var timestamp = records.BaseTimestamp + record.TimestampDelta;
+                                        var key = _keyDeserializer.Read(record.Key);
+                                        var value = _valueDeserializer.Read(record.Value);
+                                        var consumeResult = new ConsumeResult<TKey, TValue>(
+                                            TopicPartition: topicPartition,
+                                            Offset: offset,
+                                            LastStableOffset: partition.LastStableOffsetField,
+                                            LogStartOffset: partition.LogStartOffsetField,
+                                            HighWatermark: partition.HighWatermarkField,
+                                            Errors.Known.NONE,
+                                            Record: new(
+                                                Timestamp: records.Attributes.HasFlag(Attributes.LogAppendTime) ? Timestamp.LogAppend(timestamp) : Timestamp.Created(timestamp),
+                                                Headers: record.Headers,
+                                                Key: key,
+                                                Value: value
+                                            )
+                                        );
+                                        yield return consumeResult;
+                                        var newOffset = offset + 1;
+                                        topicPartitionOffsets[topicPartition] = newOffset;
+                                        commitQueue.Enqueue(new(topicPartition, newOffset));
+                                    }
                                 }
                             }
                         }
@@ -736,7 +966,11 @@ namespace Kafka.Client.Clients.Consumer
             {
                 try
                 {
-                    await LeaveGroup(subscriptionMetadata, _internalCts.Token);
+                    await SubscribedConsumer<TKey, TValue>.LeaveGroup(
+                        coordinatorConnection,
+                        subscriptionMetadata,
+                        _internalCts.Token
+                    );
                 }
                 catch (Exception ex)
                 {

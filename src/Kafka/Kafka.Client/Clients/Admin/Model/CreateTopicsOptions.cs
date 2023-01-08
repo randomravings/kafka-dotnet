@@ -19,16 +19,16 @@ namespace Kafka.Client.Clients.Admin.Model
 
         public record NewTopic(
             string Name,
-            int? NumPartitions,
-            short? ReplicationFactor,
+            int NumPartitions,
+            short ReplicationFactor,
             ImmutableSortedDictionary<int, ImmutableArray<int>> ReplicasAssignments,
             ImmutableSortedDictionary<string, string?> Configs
         )
         {
             public static NewTopic Empty { get; } = new(
                 "",
-                null,
-                null,
+                -1,
+                -1,
                 ImmutableSortedDictionary<int, ImmutableArray<int>>.Empty,
                 ImmutableSortedDictionary<string, string?>.Empty
             );

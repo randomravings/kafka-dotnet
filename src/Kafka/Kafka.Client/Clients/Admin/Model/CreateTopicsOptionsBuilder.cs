@@ -41,8 +41,8 @@ namespace Kafka.Client.Clients.Admin.Model
         public interface INewTopicBuilder
         {
             INewTopicBuilder Name(string name);
-            INewTopicBuilder NumPartitions(int? numPartitions);
-            INewTopicBuilder ReplicationFactor(short? replicationFactor);
+            INewTopicBuilder NumPartitions(int numPartitions);
+            INewTopicBuilder ReplicationFactor(short replicationFactor);
             INewTopicBuilder ReplicasAssignments(int partition, params int[] replicas);
             INewTopicBuilder ReplicasAssignments(IDictionary<int, int[]> assinments);
             INewTopicBuilder Configs(string key, string ? value);
@@ -53,8 +53,8 @@ namespace Kafka.Client.Clients.Admin.Model
             INewTopicBuilder
         {
             private string _name = "";
-            private int? _numPartitions;
-            private short? _replicationFactor;
+            private int _numPartitions = -1;
+            private short _replicationFactor = -1;
             private readonly Dictionary<int, int[]> _replicasAssignments = new();
             private readonly Dictionary<string, string?> _configs = new();
 
@@ -70,7 +70,7 @@ namespace Kafka.Client.Clients.Admin.Model
                 return this;
             }
 
-            INewTopicBuilder INewTopicBuilder.NumPartitions(int? numPartitions)
+            INewTopicBuilder INewTopicBuilder.NumPartitions(int numPartitions)
             {
                 _numPartitions = numPartitions;
                 return this;
@@ -89,7 +89,7 @@ namespace Kafka.Client.Clients.Admin.Model
                 return this;
             }
 
-            INewTopicBuilder INewTopicBuilder.ReplicationFactor(short? replicationFactor)
+            INewTopicBuilder INewTopicBuilder.ReplicationFactor(short replicationFactor)
             {
                 _replicationFactor = replicationFactor;
                 return this;

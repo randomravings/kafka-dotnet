@@ -1,18 +1,21 @@
-﻿namespace Kafka.Common.Network
+﻿using System.Net;
+
+namespace Kafka.Common.Network
 {
     public interface ITransport :
         IDisposable
     {
         bool IsConnected { get; }
-        ValueTask Connect(CancellationToken cancellationToken = default);
-        ValueTask Disconnect(CancellationToken cancellationToken = default);
-        ValueTask Handshake(CancellationToken cancellationToken = default);
-        ValueTask<byte[]> HandleRequest(
+        DnsEndPoint EndPoint { get; }
+        Task Connect(CancellationToken cancellationToken = default);
+        Task Disconnect(CancellationToken cancellationToken = default);
+        Task Handshake(CancellationToken cancellationToken = default);
+        Task<byte[]> HandleRequest(
             byte[] requestBytes,
             int offset,
             int length,
             CancellationToken cancellationToken
         );
-        ValueTask Close(CancellationToken cancellationToken = default);
+        Task Close(CancellationToken cancellationToken = default);
     }
 }

@@ -26,7 +26,7 @@ namespace Kafka.Common.Records
     /// <param name="Key">Key bytes, null if no key in record.</param>
     /// <param name="Value">Value bytes, null if no value in record.</param>
     /// <param name="Headers">Record Headers, empty if no header.</param>
-    public sealed record Record(
+    public record Record(
         int Length,
         Attributes Attributes,
         long TimestampDelta,

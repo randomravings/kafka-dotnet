@@ -9,7 +9,7 @@ namespace Kafka.Cli.Text
             $"{error.Code} - {error.Label} - {error.Message}"
         ;
         public static string Print(TopicPartitionOffset topicPartitionOffset) =>
-            $"{Print(topicPartitionOffset.Topic)}:{topicPartitionOffset.PartitionOffset}"
+            $"{Print(topicPartitionOffset.TopicPartition)}:{topicPartitionOffset.Offset}"
         ;
         public static string Print(TopicName topic) =>
             topic.Value switch
@@ -18,8 +18,8 @@ namespace Kafka.Cli.Text
                 string s => s
             }
         ;
-        public static string Print(PartitionOffset partitionOffset) =>
-            $"{Print(partitionOffset.Partition)}:{Print(partitionOffset.Offset)}"
+        public static string Print(TopicPartition partitionOffset) =>
+            $"{Print(partitionOffset.Topic)}:{Print(partitionOffset.Partition)}"
         ;
         public static string Print(Partition partition)
         {

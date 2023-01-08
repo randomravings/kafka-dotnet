@@ -224,7 +224,7 @@ namespace Kafka.Common.Encoding
             var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index));
             return ReadRecordBatches(buffer, length, ref index);
         }
-        
+
         private static ImmutableArray<IRecords>? ReadRecordBatches(byte[] buffer, int length, ref int index)
         {
             if (length == 0)
@@ -232,7 +232,7 @@ namespace Kafka.Common.Encoding
             CheckRemaining(buffer, index, length);
             var recordBatchesBuilder = ImmutableArray.CreateBuilder<IRecords>();
             var limit = length + index;
-            while(index < limit)
+            while (index < limit)
             {
                 var recordBatch = ReadRecordBatch(buffer, ref index);
                 recordBatchesBuilder.Add(recordBatch);
@@ -247,7 +247,7 @@ namespace Kafka.Common.Encoding
             var partitionLeaderEpoch = ReadInt32(buffer, ref index);
             var magic = ReadInt8(buffer, ref index);
             var crc = ReadInt32(buffer, ref index);
-            var attributes = ReadInt16(buffer, ref index);
+            var attributes = (Attributes)ReadInt16(buffer, ref index);
             var lastOffsetDelta = ReadInt32(buffer, ref index);
             var baseTimestamp = ReadInt64(buffer, ref index);
             var maxTimestamp = ReadInt64(buffer, ref index);
@@ -255,18 +255,26 @@ namespace Kafka.Common.Encoding
             var producerEpoch = ReadInt16(buffer, ref index);
             var baseSequence = ReadInt32(buffer, ref index);
 
-            var records = ReadArray(
-                buffer,
-                ref index,
-                ReadRecord
-            ) ?? ImmutableArray<IRecord>.Empty;
+            var records = ImmutableArray<IRecord>.Empty;
+            if (attributes.HasFlag(Attributes.IsControlBatch))
+                records = ReadArray(
+                    buffer,
+                    ref index,
+                    ReadControlRecord
+                ) ?? ImmutableArray<IRecord>.Empty;
+            else
+                records = ReadArray(
+                    buffer,
+                    ref index,
+                    ReadRecord
+                ) ?? ImmutableArray<IRecord>.Empty;
             return new RecordBatch(
                 BaseOffset: baseOffset,
                 BatchLength: size,
                 PartitionLeaderEpoch: partitionLeaderEpoch,
                 Magic: magic,
                 Crc: crc,
-                Attributes: (Records.Attributes)attributes,
+                Attributes: attributes,
                 LastOffsetDelta: lastOffsetDelta,
                 BaseTimestamp: baseTimestamp,
                 MaxTimestamp: maxTimestamp,
@@ -274,6 +282,51 @@ namespace Kafka.Common.Encoding
                 ProducerEpoch: producerEpoch,
                 BaseSequence: baseSequence,
                 Records: records
+            );
+        }
+
+        private static IRecord ReadControlRecord(byte[] buffer, ref int index)
+        {
+            var version = default(short);
+            var type = default(ControlType);
+
+            var length = ReadVarInt32(buffer, ref index);
+            var attributes = ReadInt8(buffer, ref index);
+            var timestampDelta = ReadVarInt64(buffer, ref index);
+            var offsetDelta = ReadVarInt32(buffer, ref index);
+            var key = default(ReadOnlyMemory<byte>?);
+            var keyLength = ReadVarInt32(buffer, ref index);
+            if (keyLength >= 0)
+            {
+                var i = 0;
+                var keyBytes = buffer[index..(index += keyLength)];
+                version = ReadInt16(keyBytes, ref i);
+                type = (ControlType)ReadInt16(keyBytes, ref i);
+                key = keyBytes.AsMemory();
+            }
+            var value = default(ReadOnlyMemory<byte>?);
+            var valueLength = ReadVarInt32(buffer, ref index);
+            if (valueLength >= 0)
+                value = buffer[index..(index += valueLength)].AsMemory();
+            var headers = ImmutableArray<RecordHeader>.Empty;
+            var headerCount = ReadVarInt32(buffer, ref index);
+            if (headerCount > 0)
+            {
+                var headersBuilder = ImmutableArray.CreateBuilder<RecordHeader>(headerCount);
+                for (int i = 0; i < headerCount; i++)
+                    headersBuilder.Add(ReadRecordHeader(buffer, ref index));
+                headers = headersBuilder.ToImmutable();
+            }
+            return new ControlRecord(
+                Length: length,
+                Attributes: (Attributes)attributes,
+                TimestampDelta: timestampDelta,
+                OffsetDelta: offsetDelta,
+                Key: key,
+                Value: value,
+                Headers: headers,
+                Version: version,
+                Type: type
             );
         }
 
@@ -293,16 +346,16 @@ namespace Kafka.Common.Encoding
                 value = buffer[index..(index += valueLength)].AsMemory();
             var headers = ImmutableArray<RecordHeader>.Empty;
             var headerCount = ReadVarInt32(buffer, ref index);
-            if(headerCount > 0)
+            if (headerCount > 0)
             {
                 var headersBuilder = ImmutableArray.CreateBuilder<RecordHeader>(headerCount);
-                for(int i = 0; i < headerCount; i++)
+                for (int i = 0; i < headerCount; i++)
                     headersBuilder.Add(ReadRecordHeader(buffer, ref index));
                 headers = headersBuilder.ToImmutable();
             }
             return new Record(
                 Length: length,
-                Attributes: (Attributes) attributes,
+                Attributes: (Attributes)attributes,
                 TimestampDelta: timestampDelta,
                 OffsetDelta: offsetDelta,
                 Key: key,

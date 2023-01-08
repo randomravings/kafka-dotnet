@@ -10,6 +10,7 @@ using Kafka.Common.Types.Comparison;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Kafka.Client.Clients.Producer
@@ -144,7 +145,7 @@ namespace Kafka.Client.Clients.Producer
             var chunk = new ProduceCommand<TKey, TValue>[chunkSize];
             foreach (var produceRecord in produceRecords)
             {
-                var produceCallback = await CreateProduceCommand(produceRecord);
+                var produceCallback = CreateProduceCommand(produceRecord);
                 chunk[count++] = produceCallback;
                 if (count >= chunkSize)
                 {
@@ -189,26 +190,21 @@ namespace Kafka.Client.Clients.Producer
             CancellationToken cancellationToken
         )
         {
-            var produceCallback = await CreateProduceCommand(produceRecord);
+            var produceCallback = CreateProduceCommand(produceRecord);
             _commandQueue.Add(produceCallback, cancellationToken);
             return await produceCallback.TaskCompletionSource.Task;
         }
 
-        private async ValueTask<ProduceCommand<TKey, TValue>> CreateProduceCommand(
+        private ProduceCommand<TKey, TValue> CreateProduceCommand(
             ProduceRecord<TKey, TValue> produceRecord
         )
         {
             var keyBytes = _keySerializer.Write(produceRecord.Key);
             var valueBytes = _valueSerializer.Write(produceRecord.Value);
-
             var partition = produceRecord.Partition;
-            if (partition == Partition.Unassigned)
-                partition = await _partitioner.Select(_cluster, produceRecord.Topic, keyBytes);
-
             var timestamp = produceRecord.Timestamp;
             if (timestamp == Timestamp.None)
                 timestamp = Timestamp.Now();
-
             var taskCompletionSource = new TaskCompletionSource<ProduceResult<TKey, TValue>>();
             return new ProduceCommand<TKey, TValue>(
                     produceRecord.Topic,
@@ -231,28 +227,23 @@ namespace Kafka.Client.Clients.Producer
             var lingerTime = TimeSpan.FromMilliseconds(_config.LingerMs);
             try
             {
-                var collectExitReason = BatchAccumulatedReason.None;
-                var overflow = default(ProduceCommand<TKey, TValue>?);
+                var carryOver = default(ProduceCommand<TKey, TValue>);
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    // Create new batch at add overflow from prior batch if any.
-                    var batchBuilder = ImmutableArray.CreateBuilder<ProduceCommand<TKey, TValue>>(maxInFlightRequestsPerConnection);
-                    if (overflow != null)
-                        batchBuilder.Add(overflow);
                     // Pack batch and return overflow if any,
-                    (collectExitReason, overflow) = Collect(
+                    (var collectExitReason, var batch, carryOver, var controlCommand) = Collect(
                         _commandQueue,
-                        _executeQueue,
-                        batchBuilder,
+                        carryOver,
                         maxInFlightRequestsPerConnection,
                         maxrequestSize,
                         lingerTime,
                         cancellationToken
                     );
-                    // Flush items.
-                    var batch = batchBuilder.ToImmutable();
-                    _executeQueue.Add(new ProduceCommandBatch<TKey, TValue>(batch), CancellationToken.None);
-                    _logger.LogTrace("Collect triggered reason: {reason}, count: {count}", collectExitReason, batch.Length);
+                    _logger.LogTrace("Collect reason: {reason}, count: {count}, carryOver: {carryOver}, controlCommand: {controlCommand}", collectExitReason, batch.Length, carryOver != null, controlCommand?.GetType().Name ?? "(none)");
+                    if (batch.Length > 0)
+                        _executeQueue.Add(new ProduceCommandBatch<TKey, TValue>(batch), CancellationToken.None);
+                    if (controlCommand != null)
+                        _executeQueue.Add(controlCommand, CancellationToken.None);
                 }
             }
             catch (OperationCanceledException) { }
@@ -265,91 +256,118 @@ namespace Kafka.Client.Clients.Producer
         /// <param name="batch">Batch to fill.</param>
         /// <param name="cancellationToken">Cancellation token for the initial dequeue.</param>
         /// <returns></returns>
-        private static (BatchAccumulatedReason Reason, ProduceCommand<TKey, TValue>? Overflow) Collect(
+        private static BatchCollectResult<TKey, TValue> Collect(
             BlockingCollection<IProducerCommand> commandQueue,
-            BlockingCollection<IProducerCommand> dispatchQueue,
-            ImmutableArray<ProduceCommand<TKey, TValue>>.Builder batchBuilder,
+            ProduceCommand<TKey, TValue>? carryOver,
             int maxInFlightRequestsPerConnection,
             int maxRequestSize,
             TimeSpan lingerTime,
             CancellationToken cancellationToken
         )
         {
-            // Batch always allows at least one item.
-            while (batchBuilder.Count == 0)
+            var batchBuilder = ImmutableArray.CreateBuilder<ProduceCommand<TKey, TValue>>(maxInFlightRequestsPerConnection);
+            var fetchedSize = 0;
+            if (carryOver != null)
             {
-                var produceCommand = HandleCommandQueue(
-                    commandQueue,
-                    dispatchQueue,
-                    cancellationToken
-                );
-                batchBuilder.Add(produceCommand);
+                batchBuilder.Add(carryOver);
+                if (maxInFlightRequestsPerConnection == 1)
+                    return new(BatchCollectReason.MaxInFlightReached, batchBuilder.ToImmutable(), default, default);
+                fetchedSize += EstimateRecordSize(carryOver);
             }
-
-            // Degenerate case, batch size = 1 or no linger time.
-            if (maxInFlightRequestsPerConnection <= 1 && lingerTime <= TimeSpan.Zero)
-                return (BatchAccumulatedReason.MaxInFlightReached, default);
-
-            // Populate remaining batch items for max size > 1.
-            var fetchedSize = batchBuilder.Sum(r => EstimateRecordSize(r));
+            var command = commandQueue.Take(cancellationToken);
             using var localCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             localCts.CancelAfter(lingerTime);
-            while (true)
+            do
             {
                 try
                 {
-                    var produceCommand = HandleCommandQueue(
-                        commandQueue,
-                        dispatchQueue,
-                        localCts.Token
-                    );
-                    fetchedSize += EstimateRecordSize(produceCommand);
-                    if (fetchedSize >= maxRequestSize)
-                        return (BatchAccumulatedReason.MaxSizeExceeded, produceCommand);
-                    batchBuilder.Add(produceCommand);
-                    if (batchBuilder.Count >= maxInFlightRequestsPerConnection)
-                        return (BatchAccumulatedReason.MaxInFlightReached, default);
+                    switch (command)
+                    {
+                        case ProduceCommand<TKey, TValue> produceCommand:
+                            if (batchBuilder.Count >= maxInFlightRequestsPerConnection)
+                                return new(BatchCollectReason.MaxInFlightReached, batchBuilder.ToImmutable(), produceCommand, default);
+                            fetchedSize += EstimateRecordSize(produceCommand);
+                            if (fetchedSize >= maxRequestSize)
+                                return new(BatchCollectReason.MaxSizeExceeded, batchBuilder.ToImmutable(), produceCommand, default);
+                            batchBuilder.Add(produceCommand);
+                            break;
+                        default:
+                            return new(BatchCollectReason.ControlCommandIssued, batchBuilder.ToImmutable(), default, command);
+                    }
+                    command = commandQueue.Take(localCts.Token);
                 }
-                catch (OperationCanceledException)
-                {
-                    return (BatchAccumulatedReason.MaxLingerMsReached, default);
-                }
+                catch (OperationCanceledException) { }
+            }
+            while (!localCts.IsCancellationRequested);
+            return new(BatchCollectReason.MaxLingerMsReached, batchBuilder.ToImmutable(), default, default);
+        }
+
+        private sealed class TopicState
+        {
+            public TopicState(
+                string topicName,
+                long lastRefreshedMs,
+                PartitionState[] partitionStates
+            )
+            {
+                TopicName = topicName;
+                LastRefreshedMs = lastRefreshedMs;
+                PartitionStates = partitionStates;
+            }
+            public string TopicName { get; init; }
+            public long LastRefreshedMs { get; init; }
+            public PartitionState[] PartitionStates { get; init; }
+            public ClusterNodeId PartitionLeader { get; private set; }
+            public static TopicState FromTopicMetadata(MetadataResponse.MetadataResponseTopic topic)
+            {
+                string topicName = topic.NameField ?? "";
+                long lastRefeshedMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var partitionStates = topic
+                    .PartitionsField
+                    .Select(p =>
+                        PartitionState.FromPartitionMetadata(p)
+                    )
+                    .ToArray()
+                ;
+                return new(topicName, lastRefeshedMs, partitionStates);
             }
         }
 
-        private static ProduceCommand<TKey, TValue> HandleCommandQueue(
-            BlockingCollection<IProducerCommand> commandQueue,
-            BlockingCollection<IProducerCommand> dispatchQueue,
-            CancellationToken cancellationToken
-        )
+        private sealed class PartitionState
         {
-            ProduceCommand<TKey, TValue>? produceCommand = null;
-            while (produceCommand == null)
+            private int _baseSequence = -1;
+            private PartitionState() { }
+            public int PartitionIndex { get; init; }
+            public int PartitionLeader { get; init; }
+            public int NextBaseSequence() =>
+                Interlocked.Increment(ref _baseSequence)
+            ;
+            public static PartitionState FromPartitionMetadata(MetadataResponse.MetadataResponseTopic.MetadataResponsePartition partition)
             {
-                var producerCommand = commandQueue.Take(cancellationToken);
-                switch (producerCommand)
+                int partitionIndex = partition.PartitionIndexField;
+                var partitionLeader = partition.LeaderIdField;
+                return new PartitionState
                 {
-                    case ProduceCommand<TKey, TValue> p:
-                        return p;
-                    default:
-                        dispatchQueue.Add(producerCommand, cancellationToken);
-                        break;
-                }
+                    PartitionIndex = partitionIndex,
+                    PartitionLeader = partitionLeader,
+                };
             }
-            return produceCommand;
         }
 
         public async Task RunDispatch(
             CancellationToken cancellationToken
         )
         {
+            var topicStates = new SortedList<TopicName, TopicState>(TopicNameCompare.Instance);
+
+
             var acks = ParseAcks(_config, _logger);
             var requestTimeoutMs = _config.RequestTimeoutMs;
             var enableIdempotence = _config.EnableIdempotence;
             var producerId = -1L;
             var producerEpoch = (short)-1;
-            var baseSequence = 0;
-            var sequencer = new Func<int, int>(i => baseSequence);
+            var partitionSequences = new SortedList<TopicPartition, int>(TopicPartitionCompare.Instance);
+            var sequencer = new Func<TopicPartition, IDictionary<TopicPartition, int>, int>((t, p) => 0);
             var transactionalId = _config.TransactionalId;
             var transactionTimeoutMs = -1;
 
@@ -361,75 +379,104 @@ namespace Kafka.Client.Clients.Producer
 
             try
             {
+                var brokerConnections = await _connectionPool.AquireBrokerConnections(cancellationToken);
+                var controllerConnection = brokerConnections.Values.First();
+                if (!string.IsNullOrEmpty(transactionalId))
+                {
+                    var findCoordinatorRequest = new FindCoordinatorRequest(
+                        transactionalId,
+                        (sbyte)CoordinatorType.TRANSACTION,
+                        new[] { transactionalId }.ToImmutableArray()
+                    );
+                    var findCoordinatorResponse = await controllerConnection.ExecuteRequest(
+                        findCoordinatorRequest,
+                        FindCoordinatorRequestSerde.Write,
+                        FindCoordinatorResponseSerde.Read,
+                        cancellationToken
+                    );
+                    var host = findCoordinatorResponse.HostField;
+                    var port = findCoordinatorResponse.PortField;
+                    if (string.IsNullOrEmpty(host))
+                    {
+                        host = findCoordinatorResponse.CoordinatorsField[0].HostField;
+                        port = findCoordinatorResponse.CoordinatorsField[0].PortField;
+                    }
+                    controllerConnection = await _connectionPool.AquireConnection(host, port, cancellationToken);
+                }
                 if (enableIdempotence)
                 {
-                    var request = new InitProducerIdRequest(
+                    var initProducerIdRequest = new InitProducerIdRequest(
                         transactionalId,
                         transactionTimeoutMs,
                         producerId,
                         producerEpoch
                     );
-                    var response = await HandleRequest(
-                        request,
+                    var initProducerIdResponse = await controllerConnection.ExecuteRequest(
+                        initProducerIdRequest,
                         InitProducerIdRequestSerde.Write,
                         InitProducerIdResponseSerde.Read,
                         cancellationToken
                     );
-                    producerId = response.ProducerIdField;
-                    producerEpoch = response.ProducerEpochField;
-                    sequencer = i => { var v = baseSequence; Interlocked.Add(ref baseSequence, i); return v; };
+                    producerId = initProducerIdResponse.ProducerIdField;
+                    producerEpoch = initProducerIdResponse.ProducerEpochField;
+                    sequencer = (t, p) =>
+                    {
+                        if (!p.TryGetValue(t, out var s))
+                        {
+                            p.Add(t, 0);
+                            return 0;
+                        }
+                        else
+                        {
+                            s++;
+                            p[t] = s;
+                            return s;
+                        }
+                    };
                 }
-
                 var transaction = NoTransaction.Instance;
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var dispatchCommand = _executeQueue.Take(cancellationToken);
                     switch (dispatchCommand)
                     {
-                        case ProduceCommandBatch<TKey, TValue> pb:
-                            _logger.LogTrace("Record Builder dequeued {count} records", pb.ProduceCommands.Length);
-                            var topicPartitions = KafkaProducer<TKey, TValue>.CreateTopicPartitionTree(pb.ProduceCommands);
+                        case ProduceCommandBatch<TKey, TValue> produceCommandBatch:
+                            _logger.LogTrace("Record Builder dequeued {count} records", produceCommandBatch.ProduceCommands.Length);
+                            await UpdateTopicState(
+                                topicStates,
+                                produceCommandBatch,
+                                controllerConnection,
+                                cancellationToken
+                            );
+                            var groupedProduceCommands = new Dictionary<TopicPartition, IList<ProduceCommand<TKey, TValue>>>();
+                            foreach (var produceCommand in produceCommandBatch.ProduceCommands)
+                                await AddProduceCommand(
+                                    groupedProduceCommands,
+                                    topicStates,
+                                    _partitioner,
+                                    produceCommand,
+                                    cancellationToken
+                                );
+
                             if (transaction is ActiveTransaction activeTransaction)
-                            {
-                                var newTopicPartitions = transaction.AddTopicPartitions(topicPartitions.Keys);
-                                if (newTopicPartitions.Any())
-                                {
-                                    var addPartitionsToTxnTopic = newTopicPartitions
-                                        .GroupBy(g => g.Topic.Value ?? "")
-                                        .Select(r => new AddPartitionsToTxnRequest.AddPartitionsToTxnTopic(
-                                                r.Key,
-                                                r.Select(r => r.Partition.Value).ToImmutableArray()
-                                            )
-                                        )
-                                        .ToImmutableArray()
-                                    ;
-                                    var addPartitionsToTxnRequest = new AddPartitionsToTxnRequest(
-                                        activeTransaction.TransactionId,
-                                        producerId,
-                                        producerEpoch,
-                                        addPartitionsToTxnTopic
-                                    );
-                                    var addPartitionsToTxnResponse = await HandleRequest(
-                                        addPartitionsToTxnRequest,
-                                        AddPartitionsToTxnRequestSerde.Write,
-                                        AddPartitionsToTxnResponseSerde.Read,
-                                        cancellationToken
-                                    );
-                                    foreach (var topicParitionResponse in addPartitionsToTxnResponse.ResultsField)
-                                        foreach (var paritionResponse in topicParitionResponse.ResultsField)
-                                            if (paritionResponse.ErrorCodeField != 0)
-                                                _logger.LogWarning("Topic: {topic} - Error: {error}", topicParitionResponse.NameField, Errors.Translate(paritionResponse.ErrorCodeField).ToString());
-                                }
-                            }
+                                await UpdateTransactions(
+                                    activeTransaction,
+                                    producerId,
+                                    producerEpoch,
+                                    groupedProduceCommands.Keys,
+                                    controllerConnection,
+                                    _logger,
+                                    cancellationToken
+                                );
                             var tasks = CreateTopicPartitionSends(
+                                brokerConnections,
+                                topicStates,
+                                groupedProduceCommands,
                                 transaction,
-                                topicPartitions,
                                 acks,
                                 requestTimeoutMs,
                                 producerId,
                                 producerEpoch,
-                                transactionalId,
-                                sequencer,
                                 cancellationToken
                             );
                             await Task.WhenAll(tasks);
@@ -460,7 +507,7 @@ namespace Kafka.Client.Clients.Producer
                                 producerEpoch,
                                 true
                             );
-                            var commitResponse = await HandleRequest(
+                            var commitResponse = await controllerConnection.ExecuteRequest(
                                 commitRequest,
                                 EndTxnRequestSerde.Write,
                                 EndTxnResponseSerde.Read,
@@ -489,7 +536,7 @@ namespace Kafka.Client.Clients.Producer
                                 producerEpoch,
                                 false
                             );
-                            var rollbackResponse = await HandleRequest(
+                            var rollbackResponse = await controllerConnection.ExecuteRequest(
                                 rollbackRequest,
                                 EndTxnRequestSerde.Write,
                                 EndTxnResponseSerde.Read,
@@ -514,40 +561,126 @@ namespace Kafka.Client.Clients.Producer
             catch (OperationCanceledException) { }
         }
 
-        private static ImmutableSortedDictionary<TopicPartition, ImmutableArray<ProduceCommand<TKey, TValue>>> CreateTopicPartitionTree(
-            ImmutableArray<ProduceCommand<TKey, TValue>> dispatchItems
-        ) =>
-            dispatchItems
-                .Select((r, i) => new { Sequence = i, Callback = r })
-                .GroupBy(
-                    g => new TopicPartition(g.Callback.Topic, g.Callback.Partition)
-                )
-                .ToImmutableSortedDictionary(
-                    k => k.Key,
-                    v => v.Select(r => r.Callback)
-                        .ToImmutableArray()
-                )
-            ;
+        private static async ValueTask AddProduceCommand(
+            IDictionary<TopicPartition, IList<ProduceCommand<TKey, TValue>>> topicPartitionList,
+            IDictionary<TopicName, TopicState> topicStates,
+            IPartitioner partitioner,
+            ProduceCommand<TKey, TValue> produceCommand,
+            CancellationToken cancellationToken
+        )
+        {
+            var partition = produceCommand.Partition;
+            if (partition == Partition.Unassigned)
+                partition = await partitioner.Select(produceCommand.Topic, topicStates[produceCommand.Topic].PartitionStates.Length, produceCommand.Key, cancellationToken);
+            var topicPartition = new TopicPartition(produceCommand.Topic, partition);
+            if (!topicPartitionList.TryGetValue(topicPartition, out var commands))
+            {
+                commands = new List<ProduceCommand<TKey, TValue>>();
+                topicPartitionList.Add(topicPartition, commands);
+            }
+            commands.Add(produceCommand);
+        }
 
-        private ImmutableArray<Task> CreateTopicPartitionSends(
+        private static async ValueTask UpdateTopicState(
+            SortedList<TopicName, TopicState> topicStates,
+            ProduceCommandBatch<TKey, TValue> produceCommandBatch,
+            IConnection connection,
+            CancellationToken cancellationToken
+        )
+        {
+            var newTopics = produceCommandBatch
+                .ProduceCommands
+                .Select(r => r.Topic)
+                .Distinct()
+                .Except(topicStates.Keys)
+            ;
+            if (newTopics.Any())
+            {
+                var metadataRequest = new MetadataRequest(
+                    newTopics.Select(r =>
+                            new MetadataRequest.MetadataRequestTopic(Guid.Empty, r)
+                    ).ToImmutableArray(),
+                    false,
+                    false,
+                    false
+                );
+                var metadataResponse = await connection.ExecuteRequest(
+                    metadataRequest,
+                    MetadataRequestSerde.Write,
+                    MetadataResponseSerde.Read,
+                    cancellationToken
+                );
+                foreach (var topic in metadataResponse.TopicsField)
+                    topicStates.Add(topic.NameField, TopicState.FromTopicMetadata(topic));
+            }
+        }
+
+        private static async ValueTask UpdateTransactions(
+            ITransaction transaction,
+            long producerId,
+            short producerEpoch,
+            IEnumerable<TopicPartition> topicPartitions,
+            IConnection connection,
+            ILogger logger,
+            CancellationToken cancellationToken
+        )
+        {
+            if (transaction is ActiveTransaction activeTransaction)
+            {
+                var newTopicPartitions = activeTransaction.AddTopicPartitions(topicPartitions);
+                if (newTopicPartitions.Any())
+                {
+                    var addPartitionsToTxnTopic = newTopicPartitions
+                        .GroupBy(g => g.Topic.Value ?? "")
+                        .Select(r => new AddPartitionsToTxnRequest.AddPartitionsToTxnTopic(
+                                r.Key,
+                                r.Select(r => r.Partition.Value).ToImmutableArray()
+                            )
+                        )
+                        .ToImmutableArray()
+                    ;
+                    var addPartitionsToTxnRequest = new AddPartitionsToTxnRequest(
+                        activeTransaction.TransactionId,
+                        producerId,
+                        producerEpoch,
+                        addPartitionsToTxnTopic
+                    );
+                    var addPartitionsToTxnResponse = await connection.ExecuteRequest(
+                        addPartitionsToTxnRequest,
+                        AddPartitionsToTxnRequestSerde.Write,
+                        AddPartitionsToTxnResponseSerde.Read,
+                        cancellationToken
+                    );
+                    foreach (var topicParitionResponse in addPartitionsToTxnResponse.ResultsField)
+                        foreach (var paritionResponse in topicParitionResponse.ResultsField)
+                            if (paritionResponse.ErrorCodeField != 0)
+                                logger.LogWarning("Topic: {topic} - Error: {error}", topicParitionResponse.NameField, Errors.Translate(paritionResponse.ErrorCodeField).ToString());
+                }
+            }
+        }
+
+        private static ImmutableArray<Task> CreateTopicPartitionSends(
+            ImmutableSortedDictionary<ClusterNodeId, IConnection> connections,
+            IDictionary<TopicName, TopicState> topicStates,
+            IDictionary<TopicPartition, IList<ProduceCommand<TKey, TValue>>> groupedProduceCommand,
             Transaction transaction,
-            ImmutableSortedDictionary<TopicPartition, ImmutableArray<ProduceCommand<TKey, TValue>>> topicPartitions,
             short acks,
             int requestTimeoutMs,
             long producerId,
             short producerEpoch,
-            string? transactionId,
-            Func<int, int> sequencer,
             CancellationToken cancellationToken
         )
         {
-            var tasks = ImmutableArray.CreateBuilder<Task>(topicPartitions.Count);
-            foreach (var topicPartition in topicPartitions)
+            var tasks = ImmutableArray.CreateBuilder<Task>(groupedProduceCommand.Count);
+            foreach (var topicPartition in groupedProduceCommand)
             {
+                var partitionState = topicStates[topicPartition.Key.Topic].PartitionStates[topicPartition.Key.Partition];
                 var batchSize = 0;
-                var attributes = Attributes.None | transaction.TxnAttributes;
+                var attributes = Attributes.None;
                 var minTimestamp = long.MaxValue;
                 var maxTimestamp = long.MinValue;
+                if (transaction.TxnState == TxnState.Active)
+                    attributes |= Attributes.IsTransactional;
                 foreach (var x in topicPartition.Value)
                 {
                     minTimestamp = Math.Min(minTimestamp, x.Timestamp.TimestampMs);
@@ -567,20 +700,22 @@ namespace Kafka.Client.Clients.Producer
                     MaxTimestamp: maxTimestamp,
                     ProducerId: producerId,
                     ProducerEpoch: producerEpoch,
-                    BaseSequence: sequencer(recordList.Length),
+                    BaseSequence: partitionState.NextBaseSequence(),
                     recordList
                 );
                 var recordBatchesBuilder = ImmutableArray.CreateBuilder<IRecords>(1);
                 recordBatchesBuilder.Add(records);
+                var connection = connections[partitionState.PartitionLeader];
                 tasks.Add(
                     HandleRecordSend(
+                        connection,
                         transaction,
                         topicPartition.Key,
                         recordBatchesBuilder.ToImmutableArray(),
                         topicPartition.Value,
                         acks,
                         requestTimeoutMs,
-                        transactionId,
+                        transaction.TransactionId,
                         cancellationToken
                     )
                 );
@@ -590,17 +725,18 @@ namespace Kafka.Client.Clients.Producer
 
         //private static ImmutableArray<Task> CreateTopicPartitionSends()
 
-        private static (int SizeDelta, ImmutableArray<IRecord> Records) BuildRecordArray(ImmutableArray<ProduceCommand<TKey, TValue>> value, long minTimestampMs)
+        private static (int SizeDelta, ImmutableArray<IRecord> Records) BuildRecordArray(IEnumerable<ProduceCommand<TKey, TValue>> produceCommands, long minTimestampMs)
         {
+            var offsetDelta = 0;
             var sizeDelta = 0;
             var recordArrayBuilder = ImmutableArray.CreateBuilder<IRecord>();
-            for (int i = 0; i < value.Length; i++)
+            foreach (var produceCommand in produceCommands)
             {
-                var callback = value[i];
+                var callback = produceCommand;
                 var timestampDelta = callback.Timestamp.TimestampMs - minTimestampMs;
                 var record = CreateRecord(
                     timestampDelta,
-                    i,
+                    offsetDelta++,
                     callback.Key,
                     callback.Value,
                     callback.Headers
@@ -638,11 +774,12 @@ namespace Kafka.Client.Clients.Producer
             );
         }
 
-        private async Task HandleRecordSend(
+        private static async Task HandleRecordSend(
+            IConnection connection,
             Transaction transaction,
             TopicPartition topicPartition,
             ImmutableArray<IRecords> records,
-            ImmutableArray<ProduceCommand<TKey, TValue>> produceCallbacks,
+            IList<ProduceCommand<TKey, TValue>> produceCallbacks,
             short acks,
             int requestTimeOutMs,
             string? transactionId,
@@ -667,7 +804,7 @@ namespace Kafka.Client.Clients.Producer
                     )
                 }.ToImmutableArray()
             );
-            var respose = await HandleRequest(
+            var respose = await connection.ExecuteRequest(
                 request with { MaxVersion = 7 },
                 ProduceRequestSerde.Write,
                 ProduceResponseSerde.Read,
@@ -689,7 +826,7 @@ namespace Kafka.Client.Clients.Producer
                     {
                         foreach (var produceCallback in produceCallbacks)
                         {
-                            var topicPartitionOffset = new TopicPartitionOffset(topicName, new(partition, offset++));
+                            var topicPartitionOffset = new TopicPartitionOffset(new(topicName, partition), offset++);
                             produceCallback.TaskCompletionSource.SetResult(
                                 new ProduceResult<TKey, TValue>(
                                     topicPartitionOffset,
@@ -699,7 +836,7 @@ namespace Kafka.Client.Clients.Producer
                                 )
                             );
                         }
-                        transaction.InrementBaseSequence(topicPartition, produceCallbacks.Length);
+                        transaction.InrementBaseSequence(topicPartition, produceCallbacks.Count);
                         continue;
                     }
 
@@ -717,7 +854,7 @@ namespace Kafka.Client.Clients.Producer
                         for (int l = 0; l < recordBatch.Count; l++)
                         {
                             var index = k * l + l;
-                            var topicPartitionOffset = new TopicPartitionOffset(topicName, new(partition, offset++));
+                            var topicPartitionOffset = new TopicPartitionOffset(new(topicName, partition), offset++);
                             if (!recordErrors.TryGetValue(index, out var recordError))
                                 recordError = "";
                             var produceCallback = produceCallbacks[index];
@@ -828,7 +965,6 @@ namespace Kafka.Client.Clients.Producer
             }
             public string TransactionId { get; init; }
             public abstract TxnState TxnState { get; }
-            internal abstract Attributes TxnAttributes { get; }
             public abstract Task Commit(CancellationToken cancellationToken);
             public abstract Task Rollback(CancellationToken cancellationToken);
             internal abstract long GetBaseSequence(TopicPartition topicPartition);
@@ -849,8 +985,7 @@ namespace Kafka.Client.Clients.Producer
                 _commandQueue = commandQueue;
             }
 
-            public override TxnState TxnState => throw new NotImplementedException();
-            internal override Attributes TxnAttributes => Attributes.IsTransactional;
+            public override TxnState TxnState => _txnState;
             public override Task Commit(CancellationToken cancellationToken)
             {
                 lock (_guard)
@@ -900,9 +1035,7 @@ namespace Kafka.Client.Clients.Producer
             Transaction
         {
             public static Transaction Instance { get; } = new NoTransaction();
-
             public override TxnState TxnState => TxnState.None;
-            internal override Attributes TxnAttributes => Attributes.None;
             private NoTransaction()
                 : base("") { }
             public override Task Commit(CancellationToken cancellationToken) =>
@@ -914,11 +1047,9 @@ namespace Kafka.Client.Clients.Producer
             internal override IEnumerable<TopicPartition> AddTopicPartitions(IEnumerable<TopicPartition> topicPartitions) =>
                 Enumerable.Empty<TopicPartition>()
             ;
-
             internal override long GetBaseSequence(TopicPartition topicPartition) =>
                 0
             ;
-
             internal override void InrementBaseSequence(TopicPartition topicPartition, long count) { }
         }
     }

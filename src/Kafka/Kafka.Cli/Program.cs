@@ -12,9 +12,8 @@ await new Parser(with =>
         with.IgnoreUnknownArguments = true;
         with.CaseInsensitiveEnumValues = true;
     })
-    .ParseArguments<VerbApiVersions, Topic, Produce, Consume>(args)
+    .ParseArguments<Topic, Produce, Consume>(args)
     .MapResult(
-        (VerbApiVersions verb) => ApiCmd.Parse(verb, cts.Token),
         (Topic verb) => TopicCmd.Parse(args.Skip(1), cts.Token),
         (Produce verb) => ProduceCmd.Parse(verb, cts.Token),
         (Consume verb) => ConsumeCmd.Parse(verb, cts.Token),

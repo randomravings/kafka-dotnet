@@ -1,5 +1,8 @@
-﻿namespace Kafka.Common.Records
+﻿using System.ComponentModel;
+
+namespace Kafka.Common.Records
 {
+    [DefaultValue(None)]
     public enum ControlType : short
     {
         None = -1,

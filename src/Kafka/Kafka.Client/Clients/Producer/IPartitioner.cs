@@ -5,7 +5,7 @@ namespace Kafka.Client.Clients.Producer
 {
     public interface IPartitioner
     {
-        ValueTask<int> Select(Cluster cluster, TopicName topic, ReadOnlyMemory<byte>? keyBytes, CancellationToken cancellationToken = default);
+        ValueTask<Partition> Select(TopicName topic, int partitionCount, ReadOnlyMemory<byte>? keyBytes, CancellationToken cancellationToken);
 
         /**
          * This is called when partitioner is closed.

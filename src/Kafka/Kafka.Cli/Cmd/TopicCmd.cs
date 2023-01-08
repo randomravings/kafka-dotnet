@@ -65,7 +65,7 @@ namespace Kafka.Cli.Cmd
         {
             try
             {
-                using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
+                using var adminClient = CreateAdminClient(verb, out var adminClientConfig); 
                 var replicaAssinment = new Dictionary<int, int[]>();
                 var partitionReplicaAssignments = verb.ReplicaAssignment.Split(';', StringSplitOptions.RemoveEmptyEntries);
                 foreach (var partitionReplicaAssignment in partitionReplicaAssignments)
@@ -79,6 +79,7 @@ namespace Kafka.Cli.Cmd
                     .NewTopic(b => b
                         .Name(verb.Topic)
                         .NumPartitions(verb.PartitionCount)
+                        .ReplicationFactor(verb.ReplicationFactor)
                         .ReplicasAssignments(replicaAssinment)
                         .Build()
                     )

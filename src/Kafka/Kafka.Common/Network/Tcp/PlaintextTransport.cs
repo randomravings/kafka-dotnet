@@ -1,5 +1,4 @@
 ﻿using Kafka.Common.Encoding;
-using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Net.Sockets;
 
@@ -22,21 +21,23 @@ namespace Kafka.Common.Network.Tcp
             _tcpClient.Connected
         ;
 
-        async ValueTask ITransport.Connect(CancellationToken cancellationToken) =>
+        DnsEndPoint ITransport.EndPoint => _endPoint;
+
+        async Task ITransport.Connect(CancellationToken cancellationToken) =>
             await _tcpClient.ConnectAsync(_endPoint.Host, _endPoint.Port, cancellationToken)
         ;
 
-        async ValueTask ITransport.Disconnect(CancellationToken cancellationToken)
+        async Task ITransport.Disconnect(CancellationToken cancellationToken)
         {
             _tcpClient.Close();
             await ValueTask.CompletedTask;
         }
 
-        async ValueTask ITransport.Handshake(CancellationToken cancellationToken) =>
+        async Task ITransport.Handshake(CancellationToken cancellationToken) =>
             await ValueTask.CompletedTask
         ;
 
-        async ValueTask<byte[]> ITransport.HandleRequest(
+        async Task<byte[]> ITransport.HandleRequest(
             byte[] requestBytes,
             int offset,
             int length,
@@ -76,7 +77,7 @@ namespace Kafka.Common.Network.Tcp
             return true;
         }
 
-        public async ValueTask Close(CancellationToken cancellationToken)
+        public async Task Close(CancellationToken cancellationToken)
         {
             if (_tcpClient.Connected)
                 _tcpClient.Close();
@@ -85,6 +86,8 @@ namespace Kafka.Common.Network.Tcp
 
         void IDisposable.Dispose()
         {
+            if (_tcpClient.Connected)
+                _tcpClient.Close();
             _tcpClient.Dispose();
         }
     }
