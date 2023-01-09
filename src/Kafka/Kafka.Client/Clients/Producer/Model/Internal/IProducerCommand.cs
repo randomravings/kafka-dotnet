@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Kafka.Client.Clients.Producer.Model
+namespace Kafka.Client.Clients.Producer.Model.Internal
 {
-    public interface IProducerCommand
+    internal interface IProducerCommand
     {
     }
 }

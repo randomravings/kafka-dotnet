@@ -1,6 +1,6 @@
-﻿namespace Kafka.Client.Clients.Producer.Model
+﻿namespace Kafka.Client.Clients.Producer.Model.Internal
 {
-    public enum BatchCollectReason
+    internal enum BatchCollectReason
     {
         None = 0,
         MaxInFlightReached = 1,

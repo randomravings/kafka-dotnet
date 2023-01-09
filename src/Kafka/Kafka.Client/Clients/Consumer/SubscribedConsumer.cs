@@ -2,6 +2,7 @@
 using Kafka.Client.Messages;
 using Kafka.Common;
 using Kafka.Common.Exceptions;
+using Kafka.Common.Protocol;
 using Kafka.Common.Records;
 using Kafka.Common.Serialization;
 using Kafka.Common.Types;
@@ -9,7 +10,6 @@ using Kafka.Common.Types.Comparison;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
 
 namespace Kafka.Client.Clients.Consumer
@@ -45,7 +45,7 @@ namespace Kafka.Client.Clients.Consumer
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    cancellationToken.WaitHandle.WaitOne(5000);
+                    cancellationToken.WaitHandle.WaitOne(_config.HeartbeatIntervalMs);
                     if (string.IsNullOrEmpty(subscriptionMetadata.MemberId))
                         continue;
                     var request = new HeartbeatRequest(
@@ -54,17 +54,23 @@ namespace Kafka.Client.Clients.Consumer
                         subscriptionMetadata.MemberId,
                         subscriptionMetadata.GroupInstanceId
                     );
-                    var response = await connection.ExecuteRequest(
-                        request,
-                        HeartbeatRequestSerde.Write,
-                        HeartbeatResponseSerde.Read,
-                        cancellationToken
-                    );
-
-                    if (response.ErrorCodeField != 0)
+                    try
                     {
-                        var error = Errors.Translate(response.ErrorCodeField);
-                        _logger.LogWarning("{error}", error);
+                        var response = await connection.ExecuteRequest(
+                            request,
+                            HeartbeatRequestSerde.Write,
+                            HeartbeatResponseSerde.Read,
+                            cancellationToken
+                        );
+                        if (response.ErrorCodeField != 0)
+                        {
+                            var error = Errors.Translate(response.ErrorCodeField);
+                            _logger.LogWarning("{error}", error);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        _logger.LogCritical("{ex}", ex);
                     }
                 }
             }
@@ -88,7 +94,7 @@ namespace Kafka.Client.Clients.Consumer
                     for (int i = 0; i < count; i++)
                     {
                         if (commitQueue.TryDequeue(out var result))
-                            commitState[result.TopicPartition] = result.Offset.Value + 1;
+                            commitState[result.TopicPartition] = result.Offset.Value;
                         else
                             break;
                     }
@@ -121,14 +127,36 @@ namespace Kafka.Client.Clients.Consumer
                         -1,
                         offsetCommitRequestTopic
                     );
-                    commitState.Clear();
-                    var response = await connection.ExecuteRequest(
-                        request,
-                        OffsetCommitRequestSerde.Write,
-                        OffsetCommitResponseSerde.Read,
-                        cancellationToken
-                    );
-                    commitState.Clear();
+                    try
+                    {
+                        var response = await connection.ExecuteRequest(
+                            request,
+                            OffsetCommitRequestSerde.Write,
+                            OffsetCommitResponseSerde.Read,
+                            cancellationToken
+                        );
+                        var partitionErrors = response
+                            .TopicsField
+                            .SelectMany(r => r.PartitionsField)
+                            .Where(r => r.ErrorCodeField != 0)
+                        ;
+                        if (partitionErrors.Any())
+                        {
+                            foreach (var partition in partitionErrors)
+                            {
+                                var error = Errors.Translate(partition.ErrorCodeField);
+                                _logger.LogError("{error}", error);
+                            }
+                        }
+                        else
+                        {
+                            commitState.Clear();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogCritical("{ex}", ex);
+                    }
                 }
             }
             catch (OperationCanceledException) { }
@@ -218,7 +246,8 @@ namespace Kafka.Client.Clients.Consumer
                 .ToImmutableSortedDictionary(
                     k => new ClusterNodeId(k.Key),
                     v => v.Select(r => new TopicPartition(r.NameField, r.PartitionIndexField))
-                        .ToImmutableArray()
+                        .ToImmutableArray(),
+                    ClusterNodeIdCompare.Instance
                 )
             ;
 
@@ -232,28 +261,14 @@ namespace Kafka.Client.Clients.Consumer
 
         private static void UpdateFromOffsetFetchResponse(
             SortedList<TopicPartition, Offset> topicPartitionOffsets,
-            ImmutableSortedDictionary<ClusterNodeId, OffsetFetchResponse> offsetFetchResponses
+            OffsetFetchResponse offsetFetchResponse
         )
         {
-            foreach (var offsetFetchResponse in offsetFetchResponses.Values)
+            // Check if stored by group. This assumes one and only one group.
+            var group = offsetFetchResponse.GroupsField.FirstOrDefault();
+            if (group != null)
             {
-                // Check if stored by group. This assumes one and only one group.
-                var group = offsetFetchResponse.GroupsField.FirstOrDefault();
-                if (group != null)
-                {
-                    foreach (var topic in group.TopicsField)
-                    {
-                        foreach (var partition in topic.PartitionsField)
-                        {
-                            var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
-                            if (partition.CommittedOffsetField >= 0)
-                                topicPartitionOffsets[topicPartition] = partition.CommittedOffsetField;
-                        }
-                    }
-                }
-
-                // Check if stored by topic.
-                foreach (var topic in offsetFetchResponse.TopicsField)
+                foreach (var topic in group.TopicsField)
                 {
                     foreach (var partition in topic.PartitionsField)
                     {
@@ -261,6 +276,17 @@ namespace Kafka.Client.Clients.Consumer
                         if (partition.CommittedOffsetField >= 0)
                             topicPartitionOffsets[topicPartition] = partition.CommittedOffsetField;
                     }
+                }
+            }
+
+            // Check if stored by topic.
+            foreach (var topic in offsetFetchResponse.TopicsField)
+            {
+                foreach (var partition in topic.PartitionsField)
+                {
+                    var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
+                    if (partition.CommittedOffsetField >= 0)
+                        topicPartitionOffsets[topicPartition] = partition.CommittedOffsetField;
                 }
             }
         }
@@ -280,7 +306,8 @@ namespace Kafka.Client.Clients.Consumer
                 .Where(r => r.Value.Any())
                 .ToImmutableSortedDictionary(
                     k => k.Key,
-                    v => v.Value
+                    v => v.Value,
+                    ClusterNodeIdCompare.Instance
                 )
             ;
 
@@ -438,40 +465,32 @@ namespace Kafka.Client.Clients.Consumer
             );
         }
 
-        private async ValueTask<ImmutableSortedDictionary<ClusterNodeId, OffsetFetchResponse>> FetchOffsets(
-            ImmutableSortedDictionary<ClusterNodeId, IConnection> brokerConnections,
-            ImmutableSortedDictionary<ClusterNodeId, ImmutableArray<TopicPartition>> topicPartitionLeaders,
+        private async ValueTask<OffsetFetchResponse> FetchOffsets(
+            IConnection connection,
+            IEnumerable<TopicPartition> topicPartitions,
             CancellationToken cancellationToken
         )
         {
-            var offsetFetchRequestsBuilder = ImmutableSortedDictionary
-                .CreateBuilder<ClusterNodeId, (OffsetFetchRequest Request, IConnection Connection)>()
+            var topicsToFetch = topicPartitions
+                .GroupBy(g => g.Topic)
+                .Select(
+                    r => new OffsetFetchRequest.OffsetFetchRequestTopic(
+                        r.Key.Value ?? "",
+                        r.Select(r =>
+                            r.Partition.Value
+                        )
+                        .ToImmutableArray()
+                    )
+                )
+                .ToImmutableArray()
             ;
 
-            foreach (var topicPartitionLeader in topicPartitionLeaders)
-            {
-                var topicsToFetch = topicPartitionLeader
-                    .Value
-                    .GroupBy(g => g.Topic)
-                    .Select(
-                        r => new OffsetFetchRequest.OffsetFetchRequestTopic(
-                            r.Key.Value ?? "",
-                            r.Select(r =>
-                                r.Partition.Value
-                            )
-                            .ToImmutableArray()
-                        )
-                    )
-                    .ToImmutableArray()
-                ;
-
-                var topicsInGroupToFetch =
-                    new[]
-                    {
+            var topicsInGroupToFetch =
+                new[]
+                {
                         new OffsetFetchRequest.OffsetFetchRequestGroup(
                             _config.GroupId ?? "",
-                            topicPartitionLeader
-                                .Value
+                            topicPartitions
                                 .GroupBy(g => g.Topic)
                                 .Select(r =>
                                     new OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
@@ -482,43 +501,21 @@ namespace Kafka.Client.Clients.Consumer
                                     )
                                 ).ToImmutableArray()
                         )
-                    }
-                    .ToImmutableArray();
+                }
+                .ToImmutableArray();
 
-                var offsetFetchRequest = new OffsetFetchRequest(
-                    _config.GroupId ?? "",
-                    topicsToFetch,
-                    topicsInGroupToFetch,
-                    false
-                );
-
-                offsetFetchRequestsBuilder.Add(topicPartitionLeader.Key, (offsetFetchRequest, brokerConnections[topicPartitionLeader.Key]));
-            }
-
-            var offsetFetchRequests = offsetFetchRequestsBuilder.ToImmutableArray();
-
-            var tasks = offsetFetchRequestsBuilder
-                .ToImmutableSortedDictionary(
-                    k => k.Key,
-                    v => v.Value
-                        .Connection
-                        .ExecuteRequest(
-                            v.Value.Request,
-                            OffsetFetchRequestSerde.Write,
-                            OffsetFetchResponseSerde.Read,
-                            cancellationToken
-                        )
-                )
-            ;
-
-            await Task.WhenAll(tasks.Values);
-
-            return tasks
-                .ToImmutableSortedDictionary(
-                    k => k.Key,
-                    v => v.Value.Result
-                )
-            ;
+            var offsetFetchRequest = new OffsetFetchRequest(
+                _config.GroupId ?? "",
+                topicsToFetch,
+                topicsInGroupToFetch,
+                false
+            );
+            return await connection.ExecuteRequest(
+                offsetFetchRequest,
+                OffsetFetchRequestSerde.Write,
+                OffsetFetchResponseSerde.Read,
+                cancellationToken
+            );
         }
 
         private static async ValueTask<SyncGroupResponse> SyncGroup(
@@ -594,75 +591,82 @@ namespace Kafka.Client.Clients.Consumer
             ;
             if (!newTopics.Any())
                 return ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionWatermark>>.Empty;
-
             var brokerConnections = await _connectionPool.AquireBrokerConnections(cancellationToken);
-            var coordinatorConnection = brokerConnections.Values.First();
-
-            var findCoordinatorRequest = new FindCoordinatorRequest(
-                _config.GroupId ?? "",
-                0,
-                ImmutableArray<string>.Empty
-            );
-            var findCoordinatorResponse = await coordinatorConnection.ExecuteRequest(
-                findCoordinatorRequest,
-                FindCoordinatorRequestSerde.Write,
-                FindCoordinatorResponseSerde.Read,
-                cancellationToken
-            );
-            var metadataResponse = await TopicMetadata(
-                coordinatorConnection,
-                newTopics,
-                cancellationToken
-            );
-            var topicPartitions = CreateTopicPartitionOffsets(metadataResponse);
-            var topicPartitionMap = CreateTopicPartitionMap(metadataResponse);
-            var topicPartitionOffsets = CreateTopicPartitionOffsets(metadataResponse);
-            var lowListOffsetsResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
-                brokerConnections,
-                topicPartitionMap,
-                topicPartitions.Keys,
-                Offset.Beginning,
-                cancellationToken
-            );
-            var lowWatermarks = GetTopicPartitionOffsets(lowListOffsetsResponse);
-
-            var highListOffsetsResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
-                brokerConnections,
-                topicPartitionMap,
-                topicPartitions.Keys,
-                Offset.End,
-                cancellationToken
-            );
-            var highWatermarks = GetTopicPartitionOffsets(highListOffsetsResponse);
-
-            var fetchOffsetsResponse = await FetchOffsets(
-                brokerConnections,
-                topicPartitionMap,
-                cancellationToken
-            );
-            var storedOffsets = GetTopicPartitionOffsets(fetchOffsetsResponse.Values);
-
-            var topicWatermarksBuilder = ImmutableSortedDictionary.CreateBuilder<TopicName, ImmutableArray<PartitionWatermark>>(TopicNameCompare.Instance);
-            foreach (var topic in topicPartitions.Keys.GroupBy(g => g.Topic))
+            try
             {
-                var partitionWatermarksBuilder = ImmutableArray.CreateBuilder<PartitionWatermark>(topic.Count());
-                foreach (var partition in topic)
+                (var coordinatorConnection, var error) = await GetCoordinator(
+                    brokerConnections,
+                    _config.GroupId ?? "",
+                    CoordinatorType.GROUP,
+                    cancellationToken
+                );
+                var metadataResponse = await TopicMetadata(
+                    coordinatorConnection,
+                    newTopics,
+                    cancellationToken
+                );
+                var topicPartitions = CreateTopicPartitionOffsets(metadataResponse);
+                var topicPartitionMap = CreateTopicPartitionMap(metadataResponse);
+                var topicPartitionOffsets = CreateTopicPartitionOffsets(metadataResponse);
+                var lowListOffsetsResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
+                    brokerConnections,
+                    topicPartitionMap,
+                    topicPartitions.Keys,
+                    Offset.Beginning,
+                    cancellationToken
+                );
+                var lowWatermarks = GetTopicPartitionOffsets(lowListOffsetsResponse);
+
+                var highListOffsetsResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
+                    brokerConnections,
+                    topicPartitionMap,
+                    topicPartitions.Keys,
+                    Offset.End,
+                    cancellationToken
+                );
+                var highWatermarks = GetTopicPartitionOffsets(highListOffsetsResponse);
+
+                var fetchOffsetsResponse = await FetchOffsets(
+                    coordinatorConnection,
+                    topicPartitions.Keys,
+                    cancellationToken
+                );
+                var storedOffsets = GetTopicPartitionOffsets(fetchOffsetsResponse);
+
+                var topicWatermarksBuilder = ImmutableSortedDictionary.CreateBuilder<TopicName, ImmutableArray<PartitionWatermark>>(TopicNameCompare.Instance);
+                foreach (var topic in topicPartitions.Keys.GroupBy(g => g.Topic))
                 {
-                    var low = highWatermarks[topic.Key][partition.Partition];
-                    var high = lowWatermarks[topic.Key][partition.Partition];
-                    var stored = storedOffsets[topic.Key][partition.Partition];
-                    partitionWatermarksBuilder.Add(
-                        new(
-                            partition.Partition,
-                            low,
-                            high,
-                            stored
-                        )
-                    );
+                    var partitionWatermarksBuilder = ImmutableArray.CreateBuilder<PartitionWatermark>(topic.Count());
+                    foreach (var partition in topic)
+                    {
+                        var low = highWatermarks[topic.Key][partition.Partition];
+                        var high = lowWatermarks[topic.Key][partition.Partition];
+                        var stored = storedOffsets[topic.Key][partition.Partition];
+                        partitionWatermarksBuilder.Add(
+                            new(
+                                partition.Partition,
+                                low,
+                                high,
+                                stored
+                            )
+                        );
+                    }
+                    topicWatermarksBuilder.Add(topic.Key, partitionWatermarksBuilder.ToImmutable());
                 }
-                topicWatermarksBuilder.Add(topic.Key, partitionWatermarksBuilder.ToImmutable());
+                return topicWatermarksBuilder.ToImmutable();
             }
-            return topicWatermarksBuilder.ToImmutable();
+            finally
+            {
+                foreach (var connection in brokerConnections.Values)
+                {
+                    try
+                    {
+                        await connection.Close(cancellationToken);
+                        connection.Dispose();
+                    }
+                    catch { }
+                }
+            }
         }
 
         private sealed record SubscriptionMetadata(
@@ -696,44 +700,46 @@ namespace Kafka.Client.Clients.Consumer
             ReadOnlyMemory<byte> Metadata
         );
 
-        private static ImmutableSortedDictionary<TopicName, ImmutableSortedDictionary<Partition, Offset>> GetTopicPartitionOffsets(IEnumerable<ListOffsetsResponse> listOffsetsResponses) =>
-            listOffsetsResponses
+        private static ImmutableSortedDictionary<TopicName, ImmutableSortedDictionary<Partition, Offset>> GetTopicPartitionOffsets(IEnumerable<ListOffsetsResponse> listOffsetsResponses)
+        {
+            return listOffsetsResponses
                 .SelectMany(r => r.TopicsField)
+                .GroupBy(r => r.NameField)
                 .ToImmutableSortedDictionary(
-                    k => new TopicName(k.NameField),
-                    v => v.PartitionsField.ToImmutableSortedDictionary(
-                        k => new Partition(k.PartitionIndexField),
-                        v => new Offset(v.OffsetField),
-                        PartitionCompare.Instance
-                    ),
+                    k => new TopicName(k.Key),
+                    v => v
+                        .SelectMany(r => r.PartitionsField)
+                        .ToImmutableSortedDictionary(
+                            k => new Partition(k.PartitionIndexField),
+                            v => new Offset(v.OffsetField),
+                            PartitionCompare.Instance
+                        ),
                     TopicNameCompare.Instance
                 )
             ;
+        }
 
-        private static ImmutableSortedDictionary<TopicName, ImmutableSortedDictionary<Partition, Offset>> GetTopicPartitionOffsets(IEnumerable<OffsetFetchResponse> offsetFetchResponses)
+        private static ImmutableSortedDictionary<TopicName, ImmutableSortedDictionary<Partition, Offset>> GetTopicPartitionOffsets(OffsetFetchResponse offsetFetchResponse)
         {
             var storedOffsetsBuilder = ImmutableSortedDictionary.CreateBuilder<TopicName, ImmutableSortedDictionary<Partition, Offset>>(TopicNameCompare.Instance);
-            foreach (var offsetFetchResponse in offsetFetchResponses)
+            var group = offsetFetchResponse.GroupsField.FirstOrDefault();
+            if (group != null)
             {
-                var group = offsetFetchResponse.GroupsField.FirstOrDefault();
-                if (group != null)
-                {
-                    foreach (var topic in group.TopicsField)
-                    {
-                        var partitionOffsetsBuilder = ImmutableSortedDictionary.CreateBuilder<Partition, Offset>(PartitionCompare.Instance);
-                        foreach (var partition in topic.PartitionsField)
-                            partitionOffsetsBuilder.Add(new Partition(partition.PartitionIndexField), new Offset(partition.CommittedOffsetField));
-                        storedOffsetsBuilder.Add(new TopicName(topic.NameField), partitionOffsetsBuilder.ToImmutable());
-                    }
-                }
-                // Check if stored by topic.
-                foreach (var topic in offsetFetchResponse.TopicsField)
+                foreach (var topic in group.TopicsField)
                 {
                     var partitionOffsetsBuilder = ImmutableSortedDictionary.CreateBuilder<Partition, Offset>(PartitionCompare.Instance);
                     foreach (var partition in topic.PartitionsField)
                         partitionOffsetsBuilder.Add(new Partition(partition.PartitionIndexField), new Offset(partition.CommittedOffsetField));
                     storedOffsetsBuilder.Add(new TopicName(topic.NameField), partitionOffsetsBuilder.ToImmutable());
                 }
+            }
+            // Check if stored by topic.
+            foreach (var topic in offsetFetchResponse.TopicsField)
+            {
+                var partitionOffsetsBuilder = ImmutableSortedDictionary.CreateBuilder<Partition, Offset>(PartitionCompare.Instance);
+                foreach (var partition in topic.PartitionsField)
+                    partitionOffsetsBuilder.Add(new Partition(partition.PartitionIndexField), new Offset(partition.CommittedOffsetField));
+                storedOffsetsBuilder.Add(new TopicName(topic.NameField), partitionOffsetsBuilder.ToImmutable());
             }
             return storedOffsetsBuilder.ToImmutable();
         }
@@ -807,49 +813,32 @@ namespace Kafka.Client.Clients.Consumer
             var autoCommitterTask = Task.CompletedTask;
             var hearbeatTask = Task.CompletedTask;
             var brokerConnections = await _connectionPool.AquireBrokerConnections(cancellationToken);
-            var coordinatorConnection = brokerConnections.Values.First();
-
-            var findCoordinatorRequest = new FindCoordinatorRequest(
-                subscriptionMetadata.GroupId,
-                (sbyte)CoordinatorType.GROUP,
-                new[] { subscriptionMetadata.GroupId }.ToImmutableArray()
-            );
-            var findCoordinatorResponse = await coordinatorConnection.ExecuteRequest(
-                findCoordinatorRequest,
-                FindCoordinatorRequestSerde.Write,
-                FindCoordinatorResponseSerde.Read,
+            (var _, var host, var port, var error) = await GetCoordinator(
+                brokerConnections.Values.First(),
+                _config.GroupId ?? "",
+                CoordinatorType.GROUP,
                 cancellationToken
             );
-            var nodeId = new ClusterNodeId(findCoordinatorResponse.NodeIdField);
-            var host = findCoordinatorResponse.HostField;
-            var port = findCoordinatorResponse.PortField;
-            if (string.IsNullOrEmpty(host))
-            {
-                nodeId = new ClusterNodeId(findCoordinatorResponse.CoordinatorsField[0].NodeIdField);
-                host = findCoordinatorResponse.CoordinatorsField[0].HostField;
-                port = findCoordinatorResponse.CoordinatorsField[0].PortField;
-            }
-            if(nodeId != coordinatorConnection.NodeId)
-                coordinatorConnection = await _connectionPool.AquireConnection(host, port, cancellationToken);
+            var coordinatorConnection = await _connectionPool.AquireSharedConnection(host, port, cancellationToken);
             try
             {
-                subscriptionMetadata = await SubscribedConsumer<TKey, TValue>.JoinGroup(
-                    coordinatorConnection,
-                    subscriptionMetadata,
-                    cancellationToken
-                );
                 var metadataResponse = await TopicMetadata(
                     coordinatorConnection,
                     newTopics,
                     cancellationToken
                 );
-                var notFoundTopics = newTopics.Except(metadataResponse.TopicsField.Select(r => new TopicName(r.NameField)));
+                var notFoundTopics = metadataResponse.TopicsField.Where(r => r.ErrorCodeField != 0);
                 if (notFoundTopics.Any())
+                {
                     foreach (var notFoundTopic in notFoundTopics)
-                        _logger.LogWarning("Unable to find topic: {TopicName}", notFoundTopic);
-                if (metadataResponse.TopicsField.IsEmpty)
-                    throw new Exception("No topics to subscribe to");
-
+                        _logger.LogWarning("Unable to find topic: {TopicName}", notFoundTopic.NameField);
+                    throw new Exception("Some topics not available");
+                }
+                subscriptionMetadata = await SubscribedConsumer<TKey, TValue>.JoinGroup(
+                    coordinatorConnection,
+                    subscriptionMetadata,
+                    cancellationToken
+                );
                 var syncResponse = await SubscribedConsumer<TKey, TValue>.SyncGroup(
                     coordinatorConnection,
                     subscriptionMetadata,
@@ -858,8 +847,8 @@ namespace Kafka.Client.Clients.Consumer
                 var topicPartitionMap = CreateTopicPartitionMap(metadataResponse);
                 var topicPartitionOffsets = CreateTopicPartitionOffsets(metadataResponse);
                 var offsetFetchResponse = await FetchOffsets(
-                    brokerConnections,
-                    topicPartitionMap,
+                    coordinatorConnection,
+                    topicPartitionOffsets.Keys,
                     cancellationToken
                 );
                 UpdateFromOffsetFetchResponse(
@@ -974,7 +963,7 @@ namespace Kafka.Client.Clients.Consumer
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError("Exception duing leave: {ex}", ex);
+                    _logger.LogError("Exception during leave: {ex}", ex);
                 }
                 _semaphore.Release();
             }

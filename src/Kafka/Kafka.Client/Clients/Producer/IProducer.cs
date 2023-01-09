@@ -89,7 +89,8 @@ namespace Kafka.Client.Clients.Producer
 
         /// <summary>
         /// Produce a batch of records using a given chunk size which can be used to
-        /// achieve higher throughput while preserving ordering within partitions.
+        /// achieve higher throughput while preserving ordering within partitions for
+        /// the provided list of records.
         /// <para>
         /// The throughput is constrained by the settings:
         /// <list type="bullet">
@@ -110,6 +111,13 @@ namespace Kafka.Client.Clients.Producer
             CancellationToken cancellationToken
         );
 
+        /// <summary>
+        /// Begins a transaction.
+        /// If any messages are in flight they will be flushed before transaction is initialized.
+        /// To control ensure transaction boundary, all sends should be completed prior to this call.
+        /// </summary>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         Task<ITransaction> BeginTransaction(CancellationToken cancellationToken);
     }
 }

@@ -125,7 +125,7 @@ namespace Kafka.Cli.Cmd
                     );
                     records.Add(record);
                 }
-                if(records.Count > 0)
+                if (records.Count > 0)
                     await FlushBatch(
                         records,
                         producer,

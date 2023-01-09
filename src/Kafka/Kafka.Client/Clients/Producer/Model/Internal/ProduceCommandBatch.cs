@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
 
-namespace Kafka.Client.Clients.Producer.Model
+namespace Kafka.Client.Clients.Producer.Model.Internal
 {
-    public record ProduceCommandBatch<TKey, TValue>(
+    internal record ProduceCommandBatch<TKey, TValue>(
         ImmutableArray<ProduceCommand<TKey, TValue>> ProduceCommands
     ) : IProducerCommand;
 }

@@ -23,7 +23,5 @@ namespace Kafka.Client.Clients.Producer
                 return await ValueTask.FromResult(partition);
             }
         }
-
-        public void Close() { }
     }
 }

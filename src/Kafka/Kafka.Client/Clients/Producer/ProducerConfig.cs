@@ -1,7 +1,4 @@
-﻿using Kafka.Common.Protocol;
-using System.Data.Common;
-using System.Text.Json.Serialization;
-using System.Transactions;
+﻿using System.Text.Json.Serialization;
 
 namespace Kafka.Client.Clients.Producer
 {

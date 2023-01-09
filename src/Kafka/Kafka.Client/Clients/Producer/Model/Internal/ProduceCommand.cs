@@ -2,9 +2,9 @@
 using Kafka.Common.Types;
 using System.Collections.Immutable;
 
-namespace Kafka.Client.Clients.Producer.Model
+namespace Kafka.Client.Clients.Producer.Model.Internal
 {
-    public record ProduceCommand<TKey, TValue>(
+    internal record ProduceCommand<TKey, TValue>(
         TopicName Topic,
         Partition Partition,
         Timestamp Timestamp,

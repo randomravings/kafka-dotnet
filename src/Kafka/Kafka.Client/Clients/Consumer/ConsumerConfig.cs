@@ -17,5 +17,8 @@ namespace Kafka.Client.Clients.Consumer
         public bool EnableAutoCommit { get; set; } = true;
         [JsonPropertyName("auto.commit.interval.ms")]
         public int AutoCommitIntervalMs { get; set; } = 5000;
+        [JsonPropertyName("heartbeat.interval.ms")]
+        public int HeartbeatIntervalMs { get; set; } = 3000;
+        
     }
 }

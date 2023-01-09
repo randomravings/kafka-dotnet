@@ -1,6 +1,6 @@
-﻿namespace Kafka.Client.Clients.Producer.Model
+﻿namespace Kafka.Client.Clients.Producer.Model.Internal
 {
-    public record CommitTransactionCommand(
+    internal record CommitTransactionCommand(
         string TransactionId,
         TaskCompletionSource<ITransaction> TaskCompletionSource
     ) : IProducerCommand;

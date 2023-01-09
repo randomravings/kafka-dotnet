@@ -18,7 +18,7 @@ namespace Kafka.Cli.Cmd
             {
                 with.CaseSensitive = true;
                 with.HelpWriter = Console.Out;
-                with.IgnoreUnknownArguments = true;
+                with.IgnoreUnknownArguments = false;
                 with.CaseInsensitiveEnumValues = true;
             }).ParseArguments<TopicList, TopicCreate, TopicDescribe, TopicDelete>(args)
                 .MapResult(
