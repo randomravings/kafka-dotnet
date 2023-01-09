@@ -319,19 +319,25 @@ namespace Kafka.Common.UnitTest.Encoding
         {
             var index = 0;
             var actual = Decoder.ReadBytes(buffer, ref index);
-            Assert.That(index, Is.EqualTo(buffer.Length));
-            Assert.That(actual, Is.EqualTo(expected));
+            Assert.Multiple(() =>
+            {
+                Assert.That(index, Is.EqualTo(buffer.Length));
+                Assert.That(actual, Is.EqualTo(expected));
+            });
         }
 
-        [TestCase(new byte[] { }, new byte[] { 0x00 })]
-        [TestCase(new byte[] { 0x00 }, new byte[] { 0x01, 0x00 })]
-        [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x02, 0x00, 0x1A })]
+        [TestCase(new byte[] { }, new byte[] { 0x01 })]
+        [TestCase(new byte[] { 0x00 }, new byte[] { 0x02, 0x00 })]
+        [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x03, 0x00, 0x1A })]
         public void TestReadCompactBytes(byte[] expected, byte[] buffer)
         {
             var index = 0;
             var actual = Decoder.ReadCompactBytes(buffer, ref index);
-            Assert.That(index, Is.EqualTo(buffer.Length));
-            Assert.That(actual, Is.EqualTo(expected));
+            Assert.Multiple(() =>
+            {
+                Assert.That(index, Is.EqualTo(buffer.Length));
+                Assert.That(actual, Is.EqualTo(expected));
+            });
         }
 
         [TestCase(null, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF })]
@@ -342,8 +348,11 @@ namespace Kafka.Common.UnitTest.Encoding
         {
             var index = 0;
             var actual = Decoder.ReadNullableBytes(buffer, ref index);
-            Assert.That(index, Is.EqualTo(buffer.Length));
-            Assert.That(actual, Is.EqualTo(expected));
+            Assert.Multiple(() =>
+            {
+                Assert.That(index, Is.EqualTo(buffer.Length));
+                Assert.That(actual, Is.EqualTo(expected));
+            });
         }
 
         [TestCase(null, new byte[] { 0x00 })]
@@ -353,8 +362,11 @@ namespace Kafka.Common.UnitTest.Encoding
         {
             var index = 0;
             var actual = Decoder.ReadCompactNullableBytes(buffer, ref index);
-            Assert.That(index, Is.EqualTo(buffer.Length));
-            Assert.That(actual, Is.EqualTo(expected));
+            Assert.Multiple(() =>
+            {
+                Assert.That(index, Is.EqualTo(buffer.Length));
+                Assert.That(actual, Is.EqualTo(expected));
+            });
         }
     }
 }
