@@ -54,7 +54,7 @@ namespace Kafka.Cli.Cmd
                     .AddConsole()
                     .SetMinimumLevel(verb.LogLevel)
                 )
-                .CreateLogger<SubscribedConsumer<TKey, TValue>>()
+                .CreateLogger<ConsumerClient<TKey, TValue>>()
             ;
             var groupId = verb.GroupId;
             if (string.IsNullOrEmpty(groupId))
@@ -65,7 +65,7 @@ namespace Kafka.Cli.Cmd
                 BootstrapServers = verb.BootstrapServer,
                 GroupId = groupId
             };
-            return new SubscribedConsumer<TKey, TValue>(
+            return new ConsumerClient<TKey, TValue>(
                 config,
                 keyDeserializer,
                 valueDeserializer,

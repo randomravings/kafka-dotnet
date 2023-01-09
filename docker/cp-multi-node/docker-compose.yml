@@ -1,0 +1,188 @@
+---
+    version: '2'
+    services:
+      zookeeper-01:
+        image: confluentinc/cp-zookeeper:7.3.0
+        hostname: zookeeper-01
+        container_name: zookeeper-01
+        ports:
+          - "2181:2181"
+        environment:
+          ZOOKEEPER_SERVER_ID: 1
+          ZOOKEEPER_CLIENT_PORT: 2181
+          ZOOKEEPER_TICK_TIME: 2000
+          ZOOKEEPER_SERVERS: zookeeper-01:2888:3888;zookeeper-02:2888:3888;zookeeper-03:2888:3888
+    
+      zookeeper-02:
+        image: confluentinc/cp-zookeeper:7.3.0
+        hostname: zookeeper-02
+        container_name: zookeeper-02
+        ports:
+          - "2182:2182"
+        environment:
+          ZOOKEEPER_SERVER_ID: 2
+          ZOOKEEPER_CLIENT_PORT: 2182
+          ZOOKEEPER_TICK_TIME: 2000
+          ZOOKEEPER_SERVERS: zookeeper-01:2888:3888;zookeeper-02:2888:3888;zookeeper-03:2888:3888
+    
+      zookeeper-03:
+        image: confluentinc/cp-zookeeper:7.3.0
+        hostname: zookeeper-03
+        container_name: zookeeper-03
+        ports:
+          - "2183:2183"
+        environment:
+          ZOOKEEPER_SERVER_ID: 3
+          ZOOKEEPER_CLIENT_PORT: 2183
+          ZOOKEEPER_TICK_TIME: 2000
+          ZOOKEEPER_SERVERS: zookeeper-01:2888:3888;zookeeper-02:2888:3888;zookeeper-03:2888:3888
+    
+      broker-01:
+        image: confluentinc/cp-server:7.3.0
+        hostname: broker-01
+        container_name: broker-01
+        depends_on:
+          - zookeeper-01
+          - zookeeper-02
+          - zookeeper-03
+        ports:
+          - "9092:9092"
+        environment:
+          KAFKA_BROKER_ID: 101
+          KAFKA_ZOOKEEPER_CONNECT: zookeeper-01:2181,zookeeper-02:2182,zookeeper-03:2183
+          KAFKA_ADVERTISED_LISTENERS: DOCKER://broker-01:29092,PLAINTEXT_HOST://localhost:9092
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+          KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+          KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_OFFSETS_TOPIC_MIN_ISR: 2
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+          KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_CONFLUENT_LICENSE_TOPIC_MIN_ISR: 2
+          KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_CONFLUENT_BALANCER_TOPIC_MIN_ISR: 2
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_JMX_PORT: 9101
+          KAFKA_JMX_HOSTNAME: localhost
+          KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+          CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "broker-01:29092,broker-02:29092,broker-03:29092"
+          CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 3
+          CONFLUENT_METRICS_REPORTER_TOPIC_MIN_ISR: 2
+          CONFLUENT_METRICS_ENABLE: 'true'
+          CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+          #KAFKA_LOG4J_LOGGERS: 'kafka.request.logger=TRACE'
+          #KAFKA_TOOLS_LOG4J_LOGLEVEL: 'DEBUG'
+    
+      broker-02:
+        image: confluentinc/cp-server:7.3.0
+        hostname: broker-02
+        container_name: broker-02
+        depends_on:
+          - zookeeper-01
+          - zookeeper-02
+          - zookeeper-03
+        ports:
+          - "9093:9093"
+        environment:
+          KAFKA_BROKER_ID: 102
+          KAFKA_ZOOKEEPER_CONNECT: zookeeper-01:2181,zookeeper-02:2182,zookeeper-03:2183
+          KAFKA_ADVERTISED_LISTENERS: DOCKER://broker-02:29092,PLAINTEXT_HOST://localhost:9093
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+          KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+          KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_OFFSETS_TOPIC_MIN_ISR: 2
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+          KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_CONFLUENT_LICENSE_TOPIC_MIN_ISR: 2
+          KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_CONFLUENT_BALANCER_TOPIC_MIN_ISR: 2
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_JMX_PORT: 9101
+          KAFKA_JMX_HOSTNAME: localhost
+          KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+          CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "broker-01:29092,broker-02:29092,broker-03:29092"
+          CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 3
+          CONFLUENT_METRICS_REPORTER_TOPIC_MIN_ISR: 2
+          CONFLUENT_METRICS_ENABLE: 'true'
+          CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+          #KAFKA_LOG4J_LOGGERS: 'kafka.request.logger=TRACE'
+          #KAFKA_TOOLS_LOG4J_LOGLEVEL: 'DEBUG'
+    
+      broker-03:
+        image: confluentinc/cp-server:7.3.0
+        hostname: broker-03
+        container_name: broker-03
+        depends_on:
+          - zookeeper-01
+          - zookeeper-02
+          - zookeeper-03
+        ports:
+          - "9094:9094"
+        environment:
+          KAFKA_BROKER_ID: 103
+          KAFKA_ZOOKEEPER_CONNECT: zookeeper-01:2181,zookeeper-02:2182,zookeeper-03:2183
+          KAFKA_ADVERTISED_LISTENERS: DOCKER://broker-03:29092,PLAINTEXT_HOST://localhost:9094
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+          KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
+          KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_OFFSETS_TOPIC_MIN_ISR: 2
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
+          KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_CONFLUENT_LICENSE_TOPIC_MIN_ISR: 2
+          KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_CONFLUENT_BALANCER_TOPIC_MIN_ISR: 2
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_JMX_PORT: 9101
+          KAFKA_JMX_HOSTNAME: localhost
+          KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+          CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: "broker-01:29092,broker-02:29092,broker-03:29092"
+          CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 3
+          CONFLUENT_METRICS_REPORTER_TOPIC_MIN_ISR: 2
+          CONFLUENT_METRICS_ENABLE: 'true'
+          CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+          #KAFKA_LOG4J_LOGGERS: 'kafka.request.logger=TRACE'
+          #KAFKA_TOOLS_LOG4J_LOGLEVEL: 'DEBUG'
+    
+      schema-registry:
+        image: confluentinc/cp-schema-registry:7.3.0
+        hostname: schema-registry
+        container_name: schema-registry
+        depends_on:
+          - broker-01
+          - broker-02
+          - broker-03
+        ports:
+          - "8081:8081"
+        environment:
+          SCHEMA_REGISTRY_HOST_NAME: schema-registry
+          SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: 'broker-01:29092,broker-02:29092,broker-03:29092'
+          SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+    
+      control-center:
+        image: confluentinc/cp-enterprise-control-center:7.3.0
+        hostname: control-center
+        container_name: control-center
+        depends_on:
+          - broker-01
+          - broker-02
+          - broker-03
+          - schema-registry
+        ports:
+          - "9021:9021"
+        environment:
+          CONTROL_CENTER_BOOTSTRAP_SERVERS: broker-01:29092,broker-02:29092,broker-03:29092
+          CONTROL_CENTER_ZOOKEPER_CONNECT: zookeeper-01:2181,zookeeper-02:2181,zookeeper-03:2181
+          CONTROL_CENTER_CONNECT_CONNECT-DEFAULT_CLUSTER: 'connect:8083'
+          CONTROL_CENTER_KSQL_KSQLDB1_URL: "http://ksqldb-server:8088"
+          CONTROL_CENTER_KSQL_KSQLDB1_ADVERTISED_URL: "http://localhost:8088"
+          CONTROL_CENTER_SCHEMA_REGISTRY_URL: "http://schema-registry:8081"
+          CONTROL_CENTER_REPLICATION_FACTOR: 3
+          CONTROL_CENTER_INTERNAL_TOPICS_PARTITIONS: 3
+          CONTROL_CENTER_MONITORING_INTERCEPTOR_TOPIC_PARTITIONS: 3
+          CONFLUENT_METRICS_TOPIC_REPLICATION: 3
+          PORT: 9021

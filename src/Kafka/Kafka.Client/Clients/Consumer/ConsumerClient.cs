@@ -2,7 +2,6 @@
 using Kafka.Client.Messages;
 using Kafka.Common;
 using Kafka.Common.Exceptions;
-using Kafka.Common.Protocol;
 using Kafka.Common.Records;
 using Kafka.Common.Serialization;
 using Kafka.Common.Types;
@@ -14,7 +13,7 @@ using System.Runtime.CompilerServices;
 
 namespace Kafka.Client.Clients.Consumer
 {
-    public sealed class SubscribedConsumer<TKey, TValue> :
+    public sealed class ConsumerClient<TKey, TValue> :
         Client<ConsumerConfig>,
         IConsumer<TKey, TValue>
     {
@@ -24,7 +23,7 @@ namespace Kafka.Client.Clients.Consumer
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private bool _disposed = false;
 
-        public SubscribedConsumer(
+        public ConsumerClient(
             ConsumerConfig config,
             IDeserializer<TKey> keyDeserializer,
             IDeserializer<TValue> valueDeserializer,
@@ -68,7 +67,7 @@ namespace Kafka.Client.Clients.Consumer
                             _logger.LogWarning("{error}", error);
                         }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
                         _logger.LogCritical("{ex}", ex);
                     }
@@ -84,82 +83,78 @@ namespace Kafka.Client.Clients.Consumer
             CancellationToken cancellationToken
         )
         {
-            try
+            var commitState = new Dictionary<TopicPartition, Offset>();
+            while (!cancellationToken.IsCancellationRequested)
             {
-                var commitState = new Dictionary<TopicPartition, Offset>();
-                while (!cancellationToken.IsCancellationRequested)
+                cancellationToken.WaitHandle.WaitOne(_config.AutoCommitIntervalMs);
+                var count = commitQueue.Count;
+                for (int i = 0; i < count; i++)
                 {
-                    cancellationToken.WaitHandle.WaitOne(_config.AutoCommitIntervalMs);
-                    var count = commitQueue.Count;
-                    for (int i = 0; i < count; i++)
-                    {
-                        if (commitQueue.TryDequeue(out var result))
-                            commitState[result.TopicPartition] = result.Offset.Value;
-                        else
-                            break;
-                    }
-                    if (commitState.Count == 0)
-                        continue;
+                    if (commitQueue.TryDequeue(out var result))
+                        commitState[result.TopicPartition] = result.Offset.Value;
+                    else
+                        break;
+                }
+                if (commitState.Count == 0)
+                    continue;
 
-                    var offsetCommitRequestTopic = commitState
-                        .GroupBy(g => g.Key.Topic)
-                        .Select(t =>
-                            new OffsetCommitRequest.OffsetCommitRequestTopic(
-                                t.Key.Value ?? "",
-                                t.Select(p =>
-                                    new OffsetCommitRequest.OffsetCommitRequestTopic.OffsetCommitRequestPartition(
-                                        p.Key.Partition,
-                                        p.Value,
-                                        -1,
-                                        Timestamp.Now().TimestampMs,
-                                        null
-                                    )
-                                ).ToImmutableArray()
-                            )
+                var offsetCommitRequestTopic = commitState
+                    .GroupBy(g => g.Key.Topic)
+                    .Select(t =>
+                        new OffsetCommitRequest.OffsetCommitRequestTopic(
+                            t.Key.Value ?? "",
+                            t.Select(p =>
+                                new OffsetCommitRequest.OffsetCommitRequestTopic.OffsetCommitRequestPartition(
+                                    p.Key.Partition,
+                                    p.Value,
+                                    -1,
+                                    Timestamp.Now().TimestampMs,
+                                    null
+                                )
+                            ).ToImmutableArray()
                         )
-                        .ToImmutableArray()
-                    ;
-                    var request = new OffsetCommitRequest(
-                        subscriptionMetadata.GroupId,
-                        subscriptionMetadata.GenerationId,
-                        subscriptionMetadata.MemberId,
-                        subscriptionMetadata.GroupInstanceId,
-                        -1,
-                        offsetCommitRequestTopic
+                    )
+                    .ToImmutableArray()
+                ;
+                var request = new OffsetCommitRequest(
+                    subscriptionMetadata.GroupId,
+                    subscriptionMetadata.GenerationId,
+                    subscriptionMetadata.MemberId,
+                    subscriptionMetadata.GroupInstanceId,
+                    -1,
+                    offsetCommitRequestTopic
+                );
+                try
+                {
+                    var response = await connection.ExecuteRequest(
+                        request,
+                        OffsetCommitRequestSerde.Write,
+                        OffsetCommitResponseSerde.Read,
+                        cancellationToken
                     );
-                    try
+                    var partitionErrors = response
+                        .TopicsField
+                        .SelectMany(r => r.PartitionsField)
+                        .Where(r => r.ErrorCodeField != 0)
+                    ;
+                    if (partitionErrors.Any())
                     {
-                        var response = await connection.ExecuteRequest(
-                            request,
-                            OffsetCommitRequestSerde.Write,
-                            OffsetCommitResponseSerde.Read,
-                            cancellationToken
-                        );
-                        var partitionErrors = response
-                            .TopicsField
-                            .SelectMany(r => r.PartitionsField)
-                            .Where(r => r.ErrorCodeField != 0)
-                        ;
-                        if (partitionErrors.Any())
+                        foreach (var partition in partitionErrors)
                         {
-                            foreach (var partition in partitionErrors)
-                            {
-                                var error = Errors.Translate(partition.ErrorCodeField);
-                                _logger.LogError("{error}", error);
-                            }
-                        }
-                        else
-                        {
-                            commitState.Clear();
+                            var error = Errors.Translate(partition.ErrorCodeField);
+                            _logger.LogError("{error}", error);
                         }
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _logger.LogCritical("{ex}", ex);
+                        commitState.Clear();
                     }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogCritical("{ex}", ex);
+                }
             }
-            catch (OperationCanceledException) { }
         }
 
         private static async ValueTask<ImmutableArray<FetchResponse>> Fetch(
@@ -178,12 +173,22 @@ namespace Kafka.Client.Clients.Consumer
                 )
             ;
 
-            await Task.WhenAll(tasks);
-
-            return tasks
-                .Select(r => r.Result)
-                .ToImmutableArray()
-            ;
+            try
+            {
+                await Task.WhenAll(tasks);
+                return tasks
+                    .Select(r => r.Result)
+                    .ToImmutableArray()
+                ;
+            }
+            catch(AggregateException ex)
+            {
+                return ImmutableArray<FetchResponse>.Empty;
+            }
+            catch(OperationCanceledException)
+            {
+                return ImmutableArray<FetchResponse>.Empty;
+            }
         }
 
         private static FetchRequest CreateFetchRequest(
@@ -608,7 +613,7 @@ namespace Kafka.Client.Clients.Consumer
                 var topicPartitions = CreateTopicPartitionOffsets(metadataResponse);
                 var topicPartitionMap = CreateTopicPartitionMap(metadataResponse);
                 var topicPartitionOffsets = CreateTopicPartitionOffsets(metadataResponse);
-                var lowListOffsetsResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
+                var lowListOffsetsResponse = await ConsumerClient<TKey, TValue>.ListOffsets(
                     brokerConnections,
                     topicPartitionMap,
                     topicPartitions.Keys,
@@ -617,7 +622,7 @@ namespace Kafka.Client.Clients.Consumer
                 );
                 var lowWatermarks = GetTopicPartitionOffsets(lowListOffsetsResponse);
 
-                var highListOffsetsResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
+                var highListOffsetsResponse = await ConsumerClient<TKey, TValue>.ListOffsets(
                     brokerConnections,
                     topicPartitionMap,
                     topicPartitions.Keys,
@@ -778,7 +783,7 @@ namespace Kafka.Client.Clients.Consumer
 
 
                     var responses =
-                        await SubscribedConsumer<TKey, TValue>.Fetch(
+                        await ConsumerClient<TKey, TValue>.Fetch(
                             connectionAssignments,
                             cancellationToken
                         )
@@ -834,12 +839,12 @@ namespace Kafka.Client.Clients.Consumer
                         _logger.LogWarning("Unable to find topic: {TopicName}", notFoundTopic.NameField);
                     throw new Exception("Some topics not available");
                 }
-                subscriptionMetadata = await SubscribedConsumer<TKey, TValue>.JoinGroup(
+                subscriptionMetadata = await ConsumerClient<TKey, TValue>.JoinGroup(
                     coordinatorConnection,
                     subscriptionMetadata,
                     cancellationToken
                 );
-                var syncResponse = await SubscribedConsumer<TKey, TValue>.SyncGroup(
+                var syncResponse = await ConsumerClient<TKey, TValue>.SyncGroup(
                     coordinatorConnection,
                     subscriptionMetadata,
                     cancellationToken
@@ -861,7 +866,7 @@ namespace Kafka.Client.Clients.Consumer
                 ;
                 if (unsetTopicPartitions.Any())
                 {
-                    var offsetListResponse = await SubscribedConsumer<TKey, TValue>.ListOffsets(
+                    var offsetListResponse = await ConsumerClient<TKey, TValue>.ListOffsets(
                         brokerConnections,
                         topicPartitionMap,
                         unsetTopicPartitions,
@@ -892,7 +897,7 @@ namespace Kafka.Client.Clients.Consumer
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var fetchableTopicResponses = await SubscribedConsumer<TKey, TValue>.FetchUntilCancelled(
+                    var fetchableTopicResponses = await ConsumerClient<TKey, TValue>.FetchUntilCancelled(
                         brokerConnections,
                         topicPartitionMap,
                         topicPartitionOffsets,
@@ -955,7 +960,7 @@ namespace Kafka.Client.Clients.Consumer
             {
                 try
                 {
-                    await SubscribedConsumer<TKey, TValue>.LeaveGroup(
+                    await ConsumerClient<TKey, TValue>.LeaveGroup(
                         coordinatorConnection,
                         subscriptionMetadata,
                         _internalCts.Token
