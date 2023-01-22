@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Kafka.Client.Clients.Consumer
 {
@@ -19,6 +20,22 @@ namespace Kafka.Client.Clients.Consumer
         public int AutoCommitIntervalMs { get; set; } = 5000;
         [JsonPropertyName("heartbeat.interval.ms")]
         public int HeartbeatIntervalMs { get; set; } = 3000;
-        
+        [JsonPropertyName("fetch.min.bytes")]
+        public int FetchMinBytes { get; set; } = 1;
+        [JsonPropertyName("fetch.max.bytes")]
+        public int FetchMaxBytes { get; set; } = 52428800;
+        [JsonPropertyName("isolation.level")]
+        public IsolationLevel IsolationLevel { get; set; } = IsolationLevel.ReadUncommitted;
+        [JsonPropertyName("fetch.max.wait.ms")]
+        public int FetchMaxWaitMs { get; set; } = 500;
+        [JsonPropertyName("client.rack")]
+        public string ClientRack { get; set; } = "";
+        [JsonPropertyName("max.partition.fetch.bytes")]
+        public int MaxPartitionFetchBytes { get; set; } = 1048576;
+        [JsonPropertyName("session.timeout.ms")]
+        public int SessionTimeoutMs { get; set; } = 45000;        
+        [JsonPropertyName("max.poll.interval.ms")]
+        public int MaxPollIntervalMs { get; set; } = 300000;
+
     }
 }

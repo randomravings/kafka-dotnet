@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
         /// <param name="OperationField">The ACL operation.</param>
         /// <param name="PermissionTypeField">The permission type.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DeleteAclsFilter (
             sbyte ResourceTypeFilterField,
             string? ResourceNameFilterField,

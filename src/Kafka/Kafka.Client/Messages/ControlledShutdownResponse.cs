@@ -23,6 +23,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicNameField">The name of the topic.</param>
         /// <param name="PartitionIndexField">The index of the partition.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record RemainingPartition (
             string TopicNameField,
             int PartitionIndexField

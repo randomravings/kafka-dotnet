@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 using Kafka.Cli.Cmd;
-using Kafka.Cli.Verbs;
+using Kafka.Cli.Options;
 
 var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (s, e) => { e.Cancel = true; cts.Cancel(); };
@@ -12,11 +12,11 @@ await new Parser(with =>
         with.IgnoreUnknownArguments = true;
         with.CaseInsensitiveEnumValues = true;
     })
-    .ParseArguments<Topic, Produce, Consume>(args)
+    .ParseArguments<TopicsOpts, ProducerOpts, ConsumerOpts>(args)
     .MapResult(
-        (Topic verb) => TopicCmd.Parse(args.Skip(1), cts.Token),
-        (Produce verb) => ProduceCmd.Parse(verb, cts.Token),
-        (Consume verb) => ConsumeCmd.Parse(verb, cts.Token),
+        (TopicsOpts verb) => TopicsCmd.Parse(args.Skip(1), cts.Token),
+        (ProducerOpts verb) => ProducerCmd.Parse(verb, cts.Token),
+        (ConsumerOpts verb) => ConsumerCmd.Parse(verb, cts.Token),
         errs => new ValueTask<int>(-1)
     );
 ;

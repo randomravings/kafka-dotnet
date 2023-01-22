@@ -30,6 +30,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name</param>
         /// <param name="PartitionsField">The responses to partitions to reassign</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record ReassignableTopicResponse (
             string NameField,
             ImmutableArray<ReassignablePartitionResponse> PartitionsField
@@ -44,6 +45,7 @@ namespace Kafka.Client.Messages
             /// <param name="ErrorCodeField">The error code for this partition, or 0 if there was no error.</param>
             /// <param name="ErrorMessageField">The error message for this partition, or null if there was no error.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record ReassignablePartitionResponse (
                 int PartitionIndexField,
                 short ErrorCodeField,

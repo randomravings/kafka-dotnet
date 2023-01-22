@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="ErrorCodeField">The error code.</param>
         /// <param name="ErrorMessageField">The error message, if any.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record AlterUserScramCredentialsResult (
             string UserField,
             short ErrorCodeField,

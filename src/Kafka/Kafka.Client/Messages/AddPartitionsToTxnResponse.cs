@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="ResultsField">The results for each partition</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record AddPartitionsToTxnTopicResult (
             string NameField,
             ImmutableArray<AddPartitionsToTxnPartitionResult> ResultsField
@@ -37,6 +38,7 @@ namespace Kafka.Client.Messages
             /// <param name="PartitionIndexField">The partition indexes.</param>
             /// <param name="ErrorCodeField">The response error code.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record AddPartitionsToTxnPartitionResult (
                 int PartitionIndexField,
                 short ErrorCodeField

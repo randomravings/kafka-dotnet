@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using DeleteAclsMatchingAcl = Kafka.Client.Messages.DeleteAclsResponse.DeleteAclsFilterResult.DeleteAclsMatchingAcl;
 using DeleteAclsFilterResult = Kafka.Client.Messages.DeleteAclsResponse.DeleteAclsFilterResult;
+using DeleteAclsMatchingAcl = Kafka.Client.Messages.DeleteAclsResponse.DeleteAclsFilterResult.DeleteAclsMatchingAcl;
 
 namespace Kafka.Client.Messages
 {
@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
         /// <param name="ErrorMessageField">The error message, or null if the filter succeeded.</param>
         /// <param name="MatchingAclsField">The ACLs which matched this filter.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DeleteAclsFilterResult (
             short ErrorCodeField,
             string? ErrorMessageField,
@@ -47,6 +48,7 @@ namespace Kafka.Client.Messages
             /// <param name="OperationField">The ACL operation.</param>
             /// <param name="PermissionTypeField">The ACL permission type.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record DeleteAclsMatchingAcl (
                 short ErrorCodeField,
                 string? ErrorMessageField,

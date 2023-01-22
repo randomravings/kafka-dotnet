@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="MatchTypeField">How to match the entity {0 = exact name, 1 = default name, 2 = any specified name}.</param>
         /// <param name="MatchField">The string to match against, or null if unused for the match type.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record ComponentData (
             string EntityTypeField,
             sbyte MatchTypeField,

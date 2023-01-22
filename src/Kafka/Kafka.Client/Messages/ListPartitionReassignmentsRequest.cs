@@ -23,6 +23,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name</param>
         /// <param name="PartitionIndexesField">The partitions to list partition reassignments for.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record ListPartitionReassignmentsTopics (
             string NameField,
             ImmutableArray<int> PartitionIndexesField

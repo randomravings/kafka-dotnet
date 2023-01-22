@@ -19,6 +19,7 @@ namespace Kafka.Client.Messages
         /// <summary>
         /// <param name="NameField">The user name.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record UserName (
             string NameField
         )

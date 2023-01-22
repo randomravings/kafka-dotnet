@@ -5,19 +5,19 @@ namespace Kafka.Common.Encoding
 {
     public static class Decoder
     {
-        public static bool ReadBoolean(byte[] buffer, ref int index)
+        public static (int Offset, bool Value) ReadBoolean(byte[] buffer, int index)
         {
             CheckRemaining(buffer, index, 1);
-            return buffer[index++] != 0;
+            return (index + 1, buffer[index] != 0);
         }
 
-        public static sbyte ReadInt8(byte[] buffer, ref int index)
+        public static (int Offset, sbyte Value) ReadInt8(byte[] buffer, int index)
         {
             CheckRemaining(buffer, index, 1);
-            return unchecked((sbyte)buffer[index++]);
+            return (index + 1, unchecked((sbyte)buffer[index]));
         }
 
-        public static short ReadInt16(byte[] buffer, ref int index)
+        public static (int Offset, short Value) ReadInt16(byte[] buffer, int index)
         {
             CheckRemaining(buffer, index, 2);
             var value = unchecked((short)(
@@ -25,14 +25,16 @@ namespace Kafka.Common.Encoding
                 (buffer[index++] & 0xff) << 0
             ));
             buffer = buffer[2..];
-            return value;
+            return (index, value);
         }
 
-        public static ushort ReadUInt16(byte[] buffer, ref int index) =>
-            (ushort)ReadInt16(buffer, ref index)
-        ;
+        public static (int Offset, ushort Value) ReadUInt16(byte[] buffer, int index)
+        {
+            (index, var value) = ReadInt16(buffer, index);
+            return (index, (ushort)value);
+        }
 
-        public static int ReadInt32(byte[] buffer, ref int index)
+        public static (int Offset, int Value) ReadInt32(byte[] buffer, int index)
         {
             CheckRemaining(buffer, index, 4);
             var value = unchecked(
@@ -42,14 +44,16 @@ namespace Kafka.Common.Encoding
                 (buffer[index++] & 0xff) << 0
             );
             buffer = buffer[4..];
-            return value;
+            return (index, value);
         }
 
-        public static uint ReadUInt32(byte[] buffer, ref int index) =>
-            (uint)ReadInt32(buffer, ref index)
-        ;
+        public static (int Offset, uint Value) ReadUInt32(byte[] buffer, int index)
+        {
+            (index, var value) = ReadInt32(buffer, index);
+            return (index, (uint)value);
+        }
 
-        public static long ReadInt64(byte[] buffer, ref int index)
+        public static (int Offset, long Value) ReadInt64(byte[] buffer, int index)
         {
             CheckRemaining(buffer, index, 8);
             var value = unchecked(
@@ -63,212 +67,178 @@ namespace Kafka.Common.Encoding
                 ((long)(buffer[index++] & 0xff) << 0)
             );
             buffer = buffer[8..];
-            return value;
+            return (index, value);
         }
 
-        public static ulong ReadUInt64(byte[] buffer, ref int index) =>
-            (ulong)ReadInt64(buffer, ref index)
-        ;
-
-        public static int ReadVarInt32(byte[] buffer, ref int index)
+        public static (int Offset, ulong Value) ReadUInt64(byte[] buffer, int index)
         {
-            var value = unchecked((uint)ZigZagDecode(buffer, ref index, 31));
-            return (int)(value >> 1) ^ -(int)(value & 1);
+            (index, var value) = ReadInt64(buffer, index);
+            return (index, (ulong)value);
         }
 
-        public static uint ReadVarUInt32(byte[] buffer, ref int index) =>
-            unchecked((uint)ZigZagDecode(buffer, ref index, 31))
-        ;
-
-        public static long ReadVarInt64(byte[] buffer, ref int index)
+        public static (int Offset, int Value) ReadVarInt32(byte[] buffer, int index)
         {
-            var value = ZigZagDecode(buffer, ref index, 63);
-            return (long)(value >> 1) ^ -(long)(value & 1);
+            (index, var value) = ZigZagDecode(buffer, index, 31);
+            return (index, unchecked(((int)(value >> 1) ^ -(int)(value & 1))));
         }
 
-        public static double ReadFloat64(byte[] buffer, ref int index)
+        public static (int Offset, uint Value) ReadVarUInt32(byte[] buffer, int index)
         {
-            var bits = ReadInt64(buffer, ref index);
-            return BitConverter.Int64BitsToDouble(bits);
+            (index, var value) = ZigZagDecode(buffer, index, 31);
+            return (index, unchecked((uint)value));
         }
 
-        public static Guid ReadUuid(byte[] buffer, ref int index)
+        public static (int Offset, long Value) ReadVarInt64(byte[] buffer, int index)
+        {
+            (index, var value) = ZigZagDecode(buffer, index, 63);
+            return (index, unchecked((long)(value >> 1) ^ -(long)(value & 1)));
+        }
+
+        public static (int Offset, double Value) ReadFloat64(byte[] buffer, int index)
+        {
+            (index, var bits) = ReadInt64(buffer, index);
+            return (index, BitConverter.Int64BitsToDouble(bits));
+        }
+
+        public static (int Offset, Guid Value) ReadUuid(byte[] buffer, int index)
         {
             CheckRemaining(buffer, index, 16);
-            return new Guid(buffer[index..(index += 16)]);
+            return (index + 16, new Guid(buffer.AsSpan(index, 16)));
         }
 
-        public static string ReadString(byte[] buffer, ref int index)
+        public static (int Offset, string Value) ReadString(byte[] buffer, int index)
         {
-            var length = ReadInt16(buffer, ref index);
+            (index, var length) = ReadInt16(buffer, index);
             CheckRemaining(buffer, index, length);
             var value = System.Text.Encoding.UTF8.GetString(buffer, index, length);
-            index += length;
-            return value;
+            return (index + length, value);
         }
 
-        public static string ReadCompactString(byte[] buffer, ref int index)
+        public static (int Offset, string Value) ReadCompactString(byte[] buffer, int index)
         {
-            var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index) - 1);
-            CheckRemaining(buffer, index, length);
-            var value = System.Text.Encoding.UTF8.GetString(buffer, index, length);
-            index += length;
-            return value;
+            (index, var length) = ReadVarUInt32(buffer, index);
+            var intLength = Convert.ToInt32(length) - 1;
+            CheckRemaining(buffer, index, intLength);
+            var value = System.Text.Encoding.UTF8.GetString(buffer, index, intLength);
+            return (index + intLength, value);
         }
 
-        public static string? ReadNullableString(byte[] buffer, ref int index)
+        public static (int Offset, string? Value) ReadNullableString(byte[] buffer, int index)
         {
-            var length = ReadInt16(buffer, ref index);
+            (index, var length) = ReadInt16(buffer, index);
             if (length == -1)
-                return default;
+                return (index, default);
             CheckRemaining(buffer, index, length);
             var value = System.Text.Encoding.UTF8.GetString(buffer, index, length);
-            index += length;
-            return value;
+            return (index + length, value);
         }
 
-        public static string? ReadCompactNullableString(byte[] buffer, ref int index)
+        public static (int Offset, string? Value) ReadCompactNullableString(byte[] buffer, int index)
         {
-            var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index));
+            (index, var length) = ReadVarUInt32(buffer, index);
             if (length == 0)
-                return default;
-            length -= 1;
-            CheckRemaining(buffer, index, length);
-            var value = System.Text.Encoding.UTF8.GetString(buffer, index, length);
-            index += length;
-            return value;
+                return (index, default);
+            var intLength = Convert.ToInt32(length) - 1;
+            CheckRemaining(buffer, index, intLength);
+            var value = System.Text.Encoding.UTF8.GetString(buffer, index, intLength);
+            return (index + intLength, value);
         }
 
-        public static byte[] ReadBytes(byte[] buffer, ref int index)
+        public static (int Offset, byte[] Value) ReadBytes(byte[] buffer, int index)
         {
-            var length = ReadInt32(buffer, ref index);
+            (index, var length) = ReadInt32(buffer, index);
             CheckRemaining(buffer, index, length);
-            return buffer[index..(index += length)];
+            var endIndex = index + length;
+            return (endIndex, buffer[index..endIndex]);
         }
 
-        public static byte[] ReadCompactBytes(byte[] buffer, ref int index)
+        public static (int Offset, byte[] Value) ReadCompactBytes(byte[] buffer, int index)
         {
-            var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index)) - 1;
-            CheckRemaining(buffer, index, length);
-            return buffer[index..(index += length)];
+            (index, var length) = ReadVarUInt32(buffer, index);
+            var intLength = Convert.ToInt32(length) - 1;
+            CheckRemaining(buffer, index, intLength);
+            var endIndex = index + intLength;
+            return (endIndex, buffer[index..endIndex]);
         }
 
-        public static byte[]? ReadNullableBytes(byte[] buffer, ref int index)
+        public static (int Offset, byte[]? Value) ReadNullableBytes(byte[] buffer, int index)
         {
-            var length = ReadInt32(buffer, ref index);
+            (index, var length) = ReadInt32(buffer, index);
             if (length == -1)
-                return default;
+                return (index, default);
             CheckRemaining(buffer, index, length);
-            return buffer[index..(index += length)];
+            var endIndex = index + length;
+            return (endIndex, buffer[index..endIndex]);
         }
 
-        public static byte[]? ReadCompactNullableBytes(byte[] buffer, ref int index)
+        public static (int Offset, byte[]? Value) ReadCompactNullableBytes(byte[] buffer, int index)
         {
-            var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index));
+            (index, var length) = ReadVarUInt32(buffer, index);
             if (length == 0)
-                return default;
-            length -= 1;
-            CheckRemaining(buffer, index, length);
-            return buffer[index..(index += length)];
+                return (index, default);
+            var intLength = Convert.ToInt32(length) - 1;
+            CheckRemaining(buffer, index, intLength);
+            var endIndex = index + intLength;
+            return (endIndex, buffer[index..endIndex]);
         }
 
-        public static IRecords? ReadMessageSet(byte[] buffer, ref int index)
+        public static (int Offset, ImmutableArray<IRecords>? Value) ReadRecords(byte[] buffer, int index)
         {
-            var records = ImmutableList.CreateBuilder<IRecord>();
-            while (buffer.Length > 0)
-                records.Add(
-                    ReadMessage(
-                        buffer,
-                        ref index,
-                        records.Count
-                    )
-                );
-            return new MessageSet(
-                Records: records.ToImmutable()
-            );
+            (index, var length) = ReadInt32(buffer, index);
+            return ReadRecordBatches(buffer, length, index);
         }
 
-        private static IRecord ReadMessage(byte[] buffer, ref int index, int sequence)
+        public static (int Offset, ImmutableArray<IRecords>? Value) ReadCompactRecords(byte[] buffer, int index)
         {
-            var offset = ReadInt64(buffer, ref index);
-            var messageSize = ReadInt32(buffer, ref index);
-            var crc = ReadInt32(buffer, ref index);
-            var magic = ReadInt8(buffer, ref index);
-            var attributes = (Records.Attributes)ReadInt16(buffer, ref index);
-            var timestamp = 0L;
-            if (magic == 1)
-                timestamp = ReadInt64(buffer, ref index);
-            var key = ReadBytes(buffer, ref index);
-            var value = ReadBytes(buffer, ref index);
-            return new Message(
-                Sequence: sequence,
-                Offset: offset,
-                MessageSize: messageSize,
-                Crc: crc,
-                MagicByte: magic,
-                Attributes: attributes,
-                Timestamp: timestamp,
-                Key: key,
-                Value: value
-            );
+            (index, var length) = ReadVarUInt32(buffer, index);
+            var intLength = Convert.ToInt32(length);
+            return ReadRecordBatches(buffer, intLength, index);
         }
 
-        public static ImmutableArray<IRecords>? ReadRecords(byte[] buffer, ref int index)
-        {
-            var length = ReadInt32(buffer, ref index);
-            return ReadRecordBatches(buffer, length, ref index);
-        }
-
-        public static ImmutableArray<IRecords>? ReadCompactRecords(byte[] buffer, ref int index)
-        {
-            var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index));
-            return ReadRecordBatches(buffer, length, ref index);
-        }
-
-        private static ImmutableArray<IRecords>? ReadRecordBatches(byte[] buffer, int length, ref int index)
+        private static (int Offset, ImmutableArray<IRecords>? Value) ReadRecordBatches(byte[] buffer, int length, int index)
         {
             if (length == 0)
-                return default;
+                return (index, null);
             CheckRemaining(buffer, index, length);
             var recordBatchesBuilder = ImmutableArray.CreateBuilder<IRecords>();
             var limit = length + index;
             while (index < limit)
             {
-                var recordBatch = ReadRecordBatch(buffer, ref index);
+                (index, var recordBatch) = ReadRecordBatch(buffer, index);
                 recordBatchesBuilder.Add(recordBatch);
             }
-            return recordBatchesBuilder.ToImmutable();
+            return (index, recordBatchesBuilder.ToImmutable());
         }
 
-        private static IRecords ReadRecordBatch(byte[] buffer, ref int index)
+        private static (int Offset, IRecords Value) ReadRecordBatch(byte[] buffer, int index)
         {
-            var baseOffset = ReadInt64(buffer, ref index);
-            var size = ReadInt32(buffer, ref index);
-            var partitionLeaderEpoch = ReadInt32(buffer, ref index);
-            var magic = ReadInt8(buffer, ref index);
-            var crc = ReadInt32(buffer, ref index);
-            var attributes = (Attributes)ReadInt16(buffer, ref index);
-            var lastOffsetDelta = ReadInt32(buffer, ref index);
-            var baseTimestamp = ReadInt64(buffer, ref index);
-            var maxTimestamp = ReadInt64(buffer, ref index);
-            var producerId = ReadInt64(buffer, ref index);
-            var producerEpoch = ReadInt16(buffer, ref index);
-            var baseSequence = ReadInt32(buffer, ref index);
+            (index, var baseOffset) = ReadInt64(buffer, index);
+            (index, var size) = ReadInt32(buffer, index);
+            (index, var partitionLeaderEpoch) = ReadInt32(buffer, index);
+            (index, var magic) = ReadInt8(buffer, index);
+            (index, var crc) = ReadInt32(buffer, index);
+            (index, var attributes) = ((int, Attributes))ReadInt16(buffer, index);
+            (index, var lastOffsetDelta) = ReadInt32(buffer, index);
+            (index, var baseTimestamp) = ReadInt64(buffer, index);
+            (index, var maxTimestamp) = ReadInt64(buffer, index);
+            (index, var producerId) = ReadInt64(buffer, index);
+            (index, var producerEpoch) = ReadInt16(buffer, index);
+            (index, var baseSequence) = ReadInt32(buffer, index);
 
-            var records = ImmutableArray<IRecord>.Empty;
+            var records = default(ImmutableArray<IRecord>?);
             if (attributes.HasFlag(Attributes.IsControlBatch))
-                records = ReadArray(
+                (index, records) = ReadArray(
                     buffer,
-                    ref index,
+                    index,
                     ReadControlRecord
-                ) ?? ImmutableArray<IRecord>.Empty;
+                );
             else
-                records = ReadArray(
+                (index, records) = ReadArray(
                     buffer,
-                    ref index,
+                    index,
                     ReadRecord
-                ) ?? ImmutableArray<IRecord>.Empty;
-            return new RecordBatch(
+                );
+            return (index, new RecordBatch(
                 BaseOffset: baseOffset,
                 BatchLength: size,
                 PartitionLeaderEpoch: partitionLeaderEpoch,
@@ -281,45 +251,48 @@ namespace Kafka.Common.Encoding
                 ProducerId: producerId,
                 ProducerEpoch: producerEpoch,
                 BaseSequence: baseSequence,
-                Records: records
-            );
+                Records: records ?? ImmutableArray<IRecord>.Empty
+            ));
         }
 
-        private static IRecord ReadControlRecord(byte[] buffer, ref int index)
+        private static (int Offset, IRecord Value) ReadControlRecord(byte[] buffer, int index)
         {
             var version = default(short);
             var type = default(ControlType);
 
-            var length = ReadVarInt32(buffer, ref index);
-            var attributes = ReadInt8(buffer, ref index);
-            var timestampDelta = ReadVarInt64(buffer, ref index);
-            var offsetDelta = ReadVarInt32(buffer, ref index);
+            (index, var length) = ReadVarInt32(buffer, index);
+            (index, var attributes) = ((int, Attributes))ReadInt8(buffer, index);
+            (index, var timestampDelta) = ReadVarInt64(buffer, index);
+            (index, var offsetDelta) = ReadVarInt32(buffer, index);
             var key = default(ReadOnlyMemory<byte>?);
-            var keyLength = ReadVarInt32(buffer, ref index);
+            (index, var keyLength) = ReadVarInt32(buffer, index);
             if (keyLength >= 0)
             {
                 var i = 0;
                 var keyBytes = buffer[index..(index += keyLength)];
-                version = ReadInt16(keyBytes, ref i);
-                type = (ControlType)ReadInt16(keyBytes, ref i);
+                (i, version) = ReadInt16(keyBytes, i);
+                (i, type) = ((int, ControlType))ReadInt16(keyBytes, i);
                 key = keyBytes.AsMemory();
             }
             var value = default(ReadOnlyMemory<byte>?);
-            var valueLength = ReadVarInt32(buffer, ref index);
+            (index, var valueLength) = ReadVarInt32(buffer, index);
             if (valueLength >= 0)
                 value = buffer[index..(index += valueLength)].AsMemory();
             var headers = ImmutableArray<RecordHeader>.Empty;
-            var headerCount = ReadVarInt32(buffer, ref index);
+            (index, var headerCount) = ReadVarInt32(buffer, index);
             if (headerCount > 0)
             {
                 var headersBuilder = ImmutableArray.CreateBuilder<RecordHeader>(headerCount);
                 for (int i = 0; i < headerCount; i++)
-                    headersBuilder.Add(ReadRecordHeader(buffer, ref index));
+                {
+                    (index, var recordHeader) = ReadRecordHeader(buffer, index);
+                    headersBuilder.Add(recordHeader);
+                }
                 headers = headersBuilder.ToImmutable();
             }
-            return new ControlRecord(
+            return (index, new ControlRecord(
                 Length: length,
-                Attributes: (Attributes)attributes,
+                Attributes: attributes,
                 TimestampDelta: timestampDelta,
                 OffsetDelta: offsetDelta,
                 Key: key,
@@ -327,81 +300,90 @@ namespace Kafka.Common.Encoding
                 Headers: headers,
                 Version: version,
                 Type: type
-            );
+            ));
         }
 
-        private static IRecord ReadRecord(byte[] buffer, ref int index)
+        private static (int Offset, IRecord Value) ReadRecord(byte[] buffer, int index)
         {
-            var length = ReadVarInt32(buffer, ref index);
-            var attributes = ReadInt8(buffer, ref index);
-            var timestampDelta = ReadVarInt64(buffer, ref index);
-            var offsetDelta = ReadVarInt32(buffer, ref index);
+            (index, var length) = ReadVarInt32(buffer, index);
+            (index, var attributes) = ((int, Attributes))ReadInt8(buffer, index);
+            (index, var timestampDelta) = ReadVarInt64(buffer, index);
+            (index, var offsetDelta) = ReadVarInt32(buffer, index);
             var key = default(ReadOnlyMemory<byte>?);
-            var keyLength = ReadVarInt32(buffer, ref index);
+            (index, var keyLength) = ReadVarInt32(buffer, index);
             if (keyLength >= 0)
                 key = buffer[index..(index += keyLength)].AsMemory();
             var value = default(ReadOnlyMemory<byte>?);
-            var valueLength = ReadVarInt32(buffer, ref index);
+            (index, var valueLength) = ReadVarInt32(buffer, index);
             if (valueLength >= 0)
                 value = buffer[index..(index += valueLength)].AsMemory();
             var headers = ImmutableArray<RecordHeader>.Empty;
-            var headerCount = ReadVarInt32(buffer, ref index);
+            (index, var headerCount) = ReadVarInt32(buffer, index);
             if (headerCount > 0)
             {
                 var headersBuilder = ImmutableArray.CreateBuilder<RecordHeader>(headerCount);
                 for (int i = 0; i < headerCount; i++)
-                    headersBuilder.Add(ReadRecordHeader(buffer, ref index));
+                {
+                    (index, var recordHeader) = ReadRecordHeader(buffer, index);
+                    headersBuilder.Add(recordHeader);
+                }
                 headers = headersBuilder.ToImmutable();
             }
-            return new Record(
+            return (index, new Record(
                 Length: length,
-                Attributes: (Attributes)attributes,
+                Attributes: attributes,
                 TimestampDelta: timestampDelta,
                 OffsetDelta: offsetDelta,
                 Key: key,
                 Value: value,
                 Headers: headers
-            );
+            ));
         }
 
-        private static RecordHeader ReadRecordHeader(byte[] buffer, ref int index)
+        private static (int Offset, RecordHeader Value) ReadRecordHeader(byte[] buffer, int index)
         {
-            var key = ReadCompactString(buffer, ref index);
-            var value = ReadCompactBytes(buffer, ref index);
-            return new(key, value);
+            (index, var key) = ReadCompactString(buffer, index);
+            (index, var value) = ReadCompactBytes(buffer, index);
+            return (index, new(key, value));
         }
 
-        public static ImmutableArray<TItem>? ReadArray<TItem>(byte[] buffer, ref int index, DecodeDelegate<TItem> readItem)
+        public static (int Offset, ImmutableArray<TItem>? Value) ReadArray<TItem>(byte[] buffer, int index, DecodeDelegate<TItem> readItem)
         {
-            var length = ReadInt32(buffer, ref index);
+            (index, var length) = ReadInt32(buffer, index);
             if (length == -1)
-                return default;
-            var items = new TItem[length];
+                return (index, default);
+            var items = ImmutableArray.CreateBuilder<TItem>(length);
             for (int i = 0; i < length; i++)
-                items[i] = readItem(buffer, ref index);
-            return items.ToImmutableArray();
+            {
+                (index, var item) = readItem(buffer, index);
+                items.Add(item);
+            }
+            return (index, items.ToImmutable());
         }
 
-        public static ImmutableArray<TItem>? ReadCompactArray<TItem>(byte[] buffer, ref int index, DecodeDelegate<TItem> readItem)
+        public static (int Offset, ImmutableArray<TItem>? Value) ReadCompactArray<TItem>(byte[] buffer, int index, DecodeDelegate<TItem> readItem)
         {
-            var length = Convert.ToInt32(ReadVarUInt32(buffer, ref index));
+            (index, var length) = ReadVarUInt32(buffer, index);
             if (length == 0)
-                return default;
-            length -= 1;
-            var items = new TItem[length];
-            for (int i = 0; i < length; i++)
-                items[i] = readItem(buffer, ref index);
-            return items.ToImmutableArray();
+                return (index, default);
+            var intLength = Convert.ToInt32(length) - 1;
+            var items = ImmutableArray.CreateBuilder<TItem>(intLength);
+            for (int i = 0; i < intLength; i++)
+            {
+                (index, var item) = readItem(buffer, index);
+                items.Add(item);
+            }
+            return (index, items.ToImmutable());
         }
 
         private static void CheckRemaining(byte[] buffer, int index, long length)
         {
             var required = index + length;
             if (buffer.Length < required)
-                throw new EndOfStreamException($"Buffer overflow");
+                throw new EndOfStreamException($"No enough bytes - required length: {required} - was: {buffer.Length}");
         }
 
-        private static ulong ZigZagDecode(byte[] buffer, ref int index, int bits)
+        private static (int Offset, ulong Value) ZigZagDecode(byte[] buffer, int index, int bits)
         {
             var value = 0UL;
             var bit = 0;
@@ -418,7 +400,7 @@ namespace Kafka.Common.Encoding
             }
             if (bit > bits)
                 throw new InvalidDataException($"ZigZag decoding exceeded ({bits}) bits");
-            return value;
+            return (index, value);
         }
     }
 }

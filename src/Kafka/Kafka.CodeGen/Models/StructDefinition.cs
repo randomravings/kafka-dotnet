@@ -5,8 +5,15 @@ namespace Kafka.CodeGen.Models
 {
     public sealed record StructDefinition(
         string Name,
-        Version Versions,
         ImmutableArray<Field> Fields,
         IImmutableDictionary<string, StructDefinition> Structs
-    );
+    ) :
+        MessageDefinition(
+            Name,
+            Version.All,
+            Version.All,
+            Fields,
+            Structs
+        )
+    ;
 }

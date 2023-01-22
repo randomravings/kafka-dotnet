@@ -249,9 +249,9 @@ namespace Kafka.Client.Server
 
             ClusterNodeId IConnection.NodeId => _clusterNodeInfo.Id;
 
-            string IConnection.Host => _transport.EndPoint.Host;
+            string IConnection.Host => _transport.RemoteEndPoint.Host;
 
-            int IConnection.Port => _transport.EndPoint.Port;
+            int IConnection.Port => _transport.RemoteEndPoint.Port;
 
             async Task<Cluster> IConnection.GetClusterInfo(CancellationToken cancellationToken) =>
                 await GetClusterInfo(cancellationToken)
@@ -348,6 +348,7 @@ namespace Kafka.Client.Server
             private async ValueTask Init(CancellationToken cancellationToken)
             {
                 await _transport.Connect(cancellationToken);
+                _logger.LogTrace($"Connected to: {_transport.RemoteEndPoint} from: {_transport.LocalEndPoint}");
                 await _transport.Handshake(cancellationToken);
                 await EnsureMetadata(cancellationToken);
             }
@@ -365,7 +366,7 @@ namespace Kafka.Client.Server
                     .Nodes
                     .Values
                     .FirstOrDefault(r =>
-                        string.Compare(r.Host, _transport.EndPoint.Host, true) == 0 && r.Port == _transport.EndPoint.Port,
+                        string.Compare(r.Host, _transport.RemoteEndPoint.Host, true) == 0 && r.Port == _transport.RemoteEndPoint.Port,
                         ClusterNode.Empty
                     )
                 ;
@@ -475,10 +476,10 @@ namespace Kafka.Client.Server
 
                 offset = 0;
                 flexibleHeader &= request.Api != ApiKey.ApiVersions.Value;
-                var responeHeader = ResponseHeaderSerde.Read(responseBytes, ref offset, RESPONSE_HEADER_VERSION, flexibleHeader);
+                (offset, var responeHeader) = ResponseHeaderSerde.Read(responseBytes, offset, RESPONSE_HEADER_VERSION, flexibleHeader);
                 if (responeHeader.CorrelationIdField != requestHeader.CorrelationIdField)
                     throw new Exception($"Correlation Id mismath - Request: {requestHeader.CorrelationIdField} - Response: {responeHeader.CorrelationIdField}");
-                var response = responseReader(responseBytes, ref offset, requestHeader.RequestApiVersionField);
+                (_, var response) = responseReader(responseBytes, offset, requestHeader.RequestApiVersionField);
                 return response;
             }
         }
@@ -536,10 +537,10 @@ namespace Kafka.Client.Server
 
                 offset = 0;
                 flexibleHeader &= request.Api != ApiKey.ApiVersions.Value;
-                var responeHeader = ResponseHeaderSerde.Read(responseBytes, ref offset, RESPONSE_HEADER_VERSION, flexibleHeader);
+                (offset, var responeHeader) = ResponseHeaderSerde.Read(responseBytes, offset, RESPONSE_HEADER_VERSION, flexibleHeader);
                 if (responeHeader.CorrelationIdField != requestHeader.CorrelationIdField)
                     throw new Exception($"Correlation Id mismath - Request: {requestHeader.CorrelationIdField} - Response: {responeHeader.CorrelationIdField}");
-                var response = responseReader(responseBytes, ref offset, requestHeader.RequestApiVersionField);
+                (_, var response) = responseReader(responseBytes, offset, requestHeader.RequestApiVersionField);
                 return response;
             }
 

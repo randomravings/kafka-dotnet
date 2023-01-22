@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponse.CreatableTopicResult;
 using CreatableTopicConfigs = Kafka.Client.Messages.CreateTopicsResponse.CreatableTopicResult.CreatableTopicConfigs;
+using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponse.CreatableTopicResult;
 
 namespace Kafka.Client.Messages
 {
@@ -30,6 +30,7 @@ namespace Kafka.Client.Messages
         /// <param name="ReplicationFactorField">Replication factor of the topic.</param>
         /// <param name="ConfigsField">Configuration of the topic.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record CreatableTopicResult (
             string NameField,
             Guid TopicIdField,
@@ -58,6 +59,7 @@ namespace Kafka.Client.Messages
             /// <param name="ConfigSourceField">The configuration source.</param>
             /// <param name="IsSensitiveField">True if this configuration is sensitive.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record CreatableTopicConfigs (
                 string NameField,
                 string? ValueField,

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic.ListOffsetsPartition;
 using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic;
+using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequest.ListOffsetsTopic.ListOffsetsPartition;
 
 namespace Kafka.Client.Messages
 {
@@ -27,6 +27,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">Each partition in the request.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record ListOffsetsTopic (
             string NameField,
             ImmutableArray<ListOffsetsPartition> PartitionsField
@@ -42,6 +43,7 @@ namespace Kafka.Client.Messages
             /// <param name="TimestampField">The current timestamp.</param>
             /// <param name="MaxNumOffsetsField">The maximum number of offsets to report.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record ListOffsetsPartition (
                 int PartitionIndexField,
                 int CurrentLeaderEpochField,

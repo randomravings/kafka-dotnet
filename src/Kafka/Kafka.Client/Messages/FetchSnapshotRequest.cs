@@ -2,8 +2,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 using SnapshotId = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot.PartitionSnapshot.SnapshotId;
-using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot.PartitionSnapshot;
 using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot;
+using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotRequest.TopicSnapshot.PartitionSnapshot;
 
 namespace Kafka.Client.Messages
 {
@@ -31,6 +31,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The name of the topic to fetch</param>
         /// <param name="PartitionsField">The partitions to fetch</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicSnapshot (
             string NameField,
             ImmutableArray<PartitionSnapshot> PartitionsField
@@ -46,6 +47,7 @@ namespace Kafka.Client.Messages
             /// <param name="SnapshotIdField">The snapshot endOffset and epoch to fetch</param>
             /// <param name="PositionField">The byte position within the snapshot to start fetching from</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionSnapshot (
                 int PartitionField,
                 int CurrentLeaderEpochField,
@@ -63,6 +65,7 @@ namespace Kafka.Client.Messages
                 /// <param name="EndOffsetField"></param>
                 /// <param name="EpochField"></param>
                 /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
                 public sealed record SnapshotId (
                     long EndOffsetField,
                     int EpochField

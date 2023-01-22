@@ -26,6 +26,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name</param>
         /// <param name="TopicIdField">The unique topic ID</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DeleteTopicState (
             string? NameField,
             Guid TopicIdField

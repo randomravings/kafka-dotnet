@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicData = Kafka.Client.Messages.DescribeQuorumRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.DescribeQuorumRequest.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.DescribeQuorumRequest.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -21,6 +21,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionsField"></param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicData (
             string TopicNameField,
             ImmutableArray<PartitionData> PartitionsField
@@ -33,6 +34,7 @@ namespace Kafka.Client.Messages
             /// <summary>
             /// <param name="PartitionIndexField">The partition index.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionData (
                 int PartitionIndexField
             )

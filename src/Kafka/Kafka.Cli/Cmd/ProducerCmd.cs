@@ -1,5 +1,5 @@
-﻿using Kafka.Cli.Text;
-using Kafka.Cli.Verbs;
+﻿using Kafka.Cli.Options;
+using Kafka.Cli.Text;
 using Kafka.Client.Clients.Producer;
 using Kafka.Client.Clients.Producer.Model;
 using Kafka.Common.Records;
@@ -10,10 +10,10 @@ using System.Collections.Immutable;
 
 namespace Kafka.Cli.Cmd
 {
-    internal static class ProduceCmd
+    internal static class ProducerCmd
     {
         public static async ValueTask<int> Parse(
-            Produce options,
+            ProducerOpts options,
             CancellationToken cancellationToken
         )
         {
@@ -47,7 +47,7 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> RunSingle(
-            Produce options,
+            ProducerOpts options,
             IProducer<string, string> producer,
             CancellationToken cancellationToken
         )
@@ -90,7 +90,7 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> RunBatch(
-            Produce options,
+            ProducerOpts options,
             IProducer<string, string> producer,
             CancellationToken cancellationToken
         )

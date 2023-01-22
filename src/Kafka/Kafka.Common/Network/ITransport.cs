@@ -6,7 +6,8 @@ namespace Kafka.Common.Network
         IDisposable
     {
         bool IsConnected { get; }
-        DnsEndPoint EndPoint { get; }
+        DnsEndPoint RemoteEndPoint { get; }
+        EndPoint LocalEndPoint { get; }
         Task Connect(CancellationToken cancellationToken = default);
         Task Disconnect(CancellationToken cancellationToken = default);
         Task Handshake(CancellationToken cancellationToken = default);

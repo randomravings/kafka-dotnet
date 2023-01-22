@@ -41,6 +41,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The protocol name.</param>
         /// <param name="MetadataField">The protocol metadata.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record JoinGroupRequestProtocol (
             string NameField,
             ReadOnlyMemory<byte> MetadataField

@@ -1,7 +1,7 @@
 ﻿namespace Kafka.Common.Encoding
 {
-    public delegate TItem DecodeDelegate<TItem>(
+    public delegate (int Offset, TItem Value) DecodeDelegate<TItem>(
         byte[] buffer,
-        ref int index
+        int index
     );
 }

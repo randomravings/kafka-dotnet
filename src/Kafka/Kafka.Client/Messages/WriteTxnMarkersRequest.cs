@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using WritableTxnMarkerTopic = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker.WritableTxnMarkerTopic;
 using WritableTxnMarker = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker;
+using WritableTxnMarkerTopic = Kafka.Client.Messages.WriteTxnMarkersRequest.WritableTxnMarker.WritableTxnMarkerTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicsField">Each topic that we want to write transaction marker(s) for.</param>
         /// <param name="CoordinatorEpochField">Epoch associated with the transaction state partition hosted by this transaction coordinator</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record WritableTxnMarker (
             long ProducerIdField,
             short ProducerEpochField,
@@ -43,6 +44,7 @@ namespace Kafka.Client.Messages
             /// <param name="NameField">The topic name.</param>
             /// <param name="PartitionIndexesField">The indexes of the partitions to write transaction markers for.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record WritableTxnMarkerTopic (
                 string NameField,
                 ImmutableArray<int> PartitionIndexesField

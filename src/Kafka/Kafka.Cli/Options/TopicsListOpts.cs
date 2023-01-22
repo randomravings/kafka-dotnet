@@ -1,11 +1,10 @@
 ﻿using CommandLine;
-using Kafka.Cli.Options;
 
-namespace Kafka.Cli.Verbs
+namespace Kafka.Cli.Options
 {
     [Verb("list")]
-    public sealed class TopicList
-        : OptionsBase
+    public sealed class TopicsListOpts
+        : KafkaCliOpts
     {
         [Option("exclude-internal")]
         public bool ExcludeInternal { get; set; } = false;

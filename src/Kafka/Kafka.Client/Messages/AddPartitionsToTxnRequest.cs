@@ -29,6 +29,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The name of the topic.</param>
         /// <param name="PartitionsField">The partition indexes to add to the transaction</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record AddPartitionsToTxnTopic (
             string NameField,
             ImmutableArray<int> PartitionsField

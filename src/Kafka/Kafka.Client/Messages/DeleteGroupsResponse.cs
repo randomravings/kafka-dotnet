@@ -23,6 +23,7 @@ namespace Kafka.Client.Messages
         /// <param name="GroupIdField">The group id</param>
         /// <param name="ErrorCodeField">The deletion error, or 0 if the deletion succeeded.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DeletableGroupResult (
             string GroupIdField,
             short ErrorCodeField

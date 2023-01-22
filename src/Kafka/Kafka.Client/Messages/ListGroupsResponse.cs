@@ -27,6 +27,7 @@ namespace Kafka.Client.Messages
         /// <param name="ProtocolTypeField">The group protocol type.</param>
         /// <param name="GroupStateField">The group state name.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record ListedGroup (
             string GroupIdField,
             string ProtocolTypeField,

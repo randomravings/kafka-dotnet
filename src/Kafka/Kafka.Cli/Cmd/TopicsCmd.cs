@@ -1,14 +1,14 @@
 ﻿using CommandLine;
 using Kafka.Cli.Options;
 using Kafka.Cli.Text;
-using Kafka.Cli.Verbs;
 using Kafka.Client.Clients.Admin;
 using Kafka.Client.Clients.Admin.Model;
+using Kafka.Common.Types;
 using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd
 {
-    internal static class TopicCmd
+    internal static class TopicsCmd
     {
         public static async ValueTask<int> Parse(
             IEnumerable<string> args,
@@ -20,18 +20,18 @@ namespace Kafka.Cli.Cmd
                 with.HelpWriter = Console.Out;
                 with.IgnoreUnknownArguments = false;
                 with.CaseInsensitiveEnumValues = true;
-            }).ParseArguments<TopicList, TopicCreate, TopicDescribe, TopicDelete>(args)
+            }).ParseArguments<TopicsListOpts, TopicsCreateOpts, TopicsDescribeOpts, TopicsDeleteOpts>(args)
                 .MapResult(
-                    (TopicList verb) => List(verb, cancellationToken),
-                    (TopicCreate verb) => Create(verb, cancellationToken),
-                    (TopicDescribe verb) => Describe(verb, cancellationToken),
-                    (TopicDelete verb) => Delete(verb, cancellationToken),
+                    (TopicsListOpts verb) => List(verb, cancellationToken),
+                    (TopicsCreateOpts verb) => Create(verb, cancellationToken),
+                    (TopicsDescribeOpts verb) => Describe(verb, cancellationToken),
+                    (TopicsDeleteOpts verb) => Delete(verb, cancellationToken),
                     errs => new ValueTask<int>(-1)
                 )
             ;
 
         public static async ValueTask<int> List(
-            TopicList verb,
+            TopicsListOpts verb,
             CancellationToken cancellationToken
         )
         {
@@ -59,7 +59,7 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> Create(
-            TopicCreate verb,
+            TopicsCreateOpts verb,
             CancellationToken cancellationToken
         )
         {
@@ -95,7 +95,7 @@ namespace Kafka.Cli.Cmd
                     foreach (var topic in result.CreatedTopics)
                     {
                         Console.Write($"  {topic.Name}");
-                        if(topic.Id != Guid.Empty)
+                        if(topic.Id != TopicId.Empty)
                             Console.Write($" ({topic.Id})");
                         Console.WriteLine();
                         Console.WriteLine($"    Partitions:         {topic.NumPartitions}");
@@ -126,7 +126,7 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> Delete(
-            TopicDelete verb,
+            TopicsDeleteOpts verb,
             CancellationToken cancellationToken
         )
         {
@@ -134,7 +134,7 @@ namespace Kafka.Cli.Cmd
             {
                 using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
                 var options = new DeleteTopicsOptionsBuilder(adminClientConfig)
-                    .TopicName(verb.TopicName)
+                    .TopicName(verb.Topic)
                     .TopicId(verb.TopicId)
                     .Build()
                 ;
@@ -157,7 +157,7 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> Describe(
-            TopicDescribe verb,
+            TopicsDescribeOpts verb,
             CancellationToken cancellationToken
         )
         {
@@ -165,7 +165,7 @@ namespace Kafka.Cli.Cmd
             {
                 using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
                 var options = new DescribeTopicsOptionsBuilder(adminClientConfig)
-                    .TopicName(verb.TopicName)
+                    .TopicName(verb.Topic)
                     .TopicId(verb.TopicId)
                     .Build()
                 ;
@@ -202,7 +202,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static IAdminClient CreateAdminClient(
-            OptionsBase options,
+            KafkaCliOpts options,
             out AdminClientConfig adminClientConfig
         )
         {

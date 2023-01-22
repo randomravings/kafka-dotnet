@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using DeleteRecordsPartition = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic.DeleteRecordsPartition;
 using DeleteRecordsTopic = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic;
+using DeleteRecordsPartition = Kafka.Client.Messages.DeleteRecordsRequest.DeleteRecordsTopic.DeleteRecordsPartition;
 
 namespace Kafka.Client.Messages
 {
@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">Each partition that we want to delete records from.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DeleteRecordsTopic (
             string NameField,
             ImmutableArray<DeleteRecordsPartition> PartitionsField
@@ -37,6 +38,7 @@ namespace Kafka.Client.Messages
             /// <param name="PartitionIndexField">The partition index.</param>
             /// <param name="OffsetField">The deletion offset.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record DeleteRecordsPartition (
                 int PartitionIndexField,
                 long OffsetField

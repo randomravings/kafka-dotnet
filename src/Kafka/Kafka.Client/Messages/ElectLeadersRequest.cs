@@ -26,6 +26,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicField">The name of a topic.</param>
         /// <param name="PartitionsField">The partitions of this topic whose leader should be elected.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicPartitions (
             string TopicField,
             ImmutableArray<int> PartitionsField

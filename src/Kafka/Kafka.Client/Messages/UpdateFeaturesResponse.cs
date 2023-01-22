@@ -30,6 +30,7 @@ namespace Kafka.Client.Messages
         /// <param name="ErrorCodeField">The feature update error code or `0` if the feature update succeeded.</param>
         /// <param name="ErrorMessageField">The feature update error, or `null` if the feature update succeeded.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record UpdatableFeatureResult (
             string FeatureField,
             short ErrorCodeField,

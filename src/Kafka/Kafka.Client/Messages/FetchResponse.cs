@@ -2,12 +2,12 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
 using Kafka.Common.Protocol;
-using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
-using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
 using PartitionData = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.EpochEndOffset;
+using SnapshotId = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.SnapshotId;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse;
+using AbortedTransaction = Kafka.Client.Messages.FetchResponse.FetchableTopicResponse.PartitionData.AbortedTransaction;
 
 namespace Kafka.Client.Messages
 {
@@ -36,6 +36,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicIdField">The unique topic ID</param>
         /// <param name="PartitionsField">The topic partitions.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record FetchableTopicResponse (
             string TopicField,
             Guid TopicIdField,
@@ -60,6 +61,7 @@ namespace Kafka.Client.Messages
             /// <param name="PreferredReadReplicaField">The preferred read replica for the consumer to use on its next fetch request</param>
             /// <param name="RecordsField">The record data.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionData (
                 int PartitionIndexField,
                 short ErrorCodeField,
@@ -88,37 +90,10 @@ namespace Kafka.Client.Messages
                     default(ImmutableArray<IRecords>)
                 );
                 /// <summary>
-                /// <param name="EndOffsetField"></param>
-                /// <param name="EpochField"></param>
-                /// </summary>
-                public sealed record SnapshotId (
-                    long EndOffsetField,
-                    int EpochField
-                )
-                {
-                    public static SnapshotId Empty { get; } = new(
-                        default(long),
-                        default(int)
-                    );
-                };
-                /// <summary>
-                /// <param name="ProducerIdField">The producer id associated with the aborted transaction.</param>
-                /// <param name="FirstOffsetField">The first offset in the aborted transaction.</param>
-                /// </summary>
-                public sealed record AbortedTransaction (
-                    long ProducerIdField,
-                    long FirstOffsetField
-                )
-                {
-                    public static AbortedTransaction Empty { get; } = new(
-                        default(long),
-                        default(long)
-                    );
-                };
-                /// <summary>
                 /// <param name="LeaderIdField">The ID of the current leader or -1 if the leader is unknown.</param>
                 /// <param name="LeaderEpochField">The latest known leader epoch</param>
                 /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
                 public sealed record LeaderIdAndEpoch (
                     int LeaderIdField,
                     int LeaderEpochField
@@ -133,6 +108,7 @@ namespace Kafka.Client.Messages
                 /// <param name="EpochField"></param>
                 /// <param name="EndOffsetField"></param>
                 /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
                 public sealed record EpochEndOffset (
                     int EpochField,
                     long EndOffsetField
@@ -140,6 +116,36 @@ namespace Kafka.Client.Messages
                 {
                     public static EpochEndOffset Empty { get; } = new(
                         default(int),
+                        default(long)
+                    );
+                };
+                /// <summary>
+                /// <param name="EndOffsetField"></param>
+                /// <param name="EpochField"></param>
+                /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
+                public sealed record SnapshotId (
+                    long EndOffsetField,
+                    int EpochField
+                )
+                {
+                    public static SnapshotId Empty { get; } = new(
+                        default(long),
+                        default(int)
+                    );
+                };
+                /// <summary>
+                /// <param name="ProducerIdField">The producer id associated with the aborted transaction.</param>
+                /// <param name="FirstOffsetField">The first offset in the aborted transaction.</param>
+                /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
+                public sealed record AbortedTransaction (
+                    long ProducerIdField,
+                    long FirstOffsetField
+                )
+                {
+                    public static AbortedTransaction Empty { get; } = new(
+                        default(long),
                         default(long)
                     );
                 };

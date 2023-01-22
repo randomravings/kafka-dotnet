@@ -8,28 +8,33 @@ namespace Kafka.Common.Network.Tcp
         ITransport
     {
         private readonly DnsEndPoint _endPoint;
-        private readonly TcpClient _tcpClient;
+        private readonly Socket _socket;
+        private static readonly EndPoint NO_ENDPOINT = new IPEndPoint(0, 0);
 
         public PlaintextTransport(
             DnsEndPoint endPoint
         )
         {
             _endPoint = endPoint;
-            _tcpClient = new TcpClient();
+            _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+            {
+                ExclusiveAddressUse = true,
+            };
         }
         bool ITransport.IsConnected =>
-            _tcpClient.Connected
+            _socket.Connected
         ;
 
-        DnsEndPoint ITransport.EndPoint => _endPoint;
+        DnsEndPoint ITransport.RemoteEndPoint => _endPoint;
+        EndPoint ITransport.LocalEndPoint => _socket?.LocalEndPoint ?? NO_ENDPOINT;
 
         async Task ITransport.Connect(CancellationToken cancellationToken) =>
-            await _tcpClient.ConnectAsync(_endPoint.Host, _endPoint.Port, cancellationToken)
+            await _socket.ConnectAsync(_endPoint.Host, _endPoint.Port, cancellationToken)
         ;
 
         async Task ITransport.Disconnect(CancellationToken cancellationToken)
         {
-            _tcpClient.Close();
+            _socket.Close();
             await ValueTask.CompletedTask;
         }
 
@@ -44,24 +49,21 @@ namespace Kafka.Common.Network.Tcp
             CancellationToken cancellationToken
         )
         {
-            var networkStream = _tcpClient.GetStream();
-            var memory = requestBytes.AsMemory(offset, length);
-            Encoder.WriteInt32(networkStream, memory.Length);
-            await networkStream.WriteAsync(memory, cancellationToken);
-            await networkStream.FlushAsync(cancellationToken);
             var sizeBytes = new byte[4];
-            if (!await ReadBytesFromNetwork(networkStream, sizeBytes, cancellationToken))
+            Encoder.WriteInt32(sizeBytes, 0, length);
+            await _socket.SendAsync(sizeBytes.AsMemory(0, 4), SocketFlags.Partial, cancellationToken);
+            await _socket.SendAsync(requestBytes.AsMemory(offset, length), SocketFlags.None, cancellationToken);
+            if (!await ReadBytesFromNetwork(_socket, sizeBytes, cancellationToken))
                 return Array.Empty<byte>();
-            var index = 0;
-            var messageLen = Decoder.ReadInt32(sizeBytes, ref index);
+            (_, var messageLen) = Decoder.ReadInt32(sizeBytes, 0);
             var responseBytes = new byte[messageLen];
-            if (!await ReadBytesFromNetwork(networkStream, responseBytes, cancellationToken))
+            if (!await ReadBytesFromNetwork(_socket, responseBytes, cancellationToken))
                 return Array.Empty<byte>();
             return responseBytes;
         }
 
         private static async ValueTask<bool> ReadBytesFromNetwork(
-            NetworkStream stream,
+            Socket socket,
             byte[] bytes,
             CancellationToken cancellationToken
         )
@@ -69,7 +71,7 @@ namespace Kafka.Common.Network.Tcp
             var offset = 0;
             while (offset < bytes.Length)
             {
-                var bytesReceived = await stream.ReadAsync(bytes.AsMemory(offset, bytes.Length - offset), cancellationToken);
+                var bytesReceived = await socket.ReceiveAsync(bytes.AsMemory(offset, bytes.Length - offset), SocketFlags.None, cancellationToken);
                 if (bytesReceived == 0)
                     return false;
                 offset += bytesReceived;
@@ -79,16 +81,16 @@ namespace Kafka.Common.Network.Tcp
 
         public async Task Close(CancellationToken cancellationToken)
         {
-            if (_tcpClient.Connected)
-                _tcpClient.Close();
+            if (_socket.Connected)
+                _socket.Close();
             await ValueTask.CompletedTask;
         }
 
         void IDisposable.Dispose()
         {
-            if (_tcpClient.Connected)
-                _tcpClient.Close();
-            _tcpClient.Dispose();
+            if (_socket.Connected)
+                _socket.Close();
+            _socket.Dispose();
         }
     }
 }

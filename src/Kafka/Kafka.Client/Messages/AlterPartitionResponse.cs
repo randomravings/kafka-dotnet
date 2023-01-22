@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicData = Kafka.Client.Messages.AlterPartitionResponse.TopicData;
 using PartitionData = Kafka.Client.Messages.AlterPartitionResponse.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.AlterPartitionResponse.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -28,6 +28,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicIdField">The ID of the topic</param>
         /// <param name="PartitionsField"></param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicData (
             string TopicNameField,
             Guid TopicIdField,
@@ -48,6 +49,7 @@ namespace Kafka.Client.Messages
             /// <param name="LeaderRecoveryStateField">1 if the partition is recovering from an unclean leader election; 0 otherwise.</param>
             /// <param name="PartitionEpochField">The current epoch for the partition for KRaft controllers. The current ZK version for the legacy controllers.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionData (
                 int PartitionIndexField,
                 short ErrorCodeField,

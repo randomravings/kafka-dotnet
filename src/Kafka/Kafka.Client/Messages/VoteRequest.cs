@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicData = Kafka.Client.Messages.VoteRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.VoteRequest.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.VoteRequest.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionsField"></param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicData (
             string TopicNameField,
             ImmutableArray<PartitionData> PartitionsField
@@ -40,6 +41,7 @@ namespace Kafka.Client.Messages
             /// <param name="LastOffsetEpochField">The epoch of the last record written to the metadata log</param>
             /// <param name="LastOffsetField">The offset of the last record written to the metadata log</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionData (
                 int PartitionIndexField,
                 int CandidateEpochField,

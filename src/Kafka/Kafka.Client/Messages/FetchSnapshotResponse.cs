@@ -2,10 +2,10 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Records;
 using Kafka.Common.Protocol;
-using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
-using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
-using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.LeaderIdAndEpoch;
+using SnapshotId = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot.SnapshotId;
+using TopicSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot;
+using PartitionSnapshot = Kafka.Client.Messages.FetchSnapshotResponse.TopicSnapshot.PartitionSnapshot;
 
 namespace Kafka.Client.Messages
 {
@@ -30,6 +30,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The name of the topic to fetch.</param>
         /// <param name="PartitionsField">The partitions to fetch.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicSnapshot (
             string NameField,
             ImmutableArray<PartitionSnapshot> PartitionsField
@@ -48,6 +49,7 @@ namespace Kafka.Client.Messages
             /// <param name="PositionField">The starting byte position within the snapshot included in the Bytes field.</param>
             /// <param name="UnalignedRecordsField">Snapshot data in records format which may not be aligned on an offset boundary</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionSnapshot (
                 int IndexField,
                 short ErrorCodeField,
@@ -68,23 +70,10 @@ namespace Kafka.Client.Messages
                     ImmutableArray<IRecords>.Empty
                 );
                 /// <summary>
-                /// <param name="EndOffsetField"></param>
-                /// <param name="EpochField"></param>
-                /// </summary>
-                public sealed record SnapshotId (
-                    long EndOffsetField,
-                    int EpochField
-                )
-                {
-                    public static SnapshotId Empty { get; } = new(
-                        default(long),
-                        default(int)
-                    );
-                };
-                /// <summary>
                 /// <param name="LeaderIdField">The ID of the current leader or -1 if the leader is unknown.</param>
                 /// <param name="LeaderEpochField">The latest known leader epoch</param>
                 /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
                 public sealed record LeaderIdAndEpoch (
                     int LeaderIdField,
                     int LeaderEpochField
@@ -92,6 +81,21 @@ namespace Kafka.Client.Messages
                 {
                     public static LeaderIdAndEpoch Empty { get; } = new(
                         default(int),
+                        default(int)
+                    );
+                };
+                /// <summary>
+                /// <param name="EndOffsetField"></param>
+                /// <param name="EpochField"></param>
+                /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
+                public sealed record SnapshotId (
+                    long EndOffsetField,
+                    int EpochField
+                )
+                {
+                    public static SnapshotId Empty { get; } = new(
+                        default(long),
                         default(int)
                     );
                 };

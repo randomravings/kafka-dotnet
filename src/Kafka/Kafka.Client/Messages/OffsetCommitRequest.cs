@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using OffsetCommitRequestPartition = Kafka.Client.Messages.OffsetCommitRequest.OffsetCommitRequestTopic.OffsetCommitRequestPartition;
 using OffsetCommitRequestTopic = Kafka.Client.Messages.OffsetCommitRequest.OffsetCommitRequestTopic;
+using OffsetCommitRequestPartition = Kafka.Client.Messages.OffsetCommitRequest.OffsetCommitRequestTopic.OffsetCommitRequestPartition;
 
 namespace Kafka.Client.Messages
 {
@@ -36,6 +36,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">Each partition to commit offsets for.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record OffsetCommitRequestTopic (
             string NameField,
             ImmutableArray<OffsetCommitRequestPartition> PartitionsField
@@ -52,6 +53,7 @@ namespace Kafka.Client.Messages
             /// <param name="CommitTimestampField">The timestamp of the commit.</param>
             /// <param name="CommittedMetadataField">Any associated metadata the client wants to keep.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record OffsetCommitRequestPartition (
                 int PartitionIndexField,
                 long CommittedOffsetField,

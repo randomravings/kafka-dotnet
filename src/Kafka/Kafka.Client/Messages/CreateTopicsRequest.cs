@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreatableReplicaAssignment;
-using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreateableTopicConfig;
 using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
+using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreateableTopicConfig;
+using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic.CreatableReplicaAssignment;
 
 namespace Kafka.Client.Messages
 {
@@ -31,6 +31,7 @@ namespace Kafka.Client.Messages
         /// <param name="AssignmentsField">The manual partition assignment, or the empty array if we are using automatic assignment.</param>
         /// <param name="ConfigsField">The custom topic configurations to set.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record CreatableTopic (
             string NameField,
             int NumPartitionsField,
@@ -47,23 +48,10 @@ namespace Kafka.Client.Messages
                 ImmutableArray<CreateableTopicConfig>.Empty
             );
             /// <summary>
-            /// <param name="PartitionIndexField">The partition index.</param>
-            /// <param name="BrokerIdsField">The brokers to place the partition on.</param>
-            /// </summary>
-            public sealed record CreatableReplicaAssignment (
-                int PartitionIndexField,
-                ImmutableArray<int> BrokerIdsField
-            )
-            {
-                public static CreatableReplicaAssignment Empty { get; } = new(
-                    default(int),
-                    ImmutableArray<int>.Empty
-                );
-            };
-            /// <summary>
             /// <param name="NameField">The configuration name.</param>
             /// <param name="ValueField">The configuration value.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record CreateableTopicConfig (
                 string NameField,
                 string? ValueField
@@ -72,6 +60,21 @@ namespace Kafka.Client.Messages
                 public static CreateableTopicConfig Empty { get; } = new(
                     "",
                     default(string?)
+                );
+            };
+            /// <summary>
+            /// <param name="PartitionIndexField">The partition index.</param>
+            /// <param name="BrokerIdsField">The brokers to place the partition on.</param>
+            /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
+            public sealed record CreatableReplicaAssignment (
+                int PartitionIndexField,
+                ImmutableArray<int> BrokerIdsField
+            )
+            {
+                public static CreatableReplicaAssignment Empty { get; } = new(
+                    default(int),
+                    ImmutableArray<int>.Empty
                 );
             };
         };

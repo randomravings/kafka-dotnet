@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using ForgottenTopic = Kafka.Client.Messages.FetchRequest.ForgottenTopic;
 using FetchPartition = Kafka.Client.Messages.FetchRequest.FetchTopic.FetchPartition;
 using FetchTopic = Kafka.Client.Messages.FetchRequest.FetchTopic;
+using ForgottenTopic = Kafka.Client.Messages.FetchRequest.ForgottenTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -49,27 +49,11 @@ namespace Kafka.Client.Messages
             ""
         );
         /// <summary>
-        /// <param name="TopicField">The topic name.</param>
-        /// <param name="TopicIdField">The unique topic ID</param>
-        /// <param name="PartitionsField">The partitions indexes to forget.</param>
-        /// </summary>
-        public sealed record ForgottenTopic (
-            string TopicField,
-            Guid TopicIdField,
-            ImmutableArray<int> PartitionsField
-        )
-        {
-            public static ForgottenTopic Empty { get; } = new(
-                "",
-                default(Guid),
-                ImmutableArray<int>.Empty
-            );
-        };
-        /// <summary>
         /// <param name="TopicField">The name of the topic to fetch.</param>
         /// <param name="TopicIdField">The unique topic ID</param>
         /// <param name="PartitionsField">The partitions to fetch.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record FetchTopic (
             string TopicField,
             Guid TopicIdField,
@@ -89,6 +73,7 @@ namespace Kafka.Client.Messages
             /// <param name="LogStartOffsetField">The earliest available offset of the follower replica.  The field is only used when the request is sent by the follower.</param>
             /// <param name="PartitionMaxBytesField">The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record FetchPartition (
                 int PartitionField,
                 int CurrentLeaderEpochField,
@@ -107,6 +92,24 @@ namespace Kafka.Client.Messages
                     default(int)
                 );
             };
+        };
+        /// <summary>
+        /// <param name="TopicField">The topic name.</param>
+        /// <param name="TopicIdField">The unique topic ID</param>
+        /// <param name="PartitionsField">The partitions indexes to forget.</param>
+        /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
+        public sealed record ForgottenTopic (
+            string TopicField,
+            Guid TopicIdField,
+            ImmutableArray<int> PartitionsField
+        )
+        {
+            public static ForgottenTopic Empty { get; } = new(
+                "",
+                default(Guid),
+                ImmutableArray<int>.Empty
+            );
         };
     };
 }

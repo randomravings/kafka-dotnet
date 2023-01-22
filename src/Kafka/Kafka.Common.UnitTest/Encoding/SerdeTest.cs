@@ -28,11 +28,14 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(int.MinValue)]
         public void TestVarInt32Serde(int value)
         {
-            var index = 0;
             var buffer = new byte[20];
-            Encoder.WriteVarInt32(buffer, index, value);
-            var actual = Decoder.ReadVarInt32(buffer, ref index);
-            Assert.That(actual, Is.EqualTo(value));
+            var writeIndex = Encoder.WriteVarInt32(buffer, 0, value);
+            (var readIndex, var actual) = Decoder.ReadVarInt32(buffer, 0);
+            Assert.Multiple(() =>
+            {
+                Assert.That(readIndex, Is.EqualTo(writeIndex));
+                Assert.That(actual, Is.EqualTo(value));
+            });
         }
 
         [TestCase(0U)]
@@ -50,11 +53,14 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(uint.MaxValue)]
         public void TestVarUInt32Serde(uint value)
         {
-            var index = 0;
             var buffer = new byte[20];
-            Encoder.WriteVarUInt32(buffer, index, value);
-            var actual = Decoder.ReadVarUInt32(buffer, ref index);
-            Assert.That(actual, Is.EqualTo(value));
+            var writeIndex = Encoder.WriteVarUInt32(buffer, 0, value);
+            (var readIndex, var actual) = Decoder.ReadVarUInt32(buffer, 0);
+            Assert.Multiple(() =>
+            {
+                Assert.That(readIndex, Is.EqualTo(writeIndex));
+                Assert.That(actual, Is.EqualTo(value));
+            });
         }
 
         [TestCase(0L)]
@@ -102,11 +108,14 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(long.MinValue)]
         public void TestVarInt64Serde(long value)
         {
-            var index = 0;
             var buffer = new byte[20];
-            Encoder.WriteVarInt64(buffer, index, value);
-            var actual = Decoder.ReadVarInt64(buffer, ref index);
-            Assert.That(actual, Is.EqualTo(value));
+            var writeIndex = Encoder.WriteVarInt64(buffer, 0, value);
+            (var readIndex, var actual) = Decoder.ReadVarInt64(buffer, 0);
+            Assert.Multiple(() =>
+            {
+                Assert.That(readIndex, Is.EqualTo(writeIndex));
+                Assert.That(actual, Is.EqualTo(value));
+            });
         }
     }
 }

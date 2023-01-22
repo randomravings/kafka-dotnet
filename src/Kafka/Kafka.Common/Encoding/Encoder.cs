@@ -170,29 +170,6 @@ namespace Kafka.Common.Encoding
             }
         ;
 
-        public static int WriteMessageSet(byte[] buffer, int index, IRecords? records)
-        {
-            if (records == null)
-                return WriteInt32(buffer, index, -1);
-            foreach (var record in records)
-                index = WriteMessage(buffer, index, record);
-            return index;
-        }
-
-        private static int WriteMessage(byte[] buffer, int index, IRecord record)
-        {
-            index = WriteInt64(buffer, index, record.Offset);
-            index = WriteInt32(buffer, index, record.SizeInBytes);
-            index = WriteInt32(buffer, index, record.Crc);
-            index = WriteInt8(buffer, index, record.Magic);
-            index = WriteInt16(buffer, index, (short)record.Attributes);
-            if (record.Magic == 1)
-                index = WriteInt64(buffer, index, record.Timestamp);
-            index = WriteNullableBytes(buffer, index, record.Key);
-            index = WriteNullableBytes(buffer, index, record.Value);
-            return index;
-        }
-
         public static int WriteRecords(byte[] buffer, int index, ImmutableArray<IRecords>? records)
         {
             if (records == null)
@@ -252,7 +229,7 @@ namespace Kafka.Common.Encoding
         private static int WriteRecord(byte[] buffer, int index, IRecord record)
         {
             // Write record header.
-            index = WriteVarInt32(buffer, index, record.SizeInBytes);
+            index = WriteVarInt32(buffer, index, record.Length);
             index = WriteInt8(buffer, index, 0);
             index = WriteVarInt64(buffer, index, record.TimestampDelta);
             index = WriteVarInt32(buffer, index, record.OffsetDelta);

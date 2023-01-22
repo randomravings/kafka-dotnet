@@ -1,11 +1,10 @@
 ﻿using CommandLine;
-using Kafka.Cli.Options;
 
-namespace Kafka.Cli.Verbs
+namespace Kafka.Cli.Options
 {
     [Verb("create")]
-    public sealed class TopicCreate
-        : OptionsBase
+    public sealed class TopicsCreateOpts
+        : KafkaCliOpts
     {
         [Option("topic", Required = true)]
         public string Topic { get; set; } = "";

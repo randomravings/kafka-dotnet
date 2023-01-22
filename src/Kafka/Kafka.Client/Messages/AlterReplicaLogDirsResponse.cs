@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using AlterReplicaLogDirPartitionResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult.AlterReplicaLogDirPartitionResult;
 using AlterReplicaLogDirTopicResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult;
+using AlterReplicaLogDirPartitionResult = Kafka.Client.Messages.AlterReplicaLogDirsResponse.AlterReplicaLogDirTopicResult.AlterReplicaLogDirPartitionResult;
 
 namespace Kafka.Client.Messages
 {
@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicNameField">The name of the topic.</param>
         /// <param name="PartitionsField">The results for each partition.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record AlterReplicaLogDirTopicResult (
             string TopicNameField,
             ImmutableArray<AlterReplicaLogDirPartitionResult> PartitionsField
@@ -37,6 +38,7 @@ namespace Kafka.Client.Messages
             /// <param name="PartitionIndexField">The partition index.</param>
             /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record AlterReplicaLogDirPartitionResult (
                 int PartitionIndexField,
                 short ErrorCodeField

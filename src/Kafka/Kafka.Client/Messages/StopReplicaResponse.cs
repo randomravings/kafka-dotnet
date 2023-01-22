@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="PartitionIndexField">The partition index.</param>
         /// <param name="ErrorCodeField">The partition error code, or 0 if there was no partition error.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record StopReplicaPartitionError (
             string TopicNameField,
             int PartitionIndexField,

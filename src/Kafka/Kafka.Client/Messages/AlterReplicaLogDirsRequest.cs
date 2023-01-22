@@ -21,6 +21,7 @@ namespace Kafka.Client.Messages
         /// <param name="PathField">The absolute directory path.</param>
         /// <param name="TopicsField">The topics to add to the directory.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record AlterReplicaLogDir (
             string PathField,
             ImmutableArray<AlterReplicaLogDirTopic> TopicsField
@@ -34,6 +35,7 @@ namespace Kafka.Client.Messages
             /// <param name="NameField">The topic name.</param>
             /// <param name="PartitionsField">The partition indexes.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record AlterReplicaLogDirTopic (
                 string NameField,
                 ImmutableArray<int> PartitionsField

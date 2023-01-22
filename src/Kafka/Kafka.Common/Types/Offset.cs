@@ -23,5 +23,11 @@
         public static Offset operator -(Offset a, long b) => new(a.Value - b);
         public static Offset operator *(Offset a, long b) => new(a.Value * b);
         public static Offset operator /(Offset a, long b) => new(a.Value / b);
+        public static Offset operator +(Offset a, int b) => new(a.Value + b);
+        public static Offset operator -(Offset a, int b) => new(a.Value - b);
+        public static Offset operator *(Offset a, int b) => new(a.Value * b);
+        public static Offset operator /(Offset a, int b) => new(a.Value / b);
+        public static Offset operator ++(Offset a) => new(a.Value + 1);
+        public static Offset operator --(Offset a) => new(a.Value - 1);
     }
 }

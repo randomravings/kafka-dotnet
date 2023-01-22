@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
         /// <param name="OperationField">The operation type for the ACL (read, write, etc.).</param>
         /// <param name="PermissionTypeField">The permission type for the ACL (allow, deny, etc.).</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record AclCreation (
             sbyte ResourceTypeField,
             string ResourceNameField,

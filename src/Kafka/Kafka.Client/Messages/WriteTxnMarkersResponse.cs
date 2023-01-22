@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using WritableTxnMarkerTopicResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult;
-using WritableTxnMarkerResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult;
 using WritableTxnMarkerPartitionResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult.WritableTxnMarkerPartitionResult;
+using WritableTxnMarkerResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult;
+using WritableTxnMarkerTopicResult = Kafka.Client.Messages.WriteTxnMarkersResponse.WritableTxnMarkerResult.WritableTxnMarkerTopicResult;
 
 namespace Kafka.Client.Messages
 {
@@ -22,6 +22,7 @@ namespace Kafka.Client.Messages
         /// <param name="ProducerIdField">The current producer ID in use by the transactional ID.</param>
         /// <param name="TopicsField">The results by topic.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record WritableTxnMarkerResult (
             long ProducerIdField,
             ImmutableArray<WritableTxnMarkerTopicResult> TopicsField
@@ -35,6 +36,7 @@ namespace Kafka.Client.Messages
             /// <param name="NameField">The topic name.</param>
             /// <param name="PartitionsField">The results by partition.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record WritableTxnMarkerTopicResult (
                 string NameField,
                 ImmutableArray<WritableTxnMarkerPartitionResult> PartitionsField
@@ -48,6 +50,7 @@ namespace Kafka.Client.Messages
                 /// <param name="PartitionIndexField">The partition index.</param>
                 /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
                 /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
                 public sealed record WritableTxnMarkerPartitionResult (
                     int PartitionIndexField,
                     short ErrorCodeField

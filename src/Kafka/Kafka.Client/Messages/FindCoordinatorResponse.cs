@@ -42,6 +42,7 @@ namespace Kafka.Client.Messages
         /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
         /// <param name="ErrorMessageField">The error message, or null if there was no error.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record Coordinator (
             string KeyField,
             int NodeIdField,

@@ -29,6 +29,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicField"></param>
         /// <param name="PartitionsField"></param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicPartition (
             string TopicField,
             ImmutableArray<int> PartitionsField

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicData = Kafka.Client.Messages.AlterPartitionRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.AlterPartitionRequest.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.AlterPartitionRequest.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -28,6 +28,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicIdField">The ID of the topic to alter ISRs for</param>
         /// <param name="PartitionsField"></param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicData (
             string TopicNameField,
             Guid TopicIdField,
@@ -46,6 +47,7 @@ namespace Kafka.Client.Messages
             /// <param name="LeaderRecoveryStateField">1 if the partition is recovering from an unclean leader election; 0 otherwise.</param>
             /// <param name="PartitionEpochField">The expected epoch of the partition which is being updated. For legacy cluster this is the ZkVersion in the LeaderAndIsr request.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionData (
                 int PartitionIndexField,
                 int LeaderEpochField,

@@ -30,6 +30,7 @@ namespace Kafka.Client.Messages
         /// <param name="ProducerIdField"></param>
         /// <param name="TransactionStateField">The current transaction state of the producer</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TransactionState (
             string TransactionalIdField,
             long ProducerIdField,

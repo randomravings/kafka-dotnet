@@ -5,218 +5,236 @@ using AddPartitionsToTxnTopicResult = Kafka.Client.Messages.AddPartitionsToTxnRe
 
 namespace Kafka.Client.Messages
 {
-    [GeneratedCode("kgen", "1.0.0.0")]
-    public static class AddPartitionsToTxnResponseSerde
-    {
-        private static readonly DecodeDelegate<AddPartitionsToTxnResponse>[] READ_VERSIONS = {
-            ReadV00,
-            ReadV01,
-            ReadV02,
-            ReadV03,
-        };
-        private static readonly EncodeDelegate<AddPartitionsToTxnResponse>[] WRITE_VERSIONS = {
-            WriteV00,
-            WriteV01,
-            WriteV02,
-            WriteV03,
-        };
-        public static AddPartitionsToTxnResponse Read(byte[] buffer, ref int index, short version) =>
-            READ_VERSIONS[version](buffer, ref index)
-        ;
-        public static int Write(byte[] buffer, int index, AddPartitionsToTxnResponse message, short version) =>
-            WRITE_VERSIONS[version](buffer, index, message)
-        ;
-        private static AddPartitionsToTxnResponse ReadV00(byte[] buffer, ref int index)
-        {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
-            var resultsField = Decoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, ref index, AddPartitionsToTxnTopicResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            return new(
-                throttleTimeMsField,
-                resultsField
-            );
-        }
-        private static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnResponse message)
-        {
-            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
-            index = Encoder.WriteArray<AddPartitionsToTxnTopicResult>(buffer, index, message.ResultsField, AddPartitionsToTxnTopicResultSerde.WriteV00);
-            return index;
-        }
-        private static AddPartitionsToTxnResponse ReadV01(byte[] buffer, ref int index)
-        {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
-            var resultsField = Decoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, ref index, AddPartitionsToTxnTopicResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            return new(
-                throttleTimeMsField,
-                resultsField
-            );
-        }
-        private static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnResponse message)
-        {
-            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
-            index = Encoder.WriteArray<AddPartitionsToTxnTopicResult>(buffer, index, message.ResultsField, AddPartitionsToTxnTopicResultSerde.WriteV01);
-            return index;
-        }
-        private static AddPartitionsToTxnResponse ReadV02(byte[] buffer, ref int index)
-        {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
-            var resultsField = Decoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, ref index, AddPartitionsToTxnTopicResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            return new(
-                throttleTimeMsField,
-                resultsField
-            );
-        }
-        private static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnResponse message)
-        {
-            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
-            index = Encoder.WriteArray<AddPartitionsToTxnTopicResult>(buffer, index, message.ResultsField, AddPartitionsToTxnTopicResultSerde.WriteV02);
-            return index;
-        }
-        private static AddPartitionsToTxnResponse ReadV03(byte[] buffer, ref int index)
-        {
-            var throttleTimeMsField = Decoder.ReadInt32(buffer, ref index);
-            var resultsField = Decoder.ReadCompactArray<AddPartitionsToTxnTopicResult>(buffer, ref index, AddPartitionsToTxnTopicResultSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-            _ = Decoder.ReadVarUInt32(buffer, ref index);
-            return new(
-                throttleTimeMsField,
-                resultsField
-            );
-        }
-        private static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnResponse message)
-        {
-            index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
-            index = Encoder.WriteCompactArray<AddPartitionsToTxnTopicResult>(buffer, index, message.ResultsField, AddPartitionsToTxnTopicResultSerde.WriteV03);
-            index = Encoder.WriteVarUInt32(buffer, index, 0);
-            return index;
-        }
-        private static class AddPartitionsToTxnTopicResultSerde
-        {
-            public static AddPartitionsToTxnTopicResult ReadV00(byte[] buffer, ref int index)
-            {
-                var NameField = Decoder.ReadString(buffer, ref index);
-                var ResultsField = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV00) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-                return new(
-                    NameField,
-                    ResultsField
-                );
-            }
-            public static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
-            {
-                index = Encoder.WriteString(buffer, index, message.NameField);
-                index = Encoder.WriteArray<AddPartitionsToTxnPartitionResult>(buffer, index, message.ResultsField, AddPartitionsToTxnPartitionResultSerde.WriteV00);
-                return index;
-            }
-            public static AddPartitionsToTxnTopicResult ReadV01(byte[] buffer, ref int index)
-            {
-                var NameField = Decoder.ReadString(buffer, ref index);
-                var ResultsField = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV01) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-                return new(
-                    NameField,
-                    ResultsField
-                );
-            }
-            public static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
-            {
-                index = Encoder.WriteString(buffer, index, message.NameField);
-                index = Encoder.WriteArray<AddPartitionsToTxnPartitionResult>(buffer, index, message.ResultsField, AddPartitionsToTxnPartitionResultSerde.WriteV01);
-                return index;
-            }
-            public static AddPartitionsToTxnTopicResult ReadV02(byte[] buffer, ref int index)
-            {
-                var NameField = Decoder.ReadString(buffer, ref index);
-                var ResultsField = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV02) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-                return new(
-                    NameField,
-                    ResultsField
-                );
-            }
-            public static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
-            {
-                index = Encoder.WriteString(buffer, index, message.NameField);
-                index = Encoder.WriteArray<AddPartitionsToTxnPartitionResult>(buffer, index, message.ResultsField, AddPartitionsToTxnPartitionResultSerde.WriteV02);
-                return index;
-            }
-            public static AddPartitionsToTxnTopicResult ReadV03(byte[] buffer, ref int index)
-            {
-                var NameField = Decoder.ReadCompactString(buffer, ref index);
-                var ResultsField = Decoder.ReadCompactArray<AddPartitionsToTxnPartitionResult>(buffer, ref index, AddPartitionsToTxnPartitionResultSerde.ReadV03) ?? throw new NullReferenceException("Null not allowed for 'Results'");
-                _ = Decoder.ReadVarUInt32(buffer, ref index);
-                return new(
-                    NameField,
-                    ResultsField
-                );
-            }
-            public static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
-            {
-                index = Encoder.WriteCompactString(buffer, index, message.NameField);
-                index = Encoder.WriteCompactArray<AddPartitionsToTxnPartitionResult>(buffer, index, message.ResultsField, AddPartitionsToTxnPartitionResultSerde.WriteV03);
-                index = Encoder.WriteVarUInt32(buffer, index, 0);
-                return index;
-            }
-            private static class AddPartitionsToTxnPartitionResultSerde
-            {
-                public static AddPartitionsToTxnPartitionResult ReadV00(byte[] buffer, ref int index)
-                {
-                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    return new(
-                        PartitionIndexField,
-                        ErrorCodeField
-                    );
-                }
-                public static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
-                {
-                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
-                    return index;
-                }
-                public static AddPartitionsToTxnPartitionResult ReadV01(byte[] buffer, ref int index)
-                {
-                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    return new(
-                        PartitionIndexField,
-                        ErrorCodeField
-                    );
-                }
-                public static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
-                {
-                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
-                    return index;
-                }
-                public static AddPartitionsToTxnPartitionResult ReadV02(byte[] buffer, ref int index)
-                {
-                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    return new(
-                        PartitionIndexField,
-                        ErrorCodeField
-                    );
-                }
-                public static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
-                {
-                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
-                    return index;
-                }
-                public static AddPartitionsToTxnPartitionResult ReadV03(byte[] buffer, ref int index)
-                {
-                    var PartitionIndexField = Decoder.ReadInt32(buffer, ref index);
-                    var ErrorCodeField = Decoder.ReadInt16(buffer, ref index);
-                    _ = Decoder.ReadVarUInt32(buffer, ref index);
-                    return new(
-                        PartitionIndexField,
-                        ErrorCodeField
-                    );
-                }
-                public static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
-                {
-                    index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
-                    index = Encoder.WriteVarUInt32(buffer, index, 0);
-                    return index;
-                }
-            }
-        }
-    }
+   [GeneratedCode("kgen", "1.0.0.0")]
+   public static class AddPartitionsToTxnResponseSerde
+   {
+       private static readonly DecodeDelegate<AddPartitionsToTxnResponse>[] READ_VERSIONS = {
+           ReadV00,
+           ReadV01,
+           ReadV02,
+           ReadV03,
+       };
+       private static readonly EncodeDelegate<AddPartitionsToTxnResponse>[] WRITE_VERSIONS = {
+           WriteV00,
+           WriteV01,
+           WriteV02,
+           WriteV03,
+};
+       public static (int Offset, AddPartitionsToTxnResponse Value) Read(byte[] buffer, int index, short version) =>
+           READ_VERSIONS[version](buffer, index)
+       ;
+       public static int Write(byte[] buffer, int index, AddPartitionsToTxnResponse message, short version) =>
+           WRITE_VERSIONS[version](buffer, index, message)
+       ;
+       private static (int Offset, AddPartitionsToTxnResponse Value) ReadV00(byte[] buffer, int index)
+       {
+           (index, var throttleTimeMsField) = Decoder.ReadInt32(buffer, index);
+           (index, var resultsField) = Decoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, index, AddPartitionsToTxnTopicResultSerde.ReadV00);
+           if (resultsField == null)
+               throw new NullReferenceException("Null not allowed for 'Results'");
+           return (index, new(
+               throttleTimeMsField,
+               resultsField.Value
+           ));
+       }
+       private static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnResponse message)
+       {
+           index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+           index = Encoder.WriteArray<AddPartitionsToTxnTopicResult>(buffer, index, message.ResultsField, AddPartitionsToTxnTopicResultSerde.WriteV00);
+           return index;
+       }
+       private static (int Offset, AddPartitionsToTxnResponse Value) ReadV01(byte[] buffer, int index)
+       {
+           (index, var throttleTimeMsField) = Decoder.ReadInt32(buffer, index);
+           (index, var resultsField) = Decoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, index, AddPartitionsToTxnTopicResultSerde.ReadV01);
+           if (resultsField == null)
+               throw new NullReferenceException("Null not allowed for 'Results'");
+           return (index, new(
+               throttleTimeMsField,
+               resultsField.Value
+           ));
+       }
+       private static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnResponse message)
+       {
+           index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+           index = Encoder.WriteArray<AddPartitionsToTxnTopicResult>(buffer, index, message.ResultsField, AddPartitionsToTxnTopicResultSerde.WriteV01);
+           return index;
+       }
+       private static (int Offset, AddPartitionsToTxnResponse Value) ReadV02(byte[] buffer, int index)
+       {
+           (index, var throttleTimeMsField) = Decoder.ReadInt32(buffer, index);
+           (index, var resultsField) = Decoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, index, AddPartitionsToTxnTopicResultSerde.ReadV02);
+           if (resultsField == null)
+               throw new NullReferenceException("Null not allowed for 'Results'");
+           return (index, new(
+               throttleTimeMsField,
+               resultsField.Value
+           ));
+       }
+       private static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnResponse message)
+       {
+           index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+           index = Encoder.WriteArray<AddPartitionsToTxnTopicResult>(buffer, index, message.ResultsField, AddPartitionsToTxnTopicResultSerde.WriteV02);
+           return index;
+       }
+       private static (int Offset, AddPartitionsToTxnResponse Value) ReadV03(byte[] buffer, int index)
+       {
+           (index, var throttleTimeMsField) = Decoder.ReadInt32(buffer, index);
+           (index, var resultsField) = Decoder.ReadCompactArray<AddPartitionsToTxnTopicResult>(buffer, index, AddPartitionsToTxnTopicResultSerde.ReadV03);
+           if (resultsField == null)
+               throw new NullReferenceException("Null not allowed for 'Results'");
+           (index, _) = Decoder.ReadVarUInt32(buffer, index);
+           return (index, new(
+               throttleTimeMsField,
+               resultsField.Value
+           ));
+       }
+       private static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnResponse message)
+       {
+           index = Encoder.WriteInt32(buffer, index, message.ThrottleTimeMsField);
+           index = Encoder.WriteCompactArray<AddPartitionsToTxnTopicResult>(buffer, index, message.ResultsField, AddPartitionsToTxnTopicResultSerde.WriteV03);
+           index = Encoder.WriteVarUInt32(buffer, index, 0);
+           return index;
+       }
+       [GeneratedCode("kgen", "1.0.0.0")]
+       private static class AddPartitionsToTxnTopicResultSerde
+       {
+           public static (int Offset, AddPartitionsToTxnTopicResult Value) ReadV00(byte[] buffer, int index)
+           {
+               (index, var nameField) = Decoder.ReadString(buffer, index);
+               (index, var resultsField) = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, index, AddPartitionsToTxnPartitionResultSerde.ReadV00);
+               if (resultsField == null)
+                   throw new NullReferenceException("Null not allowed for 'Results'");
+               return (index, new(
+                   nameField,
+                   resultsField.Value
+               ));
+           }
+           public static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
+           {
+               index = Encoder.WriteString(buffer, index, message.NameField);
+               index = Encoder.WriteArray<AddPartitionsToTxnPartitionResult>(buffer, index, message.ResultsField, AddPartitionsToTxnPartitionResultSerde.WriteV00);
+               return index;
+           }
+           public static (int Offset, AddPartitionsToTxnTopicResult Value) ReadV01(byte[] buffer, int index)
+           {
+               (index, var nameField) = Decoder.ReadString(buffer, index);
+               (index, var resultsField) = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, index, AddPartitionsToTxnPartitionResultSerde.ReadV01);
+               if (resultsField == null)
+                   throw new NullReferenceException("Null not allowed for 'Results'");
+               return (index, new(
+                   nameField,
+                   resultsField.Value
+               ));
+           }
+           public static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
+           {
+               index = Encoder.WriteString(buffer, index, message.NameField);
+               index = Encoder.WriteArray<AddPartitionsToTxnPartitionResult>(buffer, index, message.ResultsField, AddPartitionsToTxnPartitionResultSerde.WriteV01);
+               return index;
+           }
+           public static (int Offset, AddPartitionsToTxnTopicResult Value) ReadV02(byte[] buffer, int index)
+           {
+               (index, var nameField) = Decoder.ReadString(buffer, index);
+               (index, var resultsField) = Decoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, index, AddPartitionsToTxnPartitionResultSerde.ReadV02);
+               if (resultsField == null)
+                   throw new NullReferenceException("Null not allowed for 'Results'");
+               return (index, new(
+                   nameField,
+                   resultsField.Value
+               ));
+           }
+           public static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
+           {
+               index = Encoder.WriteString(buffer, index, message.NameField);
+               index = Encoder.WriteArray<AddPartitionsToTxnPartitionResult>(buffer, index, message.ResultsField, AddPartitionsToTxnPartitionResultSerde.WriteV02);
+               return index;
+           }
+           public static (int Offset, AddPartitionsToTxnTopicResult Value) ReadV03(byte[] buffer, int index)
+           {
+               (index, var nameField) = Decoder.ReadCompactString(buffer, index);
+               (index, var resultsField) = Decoder.ReadCompactArray<AddPartitionsToTxnPartitionResult>(buffer, index, AddPartitionsToTxnPartitionResultSerde.ReadV03);
+               if (resultsField == null)
+                   throw new NullReferenceException("Null not allowed for 'Results'");
+               (index, _) = Decoder.ReadVarUInt32(buffer, index);
+               return (index, new(
+                   nameField,
+                   resultsField.Value
+               ));
+           }
+           public static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnTopicResult message)
+           {
+               index = Encoder.WriteCompactString(buffer, index, message.NameField);
+               index = Encoder.WriteCompactArray<AddPartitionsToTxnPartitionResult>(buffer, index, message.ResultsField, AddPartitionsToTxnPartitionResultSerde.WriteV03);
+               index = Encoder.WriteVarUInt32(buffer, index, 0);
+               return index;
+           }
+           [GeneratedCode("kgen", "1.0.0.0")]
+           private static class AddPartitionsToTxnPartitionResultSerde
+           {
+               public static (int Offset, AddPartitionsToTxnPartitionResult Value) ReadV00(byte[] buffer, int index)
+               {
+                   (index, var partitionIndexField) = Decoder.ReadInt32(buffer, index);
+                   (index, var errorCodeField) = Decoder.ReadInt16(buffer, index);
+                   return (index, new(
+                       partitionIndexField,
+                       errorCodeField
+                   ));
+               }
+               public static int WriteV00(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
+               {
+                   index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                   index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                   return index;
+               }
+               public static (int Offset, AddPartitionsToTxnPartitionResult Value) ReadV01(byte[] buffer, int index)
+               {
+                   (index, var partitionIndexField) = Decoder.ReadInt32(buffer, index);
+                   (index, var errorCodeField) = Decoder.ReadInt16(buffer, index);
+                   return (index, new(
+                       partitionIndexField,
+                       errorCodeField
+                   ));
+               }
+               public static int WriteV01(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
+               {
+                   index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                   index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                   return index;
+               }
+               public static (int Offset, AddPartitionsToTxnPartitionResult Value) ReadV02(byte[] buffer, int index)
+               {
+                   (index, var partitionIndexField) = Decoder.ReadInt32(buffer, index);
+                   (index, var errorCodeField) = Decoder.ReadInt16(buffer, index);
+                   return (index, new(
+                       partitionIndexField,
+                       errorCodeField
+                   ));
+               }
+               public static int WriteV02(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
+               {
+                   index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                   index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                   return index;
+               }
+               public static (int Offset, AddPartitionsToTxnPartitionResult Value) ReadV03(byte[] buffer, int index)
+               {
+                   (index, var partitionIndexField) = Decoder.ReadInt32(buffer, index);
+                   (index, var errorCodeField) = Decoder.ReadInt16(buffer, index);
+                   (index, _) = Decoder.ReadVarUInt32(buffer, index);
+                   return (index, new(
+                       partitionIndexField,
+                       errorCodeField
+                   ));
+               }
+               public static int WriteV03(byte[] buffer, int index, AddPartitionsToTxnPartitionResult message)
+               {
+                   index = Encoder.WriteInt32(buffer, index, message.PartitionIndexField);
+                   index = Encoder.WriteInt16(buffer, index, message.ErrorCodeField);
+                   index = Encoder.WriteVarUInt32(buffer, index, 0);
+                   return index;
+               }
+           }
+       }
+   }
 }

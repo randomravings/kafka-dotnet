@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TxnOffsetCommitRequestTopic = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic;
 using TxnOffsetCommitRequestPartition = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic.TxnOffsetCommitRequestPartition;
+using TxnOffsetCommitRequestTopic = Kafka.Client.Messages.TxnOffsetCommitRequest.TxnOffsetCommitRequestTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -42,6 +42,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">The partitions inside the topic that we want to committ offsets for.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TxnOffsetCommitRequestTopic (
             string NameField,
             ImmutableArray<TxnOffsetCommitRequestPartition> PartitionsField
@@ -57,6 +58,7 @@ namespace Kafka.Client.Messages
             /// <param name="CommittedLeaderEpochField">The leader epoch of the last consumed record.</param>
             /// <param name="CommittedMetadataField">Any associated metadata the client wants to keep.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record TxnOffsetCommitRequestPartition (
                 int PartitionIndexField,
                 long CommittedOffsetField,

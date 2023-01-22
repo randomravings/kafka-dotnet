@@ -10,7 +10,7 @@ using static Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
 namespace Kafka.Client.Clients.Admin
 {
     public sealed class AdminClient :
-        Client<AdminClientConfig>,
+        Client<IAdminClient, AdminClientConfig>,
         IAdminClient
     {
         public AdminClient(
@@ -37,14 +37,28 @@ namespace Kafka.Client.Clients.Admin
                 MetadataResponseSerde.Read,
                 cancellationToken
             );
+
             var topics = response
                 .TopicsField
-                .Where(r => options.IncludeInternal || r.IsInternalField == false)
-                .Select(r => new Topic(r.TopicIdField, r.NameField, r.IsInternalField))
-                .OrderBy(r => r.Name)
-                .ThenBy(r => r.Id)
-                .ToImmutableArray()
-            ;
+                    .Where(r => options.IncludeInternal || r.IsInternalField == false)
+                    .Select(r => new TopicInfo(
+                        r.TopicIdField,
+                        r.NameField,
+                        r.IsInternalField,
+                        r.PartitionsField
+                            .Select(p => new TopicInfo.PartitionInfo(
+                                p.PartitionIndexField,
+                                p.LeaderIdField,
+                                p.IsrNodesField
+                                    .Select(i => new ClusterNodeId(i))
+                                    .ToImmutableArray()
+                            ))
+                            .ToImmutableArray()
+                        ))
+                    .OrderBy(r => r.Name)
+                    .ThenBy(r => r.Id)
+                    .ToImmutableArray()
+                ;
             return new(topics);
         }
 

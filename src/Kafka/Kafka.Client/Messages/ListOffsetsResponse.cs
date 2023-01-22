@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name</param>
         /// <param name="PartitionsField">Each partition in the response.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record ListOffsetsTopicResponse (
             string NameField,
             ImmutableArray<ListOffsetsPartitionResponse> PartitionsField
@@ -41,6 +42,7 @@ namespace Kafka.Client.Messages
             /// <param name="OffsetField">The returned offset.</param>
             /// <param name="LeaderEpochField"></param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record ListOffsetsPartitionResponse (
                 int PartitionIndexField,
                 short ErrorCodeField,

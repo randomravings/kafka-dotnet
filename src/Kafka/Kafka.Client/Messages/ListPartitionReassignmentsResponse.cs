@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using OngoingPartitionReassignment = Kafka.Client.Messages.ListPartitionReassignmentsResponse.OngoingTopicReassignment.OngoingPartitionReassignment;
 using OngoingTopicReassignment = Kafka.Client.Messages.ListPartitionReassignmentsResponse.OngoingTopicReassignment;
+using OngoingPartitionReassignment = Kafka.Client.Messages.ListPartitionReassignmentsResponse.OngoingTopicReassignment.OngoingPartitionReassignment;
 
 namespace Kafka.Client.Messages
 {
@@ -30,6 +30,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">The ongoing reassignments for each partition.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record OngoingTopicReassignment (
             string NameField,
             ImmutableArray<OngoingPartitionReassignment> PartitionsField
@@ -45,6 +46,7 @@ namespace Kafka.Client.Messages
             /// <param name="AddingReplicasField">The set of replicas we are currently adding.</param>
             /// <param name="RemovingReplicasField">The set of replicas we are currently removing.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record OngoingPartitionReassignment (
                 int PartitionIndexField,
                 ImmutableArray<int> ReplicasField,

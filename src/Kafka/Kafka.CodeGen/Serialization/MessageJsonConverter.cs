@@ -78,7 +78,7 @@ namespace Kafka.CodeGen.Serialization
                             case "commonStructs":
                                 reader.Read(); // Start array
                                 reader.Read(); // Start object
-                                ParseStructs(reader, structs);
+                                ParseStructs(reader, flexibleVersions, structs);
                                 break;
                             default:
                                 throw new InvalidOperationException($"Unknown message key '{reader.Value}'");
@@ -143,6 +143,7 @@ namespace Kafka.CodeGen.Serialization
 
         private static void ParseStructs(
             JsonReader reader,
+            Version flexibleVersions,
             IDictionary<string, StructDefinition> structs
         )
         {
@@ -150,6 +151,7 @@ namespace Kafka.CodeGen.Serialization
             {
                 ParseStruct(
                     reader,
+                    flexibleVersions,
                     structs
                 );
                 reader.Read();
@@ -253,7 +255,6 @@ namespace Kafka.CodeGen.Serialization
                     structType.Name,
                     new(
                         structType.Name,
-                        versions,
                         localFields.ToImmutableArray(),
                         localStructs.ToImmutableDictionary()
                     )
@@ -294,6 +295,7 @@ namespace Kafka.CodeGen.Serialization
 
         private static void ParseStruct(
             JsonReader reader,
+            Version flexibleVersions,
             IDictionary<string, StructDefinition> structs
         )
         {
@@ -335,7 +337,6 @@ namespace Kafka.CodeGen.Serialization
                 name,
                 new(
                     name,
-                    versions,
                     fields.ToImmutableArray(),
                     localStructs.ToImmutableDictionary()
                 )
@@ -374,9 +375,9 @@ namespace Kafka.CodeGen.Serialization
                 "none" => Version.Empty,
                 var v => (v.IndexOf('+'), v.IndexOf('-')) switch
                 {
-                    (var p, -1) when p >= 0 => Version.From(short.Parse(v[..p])),
-                    (-1, var d) when d >= 0 => Version.Between(short.Parse(v[..d]), short.Parse(v[(d + 1)..])),
-                    _ => Version.Exactly(short.Parse(v))
+                    (var p, -1) when p >= 0 => new Version(short.Parse(v[..p]), short.MaxValue  ),
+                    (-1, var d) when d >= 0 => new Version(short.Parse(v[..d]), short.Parse(v[(d + 1)..])),
+                    _ => new Version(short.Parse(v), short.Parse(v))
                 }
             };
         }

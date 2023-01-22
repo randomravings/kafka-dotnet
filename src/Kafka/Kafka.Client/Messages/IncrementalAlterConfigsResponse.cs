@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
         /// <param name="ResourceTypeField">The resource type.</param>
         /// <param name="ResourceNameField">The resource name.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record AlterConfigsResourceResponse (
             short ErrorCodeField,
             string? ErrorMessageField,

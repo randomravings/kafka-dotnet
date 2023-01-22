@@ -11,16 +11,13 @@ using Kafka.Common.Types;
 using Kafka.Common.Types.Comparison;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Security.Cryptography.X509Certificates;
 
 namespace Kafka.Client.Clients.Producer
 {
     internal sealed class ProducerClient<TKey, TValue> :
-        Client<ProducerConfig>,
+        Client<IProducer<TKey, TValue>, ProducerConfig>,
         IProducer<TKey, TValue>
     {
         private readonly ISerializer<TKey> _keySerializer;
@@ -947,8 +944,8 @@ namespace Kafka.Client.Clients.Producer
                     callback.Headers
                 );
                 recordArrayBuilder.Add(record);
-                sizeDelta += record.SizeInBytes;
-                sizeDelta += Encoder.SizeOfInt32(record.SizeInBytes);
+                sizeDelta += record.Length;
+                sizeDelta += Encoder.SizeOfInt32(record.Length);
             }
             return (sizeDelta, recordArrayBuilder.ToImmutable());
         }

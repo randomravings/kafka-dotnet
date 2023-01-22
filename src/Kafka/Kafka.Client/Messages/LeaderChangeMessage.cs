@@ -28,6 +28,7 @@ namespace Kafka.Client.Messages
         /// <summary>
         /// <param name="VoterIdField"></param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record Voter (
             int VoterIdField
         )

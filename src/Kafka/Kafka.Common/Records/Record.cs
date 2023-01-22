@@ -36,37 +36,18 @@ namespace Kafka.Common.Records
         ImmutableArray<RecordHeader> Headers
     ) : IRecord
     {
-        int IRecord.Sequence => -1;
-
-        long IRecord.Offset => -1;
-
-        int IRecord.SizeInBytes => Length;
-
-        sbyte IRecord.Magic => -1;
-
-        int IRecord.Crc => 0;
+        int IRecord.Length => Length;
 
         Attributes IRecord.Attributes => Attributes.None;
-
-        long IRecord.Timestamp => -1;
-
-        ReadOnlyMemory<byte>? IRecord.Key => Key;
-
-        ReadOnlyMemory<byte>? IRecord.Value => Value;
 
         long IRecord.TimestampDelta => TimestampDelta;
 
         int IRecord.OffsetDelta => OffsetDelta;
 
-        CompressionType IRecord.CompressionType => CompressionType.None;
+        ReadOnlyMemory<byte>? IRecord.Key => Key;
 
-        TimestampType IRecord.TimestampType => TimestampType.None;
+        ReadOnlyMemory<byte>? IRecord.Value => Value;
 
         ImmutableArray<RecordHeader> IRecord.Headers => ImmutableArray<RecordHeader>.Empty;
-
-        void IRecord.EnsureValid()
-        {
-            // CRC performed at batch level.
-        }
     }
 }

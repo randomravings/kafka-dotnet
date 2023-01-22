@@ -31,6 +31,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionDataField">Each partition to produce to.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicProduceData (
             string NameField,
             ImmutableArray<PartitionProduceData> PartitionDataField
@@ -44,6 +45,7 @@ namespace Kafka.Client.Messages
             /// <param name="IndexField">The partition index.</param>
             /// <param name="RecordsField">The record data to be produced.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionProduceData (
                 int IndexField,
                 ImmutableArray<IRecords>? RecordsField

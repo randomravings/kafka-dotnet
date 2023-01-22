@@ -29,6 +29,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicIdField">The topic id.</param>
         /// <param name="NameField">The topic name.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record MetadataRequestTopic (
             Guid TopicIdField,
             string? NameField

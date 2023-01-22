@@ -65,7 +65,7 @@ namespace Kafka.CodeGen.CSharp
                 message,
                 typeLookup,
                 usings,
-                (w, m, t) => WriteMessageRecord(w, m)
+                (w, m, t) => WriteMessageRecord(w, m, "    ")
             );
             await writer.FlushAsync();
         }
@@ -100,7 +100,7 @@ namespace Kafka.CodeGen.CSharp
                 message,
                 typeLookup,
                 usings,
-                (w, m, t) => WriteMessageRecordExtension(w, m)
+                (w, m, t) => WriteMessageRecordExtension(w, m, Version.All, Version.All, "   ")
             );
             await writer.FlushAsync();
         }
@@ -130,79 +130,44 @@ namespace Kafka.CodeGen.CSharp
 
         private static async ValueTask WriteMessageRecord(
             TextWriter writer,
-            MessageDefinition message
+            MessageDefinition message,
+            string indent
         )
         {
             var assemblyName = typeof(Generator).Assembly.GetName();
-            await WriteSummary(writer, "    ", message);
-            await writer.WriteLineAsync($"    [GeneratedCode(\"{assemblyName.Name}\", \"{assemblyName.Version}\")]");
-            await writer.WriteLineAsync($"    public sealed record {message.Name} (");
+            await WriteSummary(writer, indent, message);
+            await writer.WriteLineAsync($"{indent}[GeneratedCode(\"{assemblyName.Name}\", \"{assemblyName.Version}\")]");
+            await writer.WriteLineAsync($"{indent}public sealed record {message.Name} (");
             await WriteFields(
                 writer,
                 message.Fields,
-                "    "
+                $"{indent}    "
             );
             switch (message)
             {
                 case ApiRequestMessage a:
-                    await writer.WriteLineAsync($"    ) : {nameof(Request)}({a.ApiKey.Value},{a.ValidVersions.Min},{a.ValidVersions.Max},{a.FlexibleVersions.Min})");
+                    await writer.WriteLineAsync($"{indent}) : {nameof(Request)}({a.ApiKey.Value},{a.ValidVersions.Min},{a.ValidVersions.Max},{a.FlexibleVersions.Min})");
                     break;
                 case ApiResponseMessage a:
-                    await writer.WriteLineAsync($"    ) : {nameof(Response)}({a.ApiKey.Value})");
+                    await writer.WriteLineAsync($"{indent}) : {nameof(Response)}({a.ApiKey.Value})");
                     break;
                 default:
-                    await writer.WriteLineAsync($"    )");
+                    await writer.WriteLineAsync($"{indent})");
                     break;
             }
-            await writer.WriteLineAsync($"    {{");
-            await WriteDefaultEmptyValue(
-                writer,
-                "        ",
-                message.Name,
-                message.Fields
-            );
-            await WriteMessageNestedRecords(
-                message.Structs,
-                writer,
-                "        "
-            );
-            await writer.WriteLineAsync($"    }};");
-        }
-
-        private static async ValueTask WriteMessageNestedRecords(
-            IImmutableDictionary<string, StructDefinition> types,
-            TextWriter writer,
-            string indent
-        )
-        {
-            if (!types.Any())
-                return;
-            foreach (var type in types.Values)
-                await WriteMessageNestedRecord(type, writer, indent);
-        }
-
-        private static async ValueTask WriteMessageNestedRecord(
-            StructDefinition @struct,
-            TextWriter writer,
-            string indent
-        )
-        {
-            await WriteSummary(writer, indent, @struct);
-            await writer.WriteLineAsync($"{indent}public sealed record {@struct.Name} (");
-            await WriteFields(
-                writer,
-                @struct.Fields,
-                indent
-            );
-            await writer.WriteLineAsync($"{indent})");
             await writer.WriteLineAsync($"{indent}{{");
             await WriteDefaultEmptyValue(
                 writer,
                 $"{indent}    ",
-                @struct.Name,
-                @struct.Fields
+                message.Name,
+                message.Fields
             );
-            await WriteMessageNestedRecords(@struct.Structs, writer, $"{indent}    ");
+            foreach (var @struct in message.Structs)
+                await WriteMessageRecord(
+                    writer,
+                    @struct.Value,
+                    $"{indent}    "
+                );
             await writer.WriteLineAsync($"{indent}}};");
         }
 
@@ -232,11 +197,11 @@ namespace Kafka.CodeGen.CSharp
             string indent
         )
         {
-            await WriteFieldProperty(writer, $"{indent}    ", fields.First());
+            await WriteFieldProperty(writer, indent, fields.First());
             foreach (var field in fields.Skip(1))
             {
                 await writer.WriteLineAsync($",");
-                await WriteFieldProperty(writer, $"{indent}    ", field);
+                await WriteFieldProperty(writer, indent, field);
             }
             await writer.WriteLineAsync();
         }
@@ -246,7 +211,7 @@ namespace Kafka.CodeGen.CSharp
             HeaderMessage message
         )
         {
-            await writer.WriteLineAsync($"        private delegate {message.Name} DecodeDelegate(byte[] buffer, ref int index, bool flexible);");
+            await writer.WriteLineAsync($"        private delegate (int Offset, {message.Name} Value) DecodeDelegate(byte[] buffer, int index, bool flexible);");
             await writer.WriteLineAsync($"        private delegate int EncodeDelegate(byte[] buffer, int offset, {message.Name} item, bool flexible);");
             await writer.WriteLineAsync($"        private static readonly DecodeDelegate[] READ_VERSIONS = {{");
             foreach (var version in message.ValidVersions.Enumerate())
@@ -256,8 +221,8 @@ namespace Kafka.CodeGen.CSharp
             foreach (var version in message.ValidVersions.Enumerate())
                 await writer.WriteLineAsync($"            WriteV{version:0#},");
             await writer.WriteLineAsync($"        }};");
-            await writer.WriteLineAsync($"        public static {message.Name} Read(byte[] buffer, ref int index, short version, bool flexible) =>");
-            await writer.WriteLineAsync($"            READ_VERSIONS[version](buffer, ref index, flexible)");
+            await writer.WriteLineAsync($"        public static (int Offset, {message.Name} Value) Read(byte[] buffer, int index, short version, bool flexible) =>");
+            await writer.WriteLineAsync($"            READ_VERSIONS[version](buffer, index, flexible)");
             await writer.WriteLineAsync($"        ;");
             await writer.WriteLineAsync($"        public static int Write(byte[] buffer, int index, {message.Name} message, short version, bool flexible) =>");
             await writer.WriteLineAsync($"            WRITE_VERSIONS[version](buffer, index, message,flexible)");
@@ -266,24 +231,27 @@ namespace Kafka.CodeGen.CSharp
             {
                 var flexible = message.FlexibleVersions.Includes(version);
                 var variableList = new List<string>();
-                await writer.WriteLineAsync($"        private static {message.Name} ReadV{version:0#}(byte[] buffer, ref int index, bool flexible)");
+                await writer.WriteLineAsync($"        private static (int Offset, {message.Name} Value) ReadV{version:0#}(byte[] buffer, int index, bool flexible)");
                 await writer.WriteLineAsync($"        {{");
                 foreach (var field in message.Fields)
                 {
                     var variable = FieldVariableNamify(field);
-                    variableList.Add(variable);
+                    if (field.Type is ArrayFieldType)
+                        variableList.Add($"{variable}.Value");
+                    else
+                        variableList.Add(variable);
                     await DecodeField(writer, "            ", flexible, field, version, variable);
                 }
                 if (flexible)
                 {
                     await writer.WriteLineAsync("            if (flexible)");
-                    await writer.WriteLineAsync("                _ = Decoder.ReadVarUInt32(buffer, ref index);");
+                    await writer.WriteLineAsync("                (index, _) = Decoder.ReadVarUInt32(buffer, index);");
                 }
-                await writer.WriteLineAsync($"            return new(");
+                await writer.WriteLineAsync($"            return (index, new(");
                 foreach (var variable in variableList.GetRange(0, variableList.Count - 1))
                     await writer.WriteLineAsync($"                {variable},");
                 await writer.WriteLineAsync($"                {variableList.Last()}");
-                await writer.WriteLineAsync($"            );");
+                await writer.WriteLineAsync($"            ));");
                 await writer.WriteLineAsync($"        }}");
                 await writer.WriteLineAsync($"        private static int WriteV{version:0#}(byte[] buffer, int index, {message.Name} message, bool flexible)");
                 await writer.WriteLineAsync($"        {{");
@@ -301,119 +269,93 @@ namespace Kafka.CodeGen.CSharp
 
         private static async ValueTask WriteRequestResponseExtension(
             TextWriter writer,
-            MessageDefinition message
+            MessageDefinition message,
+            Version versions,
+            Version flexibleVersions,
+            string indent
         )
         {
-            await writer.WriteLineAsync($"        private static readonly DecodeDelegate<{message.Name}>[] READ_VERSIONS = {{");
-            foreach (var version in message.ValidVersions.Enumerate())
-                await writer.WriteLineAsync($"            ReadV{version:0#},");
-            await writer.WriteLineAsync($"        }};");
-            await writer.WriteLineAsync($"        private static readonly EncodeDelegate<{message.Name}>[] WRITE_VERSIONS = {{");
-            foreach (var version in message.ValidVersions.Enumerate())
-                await writer.WriteLineAsync($"            WriteV{version:0#},");
-            await writer.WriteLineAsync($"        }};");
-            await writer.WriteLineAsync($"        public static {message.Name} Read(byte[] buffer, ref int index, short version) =>");
-            await writer.WriteLineAsync($"            READ_VERSIONS[version](buffer, ref index)");
-            await writer.WriteLineAsync($"        ;");
-            await writer.WriteLineAsync($"        public static int Write(byte[] buffer, int index, {message.Name} message, short version) =>");
-            await writer.WriteLineAsync($"            WRITE_VERSIONS[version](buffer, index, message)");
-            await writer.WriteLineAsync($"        ;");
-            foreach (var version in message.ValidVersions.Enumerate())
+            var serdeModifier = "public";
+            if (message is not StructDefinition)
             {
-                var flexible = message.FlexibleVersions.Includes(version);
+                await writer.WriteLineAsync($"{indent}private static readonly DecodeDelegate<{message.Name}>[] READ_VERSIONS = {{");
+                foreach (var version in versions.Enumerate())
+                    await writer.WriteLineAsync($"{indent}    ReadV{version:0#},");
+                await writer.WriteLineAsync($"{indent}}};");
+                await writer.WriteLineAsync($"{indent}private static readonly EncodeDelegate<{message.Name}>[] WRITE_VERSIONS = {{");
+                foreach (var version in versions.Enumerate())
+                    await writer.WriteLineAsync($"{indent}    WriteV{version:0#},");
+                await writer.WriteLineAsync($"}};");
+                await writer.WriteLineAsync($"{indent}public static (int Offset, {message.Name} Value) Read(byte[] buffer, int index, short version) =>");
+                await writer.WriteLineAsync($"{indent}    READ_VERSIONS[version](buffer, index)");
+                await writer.WriteLineAsync($"{indent};");
+                await writer.WriteLineAsync($"{indent}public static int Write(byte[] buffer, int index, {message.Name} message, short version) =>");
+                await writer.WriteLineAsync($"{indent}    WRITE_VERSIONS[version](buffer, index, message)");
+                await writer.WriteLineAsync($"{indent};");
+                serdeModifier = "private";
+            }
+            foreach (var version in versions.Enumerate())
+            {
+                var flexible = flexibleVersions.Includes(version);
                 var variableList = new List<string>();
-                await writer.WriteLineAsync($"        private static {message.Name} ReadV{version:0#}(byte[] buffer, ref int index)");
-                await writer.WriteLineAsync($"        {{");
+                await writer.WriteLineAsync($"{indent}{serdeModifier} static (int Offset, {message.Name} Value) ReadV{version:0#}(byte[] buffer, int index)");
+                await writer.WriteLineAsync($"{indent}{{");
                 foreach (var field in message.Fields)
                 {
-                    var variable = $"{char.ToLower(field.Name[0])}{field.Name[1..]}Field";
-                    variableList.Add(variable);
-                    await DecodeField(writer, "            ", flexible, field, version, variable);
+                    var variable = FieldVariableNamify(field);
+                    if (field.Type is ArrayFieldType or RecordsFieldType && field.Properties.NullableVersions.None() && field.Properties.Versions.Includes(version) && !field.Properties.TaggedVersions.Includes(version))
+                        variableList.Add($"{variable}.Value");
+                    else
+                        variableList.Add(variable);
+                    await DecodeField(writer, $"{indent}    ", flexible, field, version, variable);
                 }
                 if (flexible)
-                    await writer.WriteLineAsync("            _ = Decoder.ReadVarUInt32(buffer, ref index);");
-                await writer.WriteLineAsync($"            return new(");
+                    await writer.WriteLineAsync($"{indent}    (index, _) = Decoder.ReadVarUInt32(buffer, index);");
+                await writer.WriteLineAsync($"{indent}    return (index, new(");
                 foreach (var variable in variableList.GetRange(0, variableList.Count - 1))
-                    await writer.WriteLineAsync($"                {variable},");
-                await writer.WriteLineAsync($"                {variableList.Last()}");
-                await writer.WriteLineAsync($"            );");
-                await writer.WriteLineAsync($"        }}");
-                await writer.WriteLineAsync($"        private static int WriteV{version:0#}(byte[] buffer, int index, {message.Name} message)");
-                await writer.WriteLineAsync($"        {{");
+                    await writer.WriteLineAsync($"{indent}        {variable},");
+                await writer.WriteLineAsync($"{indent}        {variableList.Last()}");
+                await writer.WriteLineAsync($"{indent}    ));");
+                await writer.WriteLineAsync($"{indent}}}");
+                await writer.WriteLineAsync($"{indent}{serdeModifier} static int WriteV{version:0#}(byte[] buffer, int index, {message.Name} message)");
+                await writer.WriteLineAsync($"{indent}{{");
                 foreach (var field in message.Fields.Where(f => f.Properties.Versions.Includes(version)))
-                    await EncodeField(writer, "            ", flexible, field, version, $"message.{FieldPropertyNamify(field)}");
+                    await EncodeField(writer, $"{indent}    ", flexible, field, version, $"message.{FieldPropertyNamify(field)}");
                 if (flexible)
-                    await writer.WriteLineAsync("            index = Encoder.WriteVarUInt32(buffer, index, 0);");
-                await writer.WriteLineAsync($"            return index;");
-                await writer.WriteLineAsync($"        }}");
+                    await writer.WriteLineAsync($"{indent}    index = Encoder.WriteVarUInt32(buffer, index, 0);");
+                await writer.WriteLineAsync($"{indent}    return index;");
+                await writer.WriteLineAsync($"{indent}}}");
             }
             foreach (var @struct in message.Structs.Values)
-                await WriteMessageRecordExtension(writer, @struct, message.FlexibleVersions, @struct.Versions.Constrain(message.ValidVersions), 0);
+                await WriteMessageRecordExtension(writer, @struct, versions, flexibleVersions, indent);
         }
 
         private static async ValueTask WriteMessageRecordExtension(
             TextWriter writer,
-            MessageDefinition message
+            MessageDefinition message,
+            Version versions,
+            Version flexibleVersions,
+            string indent
         )
         {
+            versions = versions.Intersect(message.ValidVersions);
+            flexibleVersions = flexibleVersions.Intersect(message.FlexibleVersions);
+            var classModifier = "public";
+            if (message is StructDefinition)
+                classModifier = "private";
             var assemblyName = typeof(Generator).Assembly.GetName();
-            await writer.WriteLineAsync($"    [GeneratedCode(\"{assemblyName.Name}\", \"{assemblyName.Version}\")]");
-            await writer.WriteLineAsync($"    public static class {message.Name}Serde");
-            await writer.WriteLineAsync($"    {{");
+            await writer.WriteLineAsync($"{indent}[GeneratedCode(\"{assemblyName.Name}\", \"{assemblyName.Version}\")]");
+            await writer.WriteLineAsync($"{indent}{classModifier} static class {message.Name}Serde");
+            await writer.WriteLineAsync($"{indent}{{");
             switch (message)
             {
                 case HeaderMessage h:
                     await WriteHeaderRecordExtension(writer, h);
                     break;
                 default:
-                    await WriteRequestResponseExtension(writer, message);
+                    await WriteRequestResponseExtension(writer, message, versions, flexibleVersions, $"{indent}    ");
                     break;
             }
-            await writer.WriteLineAsync($"    }}");
-        }
-
-        private static async ValueTask WriteMessageRecordExtension(
-            TextWriter writer,
-            StructDefinition @struct,
-            Version flexibleVersions,
-            Version versions,
-            int depth
-        )
-        {
-            var indent = "".PadRight(8 + (depth * 4));
-            await writer.WriteLineAsync($"{indent}private static class {@struct.Name}Serde");
-            await writer.WriteLineAsync($"{indent}{{");
-            foreach (var version in versions.Enumerate())
-            {
-                var flexible = flexibleVersions.Includes(version);
-                var variableList = new List<string>();
-                await writer.WriteLineAsync($"{indent}    public static {@struct.Name} ReadV{version:0#}(byte[] buffer, ref int index)");
-                await writer.WriteLineAsync($"{indent}    {{");
-                foreach (var field in @struct.Fields)
-                {
-                    var variable = FieldPropertyNamify(field);
-                    variableList.Add(variable);
-                    await DecodeField(writer, $"{indent}        ", flexible, field, version, variable);
-                }
-                if (flexible)
-                    await writer.WriteLineAsync($"{indent}        _ = Decoder.ReadVarUInt32(buffer, ref index);");
-                await writer.WriteLineAsync($"{indent}        return new(");
-                foreach (var variable in variableList.GetRange(0, variableList.Count - 1))
-                    await writer.WriteLineAsync($"{indent}            {variable},");
-                await writer.WriteLineAsync($"{indent}            {variableList.Last()}");
-                await writer.WriteLineAsync($"{indent}        );");
-                await writer.WriteLineAsync($"{indent}    }}");
-                await writer.WriteLineAsync($"{indent}    public static int WriteV{version:0#}(byte[] buffer, int index, {@struct.Name} message)");
-                await writer.WriteLineAsync($"{indent}    {{");
-                foreach (var field in @struct.Fields.Where(f => f.Properties.Versions.Includes(version)))
-                    await EncodeField(writer, $"{indent}        ", flexible, field, version, $"message.{FieldPropertyNamify(field)}");
-                if (flexible)
-                    await writer.WriteLineAsync($"{indent}        index = Encoder.WriteVarUInt32(buffer, index, 0);");
-                await writer.WriteLineAsync($"{indent}        return index;");
-                await writer.WriteLineAsync($"{indent}    }}");
-            }
-            foreach (var nestedStruct in @struct.Structs.Values)
-                await WriteMessageRecordExtension(writer, nestedStruct, flexibleVersions, nestedStruct.Versions.Constrain(versions), depth + 1);
             await writer.WriteLineAsync($"{indent}}}");
         }
 
@@ -701,17 +643,20 @@ namespace Kafka.CodeGen.CSharp
         {
             var flexibleField = flexible && field.Properties.FlexibleVersions.Includes(version);
             await writer.WriteAsync(indent);
-            await writer.WriteAsync($"var {dereference} = ");
+            if (!field.Properties.Versions.Includes(version) || field.Properties.TaggedVersions.Includes(version))
+                await writer.WriteAsync($"var {dereference} = ");
+            else
+                await writer.WriteAsync($"(index, var {dereference}) = ");
             switch (field.Type)
             {
                 case ArrayFieldType a:
-                    await DecodeArrayField(writer, field.Name, flexibleField, field.Properties, a, version);
+                    await DecodeArrayField(writer, indent, field.Name, flexibleField, field.Properties, a, version, dereference);
                     break;
                 case StructFieldType s:
                     await DecodeStructField(writer, field.Properties, s, version);
                     break;
                 case RecordsFieldType r:
-                    await DecodeRecordsField(writer, field.Name, flexibleField, field.Properties, r, version);
+                    await DecodeRecordsField(writer, indent, field.Name, flexibleField, field.Properties, r, version, dereference);
                     break;
                 case ScalarFieldType f:
                     await DecodeScalarField(writer, flexibleField, field.Properties, f, version);
@@ -723,11 +668,13 @@ namespace Kafka.CodeGen.CSharp
 
         private static async ValueTask DecodeArrayField(
             TextWriter writer,
+            string indent,
             string fieldName,
             bool flexible,
             FieldProperties fieldProperties,
             ArrayFieldType fieldType,
-            short version
+            short version,
+            string dereference
         )
         {
             var typeArg = QualifyType(fieldType.ItemType);
@@ -745,7 +692,7 @@ namespace Kafka.CodeGen.CSharp
                 if (flexible)
                     await writer.WriteAsync("Compact");
                 await writer.WriteAsync($"Array");
-                await writer.WriteAsync($"<{typeArg}>(buffer, ref index, ");
+                await writer.WriteAsync($"<{typeArg}>(buffer, index, ");
             }
             switch (fieldType.ItemType)
             {
@@ -763,7 +710,11 @@ namespace Kafka.CodeGen.CSharp
             }
             await writer.WriteAsync($")");
             if (!fieldProperties.NullableVersions.Includes(version))
-                await writer.WriteAsync(@$" ?? throw new {nameof(NullReferenceException)}(""Null not allowed for '{fieldName}'"")");
+            {
+                await writer.WriteLineAsync($";");
+                await writer.WriteLineAsync(@$"{indent}if ({dereference} == null)");
+                await writer.WriteAsync(@$"{indent}    throw new {nameof(NullReferenceException)}(""Null not allowed for '{fieldName}'"")");
+            }
             await writer.WriteLineAsync($";");
         }
 
@@ -780,32 +731,41 @@ namespace Kafka.CodeGen.CSharp
                 else
                     await writer.WriteLineAsync($"{fieldType.Name}.Empty;");
             else
-                await writer.WriteLineAsync($"{fieldType.Name}Serde.ReadV{version:0#}(buffer, ref index);");
+                await writer.WriteLineAsync($"{fieldType.Name}Serde.ReadV{version:0#}(buffer, index);");
         }
 
         private static async ValueTask DecodeRecordsField(
             TextWriter writer,
+            string indent,
             string fieldName,
             bool flexible,
             FieldProperties fieldProperties,
             RecordsFieldType fieldType,
-            short version
+            short version,
+            string dereference
         )
         {
             if (!fieldProperties.Versions.Includes(version) || fieldProperties.TaggedVersions.Includes(version))
             {
                 if (fieldProperties.NullableVersions.Includes(version))
-                    await writer.WriteLineAsync($"default(ImmutableArray<{nameof(IRecords)}>);");
+                    await writer.WriteAsync($"default(ImmutableArray<{nameof(IRecords)}>)");
                 else
-                    await writer.WriteLineAsync($"{nameof(RecordBatch)}.{nameof(RecordBatch.Empty)};");
+                    await writer.WriteAsync($"{nameof(RecordBatch)}.{nameof(RecordBatch.Empty)}");
             }
             else
             {
                 if (fieldProperties.NullableVersions.Includes(version))
-                    await writer.WriteLineAsync($"Decoder.ReadRecords(buffer, ref index);");
+                    await writer.WriteAsync($"Decoder.ReadRecords(buffer, index)");
                 else
-                    await writer.WriteLineAsync($"Decoder.ReadRecords(buffer, ref index) ?? throw new {nameof(NullReferenceException)}(\"Null not allowed for '{fieldName}'\");");
+                    await writer.WriteAsync($"Decoder.ReadRecords(buffer, index)");
             }
+            if (!fieldProperties.NullableVersions.Includes(version))
+            {
+                await writer.WriteLineAsync($";");
+                await writer.WriteLineAsync(@$"{indent}if ({dereference} == null)");
+                await writer.WriteAsync(@$"{indent}    throw new {nameof(NullReferenceException)}(""Null not allowed for '{fieldName}'"")");
+            }
+            await writer.WriteLineAsync($";");
         }
 
         private static async ValueTask DecodeScalarField(
@@ -824,7 +784,7 @@ namespace Kafka.CodeGen.CSharp
             else
             {
                 var scalarRead = ScalarFieldToDecode(fieldType, fieldProperties.NullableVersions.Includes(version), flexible);
-                await writer.WriteLineAsync($"Decoder.{scalarRead}(buffer, ref index);");
+                await writer.WriteLineAsync($"Decoder.{scalarRead}(buffer, index);");
             }
         }
 

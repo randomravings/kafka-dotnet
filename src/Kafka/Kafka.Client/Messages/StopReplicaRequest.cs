@@ -3,8 +3,8 @@ using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 using StopReplicaPartitionV0 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaPartitionV0;
 using StopReplicaTopicState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState;
-using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 using StopReplicaPartitionState = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicState.StopReplicaPartitionState;
+using StopReplicaTopicV1 = Kafka.Client.Messages.StopReplicaRequest.StopReplicaTopicV1;
 
 namespace Kafka.Client.Messages
 {
@@ -44,6 +44,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionIndexField">The partition index.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record StopReplicaPartitionV0 (
             string TopicNameField,
             int PartitionIndexField
@@ -58,6 +59,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionStatesField">The state of each partition</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record StopReplicaTopicState (
             string TopicNameField,
             ImmutableArray<StopReplicaPartitionState> PartitionStatesField
@@ -72,6 +74,7 @@ namespace Kafka.Client.Messages
             /// <param name="LeaderEpochField">The leader epoch.</param>
             /// <param name="DeletePartitionField">Whether this partition should be deleted.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record StopReplicaPartitionState (
                 int PartitionIndexField,
                 int LeaderEpochField,
@@ -89,6 +92,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionIndexesField">The partition indexes.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record StopReplicaTopicV1 (
             string NameField,
             ImmutableArray<int> PartitionIndexesField

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using DescribeUserScramCredentialsResult = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult;
 using CredentialInfo = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult.CredentialInfo;
+using DescribeUserScramCredentialsResult = Kafka.Client.Messages.DescribeUserScramCredentialsResponse.DescribeUserScramCredentialsResult;
 
 namespace Kafka.Client.Messages
 {
@@ -32,6 +32,7 @@ namespace Kafka.Client.Messages
         /// <param name="ErrorMessageField">The user-level error message, if any.</param>
         /// <param name="CredentialInfosField">The mechanism and related information associated with the user's SCRAM credentials.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribeUserScramCredentialsResult (
             string UserField,
             short ErrorCodeField,
@@ -49,6 +50,7 @@ namespace Kafka.Client.Messages
             /// <param name="MechanismField">The SCRAM mechanism.</param>
             /// <param name="IterationsField">The number of iterations used in the SCRAM credential.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record CredentialInfo (
                 sbyte MechanismField,
                 int IterationsField

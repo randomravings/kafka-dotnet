@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using ReplicaElectionResult = Kafka.Client.Messages.ElectLeadersResponse.ReplicaElectionResult;
 using PartitionResult = Kafka.Client.Messages.ElectLeadersResponse.ReplicaElectionResult.PartitionResult;
+using ReplicaElectionResult = Kafka.Client.Messages.ElectLeadersResponse.ReplicaElectionResult;
 
 namespace Kafka.Client.Messages
 {
@@ -27,6 +27,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicField">The topic name</param>
         /// <param name="PartitionResultField">The results for each partition</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record ReplicaElectionResult (
             string TopicField,
             ImmutableArray<PartitionResult> PartitionResultField
@@ -41,6 +42,7 @@ namespace Kafka.Client.Messages
             /// <param name="ErrorCodeField">The result error, or zero if there was no error.</param>
             /// <param name="ErrorMessageField">The result message, or null if there was no error.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionResult (
                 int PartitionIdField,
                 short ErrorCodeField,

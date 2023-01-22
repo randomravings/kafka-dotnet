@@ -30,6 +30,7 @@ namespace Kafka.Client.Messages
         /// <param name="ProducerEpochField"></param>
         /// <param name="TopicsField">The set of partitions included in the current transaction (if active). When a transaction is preparing to commit or abort, this will include only partitions which do not have markers.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TransactionState (
             short ErrorCodeField,
             string TransactionalIdField,
@@ -55,6 +56,7 @@ namespace Kafka.Client.Messages
             /// <param name="TopicField"></param>
             /// <param name="PartitionsField"></param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record TopicData (
                 string TopicField,
                 ImmutableArray<int> PartitionsField

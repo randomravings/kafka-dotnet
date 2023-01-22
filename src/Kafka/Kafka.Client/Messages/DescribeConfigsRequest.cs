@@ -27,6 +27,7 @@ namespace Kafka.Client.Messages
         /// <param name="ResourceNameField">The resource name.</param>
         /// <param name="ConfigurationKeysField">The configuration keys to list, or null to list all configuration keys.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribeConfigsResource (
             sbyte ResourceTypeField,
             string ResourceNameField,

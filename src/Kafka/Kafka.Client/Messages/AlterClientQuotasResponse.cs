@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
         /// <param name="ErrorMessageField">The error message, or `null` if the quota alteration succeeded.</param>
         /// <param name="EntityField">The quota entity to alter.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record EntryData (
             short ErrorCodeField,
             string? ErrorMessageField,
@@ -40,6 +41,7 @@ namespace Kafka.Client.Messages
             /// <param name="EntityTypeField">The entity type.</param>
             /// <param name="EntityNameField">The name of the entity, or null if the default.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record EntityData (
                 string EntityTypeField,
                 string? EntityNameField

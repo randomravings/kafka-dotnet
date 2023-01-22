@@ -60,11 +60,11 @@ namespace Kafka.Common.Records
 
         TimestampType IRecords.TimestampType => (TimestampType)(Attributes & Attributes.TimestampType);
 
-        bool IRecords.IsTransactional => (Attributes & Attributes.IsTransactional) == Attributes.IsTransactional;
+        bool IRecords.IsTransactional => Attributes.HasFlag(Attributes.IsTransactional);
 
-        bool IRecords.IsControlBatch => (Attributes & Attributes.IsControlBatch) == Attributes.IsControlBatch;
+        bool IRecords.IsControlBatch => Attributes.HasFlag(Attributes.IsControlBatch);
 
-        bool IRecords.HasDeleteHorizonMs => (Attributes & Attributes.HasDeleteHorizonMs) == Attributes.HasDeleteHorizonMs;
+        bool IRecords.HasDeleteHorizonMs => Attributes.HasFlag(Attributes.HasDeleteHorizonMs);
 
         ControlRecord IRecords.ControlRecord => (ControlRecord)Records[0];
 

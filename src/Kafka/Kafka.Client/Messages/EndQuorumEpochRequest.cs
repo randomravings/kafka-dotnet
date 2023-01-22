@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicData = Kafka.Client.Messages.EndQuorumEpochRequest.TopicData;
 using PartitionData = Kafka.Client.Messages.EndQuorumEpochRequest.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.EndQuorumEpochRequest.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionsField"></param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicData (
             string TopicNameField,
             ImmutableArray<PartitionData> PartitionsField
@@ -39,6 +40,7 @@ namespace Kafka.Client.Messages
             /// <param name="LeaderEpochField">The current epoch</param>
             /// <param name="PreferredSuccessorsField">A sorted list of preferred successors to start the election</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionData (
                 int PartitionIndexField,
                 int LeaderIdField,

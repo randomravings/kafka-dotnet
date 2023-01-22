@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicField">The topic name.</param>
         /// <param name="PartitionsField">Each partition to get offsets for.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record OffsetForLeaderTopic (
             string TopicField,
             ImmutableArray<OffsetForLeaderPartition> PartitionsField
@@ -38,6 +39,7 @@ namespace Kafka.Client.Messages
             /// <param name="CurrentLeaderEpochField">An epoch used to fence consumers/replicas with old metadata. If the epoch provided by the client is larger than the current epoch known to the broker, then the UNKNOWN_LEADER_EPOCH error code will be returned. If the provided epoch is smaller, then the FENCED_LEADER_EPOCH error code will be returned.</param>
             /// <param name="LeaderEpochField">The epoch to look up an offset for.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record OffsetForLeaderPartition (
                 int PartitionField,
                 int CurrentLeaderEpochField,

@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
+using PartitionData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData.PartitionData;
 using ReplicaState = Kafka.Client.Messages.DescribeQuorumResponse.ReplicaState;
 using TopicData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData;
-using PartitionData = Kafka.Client.Messages.DescribeQuorumResponse.TopicData.PartitionData;
 
 namespace Kafka.Client.Messages
 {
@@ -27,6 +27,7 @@ namespace Kafka.Client.Messages
         /// <param name="LastFetchTimestampField">The last known leader wall clock time time when a follower fetched from the leader. This is reported as -1 both for the current leader or if it is unknown for a voter</param>
         /// <param name="LastCaughtUpTimestampField">The leader wall clock append time of the offset for which the follower made the most recent fetch request. This is reported as the current time for the leader and -1 if unknown for a voter</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record ReplicaState (
             int ReplicaIdField,
             long LogEndOffsetField,
@@ -45,6 +46,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionsField"></param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicData (
             string TopicNameField,
             ImmutableArray<PartitionData> PartitionsField
@@ -63,6 +65,7 @@ namespace Kafka.Client.Messages
             /// <param name="CurrentVotersField"></param>
             /// <param name="ObserversField"></param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionData (
                 int PartitionIndexField,
                 short ErrorCodeField,

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic.MetadataResponsePartition;
 using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic;
+using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponse.MetadataResponseTopic.MetadataResponsePartition;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponse.MetadataResponseBroker;
 
 namespace Kafka.Client.Messages
@@ -41,6 +41,7 @@ namespace Kafka.Client.Messages
         /// <param name="PartitionsField">Each partition in the topic.</param>
         /// <param name="TopicAuthorizedOperationsField">32-bit bitfield to represent authorized operations for this topic.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record MetadataResponseTopic (
             short ErrorCodeField,
             string? NameField,
@@ -67,6 +68,7 @@ namespace Kafka.Client.Messages
             /// <param name="IsrNodesField">The set of nodes that are in sync with the leader for this partition.</param>
             /// <param name="OfflineReplicasField">The set of offline replicas of this partition.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record MetadataResponsePartition (
                 short ErrorCodeField,
                 int PartitionIndexField,
@@ -94,6 +96,7 @@ namespace Kafka.Client.Messages
         /// <param name="PortField">The broker port.</param>
         /// <param name="RackField">The rack of the broker, or null if it has not been assigned to a rack.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record MetadataResponseBroker (
             int NodeIdField,
             string HostField,

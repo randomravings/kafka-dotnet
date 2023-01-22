@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using DescribeLogDirsTopic = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic;
 using DescribeLogDirsPartition = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic.DescribeLogDirsPartition;
 using DescribeLogDirsResult = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult;
+using DescribeLogDirsTopic = Kafka.Client.Messages.DescribeLogDirsResponse.DescribeLogDirsResult.DescribeLogDirsTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -31,6 +31,7 @@ namespace Kafka.Client.Messages
         /// <param name="TotalBytesField">The total size in bytes of the volume the log directory is in.</param>
         /// <param name="UsableBytesField">The usable size in bytes of the volume the log directory is in.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribeLogDirsResult (
             short ErrorCodeField,
             string LogDirField,
@@ -50,6 +51,7 @@ namespace Kafka.Client.Messages
             /// <param name="NameField">The topic name.</param>
             /// <param name="PartitionsField"></param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record DescribeLogDirsTopic (
                 string NameField,
                 ImmutableArray<DescribeLogDirsPartition> PartitionsField
@@ -65,6 +67,7 @@ namespace Kafka.Client.Messages
                 /// <param name="OffsetLagField">The lag of the log's LEO w.r.t. partition's HW (if it is the current log for the partition) or current replica's LEO (if it is the future log for the partition)</param>
                 /// <param name="IsFutureKeyField">True if this log is created by AlterReplicaLogDirsRequest and will replace the current log of the replica in the future.</param>
                 /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
                 public sealed record DescribeLogDirsPartition (
                     int PartitionIndexField,
                     long PartitionSizeField,

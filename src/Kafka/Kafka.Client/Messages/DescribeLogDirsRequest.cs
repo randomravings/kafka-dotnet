@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicField">The topic name</param>
         /// <param name="PartitionsField">The partition indexes.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribableLogDirTopic (
             string TopicField,
             ImmutableArray<int> PartitionsField

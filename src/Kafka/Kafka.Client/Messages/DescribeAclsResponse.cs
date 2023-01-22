@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using AclDescription = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource.AclDescription;
 using DescribeAclsResource = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource;
+using AclDescription = Kafka.Client.Messages.DescribeAclsResponse.DescribeAclsResource.AclDescription;
 
 namespace Kafka.Client.Messages
 {
@@ -32,6 +32,7 @@ namespace Kafka.Client.Messages
         /// <param name="PatternTypeField">The resource pattern type.</param>
         /// <param name="AclsField">The ACLs.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribeAclsResource (
             sbyte ResourceTypeField,
             string ResourceNameField,
@@ -51,6 +52,7 @@ namespace Kafka.Client.Messages
             /// <param name="OperationField">The ACL operation.</param>
             /// <param name="PermissionTypeField">The ACL permission type.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record AclDescription (
                 string PrincipalField,
                 string HostField,

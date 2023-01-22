@@ -2,16 +2,6 @@
 {
     public static class VersionExtensions
     {
-        public static Version Constrain(
-            this Version version,
-            Version constrainingVersion
-        ) =>
-            Version.Between(
-                Math.Max(version.Min, constrainingVersion.Min),
-                Math.Min(version.Max, constrainingVersion.Max)
-            )
-        ;
-
         public static IEnumerable<short> Enumerate(
             this Version version
         )
@@ -26,6 +16,24 @@
         ) =>
             value >= version.Min &&
             value <= version.Max
+        ;
+
+        public static bool Some(this Version version) =>
+            version.Min <= version.Max
+        ;
+
+        public static bool None(this Version version) =>
+            version.Min > version.Max
+        ;
+
+        public static Version Intersect(
+            this Version version,
+            Version other
+        ) =>
+            new(
+                Math.Max(version.Min, other.Min),
+                Math.Min(version.Max, other.Max)
+            )
         ;
     }
 }

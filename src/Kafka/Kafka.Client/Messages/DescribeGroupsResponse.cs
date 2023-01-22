@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using DescribedGroup = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup;
 using DescribedGroupMember = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup.DescribedGroupMember;
+using DescribedGroup = Kafka.Client.Messages.DescribeGroupsResponse.DescribedGroup;
 
 namespace Kafka.Client.Messages
 {
@@ -29,6 +29,7 @@ namespace Kafka.Client.Messages
         /// <param name="MembersField">The group members.</param>
         /// <param name="AuthorizedOperationsField">32-bit bitfield to represent authorized operations for this group.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribedGroup (
             short ErrorCodeField,
             string GroupIdField,
@@ -56,6 +57,7 @@ namespace Kafka.Client.Messages
             /// <param name="MemberMetadataField">The metadata corresponding to the current group protocol in use.</param>
             /// <param name="MemberAssignmentField">The current assignment provided by the group leader.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record DescribedGroupMember (
                 string MemberIdField,
                 string? GroupInstanceIdField,

@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using CreatePartitionsTopic = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic;
 using CreatePartitionsAssignment = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic.CreatePartitionsAssignment;
+using CreatePartitionsTopic = Kafka.Client.Messages.CreatePartitionsRequest.CreatePartitionsTopic;
 
 namespace Kafka.Client.Messages
 {
@@ -28,6 +28,7 @@ namespace Kafka.Client.Messages
         /// <param name="CountField">The new partition count.</param>
         /// <param name="AssignmentsField">The new partition assignments.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record CreatePartitionsTopic (
             string NameField,
             int CountField,
@@ -42,6 +43,7 @@ namespace Kafka.Client.Messages
             /// <summary>
             /// <param name="BrokerIdsField">The assigned broker IDs.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record CreatePartitionsAssignment (
                 ImmutableArray<int> BrokerIdsField
             )

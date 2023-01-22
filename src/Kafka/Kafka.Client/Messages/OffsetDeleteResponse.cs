@@ -27,6 +27,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">The responses for each partition in the topic.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record OffsetDeleteResponseTopic (
             string NameField,
             ImmutableArray<OffsetDeleteResponsePartition> PartitionsField
@@ -40,6 +41,7 @@ namespace Kafka.Client.Messages
             /// <param name="PartitionIndexField">The partition index.</param>
             /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record OffsetDeleteResponsePartition (
                 int PartitionIndexField,
                 short ErrorCodeField

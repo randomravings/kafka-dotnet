@@ -40,6 +40,7 @@ namespace Kafka.Client.Messages
         /// <param name="PortField">The broker port.</param>
         /// <param name="RackField">The rack of the broker, or null if it has not been assigned to a rack.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribeClusterBroker (
             int BrokerIdField,
             string HostField,

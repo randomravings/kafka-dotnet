@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicProduceResponse = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse;
 using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
+using TopicProduceResponse = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse;
 using PartitionProduceResponse = Kafka.Client.Messages.ProduceResponse.TopicProduceResponse.PartitionProduceResponse;
 
 namespace Kafka.Client.Messages
@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name</param>
         /// <param name="PartitionResponsesField">Each partition that we produced to within the topic.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicProduceResponse (
             string NameField,
             ImmutableArray<PartitionProduceResponse> PartitionResponsesField
@@ -43,6 +44,7 @@ namespace Kafka.Client.Messages
             /// <param name="RecordErrorsField">The batch indices of records that caused the batch to be dropped</param>
             /// <param name="ErrorMessageField">The global error message summarizing the common root cause of the records that caused the batch to be dropped</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionProduceResponse (
                 int IndexField,
                 short ErrorCodeField,
@@ -66,6 +68,7 @@ namespace Kafka.Client.Messages
                 /// <param name="BatchIndexField">The batch index of the record that cause the batch to be dropped</param>
                 /// <param name="BatchIndexErrorMessageField">The error message of the record that caused the batch to be dropped</param>
                 /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
                 public sealed record BatchIndexAndErrorMessage (
                     int BatchIndexField,
                     string? BatchIndexErrorMessageField

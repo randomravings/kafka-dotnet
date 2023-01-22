@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using TopicData = Kafka.Client.Messages.VoteResponse.TopicData;
 using PartitionData = Kafka.Client.Messages.VoteResponse.TopicData.PartitionData;
+using TopicData = Kafka.Client.Messages.VoteResponse.TopicData;
 
 namespace Kafka.Client.Messages
 {
@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicNameField">The topic name.</param>
         /// <param name="PartitionsField"></param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicData (
             string TopicNameField,
             ImmutableArray<PartitionData> PartitionsField
@@ -40,6 +41,7 @@ namespace Kafka.Client.Messages
             /// <param name="LeaderEpochField">The latest known leader epoch</param>
             /// <param name="VoteGrantedField">True if the vote was granted and false otherwise</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionData (
                 int PartitionIndexField,
                 short ErrorCodeField,

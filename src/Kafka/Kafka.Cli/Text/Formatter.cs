@@ -1,15 +1,18 @@
-﻿using Kafka.Client.Clients.Producer.Model;
+﻿using Kafka.Client.Clients.Consumer.Models;
 using Kafka.Common.Types;
 
 namespace Kafka.Cli.Text
 {
     public static class Formatter
     {
-        public static string Print(Error error) =>
-            $"{error.Code} - {error.Label} - {error.Message}"
+        public static string Print<TKey, TValue>(ConsumeResult<TKey, TValue> value) =>
+        $"{Print(value.TopicPartition)}:{Print(value.Offset)}:{value.Record.Key}:{value.Record.Value}"
+    ;
+        public static string Print(Error value) =>
+            $"{value.Code} - {value.Label} - {value.Message}"
         ;
-        public static string Print(TopicPartitionOffset topicPartitionOffset) =>
-            $"{Print(topicPartitionOffset.TopicPartition)}:{topicPartitionOffset.Offset}"
+        public static string Print(TopicPartitionOffset value) =>
+            $"{Print(value.TopicPartition)}:{Print(value.Offset)}"
         ;
         public static string Print(TopicName topic) =>
             topic.Value switch
@@ -18,27 +21,30 @@ namespace Kafka.Cli.Text
                 string s => s
             }
         ;
-        public static string Print(TopicPartition partitionOffset) =>
-            $"{Print(partitionOffset.Topic)}:{Print(partitionOffset.Partition)}"
+        public static string Print(TopicPartition value) =>
+            $"{Print(value.Topic)}:{Print(value.Partition)}"
         ;
-        public static string Print(Partition partition)
+        public static string Print(PartitionOffset value) =>
+            $"{Print(value.Partition)}:{Print(value.Offset)}"
+        ;
+        public static string Print(Partition value)
         {
-            if (partition == Partition.Unassigned)
+            if (value == Partition.Unassigned)
                 return "unassigned";
             else
-                return $"{partition.Value}";
+                return $"{value.Value}";
         }
-        public static string Print(Offset offset)
+        public static string Print(Offset value)
         {
-            if (offset >= 0)
-                return $"{offset.Value}";
-            if (offset == Offset.Beginning)
+            if (value >= 0)
+                return $"{value.Value}";
+            if (value == Offset.Beginning)
                 return $"beginning";
-            if (offset == Offset.End)
+            if (value == Offset.End)
                 return $"end";
-            if (offset == Offset.Stored)
+            if (value == Offset.Stored)
                 return $"stored";
-            if (offset == Offset.Unset)
+            if (value == Offset.Unset)
                 return $"unset";
             return "unknown";
         }

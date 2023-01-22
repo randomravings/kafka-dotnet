@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using AlterConfigsResource = Kafka.Client.Messages.AlterConfigsRequest.AlterConfigsResource;
 using AlterableConfig = Kafka.Client.Messages.AlterConfigsRequest.AlterConfigsResource.AlterableConfig;
+using AlterConfigsResource = Kafka.Client.Messages.AlterConfigsRequest.AlterConfigsResource;
 
 namespace Kafka.Client.Messages
 {
@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
         /// <param name="ResourceNameField">The resource name.</param>
         /// <param name="ConfigsField">The configurations.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record AlterConfigsResource (
             sbyte ResourceTypeField,
             string ResourceNameField,
@@ -40,6 +41,7 @@ namespace Kafka.Client.Messages
             /// <param name="NameField">The configuration key name.</param>
             /// <param name="ValueField">The value to set for the configuration key.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record AlterableConfig (
                 string NameField,
                 string? ValueField

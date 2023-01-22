@@ -45,6 +45,7 @@ namespace Kafka.Client.Messages
         /// <param name="GroupInstanceIdField">The unique identifier of the consumer instance provided by end user.</param>
         /// <param name="MetadataField">The group member metadata.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record JoinGroupResponseMember (
             string MemberIdField,
             string? GroupInstanceIdField,

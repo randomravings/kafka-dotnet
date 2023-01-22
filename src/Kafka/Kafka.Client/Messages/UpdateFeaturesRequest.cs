@@ -28,6 +28,7 @@ namespace Kafka.Client.Messages
         /// <param name="AllowDowngradeField">DEPRECATED in version 1 (see DowngradeType). When set to true, the finalized feature version level is allowed to be downgraded/deleted. The downgrade request will fail if the new maximum version level is a value that's not lower than the existing maximum finalized version level.</param>
         /// <param name="UpgradeTypeField">Determine which type of upgrade will be performed: 1 will perform an upgrade only (default), 2 is safe downgrades only (lossless), 3 is unsafe downgrades (lossy).</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record FeatureUpdateKey (
             string FeatureField,
             short MaxVersionLevelField,

@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup;
 using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestTopic;
 using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
+using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequest.OffsetFetchRequestGroup;
 
 namespace Kafka.Client.Messages
 {
@@ -28,9 +28,25 @@ namespace Kafka.Client.Messages
             default(bool)
         );
         /// <summary>
+        /// <param name="NameField">The topic name.</param>
+        /// <param name="PartitionIndexesField">The partition indexes we would like to fetch offsets for.</param>
+        /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
+        public sealed record OffsetFetchRequestTopic (
+            string NameField,
+            ImmutableArray<int> PartitionIndexesField
+        )
+        {
+            public static OffsetFetchRequestTopic Empty { get; } = new(
+                "",
+                ImmutableArray<int>.Empty
+            );
+        };
+        /// <summary>
         /// <param name="GroupIdField">The group ID.</param>
         /// <param name="TopicsField">Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record OffsetFetchRequestGroup (
             string GroupIdField,
             ImmutableArray<OffsetFetchRequestTopics>? TopicsField
@@ -44,6 +60,7 @@ namespace Kafka.Client.Messages
             /// <param name="NameField">The topic name.</param>
             /// <param name="PartitionIndexesField">The partition indexes we would like to fetch offsets for.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record OffsetFetchRequestTopics (
                 string NameField,
                 ImmutableArray<int> PartitionIndexesField
@@ -54,20 +71,6 @@ namespace Kafka.Client.Messages
                     ImmutableArray<int>.Empty
                 );
             };
-        };
-        /// <summary>
-        /// <param name="NameField">The topic name.</param>
-        /// <param name="PartitionIndexesField">The partition indexes we would like to fetch offsets for.</param>
-        /// </summary>
-        public sealed record OffsetFetchRequestTopic (
-            string NameField,
-            ImmutableArray<int> PartitionIndexesField
-        )
-        {
-            public static OffsetFetchRequestTopic Empty { get; } = new(
-                "",
-                ImmutableArray<int>.Empty
-            );
         };
     };
 }

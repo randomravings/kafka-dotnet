@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using DescribedDelegationToken = Kafka.Client.Messages.DescribeDelegationTokenResponse.DescribedDelegationToken;
 using DescribedDelegationTokenRenewer = Kafka.Client.Messages.DescribeDelegationTokenResponse.DescribedDelegationToken.DescribedDelegationTokenRenewer;
+using DescribedDelegationToken = Kafka.Client.Messages.DescribeDelegationTokenResponse.DescribedDelegationToken;
 
 namespace Kafka.Client.Messages
 {
@@ -35,6 +35,7 @@ namespace Kafka.Client.Messages
         /// <param name="HmacField">The token HMAC.</param>
         /// <param name="RenewersField">Those who are able to renew this token before it expires.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribedDelegationToken (
             string PrincipalTypeField,
             string PrincipalNameField,
@@ -64,6 +65,7 @@ namespace Kafka.Client.Messages
             /// <param name="PrincipalTypeField">The renewer principal type</param>
             /// <param name="PrincipalNameField">The renewer principal name</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record DescribedDelegationTokenRenewer (
                 string PrincipalTypeField,
                 string PrincipalNameField

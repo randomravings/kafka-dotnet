@@ -20,6 +20,7 @@ namespace Kafka.Client.Messages
         /// <param name="PrincipalTypeField">The owner principal type.</param>
         /// <param name="PrincipalNameField">The owner principal name.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribeDelegationTokenOwner (
             string PrincipalTypeField,
             string PrincipalNameField

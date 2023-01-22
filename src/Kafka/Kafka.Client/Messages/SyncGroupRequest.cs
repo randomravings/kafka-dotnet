@@ -38,6 +38,7 @@ namespace Kafka.Client.Messages
         /// <param name="MemberIdField">The ID of the member to assign.</param>
         /// <param name="AssignmentField">The member assignment.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record SyncGroupRequestAssignment (
             string MemberIdField,
             ReadOnlyMemory<byte> AssignmentField

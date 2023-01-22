@@ -27,6 +27,7 @@ namespace Kafka.Client.Messages
         /// <param name="GroupInstanceIdField">The group instance ID to remove from the group.</param>
         /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record MemberResponse (
             string MemberIdField,
             string? GroupInstanceIdField,

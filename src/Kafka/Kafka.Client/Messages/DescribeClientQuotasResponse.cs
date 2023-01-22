@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using ValueData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.ValueData;
 using EntityData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.EntityData;
+using ValueData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData.ValueData;
 using EntryData = Kafka.Client.Messages.DescribeClientQuotasResponse.EntryData;
 
 namespace Kafka.Client.Messages
@@ -31,6 +31,7 @@ namespace Kafka.Client.Messages
         /// <param name="EntityField">The quota entity description.</param>
         /// <param name="ValuesField">The quota values for the entity.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record EntryData (
             ImmutableArray<EntityData> EntityField,
             ImmutableArray<ValueData> ValuesField
@@ -41,23 +42,10 @@ namespace Kafka.Client.Messages
                 ImmutableArray<ValueData>.Empty
             );
             /// <summary>
-            /// <param name="KeyField">The quota configuration key.</param>
-            /// <param name="ValueField">The quota configuration value.</param>
-            /// </summary>
-            public sealed record ValueData (
-                string KeyField,
-                double ValueField
-            )
-            {
-                public static ValueData Empty { get; } = new(
-                    "",
-                    default(double)
-                );
-            };
-            /// <summary>
             /// <param name="EntityTypeField">The entity type.</param>
             /// <param name="EntityNameField">The entity name, or null if the default.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record EntityData (
                 string EntityTypeField,
                 string? EntityNameField
@@ -66,6 +54,21 @@ namespace Kafka.Client.Messages
                 public static EntityData Empty { get; } = new(
                     "",
                     default(string?)
+                );
+            };
+            /// <summary>
+            /// <param name="KeyField">The quota configuration key.</param>
+            /// <param name="ValueField">The quota configuration value.</param>
+            /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
+            public sealed record ValueData (
+                string KeyField,
+                double ValueField
+            )
+            {
+                public static ValueData Empty { get; } = new(
+                    "",
+                    default(double)
                 );
             };
         };

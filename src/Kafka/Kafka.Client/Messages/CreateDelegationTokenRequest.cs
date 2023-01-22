@@ -29,6 +29,7 @@ namespace Kafka.Client.Messages
         /// <param name="PrincipalTypeField">The type of the Kafka principal.</param>
         /// <param name="PrincipalNameField">The name of the Kafka principal.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record CreatableRenewers (
             string PrincipalTypeField,
             string PrincipalNameField

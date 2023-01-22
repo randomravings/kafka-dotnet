@@ -1,9 +1,9 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using DescribeConfigsSynonym = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult.DescribeConfigsSynonym;
 using DescribeConfigsResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult;
 using DescribeConfigsResourceResult = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult;
+using DescribeConfigsSynonym = Kafka.Client.Messages.DescribeConfigsResponse.DescribeConfigsResult.DescribeConfigsResourceResult.DescribeConfigsSynonym;
 
 namespace Kafka.Client.Messages
 {
@@ -28,6 +28,7 @@ namespace Kafka.Client.Messages
         /// <param name="ResourceNameField">The resource name.</param>
         /// <param name="ConfigsField">Each listed configuration.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DescribeConfigsResult (
             short ErrorCodeField,
             string? ErrorMessageField,
@@ -54,6 +55,7 @@ namespace Kafka.Client.Messages
             /// <param name="ConfigTypeField">The configuration data type. Type can be one of the following values - BOOLEAN, STRING, INT, SHORT, LONG, DOUBLE, LIST, CLASS, PASSWORD</param>
             /// <param name="DocumentationField">The configuration documentation.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record DescribeConfigsResourceResult (
                 string NameField,
                 string? ValueField,
@@ -82,6 +84,7 @@ namespace Kafka.Client.Messages
                 /// <param name="ValueField">The synonym value.</param>
                 /// <param name="SourceField">The synonym source.</param>
                 /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
                 public sealed record DescribeConfigsSynonym (
                     string NameField,
                     string? ValueField,

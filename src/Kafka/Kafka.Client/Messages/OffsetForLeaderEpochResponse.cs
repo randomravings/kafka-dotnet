@@ -1,8 +1,8 @@
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
-using OffsetForLeaderTopicResult = Kafka.Client.Messages.OffsetForLeaderEpochResponse.OffsetForLeaderTopicResult;
 using EpochEndOffset = Kafka.Client.Messages.OffsetForLeaderEpochResponse.OffsetForLeaderTopicResult.EpochEndOffset;
+using OffsetForLeaderTopicResult = Kafka.Client.Messages.OffsetForLeaderEpochResponse.OffsetForLeaderTopicResult;
 
 namespace Kafka.Client.Messages
 {
@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="TopicField">The topic name.</param>
         /// <param name="PartitionsField">Each partition in the topic we fetched offsets for.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record OffsetForLeaderTopicResult (
             string TopicField,
             ImmutableArray<EpochEndOffset> PartitionsField
@@ -39,6 +40,7 @@ namespace Kafka.Client.Messages
             /// <param name="LeaderEpochField">The leader epoch of the partition.</param>
             /// <param name="EndOffsetField">The end offset of the epoch.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record EpochEndOffset (
                 short ErrorCodeField,
                 int PartitionField,

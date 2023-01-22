@@ -24,6 +24,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name.</param>
         /// <param name="PartitionsField">Each partition to delete offsets for.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record OffsetDeleteRequestTopic (
             string NameField,
             ImmutableArray<OffsetDeleteRequestPartition> PartitionsField
@@ -36,6 +37,7 @@ namespace Kafka.Client.Messages
             /// <summary>
             /// <param name="PartitionIndexField">The partition index.</param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record OffsetDeleteRequestPartition (
                 int PartitionIndexField
             )

@@ -23,6 +23,7 @@ namespace Kafka.Client.Messages
         /// <param name="ErrorCodeField">The result error, or zero if there was no error.</param>
         /// <param name="ErrorMessageField">The result message, or null if there was no error.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record AclCreationResult (
             short ErrorCodeField,
             string? ErrorMessageField

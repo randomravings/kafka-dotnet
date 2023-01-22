@@ -2,8 +2,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using Kafka.Common.Protocol;
 using ProducerState = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse.ProducerState;
-using PartitionResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse;
 using TopicResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse;
+using PartitionResponse = Kafka.Client.Messages.DescribeProducersResponse.TopicResponse.PartitionResponse;
 
 namespace Kafka.Client.Messages
 {
@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
         /// <param name="NameField">The topic name</param>
         /// <param name="PartitionsField">Each partition in the response.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record TopicResponse (
             string NameField,
             ImmutableArray<PartitionResponse> PartitionsField
@@ -40,6 +41,7 @@ namespace Kafka.Client.Messages
             /// <param name="ErrorMessageField">The partition error message, which may be null if no additional details are available</param>
             /// <param name="ActiveProducersField"></param>
             /// </summary>
+            [GeneratedCode("kgen", "1.0.0.0")]
             public sealed record PartitionResponse (
                 int PartitionIndexField,
                 short ErrorCodeField,
@@ -61,6 +63,7 @@ namespace Kafka.Client.Messages
                 /// <param name="CoordinatorEpochField"></param>
                 /// <param name="CurrentTxnStartOffsetField"></param>
                 /// </summary>
+                [GeneratedCode("kgen", "1.0.0.0")]
                 public sealed record ProducerState (
                     long ProducerIdField,
                     int ProducerEpochField,

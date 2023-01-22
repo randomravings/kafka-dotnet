@@ -25,6 +25,7 @@ namespace Kafka.Client.Messages
         /// <param name="ErrorCodeField">The deletion error, or 0 if the deletion succeeded.</param>
         /// <param name="ErrorMessageField">The error message, or null if there was no error.</param>
         /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record DeletableTopicResult (
             string? NameField,
             Guid TopicIdField,

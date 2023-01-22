@@ -1,19 +1,20 @@
 ﻿using Kafka.Client.Messages;
 using Kafka.Client.Server;
+using Kafka.Common;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Types;
-using Kafka.Common;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients
 {
-    public abstract class Client<TConfig> :
+    public abstract class Client<TCLient, TConfig> :
         IClient
+        where TCLient : notnull, IClient
         where TConfig : notnull, ClientConfig
     {
         protected readonly TConfig _config;
-        protected readonly ILogger _logger;
+        protected readonly ILogger<TCLient> _logger;
 
         private bool _disposed;
 
@@ -21,7 +22,7 @@ namespace Kafka.Client.Clients
 
         protected Client(
             TConfig config,
-            ILogger logger
+            ILogger<TCLient> logger
         )
         {
             _config = config;
@@ -95,7 +96,7 @@ namespace Kafka.Client.Clients
                     new[] { key }.ToImmutableArray()
                 );
                 var findCoordinatorResponse = await connection.ExecuteRequest(
-                    findCoordinatorRequest with { MaxVersion = 2 },
+                    findCoordinatorRequest,
                     FindCoordinatorRequestSerde.Write,
                     FindCoordinatorResponseSerde.Read,
                     cancellationToken
@@ -119,6 +120,35 @@ namespace Kafka.Client.Clients
                 cancellationToken.WaitHandle.WaitOne(500);
             }
             throw new ApiException(lastError);
+        }
+
+        protected async ValueTask<(ClusterNodeId CoordinatorNodeId, Error Error)> GetGroupCoordinator(
+            ImmutableSortedDictionary<ClusterNodeId, IConnection> connections,
+            string groupId,
+            CancellationToken cancellationToken
+        )
+        {
+            var randomConnection = connections.Values.ElementAt(Random.Shared.Next(0, connections.Count - 1));
+            var findCoordinatorRequest = new FindCoordinatorRequest(
+                groupId,
+                (sbyte)CoordinatorType.GROUP,
+                new[] { groupId }.ToImmutableArray()
+            );
+            var findCoordinatorResponse = await randomConnection.ExecuteRequest(
+                findCoordinatorRequest,
+                FindCoordinatorRequestSerde.Write,
+                FindCoordinatorResponseSerde.Read,
+                cancellationToken
+            );
+            if(findCoordinatorResponse.ErrorCodeField != 0)
+            {
+                var error = Errors.Translate(findCoordinatorResponse.ErrorCodeField);
+                return (ClusterNodeId.Empty, error);
+            }
+            var nodeId = findCoordinatorResponse.NodeIdField;
+            if (findCoordinatorResponse.CoordinatorsField.Any())
+                nodeId = findCoordinatorResponse.CoordinatorsField[0].NodeIdField;
+            return (nodeId, Errors.Known.NONE);
         }
     }
 }
