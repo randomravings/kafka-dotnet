@@ -4,7 +4,7 @@ using Kafka.Client.Clients.Producer;
 using Kafka.Client.Clients.Producer.Model;
 using Kafka.Common.Records;
 using Kafka.Common.Serialization;
-using Kafka.Common.Types;
+using Kafka.Common.Model;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 

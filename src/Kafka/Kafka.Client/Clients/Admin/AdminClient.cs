@@ -1,8 +1,8 @@
 ﻿using Kafka.Client.Clients.Admin.Model;
 using Kafka.Client.Messages;
-using Kafka.Common;
-using Kafka.Common.Types;
-using Kafka.Common.Types.Comparison;
+using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
+using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 using static Kafka.Client.Messages.CreateTopicsRequest.CreatableTopic;
@@ -30,7 +30,7 @@ namespace Kafka.Client.Clients.Admin
                 false,
                 false
             );
-            using var connection = await _connectionPool.AquireControllerConnection(cancellationToken);
+            using var connection = await _connectionPool.AquireCoordinatorConnection(cancellationToken);
             var response = await connection.ExecuteRequest(
                 request,
                 MetadataRequestSerde.Write,
@@ -90,7 +90,7 @@ namespace Kafka.Client.Clients.Admin
                 options.TimeoutMs,
                 options.ValidateOnly
             );
-            using var connection = await _connectionPool.AquireControllerConnection(cancellationToken);
+            using var connection = await _connectionPool.AquireCoordinatorConnection(cancellationToken);
             var response = await connection.ExecuteRequest(
                 request,
                 CreateTopicsRequestSerde.Write,
@@ -158,7 +158,7 @@ namespace Kafka.Client.Clients.Admin
                 options.TopicNames,
                 options.TimeoutMs
             );
-            using var connection = await _connectionPool.AquireControllerConnection(cancellationToken);
+            using var connection = await _connectionPool.AquireCoordinatorConnection(cancellationToken);
             var response = await connection.ExecuteRequest(
                 request,
                 DeleteTopicsRequestSerde.Write,
@@ -221,7 +221,7 @@ namespace Kafka.Client.Clients.Admin
                 false,
                 true
             );
-            using var connection = await _connectionPool.AquireControllerConnection(cancellationToken);
+            using var connection = await _connectionPool.AquireCoordinatorConnection(cancellationToken);
             var response = await connection.ExecuteRequest(
                 request,
                 MetadataRequestSerde.Write,

@@ -1,5 +1,5 @@
 ﻿using Kafka.Common.Hashing;
-using Kafka.Common.Types;
+using Kafka.Common.Model;
 
 namespace Kafka.Client.Clients.Producer
 {

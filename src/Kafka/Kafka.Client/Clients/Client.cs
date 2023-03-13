@@ -1,8 +1,10 @@
-﻿using Kafka.Client.Messages;
+﻿using Kafka.Client.Clients.Consumer;
+using Kafka.Client.Messages;
 using Kafka.Client.Server;
-using Kafka.Common;
 using Kafka.Common.Exceptions;
-using Kafka.Common.Types;
+using Kafka.Common.Model;
+using Kafka.Common.Network;
+using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 
@@ -120,35 +122,6 @@ namespace Kafka.Client.Clients
                 cancellationToken.WaitHandle.WaitOne(500);
             }
             throw new ApiException(lastError);
-        }
-
-        protected async ValueTask<(ClusterNodeId CoordinatorNodeId, Error Error)> GetGroupCoordinator(
-            ImmutableSortedDictionary<ClusterNodeId, IConnection> connections,
-            string groupId,
-            CancellationToken cancellationToken
-        )
-        {
-            var randomConnection = connections.Values.ElementAt(Random.Shared.Next(0, connections.Count - 1));
-            var findCoordinatorRequest = new FindCoordinatorRequest(
-                groupId,
-                (sbyte)CoordinatorType.GROUP,
-                new[] { groupId }.ToImmutableArray()
-            );
-            var findCoordinatorResponse = await randomConnection.ExecuteRequest(
-                findCoordinatorRequest,
-                FindCoordinatorRequestSerde.Write,
-                FindCoordinatorResponseSerde.Read,
-                cancellationToken
-            );
-            if(findCoordinatorResponse.ErrorCodeField != 0)
-            {
-                var error = Errors.Translate(findCoordinatorResponse.ErrorCodeField);
-                return (ClusterNodeId.Empty, error);
-            }
-            var nodeId = findCoordinatorResponse.NodeIdField;
-            if (findCoordinatorResponse.CoordinatorsField.Any())
-                nodeId = findCoordinatorResponse.CoordinatorsField[0].NodeIdField;
-            return (nodeId, Errors.Known.NONE);
         }
     }
 }

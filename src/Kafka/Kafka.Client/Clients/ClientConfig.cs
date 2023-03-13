@@ -317,7 +317,7 @@ namespace Kafka.Client.Clients
         public int Retries { get; set; } = 2147483647;
 
         /// <summary>
-        /// Setting a value greater than zero will cause the client to resend any request that fails with a potentially transient error.It is recommended to set the value to either zero or `MAX_VALUE` and use corresponding timeout parameters to control how long a client should retry a request.
+        /// The amount of time to wait before attempting to retry a failed request. This avoids repeatedly sending requests in a tight loop under some failure scenarios.
         /// <list type="table">
         ///   <item>
         ///     <term>Type</term>
@@ -338,6 +338,6 @@ namespace Kafka.Client.Clients
         /// </list>
         /// </summary>
         [JsonPropertyName("retry.backoff.ms")]
-        public int RetryBackoffMs { get; set; } = 100;
+        public long RetryBackoffMs { get; set; } = 100;
     }
 }

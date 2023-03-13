@@ -1,6 +1,6 @@
 ﻿using Kafka.Client.Clients.Producer.Model;
 using Kafka.Common.Records;
-using Kafka.Common.Types;
+using Kafka.Common.Model;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Producer

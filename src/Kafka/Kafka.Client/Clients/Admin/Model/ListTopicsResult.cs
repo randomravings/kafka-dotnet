@@ -1,4 +1,4 @@
-﻿using Kafka.Common.Types;
+﻿using Kafka.Common.Model;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Admin.Model

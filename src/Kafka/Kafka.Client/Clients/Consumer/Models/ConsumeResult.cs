@@ -1,45 +1,31 @@
-﻿using Kafka.Common.Types;
+﻿using Kafka.Common.Model;
+using Kafka.Common.Protocol;
+using Kafka.Common.Records;
+using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Consumer.Models
 {
-    public abstract record ConsumeResult(
+    internal sealed record ConsumeResult(
         TopicPartition TopicPartition,
-        Offset Offset,
-        Offset LastStableOffset,
-        Offset LogStartOffset,
-        Offset HighWatermark,
+        ImmutableArray<IRecords>? Records,
+        short ErrorCode
+    );
+
+    internal sealed record ConsumeResult<TKey, TValue>(
+        TopicPartition TopicPartition,
+        IEnumerator<ConsumerRecord<TKey, TValue>> Records,
         Error Error
-    );
-    public sealed record ConsumeResult<TKey, TValue>(
-        TopicPartition TopicPartition,
-        Offset Offset,
-        Offset LastStableOffset,
-        Offset LogStartOffset,
-        Offset HighWatermark,
-        Error Error,
-        ConsumerRecord<TKey, TValue> Record
-    ) : ConsumeResult(
-        TopicPartition,
-        Offset,
-        LastStableOffset,
-        LogStartOffset,
-        HighWatermark,
-        Error
-    );
-    internal sealed record ControlResult(
-        TopicPartition TopicPartition,
-        Offset Offset,
-        Offset LastStableOffset,
-        Offset LogStartOffset,
-        Offset HighWatermark,
-        Error Error,
-        ControlRecord Record
-    ) : ConsumeResult(
-        TopicPartition,
-        Offset,
-        LastStableOffset,
-        LogStartOffset,
-        HighWatermark,
-        Error
-    );
+    )
+    {
+        private static readonly IEnumerator<ConsumerRecord<TKey, TValue>> EMPTY_ENUMERATOR =
+            ImmutableArray<ConsumerRecord<TKey, TValue>>.Empty.AsEnumerable().GetEnumerator()
+        ;
+        public static ConsumeResult<TKey, TValue> Empty { get; } =
+            new(
+                TopicPartition.Empty,
+                EMPTY_ENUMERATOR,
+                Errors.Known.NONE
+            )
+        ;
+    }
 }

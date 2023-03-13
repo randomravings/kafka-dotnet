@@ -1,18 +1,19 @@
 ﻿using Kafka.Client.Clients.Producer.Model;
 using Kafka.Client.Clients.Producer.Model.Internal;
 using Kafka.Client.Messages;
-using Kafka.Common;
 using Kafka.Common.Encoding;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Protocol;
 using Kafka.Common.Records;
 using Kafka.Common.Serialization;
-using Kafka.Common.Types;
-using Kafka.Common.Types.Comparison;
+using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using Kafka.Common.Network;
+using Kafka.Client.Clients.Producer.Logging;
 
 namespace Kafka.Client.Clients.Producer
 {
@@ -520,7 +521,7 @@ namespace Kafka.Client.Clients.Producer
             switch (command)
             {
                 case ProduceCommandBatch<TKey, TValue> produceCommandBatch:
-                    _logger.LogTrace("Record Builder dequeued {count} records", produceCommandBatch.ProduceCommands.Length);
+                    ProducerLog.ProduceCommandDequeue(_logger, produceCommandBatch.ProduceCommands.Length);
                     await HandleProduceCommandBatch(
                         produceCommandBatch,
                         runtime,
@@ -839,7 +840,7 @@ namespace Kafka.Client.Clients.Producer
                 foreach (var topicParitionResponse in addPartitionsToTxnResponse.ResultsField)
                     foreach (var paritionResponse in topicParitionResponse.ResultsField)
                         if (paritionResponse.ErrorCodeField != 0)
-                            _logger.LogWarning("Topic: {topic} - Error: {error}", topicParitionResponse.NameField, Errors.Translate(paritionResponse.ErrorCodeField).ToString());
+                            ProducerLog.ProducePartitionError(_logger, topicParitionResponse.NameField, Errors.Translate(paritionResponse.ErrorCodeField));
             }
         }
 

@@ -1,21 +1,31 @@
-﻿using Kafka.Client.Clients.Consumer.Models;
-using Kafka.Client.Messages;
+﻿using Kafka.Client.Messages;
 using Kafka.Common.Encoding;
-using Kafka.Common.Types;
+using Kafka.Common.Model;
+using Kafka.Common.Network;
+using Kafka.Common.Protocol;
+using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Consumer
 {
     internal static class ConsumerProtocol
     {
-        public static async ValueTask<MetadataResponse> RequestMetadata(
+        public static async Task<MetadataResponse> Metadata(
             IConnection connection,
             IEnumerable<TopicName> topicNames,
             CancellationToken cancellationToken
         )
         {
-            var request = CreateMetadataRequest(
-                topicNames
+            var request = new MetadataRequest(
+                topicNames.Select(r => new MetadataRequest.MetadataRequestTopic(
+                        Guid.Empty,
+                        r
+                    )
+                ).ToImmutableArray(),
+                true,
+                false,
+                false
             );
             return await connection.ExecuteRequest(
                 request,
@@ -25,18 +35,19 @@ namespace Kafka.Client.Clients.Consumer
             );
         }
 
-        public static async ValueTask<HeartbeatResponse> RequestHeartbeat(
+        public static async Task<HeartbeatResponse> Heartbeat(
             IConnection connection,
-            string memberId,
             int generationId,
+            string memberId,
             ConsumerConfig config,
             CancellationToken cancellationToken
         )
         {
-            var request = CreateHeartbeatRequest(
-                memberId,
+            var request = new HeartbeatRequest(
+                config.GroupId ?? "",
                 generationId,
-                config
+                memberId,
+                config.GroupInstanceId
             );
             return await connection.ExecuteRequest(
                 request,
@@ -46,7 +57,7 @@ namespace Kafka.Client.Clients.Consumer
             );
         }
 
-        public static async ValueTask<JoinGroupResponse> RequestJoinGroup(
+        public static async Task<JoinGroupResponse> JoinGroup(
             IConnection connection,
             string memberId,
             IEnumerable<TopicName> topicNames,
@@ -54,204 +65,7 @@ namespace Kafka.Client.Clients.Consumer
             CancellationToken cancellationToken
         )
         {
-            var request = CreateJoinGroupRequest(memberId, topicNames, config);
-            return await connection.ExecuteRequest(
-                request,
-                JoinGroupRequestSerde.Write,
-                JoinGroupResponseSerde.Read,
-                cancellationToken
-            );
-        }
-
-        public static async ValueTask<SyncGroupResponse> RequestSyncGroup(
-            IConnection connection,
-            int generationId,
-            string memberId,
-            string? protocolName,
-            IEnumerable<TopicPartition> topicPartitions,
-            ConsumerConfig config,
-            CancellationToken cancellationToken
-        )
-        {
-            var request = CreateSyncGroupRequest(
-                generationId,
-                memberId,
-                protocolName,
-                topicPartitions,
-                config
-            );
-            return await connection.ExecuteRequest(
-                request,
-                SyncGroupRequestSerde.Write,
-                SyncGroupResponseSerde.Read,
-                cancellationToken
-            );
-        }
-
-        public static async ValueTask<LeaveGroupResponse> RequestLeaveGroup(
-            IConnection connection,
-            string memberId,
-            ConsumerConfig config,
-            CancellationToken cancellationToken
-        )
-        {
-            var request = CreateLeaveRequest(
-                memberId,
-                config
-            );
-            return await connection.ExecuteRequest(
-                request,
-                LeaveGroupRequestSerde.Write,
-                LeaveGroupResponseSerde.Read,
-                cancellationToken
-            );
-        }
-
-        public static async ValueTask<OffsetFetchResponse> RequestOffsetFetch(
-            IConnection connection,
-            ConsumerConfig config,
-            IEnumerable<TopicPartition> topicPartitionOffsets,
-            CancellationToken cancellationToken
-        )
-        {
-            var request = CreateOffsetFetchRequest(
-                config,
-                topicPartitionOffsets
-            );
-            return await connection.ExecuteRequest(
-                request,
-                OffsetFetchRequestSerde.Write,
-                OffsetFetchResponseSerde.Read,
-                cancellationToken
-            );
-        }
-
-        public static async ValueTask<ImmutableArray<ListOffsetsResponse>> RequestListOffsets(
-            ImmutableArray<NodeAssignment> nodeAssignments,
-            ImmutableSortedSet<TopicPartition> topicPartitions,
-            IsolationLevel isolationLevel,
-            DateTimeOffset timestamp,
-            CancellationToken cancellationToken
-        )
-        {
-            var nodeCount = nodeAssignments.Length;
-            var tasks = new Task<ListOffsetsResponse>[nodeCount];
-            for (int i = 0; i < nodeCount; i++)
-            {
-                var topicPartitionsToList = nodeAssignments[i]
-                    .TopicPartitions
-                    .Intersect(topicPartitions)
-                ;
-                var tpoCount = topicPartitionsToList.Count;
-                if (tpoCount == 0)
-                {
-                    tasks[i] = Task.FromResult(ListOffsetsResponse.Empty);
-                    continue;
-                }
-
-                var request = CreateListOffsetsRequest(
-                    topicPartitionsToList,
-                    isolationLevel,
-                    timestamp
-                );
-                tasks[i] = nodeAssignments[i]
-                    .Connection
-                    .ExecuteRequest(
-                        request,
-                        ListOffsetsRequestSerde.Write,
-                        ListOffsetsResponseSerde.Read,
-                        cancellationToken
-                    )
-                ;
-            }
-
-            await Task.WhenAll(tasks);
-
-            return tasks
-                .Select(r => r.Result)
-                .ToImmutableArray()
-            ;
-        }
-
-        public static async ValueTask<OffsetCommitResponse> RequestCommitOffsets(
-            IConnection connection,
-            int generationId,
-            string memberId,
-            ConsumerConfig config,
-            IEnumerable<TopicPartitionOffset> topicPartitionOffsets,
-            CancellationToken cancellationToken
-        )
-        {
-            var request = CreateCommitRequest(
-                generationId,
-                memberId,
-                config,
-                topicPartitionOffsets
-            );
-            return await connection.ExecuteRequest(
-                request,
-                OffsetCommitRequestSerde.Write,
-                OffsetCommitResponseSerde.Read,
-                cancellationToken
-            );
-        }
-
-        public static async ValueTask<OffsetCommitResponse> RequestCommitOffset(
-            IConnection connection,
-            int generationId,
-            string memberId,
-            ConsumerConfig config,
-            TopicPartitionOffset topicPartitionOffset,
-            CancellationToken cancellationToken
-        )
-        {
-            var request = CreateCommitRequest(
-                generationId,
-                memberId,
-                config,
-                topicPartitionOffset
-            );
-            return await connection.ExecuteRequest(
-                request,
-                OffsetCommitRequestSerde.Write,
-                OffsetCommitResponseSerde.Read,
-                cancellationToken
-            );
-        }
-
-        private static MetadataRequest CreateMetadataRequest(
-            IEnumerable<TopicName> topicNames
-        ) => new(
-                topicNames.Select(r => new MetadataRequest.MetadataRequestTopic(
-                        Guid.Empty,
-                        r
-                    )
-                ).ToImmutableArray(),
-                true,
-                false,
-                false
-            )
-        ;
-
-        private static HeartbeatRequest CreateHeartbeatRequest(
-            string memberId,
-            int generationId,
-            ConsumerConfig config
-        ) => new(
-                config.GroupId ?? "",
-                generationId,
-                memberId,
-                config.GroupInstanceId
-            )
-        ;
-
-        private static JoinGroupRequest CreateJoinGroupRequest(
-            string memberId,
-            IEnumerable<TopicName> topicNames,
-            ConsumerConfig config
-        )
-        {
-            var metadataSize = 
+            var metadataSize =
                 2 + // version
                 4 + // count
                 topicNames.Sum(r => 2 + r.Value?.Length ?? 0) + // topic names including size
@@ -263,8 +77,7 @@ namespace Kafka.Client.Clients.Consumer
             offset = Encoder.WriteInt32(topicMetadata, offset, topicNames.Count());
             foreach (var topic in topicNames)
                 offset = Encoder.WriteString(topicMetadata, offset, topic);
-
-            return new JoinGroupRequest(
+            var request = new JoinGroupRequest(
                 config.GroupId ?? "",
                 config.SessionTimeoutMs,
                 config.MaxPollIntervalMs,
@@ -284,46 +97,59 @@ namespace Kafka.Client.Clients.Consumer
                 }.ToImmutableArray(),
                 null
             );
+            return await connection.ExecuteRequest(
+                request,
+                JoinGroupRequestSerde.Write,
+                JoinGroupResponseSerde.Read,
+                cancellationToken
+            );
         }
 
-        private static SyncGroupRequest CreateSyncGroupRequest(
+        public static async Task<SyncGroupResponse> SyncGroup(
+            IConnection connection,
             int generationId,
             string memberId,
             string? protocolName,
-            IEnumerable<TopicPartition> topicPartitions,
-            ConsumerConfig config
+            IDictionary<string, List<TopicPartition>> topicPartitions,
+            ConsumerConfig config,
+            CancellationToken cancellationToken
         )
         {
-            var topics = topicPartitions.Select(r => $"{r.Topic.Value}").Distinct();
-            var topicNameBytes = topics.Sum(r => r.Length);
-            var groupedTopics = topicPartitions
-                .GroupBy(r => r.Topic.Value ?? "")
-            ;
-            var size =
-                4 + // some magic
-                2 + // number of assignments
-                (topics.Count() * 2) + // topic name length
-                topicNameBytes + // total bytes for topic names
-                (topics.Count() * 4) + // partition counts
-                (topicPartitions.Count() * 4) // partition indices
-            ;
-
             var synbGroupRequestAssignmentsBuilder = ImmutableArray.CreateBuilder<SyncGroupRequest.SyncGroupRequestAssignment>();
-            var bytes = new byte[size];
-            var offset = 4; // skipping magic
-            offset = Encoder.WriteInt16(bytes, offset, (short)topics.Count());
-            foreach (var groupedTopic in groupedTopics)
+            foreach ((var member, var assignments) in topicPartitions)
             {
-                offset = Encoder.WriteString(bytes, offset, groupedTopic.Key);
-                offset = Encoder.WriteInt32(bytes, offset, groupedTopic.Count());
-                foreach (var partition in groupedTopic.OrderBy(r => r.Partition.Value))
-                    offset = Encoder.WriteInt32(bytes, offset, partition.Partition.Value);
+                var groupedTopics = assignments
+                    .GroupBy(r => r.Topic.Value ?? "")
+                ;
+                var topicNameCount = groupedTopics.Count();
+                var topicPartitionCount = groupedTopics.Sum(r => r.Count());
+                var topicNameBytes = groupedTopics.Sum(r => r.Key.Length);
+                var size =
+                    4 + // total size of assignment
+                    2 + // number of assignments
+                    (topicNameCount * 2) + // topic name length
+                    topicNameBytes + // total bytes for topic names
+                    (topicNameCount * 4) + // partition counts
+                    (topicPartitionCount * 4) // total partition indices
+                ;
+
+                var bytes = new byte[size];
+                var offset = 0;
+                offset = Encoder.WriteInt32(bytes, offset, size);
+                offset = Encoder.WriteInt16(bytes, offset, (short)topicNameCount);
+                foreach (var groupedTopic in groupedTopics)
+                {
+                    offset = Encoder.WriteString(bytes, offset, groupedTopic.Key);
+                    offset = Encoder.WriteInt32(bytes, offset, groupedTopic.Count());
+                    foreach (var partition in groupedTopic.OrderBy(r => r.Partition.Value))
+                        offset = Encoder.WriteInt32(bytes, offset, partition.Partition.Value);
+                }
+                synbGroupRequestAssignmentsBuilder.Add(new SyncGroupRequest.SyncGroupRequestAssignment(
+                    member,
+                    bytes
+                ));
             }
-            synbGroupRequestAssignmentsBuilder.Add(new SyncGroupRequest.SyncGroupRequestAssignment(
-                memberId,
-                bytes
-            ));
-            return new SyncGroupRequest(
+            var request = new SyncGroupRequest(
                 config.GroupId ?? "",
                 generationId,
                 memberId,
@@ -332,23 +158,39 @@ namespace Kafka.Client.Clients.Consumer
                 protocolName,
                 synbGroupRequestAssignmentsBuilder.ToImmutable()
             );
+            return await connection.ExecuteRequest(
+                request,
+                SyncGroupRequestSerde.Write,
+                SyncGroupResponseSerde.Read,
+                cancellationToken
+            );
         }
 
-        private static LeaveGroupRequest CreateLeaveRequest(
+        public static async Task<LeaveGroupResponse> LeaveGroup(
+            IConnection connection,
             string memberId,
-            ConsumerConfig config
+            ConsumerConfig config,
+            CancellationToken cancellationToken
         )
         {
-            return new LeaveGroupRequest(
+            var request = new LeaveGroupRequest(
                 config.GroupId ?? "",
                 memberId,
                 ImmutableArray<LeaveGroupRequest.MemberIdentity>.Empty
             );
+            return await connection.ExecuteRequest(
+                request,
+                LeaveGroupRequestSerde.Write,
+                LeaveGroupResponseSerde.Read,
+                cancellationToken
+            );
         }
 
-        private static OffsetFetchRequest CreateOffsetFetchRequest(
+        public static async Task<OffsetFetchResponse> OffsetFetch(
+            IConnection connection,
             ConsumerConfig config,
-            IEnumerable<TopicPartition> topicPartitionOffsets
+            IEnumerable<TopicPartition> topicPartitionOffsets,
+            CancellationToken cancellationToken
         )
         {
             var topicsToFetch = topicPartitionOffsets
@@ -384,20 +226,29 @@ namespace Kafka.Client.Clients.Consumer
                 }
                 .ToImmutableArray()
             ;
-
-            return new OffsetFetchRequest(
+            var request = new OffsetFetchRequest(
                 config.GroupId ?? "",
                 topicsToFetch,
                 topicsInGroupToFetch,
                 false
             );
+            return await connection.ExecuteRequest(
+                request,
+                OffsetFetchRequestSerde.Write,
+                OffsetFetchResponseSerde.Read,
+                cancellationToken
+            );
         }
 
-        public static ListOffsetsRequest CreateListOffsetsRequest(
-            IEnumerable<TopicPartition> topicPartitions,
+        public static async Task<ListOffsetsResponse> ListOffsets(
+            IConnection connection,
+            ImmutableSortedSet<TopicPartition> topicPartitions,
             IsolationLevel isolationLevel,
-            DateTimeOffset timestamp
-        ) => new(
+            DateTimeOffset timestamp,
+            CancellationToken cancellationToken
+        )
+        {
+            var request = new ListOffsetsRequest(
                 -1,
                 (sbyte)isolationLevel,
                 topicPartitions
@@ -417,14 +268,24 @@ namespace Kafka.Client.Clients.Consumer
                     )
                 )
                 .ToImmutableArray()
-            )
-        ;
+            );
+            return await connection
+                .ExecuteRequest(
+                    request,
+                    ListOffsetsRequestSerde.Write,
+                    ListOffsetsResponseSerde.Read,
+                    cancellationToken
+                )
+            ;
+        }
 
-        private static OffsetCommitRequest CreateCommitRequest(
+        public static async Task<OffsetCommitResponse> CommitOffsets(
+            IConnection connection,
             int generationId,
             string memberId,
+            IEnumerable<TopicPartitionOffset> topicPartitionOffsets,
             ConsumerConfig config,
-            IEnumerable<TopicPartitionOffset> topicPartitionOffsets
+            CancellationToken cancellationToken
         )
         {
             var offsetCommitRequestTopic = topicPartitionOffsets
@@ -445,7 +306,7 @@ namespace Kafka.Client.Clients.Consumer
                 )
                 .ToImmutableArray()
             ;
-            return new OffsetCommitRequest(
+            var request = new OffsetCommitRequest(
                 config.GroupId ?? "",
                 generationId,
                 memberId,
@@ -453,13 +314,21 @@ namespace Kafka.Client.Clients.Consumer
                 -1,
                 offsetCommitRequestTopic
             );
+            return await connection.ExecuteRequest(
+                request,
+                OffsetCommitRequestSerde.Write,
+                OffsetCommitResponseSerde.Read,
+                cancellationToken
+            );
         }
 
-        private static OffsetCommitRequest CreateCommitRequest(
+        public static async Task<OffsetCommitResponse> CommitOffset(
+            IConnection connection,
             int generationId,
             string memberId,
+            TopicPartitionOffset topicPartitionOffset,
             ConsumerConfig config,
-            TopicPartitionOffset topicPartitionOffset
+            CancellationToken cancellationToken
         )
         {
             var offsetCommitRequestTopic = new[] {
@@ -476,13 +345,98 @@ namespace Kafka.Client.Clients.Consumer
                     }.ToImmutableArray()
                 )
             }.ToImmutableArray();
-            return new OffsetCommitRequest(
+            var request = new OffsetCommitRequest(
                 config.GroupId ?? "",
                 generationId,
                 memberId,
                 config.GroupInstanceId,
                 -1,
                 offsetCommitRequestTopic
+            );
+            return await connection.ExecuteRequest(
+                request,
+                OffsetCommitRequestSerde.Write,
+                OffsetCommitResponseSerde.Read,
+                cancellationToken
+            );
+        }
+
+        internal static async Task<FindCoordinatorResponse> FindCoordinator(
+            IConnection connection,
+            ConsumerConfig config,
+            ILogger logger,
+            CancellationToken cancellationToken
+        )
+        {
+            var groupId = config.GroupId ?? "";
+            var request = new FindCoordinatorRequest(
+                groupId,
+                (sbyte)CoordinatorType.GROUP,
+                new[] { groupId }.ToImmutableArray()
+            );
+            return await RetryHandler.Run(
+                connection,
+                request,
+                FindCoordinatorRequestSerde.Write,
+                FindCoordinatorResponseSerde.Read,
+                config.Retries,
+                config.RetryBackoffMs,
+                r => r.ErrorCodeField,
+                (l, e) => l.LogError("{error}", e),
+                logger,
+                cancellationToken
+            );
+        }
+
+        internal static async Task<FetchResponse> Fetch(
+            IConnection connection,
+            IEnumerable<KeyValuePair<TopicPartition, Offset>> topicPartitionOffsets,
+            ConsumerConfig config,
+            CancellationToken cancellationToken
+        )
+        {
+            var fetchTopics = topicPartitionOffsets
+                .GroupBy(g => g.Key.Topic)
+                .Select(t =>
+                    new FetchRequest.FetchTopic(
+                        t.Key,
+                        Guid.Empty,
+                        t.Select(tp =>
+                            new FetchRequest.FetchTopic.FetchPartition(
+                                PartitionField: tp.Key.Partition,
+                                CurrentLeaderEpochField: -1,
+                                FetchOffsetField: tp.Value,
+                                LastFetchedEpochField: -1,
+                                LogStartOffsetField: -1,
+                                PartitionMaxBytesField: 1048576
+                            )
+                        )
+                        .ToImmutableArray()
+                    )
+                )
+                .ToImmutableArray()
+            ;
+            var request = new FetchRequest(
+                ClusterIdField: null,
+                ReplicaIdField: -1,
+                MaxWaitMsField: config.FetchMaxWaitMs,
+                MinBytesField: config.FetchMinBytes,
+                MaxBytesField: config.FetchMaxBytes,
+                IsolationLevelField: (sbyte)config.IsolationLevel,
+                SessionIdField: -1,
+                SessionEpochField: -1,
+                TopicsField: fetchTopics,
+                ForgottenTopicsDataField: ImmutableArray<FetchRequest.ForgottenTopic>.Empty,
+                RackIdField: config.ClientRack
+            ) with
+            {
+                MaxVersion = 11
+            };
+            return await connection.ExecuteRequest(
+                request,
+                FetchRequestSerde.Write,
+                FetchResponseSerde.Read,
+                cancellationToken
             );
         }
     }

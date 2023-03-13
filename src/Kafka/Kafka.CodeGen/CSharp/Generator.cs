@@ -3,10 +3,11 @@ using Kafka.CodeGen.Models.Extensions;
 using Kafka.Common.Encoding;
 using Kafka.Common.Protocol;
 using Kafka.Common.Records;
-using Kafka.Common.Types.Extensions;
+using Kafka.Common.Model.Extensions;
 using System.Collections.Immutable;
 using System.IO.Abstractions;
-using Version = Kafka.Common.Types.Version;
+using Version = Kafka.Common.Model.Version;
+using System.IO.Abstractions.TestingHelpers;
 
 namespace Kafka.CodeGen.CSharp
 {
@@ -963,7 +964,7 @@ namespace Kafka.CodeGen.CSharp
         {
             var path = fileSystem.Path.Join(directory, $"{name}.cs");
             return new StreamWriter(
-                fileSystem.FileStream.Create(
+                fileSystem.FileStream.New(
                     fileSystem.Path.Combine(
                         path
                     ),

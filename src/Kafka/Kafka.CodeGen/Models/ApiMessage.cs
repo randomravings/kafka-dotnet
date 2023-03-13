@@ -1,6 +1,6 @@
-﻿using Kafka.Common.Types;
+﻿using Kafka.Common.Model;
 using System.Collections.Immutable;
-using Version = Kafka.Common.Types.Version;
+using Version = Kafka.Common.Model.Version;
 
 namespace Kafka.CodeGen.Models
 {

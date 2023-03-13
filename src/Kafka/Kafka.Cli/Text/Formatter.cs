@@ -1,12 +1,12 @@
 ﻿using Kafka.Client.Clients.Consumer.Models;
-using Kafka.Common.Types;
+using Kafka.Common.Model;
 
 namespace Kafka.Cli.Text
 {
     public static class Formatter
     {
-        public static string Print<TKey, TValue>(ConsumeResult<TKey, TValue> value) =>
-        $"{Print(value.TopicPartition)}:{Print(value.Offset)}:{value.Record.Key}:{value.Record.Value}"
+        public static string Print<TKey, TValue>(ConsumerRecord<TKey, TValue> value) =>
+        $"{Print(value.TopicPartition)}:{Print(value.Offset)}:{value.Key}:{value.Value}"
     ;
         public static string Print(Error value) =>
             $"{value.Code} - {value.Label} - {value.Message}"

@@ -1,9 +1,9 @@
 ﻿using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Client.Clients.Consumer;
+using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
 using Kafka.Common.Serialization;
-using Kafka.Common.Types;
-using Kafka.Common.Types.Comparison;
 using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd
@@ -24,41 +24,41 @@ namespace Kafka.Cli.Cmd
                 Deserializers.Utf8,
                 Deserializers.Utf8
             );
-            var topicNames = verb.TopicNames.ToArray();
+            var topicNames = verb.TopicNames.Select(r => new TopicName(r)).ToHashSet();
             try
             {
-                var topicWatermarks = await consumer.GetOffsetsEnd(
-                    topicNames,
-                    cancellationToken
-                );
-
-                foreach (var topicWatermark in topicWatermarks)
-                {
-                    Console.WriteLine(Formatter.Print(topicWatermark.Key));
-                    foreach(var partitionWatermark in topicWatermark.Value)
-                        Console.WriteLine($"  {Formatter.Print(partitionWatermark)}");
-                }
-
                 var stream = default(IInputStream<string, string>);
                 if (verb.PartitionAssign.Any())
                 {
                     var topicAssigns = ParseAssignments(verb);
-                    stream = await consumer
-                        .CreateSeekableStream(topicAssigns.Keys.ToArray(), cancellationToken)
+                    stream = consumer
+                        .Assign(topicAssigns.Keys.ToHashSet())
                     ;
                 }
                 else
                 {
-                    stream = await consumer
-                        .CreateAutoCommitStream(topicNames, cancellationToken)
+                    stream = consumer
+                        .JoinGroup(topicNames)
                     ;
                 }
 
-                await foreach (var result in stream.WithCancellation(cancellationToken))
-                    Console.WriteLine(Formatter.Print(result));
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    var fetchResult = await stream.Fetch(cancellationToken);
+                    if (fetchResult.Error.Code == 0)
+                    {
+                        foreach (var record in fetchResult)
+                            Console.WriteLine(Formatter.Print(record));
+                    }
+                    else
+                    {
+                        Console.WriteLine(Formatter.Print(fetchResult.Error));
+                        break;
+                    }
+                }
             }
             catch (OperationCanceledException) { }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Console.WriteLine(ex);
             }
@@ -76,11 +76,11 @@ namespace Kafka.Cli.Cmd
             var assignmentArray = opts.PartitionAssign.ToArray();
             if (topicArray.Length != assignmentArray.Length)
                 throw new FormatException("number of assignments must match number of topics");
-            for(int i = 0; i < topicArray.Length; i++)
+            for (int i = 0; i < topicArray.Length; i++)
             {
                 var topic = topicArray[i];
                 var partitionAssignment = assignmentArray[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
-                for(int j = 0; j < partitionAssignment.Length; j++)
+                for (int j = 0; j < partitionAssignment.Length; j++)
                 {
                     var partitionOffsetPair = partitionAssignment[j].Split(':', StringSplitOptions.RemoveEmptyEntries);
                     if (partitionOffsetPair.Length != 2)

@@ -1,4 +1,4 @@
-﻿using Kafka.Common.Types;
+﻿using Kafka.Common.Model;
 using System.Collections.Immutable;
 using static Kafka.Client.Clients.Admin.Model.CreateTopicsResult;
 

@@ -3,7 +3,7 @@ using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Client.Clients.Admin;
 using Kafka.Client.Clients.Admin.Model;
-using Kafka.Common.Types;
+using Kafka.Common.Model;
 using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd

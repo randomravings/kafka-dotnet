@@ -1,5 +1,5 @@
 ﻿using Kafka.Common.Serialization;
-using Kafka.Common.Types;
+using Kafka.Common.Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 

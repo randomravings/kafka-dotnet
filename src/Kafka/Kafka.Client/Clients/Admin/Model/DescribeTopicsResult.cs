@@ -1,5 +1,5 @@
-﻿using Kafka.Common;
-using Kafka.Common.Types;
+﻿using Kafka.Common.Model;
+using Kafka.Common.Protocol;
 using System.Collections.Immutable;
 using static Kafka.Client.Clients.Admin.Model.DescribeTopicsResult;
 using static Kafka.Client.Clients.Admin.Model.DescribeTopicsResult.DescribeTopicResult;

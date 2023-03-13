@@ -4,8 +4,8 @@ using Kafka.Common.Encoding;
 using Kafka.Common.Network;
 using Kafka.Common.Network.Tcp;
 using Kafka.Common.Protocol;
-using Kafka.Common.Types;
-using Kafka.Common.Types.Comparison;
+using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -50,7 +50,7 @@ namespace Kafka.Client.Server
             _logger = logger;
         }
 
-        async Task<IConnection> IConnectionPool.AquireControllerConnection(
+        async Task<IConnection> IConnectionPool.AquireCoordinatorConnection(
             CancellationToken cancellationToken
         )
         {

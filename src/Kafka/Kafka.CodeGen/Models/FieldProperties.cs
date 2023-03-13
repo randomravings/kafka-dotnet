@@ -1,4 +1,4 @@
-﻿using Version = Kafka.Common.Types.Version;
+﻿using Version = Kafka.Common.Model.Version;
 
 namespace Kafka.CodeGen.Models
 {

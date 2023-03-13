@@ -1,4 +1,4 @@
-﻿using Kafka.Common.Types;
+﻿using Kafka.Common.Model;
 using System.Runtime.Serialization;
 
 namespace Kafka.Common.Serialization
@@ -18,7 +18,7 @@ namespace Kafka.Common.Serialization
             IDeserializer<Ignore>
         {
             Ignore IDeserializer<Ignore>.Read(ReadOnlyMemory<byte>? buffer) =>
-                Types.Ignore.Value
+                Model.Ignore.Value
             ;
         }
 
@@ -31,7 +31,7 @@ namespace Kafka.Common.Serialization
             Null IDeserializer<Null>.Read(ReadOnlyMemory<byte>? buffer) =>
                 buffer switch
                 {
-                    null => Types.Null.Value,
+                    null => Model.Null.Value,
                     _ => throw new SerializationException("Data was not null")
                 }
             ;

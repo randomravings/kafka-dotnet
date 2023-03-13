@@ -1,9 +1,8 @@
-﻿using Kafka.Client.Clients.Consumer.Models;
-
-namespace Kafka.Client.Clients.Consumer
+﻿namespace Kafka.Client.Clients.Consumer
 {
-    public interface IInputStream<TKey, TValue> :
-        IAsyncEnumerable<ConsumeResult<TKey, TValue>>
+    public interface IInputStream<TKey, TValue>
     {
+        Task<IFetchResult<TKey, TValue>> Fetch(CancellationToken cancellationToken);
+        Task Close(CancellationToken cancellationToken);
     }
 }

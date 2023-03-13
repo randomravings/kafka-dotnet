@@ -1,4 +1,5 @@
-﻿using Kafka.Common.Types;
+﻿using Kafka.Common.Model;
+using Kafka.Common.Network;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Consumer.Models
