@@ -17,10 +17,56 @@ namespace Kafka.Client.Clients.Producer.Model
     /// <param name="Headers">Header key values for the record.</param>
     public sealed record ProduceRecord<TKey, TValue>(
         TopicName Topic,
-        Partition Partition,
-        Timestamp Timestamp,
         TKey Key,
         TValue Value,
+        Partition Partition,
+        Timestamp Timestamp,
         ImmutableArray<RecordHeader> Headers
-    );
+    )
+    {
+        public ProduceRecord(
+            TopicName Topic,
+            TKey Key,
+            TValue Value
+        ) : this(
+                Topic,
+                Key,
+                Value,
+                Partition.Unassigned,
+                Timestamp.None,
+                ImmutableArray<RecordHeader>.Empty
+            )
+        { }
+
+        public ProduceRecord(
+            TopicName Topic,
+            TKey Key,
+            TValue Value,
+            Timestamp Timestamp
+        ) : this(
+                Topic,
+                Key,
+                Value,
+                Partition.Unassigned,
+                Timestamp,
+                ImmutableArray<RecordHeader>.Empty
+            )
+        { }
+
+        public ProduceRecord(
+            TopicName Topic,
+            TKey Key,
+            TValue Value,
+            Timestamp Timestamp,
+            ImmutableArray<RecordHeader> Headers
+        ) : this(
+                Topic,
+                Key,
+                Value,
+                Partition.Unassigned,
+                Timestamp,
+                Headers
+            )
+        { }
+    }
 }

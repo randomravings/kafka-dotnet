@@ -2,6 +2,7 @@
 using Kafka.Client.Messages;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
+using Kafka.Common.Network;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
@@ -25,12 +26,12 @@ namespace Kafka.Client.Clients.Admin
         )
         {
             var request = new MetadataRequest(
-                ImmutableArray<MetadataRequest.MetadataRequestTopic>.Empty,
-                options.IncludeInternal,
+                null,
+                false,
                 false,
                 false
             );
-            using var connection = await _connectionPool.AquireCoordinatorConnection(cancellationToken);
+            using var connection = await GetController(cancellationToken);
             var response = await connection.ExecuteRequest(
                 request,
                 MetadataRequestSerde.Write,
@@ -55,7 +56,7 @@ namespace Kafka.Client.Clients.Admin
                             ))
                             .ToImmutableArray()
                         ))
-                    .OrderBy(r => r.Name)
+                    .OrderBy(r => r.Name, TopicNameCompare.Instance)
                     .ThenBy(r => r.Id)
                     .ToImmutableArray()
                 ;
@@ -90,7 +91,7 @@ namespace Kafka.Client.Clients.Admin
                 options.TimeoutMs,
                 options.ValidateOnly
             );
-            using var connection = await _connectionPool.AquireCoordinatorConnection(cancellationToken);
+            using var connection = await GetController(cancellationToken);
             var response = await connection.ExecuteRequest(
                 request,
                 CreateTopicsRequestSerde.Write,
@@ -158,7 +159,7 @@ namespace Kafka.Client.Clients.Admin
                 options.TopicNames,
                 options.TimeoutMs
             );
-            using var connection = await _connectionPool.AquireCoordinatorConnection(cancellationToken);
+            using var connection = await GetController(cancellationToken);
             var response = await connection.ExecuteRequest(
                 request,
                 DeleteTopicsRequestSerde.Write,
@@ -221,7 +222,7 @@ namespace Kafka.Client.Clients.Admin
                 false,
                 true
             );
-            using var connection = await _connectionPool.AquireCoordinatorConnection(cancellationToken);
+            using var connection = await GetController(cancellationToken);
             var response = await connection.ExecuteRequest(
                 request,
                 MetadataRequestSerde.Write,
@@ -255,6 +256,16 @@ namespace Kafka.Client.Clients.Admin
                     TopicNameCompare.Instance
                 )
             );
+        }
+
+        private async ValueTask<IConnection> GetController(CancellationToken cancellationToken)
+        {
+            var connection = await _connectionPool.AquireSharedConnection(cancellationToken);
+            var cluster = await connection.GetClusterInfo(cancellationToken);
+            if (cluster.Controller.Id == connection.NodeId)
+                return connection;
+            await connection.Close(cancellationToken);
+            return await _connectionPool.AquireSharedConnection(cluster.Controller.Host, cluster.Controller.Port, cancellationToken);
         }
 
         protected override async ValueTask OnClose(CancellationToken cancellationToken) =>

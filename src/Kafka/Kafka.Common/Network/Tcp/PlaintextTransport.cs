@@ -42,6 +42,14 @@ namespace Kafka.Common.Network.Tcp
             await ValueTask.CompletedTask
         ;
 
+        async Task ITransport.Send(byte[] requestBytes, int offset, int length, CancellationToken cancellationToken) =>
+            await Send(new byte[4], requestBytes, offset, length, cancellationToken)
+        ;
+
+        async Task<byte[]> ITransport.Receive(CancellationToken cancellationToken) =>
+            await Receive(new byte[4], cancellationToken)
+        ;
+
         async Task<byte[]> ITransport.HandleRequest(
             byte[] requestBytes,
             int offset,
@@ -50,16 +58,22 @@ namespace Kafka.Common.Network.Tcp
         )
         {
             var sizeBytes = new byte[4];
-            Encoder.WriteInt32(sizeBytes, 0, length);
-            await _socket.SendAsync(sizeBytes.AsMemory(0, 4), SocketFlags.Partial, cancellationToken);
-            await _socket.SendAsync(requestBytes.AsMemory(offset, length), SocketFlags.None, cancellationToken);
-            if (!await ReadBytesFromNetwork(_socket, sizeBytes, cancellationToken))
-                return Array.Empty<byte>();
-            (_, var messageLen) = Decoder.ReadInt32(sizeBytes, 0);
-            var responseBytes = new byte[messageLen];
-            if (!await ReadBytesFromNetwork(_socket, responseBytes, cancellationToken))
-                return Array.Empty<byte>();
-            return responseBytes;
+            await Send(sizeBytes, requestBytes, offset, length, cancellationToken);
+            return await Receive(sizeBytes, cancellationToken);
+        }
+
+        async Task ITransport.Close(CancellationToken cancellationToken)
+        {
+            if (_socket.Connected)
+                _socket.Close();
+            await ValueTask.CompletedTask;
+        }
+
+        void IDisposable.Dispose()
+        {
+            if (_socket.Connected)
+                _socket.Close();
+            _socket.Dispose();
         }
 
         private static async ValueTask<bool> ReadBytesFromNetwork(
@@ -79,18 +93,22 @@ namespace Kafka.Common.Network.Tcp
             return true;
         }
 
-        public async Task Close(CancellationToken cancellationToken)
+        private async Task Send(byte[] sizeBytes, byte[] requestBytes, int offset, int length, CancellationToken cancellationToken)
         {
-            if (_socket.Connected)
-                _socket.Close();
-            await ValueTask.CompletedTask;
+            Encoder.WriteInt32(sizeBytes, 0, length);
+            await _socket.SendAsync(sizeBytes.AsMemory(0, 4), SocketFlags.Partial, cancellationToken);
+            await _socket.SendAsync(requestBytes.AsMemory(offset, length), SocketFlags.None, cancellationToken);
         }
 
-        void IDisposable.Dispose()
+        private async Task<byte[]> Receive(byte[] sizeBytes, CancellationToken cancellationToken)
         {
-            if (_socket.Connected)
-                _socket.Close();
-            _socket.Dispose();
+            if (!await ReadBytesFromNetwork(_socket, sizeBytes, cancellationToken))
+                return Array.Empty<byte>();
+            (_, var messageLen) = Decoder.ReadInt32(sizeBytes, 0);
+            var responseBytes = new byte[messageLen];
+            if (!await ReadBytesFromNetwork(_socket, responseBytes, cancellationToken))
+                return Array.Empty<byte>();
+            return responseBytes;
         }
     }
 }

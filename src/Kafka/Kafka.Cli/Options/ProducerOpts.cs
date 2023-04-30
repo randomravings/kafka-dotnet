@@ -12,7 +12,11 @@ namespace Kafka.Cli.Options
         public Guid TopicId { get; set; } = Guid.Empty;
         [Option("property", Separator = ',')]
         public IEnumerable<string> Property { get; set; } = Array.Empty<string>();
-        [Option("batch-size", HelpText = "Number of messages collected before sent to underlying producer. The effectiveness depends on the producer configs.")]
-        public int BatchSize { get; set; } = 1;
+        [Option("batch-size", HelpText = "Maximum number of messages in flight per connection.", Default = 5)]
+        public int MaxInFlightRequestsPerConnection { get; set; } = 1;
+        [Option("batch-size-bytes", HelpText = "Maximum size in bytes in flight per connection.", Default = 1048576)]
+        public int MaxRequestSize { get; set; } = 0;
+        [Option("linger-ms", HelpText = "Maximum time before sending records.", Default = 50)]
+        public int LingerMs { get; set; } = 0;
     }
 }

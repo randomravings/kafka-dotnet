@@ -1,5 +1,4 @@
 ﻿using Kafka.Client.Messages;
-using Kafka.Common.Encoding;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
@@ -94,12 +93,18 @@ namespace Kafka.Client.Clients.Consumer
                 }
             }
 
+            var packedAssignments = assignments
+                .ToDictionary(
+                    k => k.Key,
+                    v => Membership.Pack(v.Value)
+                )
+            ;
             var syncGroupResponse = await ConsumerProtocol.SyncGroup(
                 coordinatorConnection,
                 _generationId,
                 _memberId,
                 joinGroupResponse.ProtocolNameField,
-                assignments,
+                packedAssignments,
                 _config,
                 cancellationToken
             );
@@ -110,7 +115,9 @@ namespace Kafka.Client.Clients.Consumer
                 throw new ApiException(error);
             }
 
-            var topicPartitions = GetAssingments(syncGroupResponse);
+            var topicPartitions = Membership.Unpack(
+                syncGroupResponse.AssignmentField.ToArray()
+            );
             
             var cluster = await coordinatorConnection.GetClusterInfo(cancellationToken);
             var nodeAssignments = await TopicPartitionHelper.CreateNodeAssignments(
@@ -167,26 +174,6 @@ namespace Kafka.Client.Clients.Consumer
                 );
             }
             return new ConsumerGroupInstance(_memberId, _generationId, coordinatorConnection, nodeAssignments, topicPartitionOffsets, _config, _logger);
-        }
-
-        private static ImmutableSortedSet<TopicPartition> GetAssingments(SyncGroupResponse syncGroupResponse)
-        {
-            var set = ImmutableSortedSet.CreateBuilder(TopicPartitionCompare.Instance);
-            var offset = 0;
-            var data = syncGroupResponse.AssignmentField.ToArray();
-            (offset, var size) = Decoder.ReadInt32(data, offset);
-            (offset, var topicCount) = Decoder.ReadInt16(data, offset);
-            for (int i = 0; i < topicCount; i++)
-            {
-                (offset, var topic) = Decoder.ReadString(data, offset);
-                (offset, var partitionCount) = Decoder.ReadInt32(data, offset);
-                for (int j = 0; j < partitionCount; j++)
-                {
-                    (offset, var partition) = Decoder.ReadInt32(data, offset);
-                    set.Add(new TopicPartition(topic, partition));
-                }
-            }
-            return set.ToImmutable();
         }
 
         private static (string Host, int Port) GetHost(FindCoordinatorResponse findCoordinatorResponse)

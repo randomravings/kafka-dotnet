@@ -2,7 +2,7 @@
 
 namespace Kafka.Client.Clients.Producer.Model.Internal
 {
-    internal record ProduceCommandBatch<TKey, TValue>(
-        ImmutableArray<ProduceCommand<TKey, TValue>> ProduceCommands
+    internal record ProduceCommandBatch(
+        ImmutableArray<ProduceCommand> ProduceCommands
     ) : IProducerCommand;
 }

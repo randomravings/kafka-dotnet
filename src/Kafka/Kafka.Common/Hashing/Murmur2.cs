@@ -2,7 +2,7 @@
 {
     public static class Murmur2
     {
-        public static uint Compute(byte[] key, uint seed)
+        public static uint Compute(ReadOnlySpan<byte> key, uint seed)
         {
             var len = key.Length;
             var rem = len % 4;
@@ -45,6 +45,5 @@
 
             return h;
         }
-
     }
 }

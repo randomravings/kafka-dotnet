@@ -2,7 +2,7 @@
 
 namespace Kafka.Client.Clients.Producer.Model
 {
-    public sealed record ProduceResult<TKey, TValue>(
+    public sealed record ProduceResult(
         TopicPartitionOffset TopicPartitionOffset,
         Timestamp Timestamp,
         Error Error,

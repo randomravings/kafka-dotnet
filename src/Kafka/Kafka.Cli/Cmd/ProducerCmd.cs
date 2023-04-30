@@ -2,11 +2,8 @@
 using Kafka.Cli.Text;
 using Kafka.Client.Clients.Producer;
 using Kafka.Client.Clients.Producer.Model;
-using Kafka.Common.Records;
 using Kafka.Common.Serialization;
-using Kafka.Common.Model;
 using Microsoft.Extensions.Logging;
-using System.Collections.Immutable;
 
 namespace Kafka.Cli.Cmd
 {
@@ -21,7 +18,10 @@ namespace Kafka.Cli.Cmd
             {
                 ClientId = options.ClientId,
                 BootstrapServers = options.BootstrapServer,
-                TransactionalId = "txnator"
+                TransactionalId = "txnator",
+                LingerMs= options.LingerMs,
+                MaxInFlightRequestsPerConnection = options.MaxInFlightRequestsPerConnection,
+                MaxRequestSize = options.MaxRequestSize
             };
             var logger = LoggerFactory
                 .Create(builder => builder
@@ -39,7 +39,7 @@ namespace Kafka.Cli.Cmd
                 .Build()
             ;
 
-            if (options.BatchSize > 1)
+            if (options.MaxInFlightRequestsPerConnection > 1)
                 return await RunBatch(options, producer, cancellationToken);
             else
                 return await RunSingle(options, producer, cancellationToken);
@@ -66,11 +66,8 @@ namespace Kafka.Cli.Cmd
                 }
                 var record = new ProduceRecord<string, string>(
                     options.TopicName,
-                    Partition.Unassigned,
-                    Timestamp.None,
                     split[0],
-                    split[1],
-                    ImmutableArray<RecordHeader>.Empty
+                    split[1]
                 );
                 var produceResult = await producer.Send(
                     record,
@@ -95,13 +92,12 @@ namespace Kafka.Cli.Cmd
             CancellationToken cancellationToken
         )
         {
-            Console.WriteLine($"Running in batch record mode with batch size {options.BatchSize}. Empty new line will terminate session.");
-            var records = new List<ProduceRecord<string, string>>(options.BatchSize);
+            Console.WriteLine($"Running in batch record mode with batch size {options.MaxInFlightRequestsPerConnection}. Empty new line will terminate session.");
+            var records = new List<ProduceRecord<string, string>>(options.MaxInFlightRequestsPerConnection);
             var running = true;
-            var txn = await  producer.BeginTransaction(cancellationToken);
             while (running && !cancellationToken.IsCancellationRequested)
             {
-                while (records.Count < options.BatchSize)
+                while (records.Count < options.MaxInFlightRequestsPerConnection)
                 {
                     var input = Console.ReadLine();
                     if (string.IsNullOrEmpty(input))
@@ -117,11 +113,8 @@ namespace Kafka.Cli.Cmd
                     }
                     var record = new ProduceRecord<string, string>(
                         options.TopicName,
-                        Partition.Unassigned,
-                        Timestamp.None,
                         split[0],
-                        split[1],
-                        ImmutableArray<RecordHeader>.Empty
+                        split[1]
                     );
                     records.Add(record);
                 }
@@ -133,16 +126,6 @@ namespace Kafka.Cli.Cmd
                     );
                 records.Clear();
             }
-            try
-            {
-                await txn.Commit(cancellationToken);
-            }
-            catch(Exception)
-            {
-                var cts = new CancellationTokenSource();
-                cts.CancelAfter(5000);
-                await txn.Rollback(cts.Token);
-            }
             await producer.Close(CancellationToken.None);
             return 0;
         }
@@ -153,27 +136,29 @@ namespace Kafka.Cli.Cmd
             CancellationToken cancellationToken
         )
         {
-            var enumerator = producer.Send(
-                records,
-                records.Count,
-                cancellationToken
-            );
-            await foreach (var produceResults in enumerator)
+            var tasks = records.Select(r => producer.Send(r, cancellationToken)).ToList();
+            try
             {
-                foreach (var produceResult in produceResults)
+                await Task.WhenAll(tasks);
+                foreach (var task in tasks)
                 {
-                    if (produceResult.Error.Code != 0)
+                    if (task.Result.Error.Code != 0)
                     {
-                        Console.WriteLine(Formatter.Print(produceResult.Error));
-                        Console.WriteLine(Formatter.Print(produceResult.RecordError));
+                        Console.WriteLine(Formatter.Print(task.Result.Error));
+                        Console.WriteLine(Formatter.Print(task.Result.RecordError));
                     }
                     else
                     {
-                        Console.WriteLine(Formatter.Print(produceResult.TopicPartitionOffset));
+                        Console.WriteLine(Formatter.Print(task.Result.TopicPartitionOffset));
                     }
                 }
+                return 0;
             }
-            return 0;
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+                return -1;
+            }
         }
     }
 }

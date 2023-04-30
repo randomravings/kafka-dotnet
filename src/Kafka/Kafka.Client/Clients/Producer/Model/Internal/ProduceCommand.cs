@@ -4,13 +4,13 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Producer.Model.Internal
 {
-    internal record ProduceCommand<TKey, TValue>(
-        TopicName Topic,
-        Partition Partition,
+    internal record ProduceCommand(
+        TopicPartition TopicPartition,
         Timestamp Timestamp,
         ReadOnlyMemory<byte>? Key,
         ReadOnlyMemory<byte>? Value,
         ImmutableArray<RecordHeader> Headers,
-        TaskCompletionSource<ProduceResult<TKey, TValue>> TaskCompletionSource
+        Attributes Attributes,
+        TaskCompletionSource<ProduceResult> TaskCompletionSource
     ) : IProducerCommand;
 }

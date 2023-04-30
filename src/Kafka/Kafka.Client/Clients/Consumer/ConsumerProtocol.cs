@@ -4,7 +4,6 @@ using Kafka.Common.Model;
 using Kafka.Common.Network;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Consumer
@@ -65,18 +64,7 @@ namespace Kafka.Client.Clients.Consumer
             CancellationToken cancellationToken
         )
         {
-            var metadataSize =
-                2 + // version
-                4 + // count
-                topicNames.Sum(r => 2 + r.Value?.Length ?? 0) + // topic names including size
-                8 // no idea what this is ...
-            ;
-            var topicMetadata = new byte[metadataSize];
-            var offset = 0;
-            offset = Encoder.WriteInt16(topicMetadata, offset, 1);
-            offset = Encoder.WriteInt32(topicMetadata, offset, topicNames.Count());
-            foreach (var topic in topicNames)
-                offset = Encoder.WriteString(topicMetadata, offset, topic);
+            var topicMetadata = Membership.Pack(topicNames);
             var request = new JoinGroupRequest(
                 config.GroupId ?? "",
                 config.SessionTimeoutMs,
@@ -110,45 +98,18 @@ namespace Kafka.Client.Clients.Consumer
             int generationId,
             string memberId,
             string? protocolName,
-            IDictionary<string, List<TopicPartition>> topicPartitions,
+            IDictionary<string, byte[]> members,
             ConsumerConfig config,
             CancellationToken cancellationToken
         )
         {
-            var synbGroupRequestAssignmentsBuilder = ImmutableArray.CreateBuilder<SyncGroupRequest.SyncGroupRequestAssignment>();
-            foreach ((var member, var assignments) in topicPartitions)
-            {
-                var groupedTopics = assignments
-                    .GroupBy(r => r.Topic.Value ?? "")
-                ;
-                var topicNameCount = groupedTopics.Count();
-                var topicPartitionCount = groupedTopics.Sum(r => r.Count());
-                var topicNameBytes = groupedTopics.Sum(r => r.Key.Length);
-                var size =
-                    4 + // total size of assignment
-                    2 + // number of assignments
-                    (topicNameCount * 2) + // topic name length
-                    topicNameBytes + // total bytes for topic names
-                    (topicNameCount * 4) + // partition counts
-                    (topicPartitionCount * 4) // total partition indices
-                ;
-
-                var bytes = new byte[size];
-                var offset = 0;
-                offset = Encoder.WriteInt32(bytes, offset, size);
-                offset = Encoder.WriteInt16(bytes, offset, (short)topicNameCount);
-                foreach (var groupedTopic in groupedTopics)
-                {
-                    offset = Encoder.WriteString(bytes, offset, groupedTopic.Key);
-                    offset = Encoder.WriteInt32(bytes, offset, groupedTopic.Count());
-                    foreach (var partition in groupedTopic.OrderBy(r => r.Partition.Value))
-                        offset = Encoder.WriteInt32(bytes, offset, partition.Partition.Value);
-                }
-                synbGroupRequestAssignmentsBuilder.Add(new SyncGroupRequest.SyncGroupRequestAssignment(
-                    member,
-                    bytes
-                ));
-            }
+            var syncGroupRequestAssignments = members
+                .Select(r => new SyncGroupRequest.SyncGroupRequestAssignment(
+                    r.Key,
+                    r.Value
+                ))
+                .ToImmutableArray()
+            ;
             var request = new SyncGroupRequest(
                 config.GroupId ?? "",
                 generationId,
@@ -156,7 +117,7 @@ namespace Kafka.Client.Clients.Consumer
                 config.GroupInstanceId,
                 "consumer",
                 protocolName,
-                synbGroupRequestAssignmentsBuilder.ToImmutable()
+                syncGroupRequestAssignments
             );
             return await connection.ExecuteRequest(
                 request,

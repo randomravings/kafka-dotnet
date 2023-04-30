@@ -24,6 +24,15 @@ namespace Kafka.Common.Network
             where TRequest : notnull, Request
             where TResponse : notnull, Response
         ;
+
+        Task Send<TRequest>(
+            TRequest request,
+            EncodeVersionDelegate<TRequest> requestWriter,
+            CancellationToken cancellationToken
+        )
+            where TRequest : notnull, Request
+        ;
+
         Task Close(CancellationToken cancellationToken);
     }
 }

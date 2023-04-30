@@ -45,5 +45,7 @@ namespace Kafka.Common.Model
         public static bool operator <=(Timestamp a, Timestamp b) => a.TimestampMs <= b.TimestampMs;
         public static bool operator >(Timestamp a, Timestamp b) => a.TimestampMs > b.TimestampMs;
         public static bool operator <(Timestamp a, Timestamp b) => a.TimestampMs < b.TimestampMs;
+
+        public static implicit operator long(Timestamp timestamp) => timestamp.TimestampMs;
     }
 }

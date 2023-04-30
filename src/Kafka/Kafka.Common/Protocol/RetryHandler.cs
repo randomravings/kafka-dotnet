@@ -23,41 +23,66 @@ namespace Kafka.Common.Protocol
             where TRequest : notnull, Request
             where TResponse : notnull, Response
         {
-            var taskCompletionSource = new TaskCompletionSource<TResponse>();
             var retryCount = 0;
             var retryBackoff = TimeSpan.FromSeconds(retryBackoffMs);
             var lastError = Errors.Known.NONE;
-            try
+            while (!cancellationToken.IsCancellationRequested)
             {
-                while (!cancellationToken.IsCancellationRequested)
+                var response = await connection.ExecuteRequest(
+                    request,
+                    requestWriter,
+                    responseReader,
+                    cancellationToken
+                );
+                var errorCode = errorCheck(response);
+                if (errorCode == 0)
+                    return response;
+                lastError = Errors.Translate(errorCode);
+                errorLogger(logger, lastError);
+                retryCount++;
+                if (lastError.Retriable && (retries < 1 || retryCount < retries))
+                    cancellationToken.WaitHandle.WaitOne(retryBackoff);
+                else
+                    break;
+            }
+            throw new ApiException(lastError);
+        }
+
+        public static async Task RunOnWay<TRequest>(
+            IConnection connection,
+            TRequest request,
+            EncodeVersionDelegate<TRequest> requestWriter,
+            int retries,
+            long retryBackoffMs,
+            ILogger logger,
+            CancellationToken cancellationToken
+        )
+            where TRequest : notnull, Request
+        {
+            var retryCount = 0;
+            var retryBackoff = TimeSpan.FromSeconds(retryBackoffMs);
+            var lastError = Errors.Known.NONE;
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                try
                 {
-                    var response = await connection.ExecuteRequest(
+                    await connection.Send(
                         request,
                         requestWriter,
-                        responseReader,
                         cancellationToken
                     );
-                    var errorCode = errorCheck(response);
-                    if (errorCode == 0)
-                    {
-                        taskCompletionSource.SetResult(response);
-                        return await taskCompletionSource.Task;
-                    }
-                    lastError = Errors.Translate(errorCode);
-                    errorLogger(logger, lastError);
-                    retryCount++;
-                    if (lastError.Retriable && (retries < 1 || retryCount < retries))
-                        cancellationToken.WaitHandle.WaitOne(retryBackoff);
-                    else
-                        break;
+                    return;
                 }
-                taskCompletionSource.SetException(new ApiException(lastError));
+                catch(Exception ex)
+                {
+                    retryCount++;
+                    if (lastError.Retriable && retries >= retryCount)
+                        throw;
+                    logger.LogWarning("{ex}", ex);
+                    cancellationToken.WaitHandle.WaitOne(retryBackoff);
+                }
             }
-            catch (Exception ex)
-            {
-                taskCompletionSource.SetException(ex);
-            }
-            return await taskCompletionSource.Task;
+            throw new ApiException(lastError);
         }
     }
 }

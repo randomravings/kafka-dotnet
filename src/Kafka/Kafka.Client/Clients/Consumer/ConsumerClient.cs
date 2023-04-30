@@ -1,7 +1,5 @@
-﻿using Kafka.Client.Clients.Consumer.Models;
-using Kafka.Common.Model;
+﻿using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
-using Kafka.Common.Network;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
@@ -49,7 +47,7 @@ namespace Kafka.Client.Clients.Consumer
 
         async ValueTask<ImmutableArray<TopicInfo>> IConsumer<TKey, TValue>.ListTopics(CancellationToken cancellationToken)
         {
-            using var connection = await _connectionPool.AquireCoordinatorConnection(cancellationToken);
+            using var connection = await _connectionPool.AquireConnection(cancellationToken);
             var response = await ConsumerProtocol.Metadata(
                 connection,
                 Enumerable.Empty<TopicName>(),

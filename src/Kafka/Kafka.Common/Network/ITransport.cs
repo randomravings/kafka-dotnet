@@ -17,6 +17,20 @@ namespace Kafka.Common.Network
             int length,
             CancellationToken cancellationToken
         );
+
+        Task Send(
+            byte[] requestBytes,
+            int offset,
+            int length,
+            CancellationToken cancellationToken
+        );
+
+        Task<byte[]> Receive(
+            CancellationToken cancellationToken
+        );
+
+
+
         Task Close(CancellationToken cancellationToken = default);
     }
 }

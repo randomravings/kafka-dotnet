@@ -6,6 +6,7 @@
         MaxInFlightReached = 1,
         MaxLingerMsReached = 2,
         MaxSizeExceeded = 3,
-        ControlCommandIssued = 4
+        ControlCommandIssued = 4,
+        AttributesChanged = 5
     }
 }
