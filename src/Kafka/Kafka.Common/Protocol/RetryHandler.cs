@@ -24,7 +24,7 @@ namespace Kafka.Common.Protocol
             where TResponse : notnull, Response
         {
             var retryCount = 0;
-            var retryBackoff = TimeSpan.FromSeconds(retryBackoffMs);
+            var retryBackoff = TimeSpan.FromMilliseconds(retryBackoffMs);
             var lastError = Errors.Known.NONE;
             while (!cancellationToken.IsCancellationRequested)
             {

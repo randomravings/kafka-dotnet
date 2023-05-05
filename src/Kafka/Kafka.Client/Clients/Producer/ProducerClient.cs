@@ -1,7 +1,6 @@
 ﻿using Kafka.Client.Clients.Consumer.Models;
-using Kafka.Client.Clients.Producer.Logging;
 using Kafka.Client.Clients.Producer.Model;
-using Kafka.Client.Clients.Producer.Model.Internal;
+using Kafka.Client.Commands;
 using Kafka.Client.Messages;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
@@ -11,8 +10,8 @@ using Kafka.Common.Protocol;
 using Kafka.Common.Records;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using static Kafka.Client.Server.ConnectionPool;
 
 namespace Kafka.Client.Clients.Producer
 {
@@ -26,10 +25,11 @@ namespace Kafka.Client.Clients.Producer
         private readonly CancellationTokenSource _internalCts = new();
         private readonly SortedList<ClusterNodeId, IBrokerChannel> _brokerChannels = new(ClusterNodeIdCompare.Instance);
         private readonly SortedList<TopicName, ProducerTopicMetadata> _topicMetadata = new(TopicNameCompare.Instance);
+        private readonly SortedSet<TopicPartition> _transactionMembers = new(TopicPartitionCompare.Instance);
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
         private Attributes _attributes = Attributes.None;
-
         private RuntimeConfigurations? _runtimeConfigurations;
+        private Func<ProduceRecord<TKey, TValue>, RuntimeConfigurations, ProducerTopicMetadata, CancellationToken, ValueTask<ICommand<ProduceResult>>> _sendDelegate;
 
         public ProducerClient(
             ISerializer<TKey> keySerializer,
@@ -42,38 +42,167 @@ namespace Kafka.Client.Clients.Producer
             _keySerializer = keySerializer;
             _valueSerializer = valueSerializer;
             _partitioner = partitioner;
+            _sendDelegate = Send;
         }
 
-        async Task<ProduceResult> IProducer<TKey, TValue>.Send(
+        async Task<ICommand<ProduceResult>> IProducer<TKey, TValue>.Send(
             ProduceRecord<TKey, TValue> produceRecord,
             CancellationToken cancellationToken
         )
         {
-            var runtimeConfigurations = await GetRuntimeConfigurations(cancellationToken);
-            var topicMetadata = await GetTopicMetadata(produceRecord.Topic, runtimeConfigurations, cancellationToken);
-            var request = await CreateProduceCommand(produceRecord, topicMetadata, cancellationToken);
-            return await topicMetadata
-                .PartitionMetadata[request.TopicPartition.Partition]
-                .BrokerChannel
-                .Send(request, cancellationToken)
-            ;
-        }
-
-        private async ValueTask<RuntimeConfigurations> GetRuntimeConfigurations(CancellationToken cancellationToken)
-        {
-            if (_runtimeConfigurations != null)
-                return _runtimeConfigurations;
             await _semaphoreSlim.WaitAsync(cancellationToken);
             try
             {
-                // Did someone beat me to it check.
-                if (_runtimeConfigurations != null)
-                    return _runtimeConfigurations;
-                _runtimeConfigurations = await InitRuntime(_config, _logger, cancellationToken);
-                return _runtimeConfigurations;
+                var runtimeConfigurations = await GetRuntimeConfigurations(cancellationToken);
+                var topicMetadata = await GetTopicMetadata(produceRecord.Topic, runtimeConfigurations, cancellationToken);
+                var command = await _sendDelegate(produceRecord, runtimeConfigurations, topicMetadata, cancellationToken);
+                return command;
             }
             finally { _semaphoreSlim.Release(); }
         }
+
+        async Task IProducer<TKey, TValue>.BeginTransaction(CancellationToken cancellationToken)
+        {
+            await _semaphoreSlim.WaitAsync(cancellationToken);
+            try
+            {
+                var runtimeConfigurations = await GetRuntimeConfigurations(cancellationToken);
+                if(string.IsNullOrEmpty(runtimeConfigurations.TransactionalId))
+                    throw new InvalidOperationException("Transactional Id not set");
+                if (_attributes.HasFlag(Attributes.IsTransactional))
+                    throw new InvalidOperationException("Transaction in progress");
+                await FlushChannels(cancellationToken);
+                _attributes |= Attributes.IsTransactional;
+                _sendDelegate = SendTransational;
+            }
+            finally { _semaphoreSlim.Release(); }
+        }
+
+        private async Task CheckTransactionMembership(
+            SendCommand sendCommand,
+            RuntimeConfigurations runtimeConfigurations,
+            CancellationToken cancellationToken
+        )
+        {
+            // Did someone beat me to it check.
+            if (_transactionMembers.Contains(sendCommand.TopicPartition))
+                return;
+            var addPartitionsToTxnRequest = new AddPartitionsToTxnRequest(
+                runtimeConfigurations.TransactionalId,
+                runtimeConfigurations.ProducerId,
+                runtimeConfigurations.ProducerEpoch,
+                ImmutableArray.Create(
+                    new AddPartitionsToTxnRequest.AddPartitionsToTxnTopic(
+                        sendCommand.TopicPartition.Topic,
+                        ImmutableArray.Create(sendCommand.TopicPartition.Partition.Value)
+                    )
+                )
+            );
+            var addPartitionsToTxnResponse = await RetryHandler.Run(
+                runtimeConfigurations.ControllerConnection,
+                addPartitionsToTxnRequest,
+                AddPartitionsToTxnRequestSerde.Write,
+                AddPartitionsToTxnResponseSerde.Read,
+                100,
+                10,
+                r => r.ResultsField.FirstOrDefault()?.ResultsField.FirstOrDefault()?.ErrorCodeField ?? -1,
+                (l, e) => l.LogWarning($"{e}"),
+                _logger,
+                cancellationToken
+            );
+
+            foreach (var topic in addPartitionsToTxnResponse.ResultsField)
+                foreach (var partition in topic.ResultsField)
+                    if (partition.ErrorCodeField != 0)
+                    {
+                        var exception = new ApiException(Errors.Translate(partition.ErrorCodeField));
+                        sendCommand.TaskCompletionSource.SetException(exception);
+                        return;
+                    }
+
+            _transactionMembers.Add(sendCommand.TopicPartition);
+        }
+
+        async Task IProducer<TKey, TValue>.CommitTransaction(CancellationToken cancellationToken) =>
+            await EndTransaction(true, cancellationToken)
+        ;
+
+        async Task IProducer<TKey, TValue>.RollbackTransaction(CancellationToken cancellationToken) =>
+            await EndTransaction(false, cancellationToken)
+        ;
+
+        private async ValueTask<ICommand<ProduceResult>> Send(
+            ProduceRecord<TKey, TValue> produceRecord,
+            RuntimeConfigurations runtimeConfigurations,
+            ProducerTopicMetadata topicMetadata,
+            CancellationToken cancellationToken
+        )
+        {
+            var command = await CreateSendCommand(produceRecord, topicMetadata, cancellationToken);
+            var channel = await GetChannel(topicMetadata.PartitionMetadata[command.TopicPartition.Partition], runtimeConfigurations, cancellationToken);
+            await channel.Send(command, cancellationToken);
+            return command;
+        }
+
+        private async ValueTask<ICommand<ProduceResult>> SendTransational(
+            ProduceRecord<TKey, TValue> produceRecord,
+            RuntimeConfigurations runtimeConfigurations,
+            ProducerTopicMetadata topicMetadata,
+            CancellationToken cancellationToken
+        )
+        {
+            var command = await CreateSendCommand(produceRecord, topicMetadata, cancellationToken);
+            await CheckTransactionMembership(command, runtimeConfigurations, cancellationToken);
+            var channel = await GetChannel(topicMetadata.PartitionMetadata[command.TopicPartition.Partition], runtimeConfigurations, cancellationToken);
+            await channel.Send(command, cancellationToken);
+            return command;
+        }
+
+        private async Task EndTransaction(bool commit, CancellationToken cancellationToken)
+        {
+            await _semaphoreSlim.WaitAsync(cancellationToken);
+            try
+            {
+                if (!_attributes.HasFlag(Attributes.IsTransactional))
+                    throw new InvalidOperationException("No active transaction");
+                await FlushChannels(cancellationToken);
+                var runtimeConfigurations = await GetRuntimeConfigurations(cancellationToken);
+                var endTxnRequest = new EndTxnRequest(
+                    runtimeConfigurations.TransactionalId,
+                    runtimeConfigurations.ProducerId,
+                    runtimeConfigurations.ProducerEpoch,
+                    commit
+                );
+                var endTxnResponse = await runtimeConfigurations.ControllerConnection.ExecuteRequest(
+                    endTxnRequest,
+                    EndTxnRequestSerde.Write,
+                    EndTxnResponseSerde.Read,
+                    cancellationToken
+                );
+                if (endTxnResponse.ErrorCodeField != 0)
+                    throw new ApiException(Errors.Translate(endTxnResponse.ErrorCodeField));
+                _transactionMembers.Clear();
+            }
+            finally { _semaphoreSlim.Release(); }
+        }
+
+        private async Task FlushChannels(CancellationToken cancellationToken) =>
+            await Task.WhenAll(_brokerChannels.Values.Select(r => r.Flush(cancellationToken)))
+        ;
+
+        async Task IProducer<TKey, TValue>.Flush(CancellationToken cancellationToken)
+        {
+            await _semaphoreSlim.WaitAsync(cancellationToken);
+            try
+            {
+                await FlushChannels(cancellationToken);
+            }
+            finally { _semaphoreSlim.Release(); }
+        }
+
+        private async ValueTask<RuntimeConfigurations> GetRuntimeConfigurations(CancellationToken cancellationToken) =>
+            _runtimeConfigurations ??= await InitRuntime(_config, _logger, cancellationToken)
+        ;
 
         private async Task<ProducerTopicMetadata> GetTopicMetadata(
             TopicName topic,
@@ -83,20 +212,12 @@ namespace Kafka.Client.Clients.Producer
         {
             if (_topicMetadata.TryGetValue(topic, out var topicMetadata))
                 return topicMetadata;
-            await _semaphoreSlim.WaitAsync(cancellationToken);
-            try
-            {
-                // Did someone beat me to it check
-                if (_topicMetadata.TryGetValue(topic, out topicMetadata))
-                    return topicMetadata;
-                topicMetadata = await CreateTopicMetadata(topic, runtimeConfigurations, cancellationToken);
-                _topicMetadata.Add(topic, topicMetadata);
-                return topicMetadata;
-            }
-            finally { _semaphoreSlim.Release(); }
+            topicMetadata = await ProducerClient<TKey, TValue>.CreateTopicMetadata(topic, runtimeConfigurations, cancellationToken);
+            _topicMetadata.Add(topic, topicMetadata);
+            return topicMetadata;
         }
 
-        private async ValueTask<ProducerTopicMetadata> CreateTopicMetadata(
+        private static async ValueTask<ProducerTopicMetadata> CreateTopicMetadata(
             TopicName topicName,
             RuntimeConfigurations runtimeConfigurations,
             CancellationToken cancellationToken
@@ -109,36 +230,8 @@ namespace Kafka.Client.Clients.Producer
             var partitionsBuilder = ImmutableArray.CreateBuilder<ProducerPartitionMetadata>();
             foreach (var partition in topic.PartitionsField.OrderBy(r => r.PartitionIndexField))
             {
-                if (!_brokerChannels.TryGetValue(partition.LeaderIdField, out var channel))
-                {
-                    var broker = metadataResponse.BrokersField.First(r => r.NodeIdField == partition.LeaderIdField);
-                    var connection = await _connectionPool.AquireConnection(broker.HostField, broker.PortField, cancellationToken);
-                    channel = _config switch
-                    {
-                        { MaxInFlightRequestsPerConnection: 1 } or { LingerMs: 0 } or { MaxRequestSize: 0 } => new BrokerChannelSingle(
-                            runtimeConfigurations.ProducerId,
-                            runtimeConfigurations.ProducerEpoch,
-                            runtimeConfigurations.Acks,
-                            runtimeConfigurations.TransactionalId,
-                            runtimeConfigurations.TransactionTimeoutMs,
-                            _config,
-                            connection,
-                            _logger
-                        ),
-                        _ => new BrokerChannelBatch(
-                            runtimeConfigurations.ProducerId,
-                            runtimeConfigurations.ProducerEpoch,
-                            runtimeConfigurations.Acks,
-                            runtimeConfigurations.TransactionalId,
-                            runtimeConfigurations.TransactionTimeoutMs,
-                            _config,
-                            connection,
-                            _logger
-                        )
-                    };
-                    _brokerChannels[partition.LeaderIdField] = channel;
-                }
-                partitionsBuilder.Add(new ProducerPartitionMetadata(partition.PartitionIndexField, channel));
+                var broker = metadataResponse.BrokersField.First(r => r.NodeIdField == partition.LeaderIdField);
+                partitionsBuilder.Add(new ProducerPartitionMetadata(partition.PartitionIndexField, broker.NodeIdField, broker.HostField, broker.PortField));
             }
             return new ProducerTopicMetadata(
                 topicName,
@@ -146,7 +239,56 @@ namespace Kafka.Client.Clients.Producer
             );
         }
 
-        private async ValueTask<ProduceCommand> CreateProduceCommand(
+        private async Task<IBrokerChannel> GetChannel(
+            ProducerPartitionMetadata producerPartitionMetadata,
+            RuntimeConfigurations runtimeConfigurations,
+            CancellationToken cancellationToken
+        )
+        {
+            if (_brokerChannels.TryGetValue(producerPartitionMetadata.LeaderId, out var channel))
+                return channel;
+            channel = await CreateChannel(
+            runtimeConfigurations,
+            producerPartitionMetadata,
+            cancellationToken
+        );
+            _brokerChannels.Add(producerPartitionMetadata.LeaderId, channel);
+            return channel;
+        }
+
+        private async Task<IBrokerChannel> CreateChannel(
+            RuntimeConfigurations runtimeConfigurations,
+            ProducerPartitionMetadata producerPartitionMetadata,
+            CancellationToken cancellationToken
+        )
+        {
+            var connection = await _connectionPool.AquireConnection(producerPartitionMetadata.Host, producerPartitionMetadata.Port, cancellationToken);
+            return _config switch
+            {
+                { MaxInFlightRequestsPerConnection: 1 } or { LingerMs: 0 } or { MaxRequestSize: 0 } => new BrokerChannelSingle(
+                    runtimeConfigurations.ProducerId,
+                    runtimeConfigurations.ProducerEpoch,
+                    runtimeConfigurations.Acks,
+                    runtimeConfigurations.TransactionalId,
+                    runtimeConfigurations.TransactionTimeoutMs,
+                    _config,
+                    connection,
+                    _logger
+                ),
+                _ => new BrokerChannelBatch(
+                    runtimeConfigurations.ProducerId,
+                    runtimeConfigurations.ProducerEpoch,
+                    runtimeConfigurations.Acks,
+                    runtimeConfigurations.TransactionalId,
+                    runtimeConfigurations.TransactionTimeoutMs,
+                    _config,
+                    connection,
+                    _logger
+                )
+            };
+        }
+
+        private async ValueTask<SendCommand> CreateSendCommand(
             ProduceRecord<TKey, TValue> produceRecord,
             ProducerTopicMetadata topicMetadata,
             CancellationToken cancellationToken
@@ -163,26 +305,17 @@ namespace Kafka.Client.Clients.Producer
                 partition = await _partitioner.Select(produceRecord.Topic, topicMetadata.PartitionMetadata.Length, keyBytes, cancellationToken);
             if (header.IsDefault)
                 header = ImmutableArray<RecordHeader>.Empty;
-            var taskCompletionSource = new TaskCompletionSource<ProduceResult>();
-            return new ProduceCommand(
-                new(produceRecord.Topic, partition),
-                timestamp,
-                keyBytes,
-                valueBytes,
-                header,
-                _attributes,
-                taskCompletionSource
+            return new SendCommand(
+                TopicPartition: new(produceRecord.Topic, partition),
+                Timestamp: timestamp,
+                Key: keyBytes,
+                Value: valueBytes,
+                Headers: header,
+                Attributes: _attributes
             );
         }
 
-        Task<ITransaction> IProducer<TKey, TValue>.BeginTransaction(CancellationToken cancellationToken)
-        {
-            var beginTransactionCommand = new BeginTransactionCommand(new TaskCompletionSource<ITransaction>());
-            //_commandQueue.Add(beginTransactionCommand, cancellationToken);
-            return beginTransactionCommand.TaskCompletionSource.Task;
-        }
-
-        private static async ValueTask<(long ProducerId, short ProducerEpoch)> GetProducerInstance(
+        private async ValueTask<(long ProducerId, short ProducerEpoch)> GetProducerInstance(
             IConnection connection,
             string transactionalId,
             int transactionTimeoutMs,
@@ -197,10 +330,16 @@ namespace Kafka.Client.Clients.Producer
                 producerId,
                 producerEpoch
             );
-            var initProducerIdResponse = await connection.ExecuteRequest(
+            var initProducerIdResponse = await RetryHandler.Run(
+                connection,
                 initProducerIdRequest,
                 InitProducerIdRequestSerde.Write,
                 InitProducerIdResponseSerde.Read,
+                100,
+                10,
+                r => r.ErrorCodeField,
+                (l, e) => l.LogWarning($"{e}"),
+                _logger,
                 cancellationToken
             );
             return (
@@ -219,8 +358,6 @@ namespace Kafka.Client.Clients.Producer
                 string transactionalId,
                 int transactionTimeoutMs,
                 bool enableIdempotence,
-                SortedList<TopicName, TopicState> topicStates,
-                Transaction transaction,
                 IConnection controllerConnection
             )
             {
@@ -232,20 +369,16 @@ namespace Kafka.Client.Clients.Producer
                 TransactionTimeoutMs = transactionTimeoutMs;
                 EnableIdempotence = enableIdempotence;
                 ControllerConnection = controllerConnection;
-                TopicStates = topicStates;
-                Transaction = transaction;
                 ControllerConnection = controllerConnection;
             }
-            public short Acks { get; set; }
-            public int RequestTimeoutMs { get; set; }
-            public long ProducerId { get; set; }
-            public short ProducerEpoch { get; set; }
-            public string TransactionalId { get; set; }
-            public int TransactionTimeoutMs { get; set; }
-            public bool EnableIdempotence { get; set; }
-            public SortedList<TopicName, TopicState> TopicStates { get; set; }
-            public Transaction Transaction { get; set; }
-            public IConnection ControllerConnection { get; set; }
+            public short Acks { get; init; }
+            public int RequestTimeoutMs { get; init; }
+            public long ProducerId { get; init; }
+            public short ProducerEpoch { get; init; }
+            public string TransactionalId { get; init; }
+            public int TransactionTimeoutMs { get; init; }
+            public bool EnableIdempotence { get; init; }
+            public IConnection ControllerConnection { get; init; }
         }
 
         private async ValueTask<RuntimeConfigurations> InitRuntime(
@@ -286,8 +419,6 @@ namespace Kafka.Client.Clients.Producer
                 transactionalId,
                 transactionTimeoutMs,
                 enableIdempotence,
-                new SortedList<TopicName, TopicState>(TopicNameCompare.Instance),
-                NoTransaction.Instance,
                 controllerConnection
             );
         }
@@ -317,143 +448,6 @@ namespace Kafka.Client.Clients.Producer
             return await _connectionPool.AquireSharedConnection(host, port, cancellationToken);
         }
 
-        private static void HandleBeginTransaction(
-            BeginTransactionCommand beginTransactionCommand,
-            RuntimeConfigurations runtime,
-            BlockingCollection<IProducerCommand> commandQueue
-        )
-        {
-            switch (runtime.Transaction, runtime.TransactionalId)
-            {
-                case (ActiveTransaction, _):
-                    beginTransactionCommand.TaskCompletionSource.SetException(new InvalidOperationException("Active transaction in progress"));
-                    break;
-                case (_, ""):
-                    beginTransactionCommand.TaskCompletionSource.SetException(new InvalidOperationException("transaction.id is not initialized"));
-                    break;
-                default:
-                    runtime.Transaction = new ActiveTransaction(runtime.TransactionalId, commandQueue);
-                    beginTransactionCommand.TaskCompletionSource.SetResult(runtime.Transaction);
-                    break;
-            }
-        }
-
-        private static async ValueTask HandleCommitTransaction(
-            CommitTransactionCommand commitTransactionCommand,
-            RuntimeConfigurations runtime,
-            CancellationToken cancellationToken
-        )
-        {
-            if (runtime.Transaction is NoTransaction)
-            {
-                commitTransactionCommand.TaskCompletionSource.SetException(new InvalidOperationException("No active transaction"));
-                return;
-            }
-            var commitRequest = new EndTxnRequest(
-                commitTransactionCommand.TransactionId,
-                runtime.ProducerId,
-                runtime.ProducerEpoch,
-                true
-            );
-            var commitResponse = await runtime.ControllerConnection.ExecuteRequest(
-                commitRequest,
-                EndTxnRequestSerde.Write,
-                EndTxnResponseSerde.Read,
-                cancellationToken
-            );
-            if (commitResponse.ErrorCodeField != 0)
-            {
-                var error = Errors.Translate(commitResponse.ErrorCodeField);
-                commitTransactionCommand.TaskCompletionSource.SetException(new ApiException(error));
-            }
-            else
-            {
-                commitTransactionCommand.TaskCompletionSource.SetResult(runtime.Transaction);
-                runtime.Transaction = NoTransaction.Instance;
-            }
-        }
-
-        private static async ValueTask HandleRollbackTransaction(
-            RollbackTransactionCommand rollbackTransactionCommand,
-            RuntimeConfigurations runtime,
-            CancellationToken cancellationToken
-        )
-        {
-            if (runtime.Transaction is NoTransaction)
-            {
-                rollbackTransactionCommand.TaskCompletionSource.SetException(new InvalidOperationException("No active transaction"));
-                return;
-            }
-            var rollbackRequest = new EndTxnRequest(
-                rollbackTransactionCommand.TransactionId,
-                runtime.ProducerId,
-                runtime.ProducerEpoch,
-                false
-            );
-            var rollbackResponse = await runtime.ControllerConnection.ExecuteRequest(
-                rollbackRequest,
-                EndTxnRequestSerde.Write,
-                EndTxnResponseSerde.Read,
-                cancellationToken
-            );
-            if (rollbackResponse.ErrorCodeField != 0)
-            {
-                var error = Errors.Translate(rollbackResponse.ErrorCodeField);
-                rollbackTransactionCommand.TaskCompletionSource.SetException(new ApiException(error));
-            }
-            else
-            {
-                rollbackTransactionCommand.TaskCompletionSource.SetResult(runtime.Transaction);
-                runtime.Transaction = NoTransaction.Instance;
-            }
-        }
-
-        private async ValueTask UpdateTransactions(
-            IDictionary<ClusterNodeId, IDictionary<TopicName, IDictionary<Partition, (PartitionState PartitionState, IList<ProduceCommand> Commands)>>> assignedCommands,
-            RuntimeConfigurations runtime,
-            CancellationToken cancellationToken
-        )
-        {
-            if (runtime.Transaction is not ActiveTransaction activeTransaction)
-                return;
-            var newTopicPartitions = activeTransaction.AddTopicPartitions(
-                assignedCommands
-                .SelectMany(c => c.Value
-                    .SelectMany(t => t.Value.Keys
-                        .Select(p => new TopicPartition(t.Key, p))
-                    )
-                )
-            );
-            if (newTopicPartitions.Any())
-            {
-                var addPartitionsToTxnTopic = newTopicPartitions
-                    .GroupBy(g => g.Topic.Value ?? "")
-                    .Select(r => new AddPartitionsToTxnRequest.AddPartitionsToTxnTopic(
-                            r.Key,
-                            r.Select(r => r.Partition.Value).ToImmutableArray()
-                        )
-                    )
-                    .ToImmutableArray()
-                ;
-                var addPartitionsToTxnRequest = new AddPartitionsToTxnRequest(
-                    activeTransaction.TransactionId,
-                    runtime.ProducerId,
-                    runtime.ProducerEpoch,
-                    addPartitionsToTxnTopic
-                );
-                var addPartitionsToTxnResponse = await runtime.ControllerConnection.ExecuteRequest(
-                    addPartitionsToTxnRequest,
-                    AddPartitionsToTxnRequestSerde.Write,
-                    AddPartitionsToTxnResponseSerde.Read,
-                    cancellationToken
-                );
-                foreach (var topicParitionResponse in addPartitionsToTxnResponse.ResultsField)
-                    foreach (var paritionResponse in topicParitionResponse.ResultsField)
-                        if (paritionResponse.ErrorCodeField != 0)
-                            ProducerLog.ProducePartitionError(_logger, topicParitionResponse.NameField, Errors.Translate(paritionResponse.ErrorCodeField));
-            }
-        }
-
         private static short ParseAcks(
             ProducerConfig producerConfig,
             ILogger logger
@@ -475,103 +469,6 @@ namespace Kafka.Client.Clients.Producer
                 .Select(r => r.Close(cancellationToken))
             ;
             await Task.WhenAll(channelClose);
-        }
-
-        private abstract class Transaction :
-            ITransaction
-        {
-            protected Transaction(string transactionId)
-            {
-                TransactionId = transactionId;
-            }
-            public string TransactionId { get; init; }
-            public abstract TxnState TxnState { get; }
-            public abstract Task Commit(CancellationToken cancellationToken);
-            public abstract Task Rollback(CancellationToken cancellationToken);
-            internal abstract long GetBaseSequence(TopicPartition topicPartition);
-            internal abstract void InrementBaseSequence(TopicPartition topicPartition, long count);
-            internal abstract IEnumerable<TopicPartition> AddTopicPartitions(IEnumerable<TopicPartition> topicPartitions);
-        }
-
-        private sealed class ActiveTransaction :
-            Transaction
-        {
-            private readonly TxnState _txnState = TxnState.Active;
-            private readonly object _guard = new();
-            private readonly Dictionary<TopicPartition, long> _topicPartitionsBaseSequence = new();
-            private readonly BlockingCollection<IProducerCommand> _commandQueue;
-            public ActiveTransaction(string transactionId, BlockingCollection<IProducerCommand> commandQueue)
-                : base(transactionId)
-            {
-                _commandQueue = commandQueue;
-            }
-
-            public override TxnState TxnState => _txnState;
-            public override Task Commit(CancellationToken cancellationToken)
-            {
-                lock (_guard)
-                {
-                    if (_txnState != TxnState.Active)
-                        throw new InvalidOperationException($"Invalid Transaction state: {_txnState}");
-                    var command = new CommitTransactionCommand(TransactionId, new TaskCompletionSource<ITransaction>());
-                    _commandQueue.Add(command, cancellationToken);
-                    return command.TaskCompletionSource.Task;
-                }
-            }
-            public override Task Rollback(CancellationToken cancellationToken)
-            {
-                lock (_guard)
-                {
-                    if (_txnState != TxnState.Active)
-                        throw new InvalidOperationException($"Invalid Transaction state: {_txnState}");
-                    var command = new RollbackTransactionCommand(TransactionId, new TaskCompletionSource<ITransaction>());
-                    _commandQueue.Add(command, cancellationToken);
-                    return command.TaskCompletionSource.Task;
-                }
-            }
-            internal override IEnumerable<TopicPartition> AddTopicPartitions(IEnumerable<TopicPartition> topicPartitions)
-            {
-                var newTopicPartitions = new List<TopicPartition>();
-                foreach (var topicPartition in topicPartitions)
-                {
-                    if (!_topicPartitionsBaseSequence.ContainsKey(topicPartition))
-                    {
-                        _topicPartitionsBaseSequence.Add(topicPartition, Offset.Zero);
-                        newTopicPartitions.Add(topicPartition);
-                    }
-                }
-                return newTopicPartitions;
-            }
-
-            internal override long GetBaseSequence(TopicPartition topicPartition) =>
-                _topicPartitionsBaseSequence[topicPartition]
-            ;
-
-            internal override void InrementBaseSequence(TopicPartition topicPartition, long count) =>
-                _topicPartitionsBaseSequence[topicPartition] += count
-            ;
-        }
-
-        private sealed class NoTransaction :
-            Transaction
-        {
-            public static Transaction Instance { get; } = new NoTransaction();
-            public override TxnState TxnState => TxnState.None;
-            private NoTransaction()
-                : base("") { }
-            public override Task Commit(CancellationToken cancellationToken) =>
-                Task.CompletedTask
-            ;
-            public override Task Rollback(CancellationToken cancellationToken) =>
-                Task.CompletedTask
-            ;
-            internal override IEnumerable<TopicPartition> AddTopicPartitions(IEnumerable<TopicPartition> topicPartitions) =>
-                Enumerable.Empty<TopicPartition>()
-            ;
-            internal override long GetBaseSequence(TopicPartition topicPartition) =>
-                0
-            ;
-            internal override void InrementBaseSequence(TopicPartition topicPartition, long count) { }
         }
     }
 }

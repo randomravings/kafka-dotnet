@@ -2,8 +2,10 @@
 using Kafka.Cli.Text;
 using Kafka.Client.Clients.Producer;
 using Kafka.Client.Clients.Producer.Model;
+using Kafka.Client.Commands;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace Kafka.Cli.Cmd
 {
@@ -14,12 +16,13 @@ namespace Kafka.Cli.Cmd
             CancellationToken cancellationToken
         )
         {
+            var commands = new BlockingCollection<ICommand<ProduceResult>>();
             var config = new ProducerConfig
             {
                 ClientId = options.ClientId,
                 BootstrapServers = options.BootstrapServer,
-                TransactionalId = "txnator",
-                LingerMs= options.LingerMs,
+                TransactionalId = options.TransactionalId,
+                LingerMs = options.LingerMs,
                 MaxInFlightRequestsPerConnection = options.MaxInFlightRequestsPerConnection,
                 MaxRequestSize = options.MaxRequestSize
             };
@@ -38,26 +41,29 @@ namespace Kafka.Cli.Cmd
                 .WithLogger(logger)
                 .Build()
             ;
+            var resultHandler = HandleResults(commands, cancellationToken);
 
-            if (options.MaxInFlightRequestsPerConnection > 1)
-                return await RunBatch(options, producer, cancellationToken);
-            else
-                return await RunSingle(options, producer, cancellationToken);
-
-        }
-
-        public static async ValueTask<int> RunSingle(
-            ProducerOpts options,
-            IProducer<string, string> producer,
-            CancellationToken cancellationToken
-        )
-        {
-            Console.WriteLine("Running in single record mode. Empty new line will terminate session.");
+            Console.WriteLine("Empty new line will terminate session.");
             while (!cancellationToken.IsCancellationRequested)
             {
                 var input = Console.ReadLine();
                 if (string.IsNullOrEmpty(input))
                     return 0;
+                switch (input)
+                {
+                    case "/bt":
+                        await producer.BeginTransaction(cancellationToken);
+                        continue;
+                    case "/ct":
+                        await producer.CommitTransaction(cancellationToken);
+                        continue;
+                    case "/rt":
+                        await producer.RollbackTransaction(cancellationToken);
+                        continue;
+                    case "/fl":
+                        await producer.Flush(cancellationToken);
+                        continue;
+                }
                 var split = input.Split(',', StringSplitOptions.RemoveEmptyEntries);
                 if (split.Length != 2)
                 {
@@ -69,96 +75,39 @@ namespace Kafka.Cli.Cmd
                     split[0],
                     split[1]
                 );
-                var produceResult = await producer.Send(
+                var sendCommand = await producer.Send(
                     record,
                     cancellationToken
                 );
-                if (produceResult.Error.Code != 0)
-                {
-                    Console.WriteLine(Formatter.Print(produceResult.Error));
-                    Console.WriteLine(Formatter.Print(produceResult.RecordError));
-                }
-                else
-                {
-                    Console.WriteLine(Formatter.Print(produceResult.TopicPartitionOffset));
-                }
+
             }
             return 0;
+
         }
 
-        public static async ValueTask<int> RunBatch(
-            ProducerOpts options,
-            IProducer<string, string> producer,
-            CancellationToken cancellationToken
-        )
+        static Task HandleResults(BlockingCollection<ICommand<ProduceResult>> commands, CancellationToken cancellationToken)
         {
-            Console.WriteLine($"Running in batch record mode with batch size {options.MaxInFlightRequestsPerConnection}. Empty new line will terminate session.");
-            var records = new List<ProduceRecord<string, string>>(options.MaxInFlightRequestsPerConnection);
-            var running = true;
-            while (running && !cancellationToken.IsCancellationRequested)
+            return Task.Run(async () =>
             {
-                while (records.Count < options.MaxInFlightRequestsPerConnection)
+                while (!cancellationToken.IsCancellationRequested)
                 {
-                    var input = Console.ReadLine();
-                    if (string.IsNullOrEmpty(input))
+                    try
                     {
-                        running = false;
-                        break;
+                        var command = commands.Take(cancellationToken);
+                        var produceResult = await command.Result();
+                        if (produceResult.Error.Code != 0)
+                        {
+                            Console.WriteLine(Formatter.Print(produceResult.Error));
+                            Console.WriteLine(Formatter.Print(produceResult.RecordError));
+                        }
+                        else
+                        {
+                            Console.WriteLine(Formatter.Print(produceResult.TopicPartitionOffset));
+                        }
                     }
-                    var split = input.Split(',', StringSplitOptions.RemoveEmptyEntries);
-                    if (split.Length != 2)
-                    {
-                        Console.WriteLine("Format must be 'key,value'");
-                        continue;
-                    }
-                    var record = new ProduceRecord<string, string>(
-                        options.TopicName,
-                        split[0],
-                        split[1]
-                    );
-                    records.Add(record);
+                    catch (OperationCanceledException) { }
                 }
-                if (records.Count > 0)
-                    await FlushBatch(
-                        records,
-                        producer,
-                        cancellationToken
-                    );
-                records.Clear();
-            }
-            await producer.Close(CancellationToken.None);
-            return 0;
-        }
-
-        private static async ValueTask<int> FlushBatch(
-            IList<ProduceRecord<string, string>> records,
-            IProducer<string, string> producer,
-            CancellationToken cancellationToken
-        )
-        {
-            var tasks = records.Select(r => producer.Send(r, cancellationToken)).ToList();
-            try
-            {
-                await Task.WhenAll(tasks);
-                foreach (var task in tasks)
-                {
-                    if (task.Result.Error.Code != 0)
-                    {
-                        Console.WriteLine(Formatter.Print(task.Result.Error));
-                        Console.WriteLine(Formatter.Print(task.Result.RecordError));
-                    }
-                    else
-                    {
-                        Console.WriteLine(Formatter.Print(task.Result.TopicPartitionOffset));
-                    }
-                }
-                return 0;
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-                return -1;
-            }
+            }, CancellationToken.None);
         }
     }
 }

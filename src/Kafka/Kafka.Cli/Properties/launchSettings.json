@@ -6,7 +6,7 @@
       //"commandLineArgs": "topics list --bootstrap-server localhost:9092 --log-level trace"
       //"commandLineArgs": "topics describe --topic test --bootstrap-server localhost:9092 --log-level trace"
       //"commandLineArgs": "topics delete --topic test --bootstrap-server localhost:9092 --log-level trace"
-      "commandLineArgs": "producer --topic test --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --client-id me.org --log-level trace --batch-size 1"
+      "commandLineArgs": "producer --topic test --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --client-id me.org --transactional-id xyz --linger-ms 600000 --log-level trace"
       //"commandLineArgs": "producer --topic test --bootstrap-server localhost:9092 --client-id me.org --log-level trace"
       //"commandLineArgs": "consumer --topic test --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --client-id me.org --group-id test-cg --log-level trace"
       //"commandLineArgs": "consumer --bootstrap-server localhost:9092,localhost:9093,localhost:9094  --topic test --partition-assign 0:-1,1:-1,2:-1,3:-1,4:-1,5:-1 --log-level trace"

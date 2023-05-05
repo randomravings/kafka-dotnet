@@ -1,5 +1,4 @@
 ﻿using Kafka.Client.Clients.Producer.Model;
-using Kafka.Client.Clients.Producer.Model.Internal;
 using Kafka.Common.Encoding;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
@@ -44,22 +43,22 @@ namespace Kafka.Client.Clients.Producer
             _logger = logger;
         }
 
-        public abstract Task<ProduceResult> Send(ProduceCommand produceCommand, CancellationToken cancellationToken);
+        public abstract Task Send(SendCommand sendCommand, CancellationToken cancellationToken);
 
         protected static void FinalizeSend(
-            ProduceCommand command,
+            SendCommand sendCommand,
             Offset offset,
             Error error,
             string recordError
         )
         {
-            command.TaskCompletionSource.SetResult(
+            sendCommand.TaskCompletionSource.SetResult(
                 new ProduceResult(
                     new TopicPartitionOffset(
-                        command.TopicPartition,
+                        sendCommand.TopicPartition,
                         offset
                     ),
-                    command.Timestamp,
+                    sendCommand.Timestamp,
                     error,
                     recordError
                 )
@@ -69,17 +68,17 @@ namespace Kafka.Client.Clients.Producer
         protected IRecords BuildRecords(
             int baseSequence,
             Attributes attributes,
-            IEnumerable<ProduceCommand> produceCommands
+            IEnumerable<SendCommand> sendCommands
         )
         {
             var minTimestamp = long.MaxValue;
             var maxTimestamp = long.MinValue;
-            foreach (var x in produceCommands)
+            foreach (var x in sendCommands)
             {
                 minTimestamp = Math.Min(minTimestamp, x.Timestamp.TimestampMs);
                 maxTimestamp = Math.Max(maxTimestamp, x.Timestamp.TimestampMs);
             }
-            (var batchSize, var recordList) = BuildRecordArray(minTimestamp, produceCommands);
+            (var batchSize, var recordList) = BuildRecordArray(minTimestamp, sendCommands);
             return new RecordBatch(
                 BaseOffset: 0,
                 BatchLength: batchSize,
@@ -100,10 +99,10 @@ namespace Kafka.Client.Clients.Producer
         protected IRecords BuildRecords(
             int baseSequence,
             Attributes attributes,
-            ProduceCommand produceCommand
+            SendCommand sendCommand
         )
         {
-            (var batchSize, var recordList) = BuildRecordArray(produceCommand);
+            (var batchSize, var recordList) = BuildRecordArray(sendCommand);
             return new RecordBatch(
                 BaseOffset: 0,
                 BatchLength: batchSize,
@@ -112,8 +111,8 @@ namespace Kafka.Client.Clients.Producer
                 Crc: 0, // Crc computation deferred to encoder.
                 attributes,
                 LastOffsetDelta: recordList.Length - 1,
-                BaseTimestamp: produceCommand.Timestamp.TimestampMs,
-                MaxTimestamp: produceCommand.Timestamp.TimestampMs,
+                BaseTimestamp: sendCommand.Timestamp.TimestampMs,
+                MaxTimestamp: sendCommand.Timestamp.TimestampMs,
                 ProducerId: _producerId,
                 ProducerEpoch: _producerEpoch,
                 BaseSequence: baseSequence,
@@ -123,7 +122,7 @@ namespace Kafka.Client.Clients.Producer
 
         private static (int BatchSize, ImmutableArray<IRecord> Records) BuildRecordArray(
             long minTimestampMs,
-            IEnumerable<ProduceCommand> produceCommands
+            IEnumerable<SendCommand> produceCommands
         )
         {
             var offsetDelta = 0;
@@ -148,15 +147,15 @@ namespace Kafka.Client.Clients.Producer
         }
 
         private static (int BatchSize, ImmutableArray<IRecord> Records) BuildRecordArray(
-            ProduceCommand produceCommand
+            SendCommand sendCommand
         )
         {
             var record = CreateRecord(
                 0,
                 0,
-                produceCommand.Key,
-                produceCommand.Value,
-                produceCommand.Headers
+                sendCommand.Key,
+                sendCommand.Value,
+                sendCommand.Headers
             );
             var batchSize = record.Length;
             batchSize += Encoder.SizeOfInt32(batchSize);
@@ -196,10 +195,10 @@ namespace Kafka.Client.Clients.Producer
         /// </summary>
         /// <param name="produceCallback"></param>
         /// <returns></returns>
-        protected static int EstimateRecordSize(ProduceCommand produceCallback) =>
-            (produceCallback.Key?.Length ?? 0) +
-            (produceCallback.Key?.Length ?? 0) +
-            ComputeHeadersSize(produceCallback.Headers) +
+        protected static int EstimateRecordSize(SendCommand sendCommand) =>
+            (sendCommand.Key?.Length ?? 0) +
+            (sendCommand.Key?.Length ?? 0) +
+            ComputeHeadersSize(sendCommand.Headers) +
             40 // Add some overhead to accout for overhead varint stuff.
         ;
 
@@ -253,6 +252,11 @@ namespace Kafka.Client.Clients.Producer
             await Closing(cancellationToken);
         }
 
+        async Task IBrokerChannel.Flush(CancellationToken cancellationToken) =>
+            await Flushing(cancellationToken)
+        ;
+
         protected abstract Task Closing(CancellationToken cancellationToken);
+        protected abstract Task Flushing(CancellationToken cancellationToken);
     }
 }

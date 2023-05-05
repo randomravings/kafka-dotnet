@@ -7,6 +7,7 @@
         MaxLingerMsReached = 2,
         MaxSizeExceeded = 3,
         ControlCommandIssued = 4,
-        AttributesChanged = 5
+        AttributesChanged = 5,
+        Flush = 6
     }
 }

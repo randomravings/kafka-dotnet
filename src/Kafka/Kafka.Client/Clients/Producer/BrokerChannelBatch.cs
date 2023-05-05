@@ -1,6 +1,7 @@
 ﻿using Kafka.Client.Clients.Producer.Logging;
 using Kafka.Client.Clients.Producer.Model;
 using Kafka.Client.Clients.Producer.Model.Internal;
+using Kafka.Client.Commands;
 using Kafka.Client.Messages;
 using Kafka.Common.Model;
 using Kafka.Common.Network;
@@ -9,6 +10,7 @@ using Kafka.Common.Records;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Kafka.Client.Clients.Producer
 {
@@ -21,8 +23,8 @@ namespace Kafka.Client.Clients.Producer
         private readonly Task _recordsBuilderTask;
         private readonly Task _recordsAccumulatorTask;
         private readonly CancellationTokenSource _internalCts = new();
-        private readonly BlockingCollection<ProduceCommand> _commandQueue = new();
-        private readonly BlockingCollection<ProduceBatch> _executeQueue = new();
+        private readonly BlockingCollection<ICommand> _commandQueue = new();
+        private readonly BlockingCollection<ProduceBatch> _sendQueue = new();
         private readonly Func<ProduceBatch, CancellationToken, Task> _sendDelegate;
 
         public BrokerChannelBatch(
@@ -57,16 +59,10 @@ namespace Kafka.Client.Clients.Producer
             _recordsAccumulatorTask = RunCollector(_internalCts.Token);
         }
 
-        public override Task<ProduceResult> Send(ProduceCommand produceCommand, CancellationToken cancellationToken)
+        public override Task Send(SendCommand pendCommand, CancellationToken cancellationToken)
         {
-            _commandQueue.Add(produceCommand, cancellationToken);
-            return produceCommand.TaskCompletionSource.Task;
-        }
-
-        public Task<ProduceResult> Queue(ProduceCommand produceCommand, CancellationToken cancellationToken)
-        {
-            _commandQueue.Add(produceCommand, cancellationToken);
-            return produceCommand.TaskCompletionSource.Task;
+            _commandQueue.Add(pendCommand, cancellationToken);
+            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -79,33 +75,36 @@ namespace Kafka.Client.Clients.Producer
         {
             return Task.Run(() =>
             {
-                var overflow = default(ProduceCommand);
+                var carryOver = default(ICommand);
                 try
                 {
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        // Process overflow or await next item.
-                        var item = overflow ?? _commandQueue.Take(cancellationToken);
-
-                        // Create linger time CTS.
-                        using var localCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                        localCts.CancelAfter(_lingerTime);
-
-                        // Collect until either:
-                        // - Max in flight reached.
-                        // - Max size overflowed.
-                        // - Linger time reached.
-                        (var batch, var reason, overflow) = Collect(
-                            _commandQueue,
-                            item,
-                            _maxInFlightRequestsPerConnection,
-                            _maxRequestSize,
-                            localCts.Token
-                        );
-
-                        // Send batch for delivery.
-                        _executeQueue.Add(batch, cancellationToken);
-                        ProducerLog.BatchCollected(_logger, reason, batch.Count);
+                        switch (carryOver)
+                        {
+                            case SendCommand sendCommand:
+                                (var batch, var reason, carryOver) = Collect(
+                                    _commandQueue,
+                                    sendCommand,
+                                    _maxInFlightRequestsPerConnection,
+                                    _maxRequestSize,
+                                    _lingerTime,
+                                    cancellationToken
+                                );
+                                // Send batch for delivery.
+                                if(batch.Count > 0)
+                                    _sendQueue.Add(batch, cancellationToken);
+                                ProducerLog.BatchCollected(_logger, reason, batch.Count);
+                                break;
+                            case null:
+                                carryOver = _commandQueue.Take(cancellationToken);
+                                break;
+                            case FlushCommand flushCommand:
+                                SpinWait.SpinUntil(() => _sendQueue.Count == 0);
+                                flushCommand.TaskCompletionSource.SetResult(true);
+                                carryOver = _commandQueue.Take(cancellationToken);
+                                break;
+                        }
                     }
                 }
                 catch (OperationCanceledException) { }
@@ -122,35 +121,43 @@ namespace Kafka.Client.Clients.Producer
         /// <param name="maxRequestSize">Max size in bytes for batch.</param>
         /// <param name="cancellationToken">Cancellation token for linger time.</param>
         /// <returns></returns>
-        private static (ProduceBatch Batch, BatchCollectReason Reason, ProduceCommand? Overflow) Collect(
-            BlockingCollection<ProduceCommand> commandQueue,
-            ProduceCommand firstItem,
+        private static (ProduceBatch Batch, BatchCollectReason Reason, ICommand? Overflow) Collect(
+            BlockingCollection<ICommand> commandQueue,
+            SendCommand carryOver,
             int maxInFlightRequestsPerConnection,
             int maxRequestSize,
+            TimeSpan lingerMs,
             CancellationToken cancellationToken
         )
         {
+            // Create linger time CTS.
+            using var localCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            localCts.CancelAfter(lingerMs);
+
             var batch = new ProduceBatch(Attributes.None);
-            var fetchedSize = EstimateRecordSize(firstItem);
-            var attributes = firstItem.Attributes;
-            batch.Add(firstItem);
+            var estimatedSize = EstimateRecordSize(carryOver);
+            var attributes = carryOver.Attributes;
+            batch.Add(carryOver);
             try
             {
                 while (true)
                 {
                     if (batch.Count >= maxInFlightRequestsPerConnection)
                         return (batch, BatchCollectReason.MaxInFlightReached, null);
-
-                    var item = commandQueue.Take(cancellationToken);
-
-                    if (item.Attributes != attributes)
-                        return (batch, BatchCollectReason.AttributesChanged, null);
-
-                    fetchedSize += EstimateRecordSize(item);
-                    if (fetchedSize >= maxRequestSize)
-                        return (batch, BatchCollectReason.MaxSizeExceeded, item);
-
-                    batch.Add(item);
+                    var item = commandQueue.Take(localCts.Token);
+                    switch (item)
+                    {
+                        case SendCommand sendCommand:
+                            estimatedSize += EstimateRecordSize(sendCommand);
+                            if (estimatedSize >= maxRequestSize)
+                                return (batch, BatchCollectReason.MaxSizeExceeded, sendCommand);
+                            if (sendCommand.Attributes != attributes)
+                                return (batch, BatchCollectReason.AttributesChanged, null);
+                            batch.Add(sendCommand);
+                            break;
+                        case FlushCommand flushCommand:
+                            return (batch, BatchCollectReason.Flush, flushCommand);
+                    }
                 }
             }
             catch (OperationCanceledException)
@@ -169,7 +176,7 @@ namespace Kafka.Client.Clients.Producer
                 {
                     while (!cancellationToken.IsCancellationRequested)
                     {
-                        var batch = _executeQueue.Take(cancellationToken);
+                        var batch = _sendQueue.Take(cancellationToken);
                         ProducerLog.ProduceCommandDequeue(_logger, batch.Count);
                         await _sendDelegate(
                             batch,
@@ -308,7 +315,7 @@ namespace Kafka.Client.Clients.Producer
         }
 
         private static void FinalizeSend(
-            IReadOnlyList<ProduceCommand> commands,
+            IReadOnlyList<SendCommand> commands,
             ProduceResponse.TopicProduceResponse.PartitionProduceResponse response
         )
         {
@@ -317,7 +324,7 @@ namespace Kafka.Client.Clients.Producer
         }
 
         private static void FinalizeSendWithErrors(
-            IReadOnlyList<ProduceCommand> commands,
+            IReadOnlyList<SendCommand> commands,
             ProduceResponse.TopicProduceResponse.PartitionProduceResponse response
         )
         {
@@ -341,6 +348,13 @@ namespace Kafka.Client.Clients.Producer
         {
             _internalCts.Cancel();
             await Task.WhenAll(_recordsAccumulatorTask, _recordsBuilderTask);
+        }
+
+        protected override async Task Flushing(CancellationToken cancellationToken)
+        {
+            var flushCommand = new FlushCommand();
+            _commandQueue.Add(flushCommand, cancellationToken);
+            await flushCommand.TaskCompletionSource.Task;
         }
     }
 }

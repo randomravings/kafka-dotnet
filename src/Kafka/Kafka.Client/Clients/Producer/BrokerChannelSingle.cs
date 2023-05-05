@@ -1,5 +1,4 @@
 ﻿using Kafka.Client.Clients.Producer.Model;
-using Kafka.Client.Clients.Producer.Model.Internal;
 using Kafka.Client.Messages;
 using Kafka.Common.Model;
 using Kafka.Common.Network;
@@ -14,7 +13,7 @@ namespace Kafka.Client.Clients.Producer
         BrokerChannel
     {
         private readonly SemaphoreSlim _semaphore = new(1, 1);
-        private readonly Func<ProduceCommand, CancellationToken, Task> _sendDelegate;
+        private readonly Func<SendCommand, CancellationToken, Task> _sendDelegate;
 
         public BrokerChannelSingle(
             long producerId,
@@ -43,25 +42,24 @@ namespace Kafka.Client.Clients.Producer
             };
         }
 
-        public override async Task<ProduceResult> Send(ProduceCommand produceCommand, CancellationToken cancellationToken)
+        public override async Task Send(SendCommand sendCommand, CancellationToken cancellationToken)
         {
             await _semaphore.WaitAsync(cancellationToken);
             try
             {
-                await _sendDelegate(produceCommand, cancellationToken);
-                return produceCommand.TaskCompletionSource.Task.Result;
+                await _sendDelegate(sendCommand, cancellationToken);
             }
             finally { _semaphore.Release(); }
         }
 
         private async Task SendWithAck(
-            ProduceCommand command,
+            SendCommand sendCommand,
             CancellationToken cancellationToken
         )
         {
             var partitionStates = new Dictionary<TopicPartition, int>();
             var request = CreateProduceRequest(
-                command,
+                sendCommand,
                 partitionStates
             );
             var response = await ProducerProtocol.Produce(
@@ -75,7 +73,7 @@ namespace Kafka.Client.Clients.Producer
             if (partitionData.ErrorCodeField == 0)
             {
                 FinalizeSend(
-                    command,
+                    sendCommand,
                     partitionData.BaseOffsetField,
                     Errors.Known.NONE,
                     ""
@@ -86,7 +84,7 @@ namespace Kafka.Client.Clients.Producer
                 var error = Errors.Translate(partitionData.ErrorCodeField);
                 var recordErrors = partitionData.RecordErrorsField.FirstOrDefault();
                 FinalizeSend(
-                    command,
+                    sendCommand,
                     partitionData.BaseOffsetField,
                     error,
                     recordErrors?.BatchIndexErrorMessageField ?? ""
@@ -99,13 +97,13 @@ namespace Kafka.Client.Clients.Producer
         }
 
         private async Task SendWithoutAck(
-            ProduceCommand command,
+            SendCommand sendCommand,
             CancellationToken cancellationToken
         )
         {
             var partitionStates = new Dictionary<TopicPartition, int>();
             var request = CreateProduceRequest(
-                command,
+                sendCommand,
                 partitionStates
             );
             await ProducerProtocol.ProduceNoAck(
@@ -116,7 +114,7 @@ namespace Kafka.Client.Clients.Producer
                 cancellationToken
             );
             FinalizeSend(
-                command,
+                sendCommand,
                 Offset.Unset,
                 Errors.Known.NONE,
                 ""
@@ -127,20 +125,20 @@ namespace Kafka.Client.Clients.Producer
         }
 
         private ProduceRequest CreateProduceRequest(
-            ProduceCommand command,
+            SendCommand sendCommand,
             IDictionary<TopicPartition, int> partitionStates
         )
         {
-            _topicPartitionStates.TryGetValue(command.TopicPartition, out int baseSequence);
-            var records = BuildRecords(baseSequence, Attributes.None, command);
+            _topicPartitionStates.TryGetValue(sendCommand.TopicPartition, out int baseSequence);
+            var records = BuildRecords(baseSequence, Attributes.None, sendCommand);
             baseSequence += records.Count;
-            partitionStates[command.TopicPartition] = baseSequence;
+            partitionStates[sendCommand.TopicPartition] = baseSequence;
             var partitionData = new ProduceRequest.TopicProduceData.PartitionProduceData(
-                command.TopicPartition.Partition,
+                sendCommand.TopicPartition.Partition,
                 ImmutableArray.Create(records)
             );
             var topicData = new ProduceRequest.TopicProduceData(
-                command.TopicPartition.Topic,
+                sendCommand.TopicPartition.Topic,
                 ImmutableArray.Create(partitionData)
             );
             return new ProduceRequest(
@@ -152,6 +150,10 @@ namespace Kafka.Client.Clients.Producer
         }
 
         protected override Task Closing(CancellationToken cancellationToken) =>
+            Task.CompletedTask
+        ;
+
+        protected override Task Flushing(CancellationToken cancellationToken) =>
             Task.CompletedTask
         ;
     }

@@ -1,4 +1,4 @@
-﻿using Kafka.Client.Clients.Producer.Model.Internal;
+﻿using Kafka.Client.Clients.Producer.Model;
 using Kafka.Common.Model;
 using Kafka.Common.Records;
 using System.Collections;
@@ -6,24 +6,24 @@ using System.Collections;
 namespace Kafka.Client.Clients.Producer
 {
     internal class ProduceBatch :
-        IEnumerable<KeyValuePair<TopicName, Dictionary<Partition, List<ProduceCommand>>>>
+        IEnumerable<KeyValuePair<TopicName, Dictionary<Partition, List<SendCommand>>>>
     {
-        private readonly Dictionary<TopicName, Dictionary<Partition, List<ProduceCommand>>> _items = new();
+        private readonly Dictionary<TopicName, Dictionary<Partition, List<SendCommand>>> _items = new();
         private int _count = 0;
 
         public ProduceBatch(Attributes localAttributes) =>
             LocalAttributes = localAttributes
         ;
 
-        public ProduceCommand this[TopicName topic, Partition partition, int sequence] =>
+        public SendCommand this[TopicName topic, Partition partition, int sequence] =>
             _items[topic][partition][sequence]
         ;
 
-        public IReadOnlyList<ProduceCommand> this[TopicName topic, Partition partition] =>
+        public IReadOnlyList<SendCommand> this[TopicName topic, Partition partition] =>
             _items[topic][partition]
         ;
 
-        public void Add(ProduceCommand item)
+        public void Add(SendCommand item)
         {
             UpsertBatch(_items, item);
             _count++;
@@ -33,24 +33,24 @@ namespace Kafka.Client.Clients.Producer
         public int Count => _count;
 
         private static void UpsertBatch(
-            Dictionary<TopicName, Dictionary<Partition, List<ProduceCommand>>> batch,
-            ProduceCommand command
+            Dictionary<TopicName, Dictionary<Partition, List<SendCommand>>> batch,
+            SendCommand command
         )
         {
             if (!batch.TryGetValue(command.TopicPartition.Topic, out var partitions))
             {
-                partitions = new Dictionary<Partition, List<ProduceCommand>>();
+                partitions = new Dictionary<Partition, List<SendCommand>>();
                 batch.Add(command.TopicPartition.Topic, partitions);
             }
             if (!partitions.TryGetValue(command.TopicPartition.Partition, out var commands))
             {
-                commands = new List<ProduceCommand>();
+                commands = new List<SendCommand>();
                 partitions.Add(command.TopicPartition.Partition, commands);
             }
             commands.Add(command);
         }
 
-        public IEnumerator<KeyValuePair<TopicName, Dictionary<Partition, List<ProduceCommand>>>> GetEnumerator() =>
+        public IEnumerator<KeyValuePair<TopicName, Dictionary<Partition, List<SendCommand>>>> GetEnumerator() =>
             _items.GetEnumerator()
         ;
 
