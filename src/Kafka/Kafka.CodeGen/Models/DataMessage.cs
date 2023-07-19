@@ -1,17 +1,18 @@
-﻿using System.Collections.Immutable;
-using Version = Kafka.Common.Model.Version;
+﻿using Kafka.Common.Model;
+using System.Collections.Immutable;
 
 namespace Kafka.CodeGen.Models
 {
     public sealed record DataMessage(
         string Name,
-        Version ValidVersions,
-        Version FlexibleVersions,
+        VersionRange ValidVersions,
+        VersionRange FlexibleVersions,
         ImmutableArray<Field> Fields,
         IImmutableDictionary<string, StructDefinition> Structs
     ) :
         MessageDefinition(
             Name,
+            ApiKey.None,
             ValidVersions,
             FlexibleVersions,
             Fields,

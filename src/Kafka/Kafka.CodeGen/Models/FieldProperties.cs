@@ -1,12 +1,12 @@
-﻿using Version = Kafka.Common.Model.Version;
+﻿using VersionRange = Kafka.Common.Model.VersionRange;
 
 namespace Kafka.CodeGen.Models
 {
     public sealed record FieldProperties(
-        Version Versions,
-        Version NullableVersions,
-        Version TaggedVersions,
-        Version FlexibleVersions,
+        VersionRange Versions,
+        VersionRange NullableVersions,
+        VersionRange TaggedVersions,
+        VersionRange FlexibleVersions,
         string EntityType,
         string About,
         bool Ignorable,

@@ -1,113 +1,84 @@
-﻿using Kafka.Client.Clients.Consumer.Logging;
-using Kafka.Client.Clients.Consumer.Models;
-using Kafka.Client.Messages;
-using Kafka.Common.Exceptions;
+﻿using Kafka.Client.Clients.Consumer.Models;
 using Kafka.Common.Model;
-using Kafka.Common.Protocol;
-using Kafka.Common.Records;
+using Kafka.Common.Model.Comparison;
 using Kafka.Common.Serialization;
-using Microsoft.Extensions.Logging;
-using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Consumer
 {
-    internal sealed class FetchResultEnumerator<TKey, TValue> :
-        IFetchResult<TKey, TValue>
+    internal sealed class FetchResultEnumerator :
+        IDisposable
     {
-        private readonly FetchResponse _fetchResponse;
-        private readonly IDeserializer<TKey> _keyDeserializer;
-        private readonly IDeserializer<TValue> _valueDeserializer;
-        private readonly Action<TopicPartition, Offset> _onRead;
-        private readonly Error _error;
+        public static FetchResultEnumerator Empty { get; } = new();
+
+        private readonly SortedList<TopicPartition, Offset> _readOffsets = new(TopicPartitionCompare.Instance);
+        private readonly ImmutableArray<FetchRecords> _fetchRecords;
+        private readonly TaskCompletionSource<IReadOnlyDictionary<TopicPartition, Offset>> _taskCompletionSource;
+
+        private int _recordsIndex;
+        private int _recordIndex;
+        private bool _disposed;
+
+        private FetchResultEnumerator()
+        {
+            _fetchRecords = ImmutableArray<FetchRecords>.Empty;
+            _taskCompletionSource = new TaskCompletionSource<IReadOnlyDictionary<TopicPartition, Offset>>();
+            _taskCompletionSource.SetException(new InvalidOperationException());
+            _disposed= true;
+        }
 
         public FetchResultEnumerator(
-            FetchResponse fetchResponse,
-            IDeserializer<TKey> keyDeserializer,
-            IDeserializer<TValue> valueDeserializer,
-            Action<TopicPartition, Offset> onRead
+            ImmutableArray<FetchRecords> fetchRecords,
+            TaskCompletionSource<IReadOnlyDictionary<TopicPartition, Offset>> taskCompletionSource
         )
         {
-            _fetchResponse = fetchResponse;
-            _keyDeserializer = keyDeserializer;
-            _valueDeserializer = valueDeserializer;
-            _onRead = onRead;
-            _error = _fetchResponse.ErrorCodeField switch
-            {
-                0 => Errors.Known.NONE,
-                _ => Errors.Translate(_fetchResponse.ErrorCodeField)
-            };
+            _fetchRecords = fetchRecords;
+            _taskCompletionSource = taskCompletionSource;
+            _recordIndex= -1;
         }
 
-        Error IFetchResult<TKey, TValue>.Error => _error;
-
-        IEnumerator<ConsumerRecord<TKey, TValue>> IEnumerable<ConsumerRecord<TKey, TValue>>.GetEnumerator()
+        public bool MoveNext()
         {
-            if (_error.Code != 0)
-                throw new ApiException(_error);
-
-            var allBatches = _fetchResponse
-                .ResponsesField
-                .SelectMany(t => t.PartitionsField.Select(p =>
-                    (new TopicPartition(t.TopicField, p.PartitionIndexField), p.RecordsField, p.ErrorCodeField)
-                ))
-            ;
-
-            foreach ((var topicPartition, var records, var errorCode) in allBatches)
+            if (_recordsIndex >= _fetchRecords.Length)
+                return false;
+            _recordIndex++;
+            if (_recordIndex >= _fetchRecords[_recordsIndex].Records.Count)
             {
-                switch ((records, errorCode))
-                {
-                    case (ImmutableArray<IRecords> recordBatches, 0):
-                        foreach (var recordBatch in recordBatches)
-                        {
-                            if (recordBatch.Attributes.HasFlag(Attributes.IsControlBatch))
-                                _onRead(topicPartition, recordBatch.Offset + 1);
-                            else
-                                foreach (var record in EnumerateRecords(topicPartition, recordBatch, _keyDeserializer, _valueDeserializer))
-                                {
-                                    _onRead(topicPartition, recordBatch.Offset + 1);
-                                    yield return record;
-                                }
-                        }
-                        break;
-                    case (null, _):
-                        break;
-                    default:
-                        var error = Errors.Translate(errorCode);
-                        throw new ApiException(error);
-                }
+                _recordsIndex++;
+                _recordIndex = -1;
+                return MoveNext();
             }
+            return true;
         }
 
-        IEnumerator IEnumerable.GetEnumerator() =>
-            ((IEnumerable<ConsumerRecord<TKey, TValue>>)this).GetEnumerator()
-        ;
-
-        public static IEnumerable<ConsumerRecord<TKey, TValue>> EnumerateRecords(
-            TopicPartition topicPartition,
-            IRecords records,
+        public ConsumerRecord<TKey, TValue> ReadRecord<TKey, TValue>(
             IDeserializer<TKey> keyDeserializer,
             IDeserializer<TValue> valueDeserializer
         )
         {
+            (var topicPartition, var records, var errorCode) = _fetchRecords[_recordsIndex];
+            var record = records[_recordIndex];
+            var offset = records.BaseOffset + _recordIndex;
+            var timestamp = records.BaseTimestamp + record.TimestampDelta;
+            var key = keyDeserializer.Read(record.Key);
+            var value = valueDeserializer.Read(record.Value);
+            _readOffsets[topicPartition] = offset;
+            return new ConsumerRecord<TKey, TValue>(
+                TopicPartition: topicPartition,
+                Offset: offset,
+                Timestamp: records.Attributes.HasFlag(Attributes.LogAppendTime) ? Timestamp.LogAppend(timestamp) : Timestamp.Created(timestamp),
+                Key: key,
+                Value: value,
+                Headers: record.Headers
+            );
+        }
 
-            var offset = records.Offset;
-            foreach (var record in records)
-            {
-                offset += record.OffsetDelta;
-                var timestamp = records.BaseTimestamp + record.TimestampDelta;
-                var key = keyDeserializer.Read(record.Key);
-                var value = valueDeserializer.Read(record.Value);
-                yield return new ConsumerRecord<TKey, TValue>(
-                    TopicPartition: topicPartition,
-                    Offset: offset,
-                    Timestamp: records.Attributes.HasFlag(Attributes.LogAppendTime) ? Timestamp.LogAppend(timestamp) : Timestamp.Created(timestamp),
-                    Key: key,
-                    Value: value,
-                    Headers: record.Headers
-                );
-            }
+        public void Dispose()
+        {
+            if (_disposed)
+                return;
+            _taskCompletionSource.SetResult(_readOffsets);
+            _disposed = true;
         }
     }
 }

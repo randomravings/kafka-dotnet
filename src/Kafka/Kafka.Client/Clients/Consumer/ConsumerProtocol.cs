@@ -1,5 +1,7 @@
-﻿using Kafka.Client.Messages;
-using Kafka.Common.Encoding;
+﻿using Kafka.Client.Clients.Admin.Model;
+using Kafka.Client.Messages;
+using Kafka.Client.Messages.Serdes;
+using Kafka.Client.Protocol;
 using Kafka.Common.Model;
 using Kafka.Common.Network;
 using Kafka.Common.Protocol;
@@ -8,397 +10,270 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Consumer
 {
-    internal static class ConsumerProtocol
+    internal sealed class ConsumerProtocol :
+        ClientProtocol,
+        IConsumerProtocol
     {
-        public static async Task<MetadataResponse> Metadata(
-            IConnection connection,
-            IEnumerable<TopicName> topicNames,
-            CancellationToken cancellationToken
-        )
-        {
-            var request = new MetadataRequest(
-                topicNames.Select(r => new MetadataRequest.MetadataRequestTopic(
-                        Guid.Empty,
-                        r
-                    )
-                ).ToImmutableArray(),
-                true,
-                false,
-                false
-            );
-            return await connection.ExecuteRequest(
-                request,
-                MetadataRequestSerde.Write,
-                MetadataResponseSerde.Read,
-                cancellationToken
-            );
-        }
+        private IEncoder<RequestHeader, HeartbeatRequest> _heartbeatRequestEncoder = HeartbeatRequestSerde.CreateEncoder(0);
+        private IDecoder<ResponseHeader, HeartbeatResponse> _heartbeatResponseDecoder = HeartbeatResponseSerde.CreateDecoder(0);
 
-        public static async Task<HeartbeatResponse> Heartbeat(
-            IConnection connection,
-            int generationId,
-            string memberId,
-            ConsumerConfig config,
-            CancellationToken cancellationToken
-        )
-        {
-            var request = new HeartbeatRequest(
-                config.GroupId ?? "",
-                generationId,
-                memberId,
-                config.GroupInstanceId
-            );
-            return await connection.ExecuteRequest(
-                request,
-                HeartbeatRequestSerde.Write,
-                HeartbeatResponseSerde.Read,
-                cancellationToken
-            );
-        }
+        private IEncoder<RequestHeader, JoinGroupRequest> _joinGroupRequestEncoder = JoinGroupRequestSerde.CreateEncoder(0);
+        private IDecoder<ResponseHeader, JoinGroupResponse> _joinGroupResponseDecoder = JoinGroupResponseSerde.CreateDecoder(0);
 
-        public static async Task<JoinGroupResponse> JoinGroup(
-            IConnection connection,
-            string memberId,
-            IEnumerable<TopicName> topicNames,
-            ConsumerConfig config,
-            CancellationToken cancellationToken
-        )
-        {
-            var topicMetadata = Membership.Pack(topicNames);
-            var request = new JoinGroupRequest(
-                config.GroupId ?? "",
-                config.SessionTimeoutMs,
-                config.MaxPollIntervalMs,
-                memberId,
-                config.GroupInstanceId,
-                "consumer",
-                new[]
-                {
-                    new JoinGroupRequest.JoinGroupRequestProtocol(
-                        "range",
-                        topicMetadata
-                    ),
-                    new JoinGroupRequest.JoinGroupRequestProtocol(
-                        "roundrobin",
-                        topicMetadata
-                    )
-                }.ToImmutableArray(),
-                null
-            );
-            return await connection.ExecuteRequest(
-                request,
-                JoinGroupRequestSerde.Write,
-                JoinGroupResponseSerde.Read,
-                cancellationToken
-            );
-        }
+        private IEncoder<RequestHeader, SyncGroupRequest> _syncGroupRequestEncoder = SyncGroupRequestSerde.CreateEncoder(0);
+        private IDecoder<ResponseHeader, SyncGroupResponse> _syncGroupResponseDecoder = SyncGroupResponseSerde.CreateDecoder(0);
 
-        public static async Task<SyncGroupResponse> SyncGroup(
-            IConnection connection,
-            int generationId,
-            string memberId,
-            string? protocolName,
-            IDictionary<string, byte[]> members,
-            ConsumerConfig config,
-            CancellationToken cancellationToken
-        )
-        {
-            var syncGroupRequestAssignments = members
-                .Select(r => new SyncGroupRequest.SyncGroupRequestAssignment(
-                    r.Key,
-                    r.Value
-                ))
-                .ToImmutableArray()
-            ;
-            var request = new SyncGroupRequest(
-                config.GroupId ?? "",
-                generationId,
-                memberId,
-                config.GroupInstanceId,
-                "consumer",
-                protocolName,
-                syncGroupRequestAssignments
-            );
-            return await connection.ExecuteRequest(
-                request,
-                SyncGroupRequestSerde.Write,
-                SyncGroupResponseSerde.Read,
-                cancellationToken
-            );
-        }
+        private IEncoder<RequestHeader, LeaveGroupRequest> _leaveGroupRequestEncoder = LeaveGroupRequestSerde.CreateEncoder(0);
+        private IDecoder<ResponseHeader, LeaveGroupResponse> _leaveGroupResponseDecoder = LeaveGroupResponseSerde.CreateDecoder(0);
 
-        public static async Task<LeaveGroupResponse> LeaveGroup(
-            IConnection connection,
-            string memberId,
-            ConsumerConfig config,
-            CancellationToken cancellationToken
-        )
-        {
-            var request = new LeaveGroupRequest(
-                config.GroupId ?? "",
-                memberId,
-                ImmutableArray<LeaveGroupRequest.MemberIdentity>.Empty
-            );
-            return await connection.ExecuteRequest(
-                request,
-                LeaveGroupRequestSerde.Write,
-                LeaveGroupResponseSerde.Read,
-                cancellationToken
-            );
-        }
+        private IEncoder<RequestHeader, OffsetCommitRequest> _offsetCommitRequestEncoder = OffsetCommitRequestSerde.CreateEncoder(0);
+        private IDecoder<ResponseHeader, OffsetCommitResponse> _offsetCommitResponseDecoder = OffsetCommitResponseSerde.CreateDecoder(0);
 
-        public static async Task<OffsetFetchResponse> OffsetFetch(
+        private IEncoder<RequestHeader, FetchRequest> _fetchRequestEncoder = FetchRequestSerde.CreateEncoder(0);
+        private IDecoder<ResponseHeader, FetchResponse> _fetchResponseDecoder = FetchResponseSerde.CreateDecoder(0);
+
+        public ConsumerProtocol(
             IConnection connection,
             ConsumerConfig config,
-            IEnumerable<TopicPartition> topicPartitionOffsets,
+            ILogger logger
+        ) : base(connection, config, logger) { }
+
+        async ValueTask<HeartbeatResponse> IConsumerProtocol.Heartbeat(
+            HeartbeatRequest request,
             CancellationToken cancellationToken
+        ) =>
+            await ExecuteRequest(
+                request,
+                Heartbeat,
+                HeartbeatError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private async ValueTask<SendRequestResult<HeartbeatRequest, HeartbeatResponse>> Heartbeat(
+            HeartbeatRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await SendRequest(
+                request,
+                _heartbeatRequestEncoder,
+                _heartbeatResponseDecoder,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ImmutableArray<Error> HeartbeatError(
+            HeartbeatResponse response
         )
         {
-            var topicsToFetch = topicPartitionOffsets
-                .GroupBy(g => g.Topic)
-                .Select(
-                    r => new OffsetFetchRequest.OffsetFetchRequestTopic(
-                        r.Key,
-                        r.Select(r =>
-                            r.Partition.Value
-                        )
-                        .ToImmutableArray()
-                    )
+            if (response.ErrorCodeField == 0)
+                return ImmutableArray<Error>.Empty;
+            else
+                return ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+        }
+
+        async ValueTask<JoinGroupResponse> IConsumerProtocol.JoinGroup(
+            JoinGroupRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await ExecuteRequest(
+                request,
+                JoinGroup,
+                JoinGroupError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private async ValueTask<SendRequestResult<JoinGroupRequest, JoinGroupResponse>> JoinGroup(
+            JoinGroupRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await SendRequest(
+                request,
+                _joinGroupRequestEncoder,
+                _joinGroupResponseDecoder,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ImmutableArray<Error> JoinGroupError(
+            JoinGroupResponse response
+        )
+        {
+            if (response.ErrorCodeField == 0)
+                return ImmutableArray<Error>.Empty;
+            else
+                return ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+        }
+
+        async ValueTask<SyncGroupResponse> IConsumerProtocol.SyncGroup(
+            SyncGroupRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await ExecuteRequest(
+                request,
+                SyncGroup,
+                SyncGroupError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private async ValueTask<SendRequestResult<SyncGroupRequest, SyncGroupResponse>> SyncGroup(
+            SyncGroupRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await SendRequest(
+                request,
+                _syncGroupRequestEncoder,
+                _syncGroupResponseDecoder,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ImmutableArray<Error> SyncGroupError(
+            SyncGroupResponse response
+        )
+        {
+            if (response.ErrorCodeField == 0)
+                return ImmutableArray<Error>.Empty;
+            else
+                return ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+        }
+
+        async ValueTask<LeaveGroupResponse> IConsumerProtocol.LeaveGroup(
+            LeaveGroupRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await ExecuteRequest(
+                request,
+                LeaveGroup,
+                LeaveGroupError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private async ValueTask<SendRequestResult<LeaveGroupRequest, LeaveGroupResponse>> LeaveGroup(
+            LeaveGroupRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await SendRequest(
+                request,
+                _leaveGroupRequestEncoder,
+                _leaveGroupResponseDecoder,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ImmutableArray<Error> LeaveGroupError(
+            LeaveGroupResponse response
+        )
+        {
+            if (response.ErrorCodeField == 0)
+                return ImmutableArray<Error>.Empty;
+            else
+                return ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+        }
+
+        async ValueTask<OffsetCommitResponse> IConsumerProtocol.OffsetCommit(
+            OffsetCommitRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await ExecuteRequest(
+                request,
+                OffsetCommit,
+                OffsetCommitError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private async ValueTask<SendRequestResult<OffsetCommitRequest, OffsetCommitResponse>> OffsetCommit(
+            OffsetCommitRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await SendRequest(
+                request,
+                _offsetCommitRequestEncoder,
+                _offsetCommitResponseDecoder,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ImmutableArray<Error> OffsetCommitError(
+            OffsetCommitResponse response
+        ) =>
+            response
+                .TopicsField
+                .SelectMany(t => t.PartitionsField
+                    .Where(p => p.ErrorCodeField != 0)
+                    .Select(p => Errors.Translate(p.ErrorCodeField))
                 )
                 .ToImmutableArray()
-            ;
+        ;
 
-            var topicsInGroupToFetch =
-                new[]
-                {
-                    new OffsetFetchRequest.OffsetFetchRequestGroup(
-                        config.GroupId ?? "",
-                        topicPartitionOffsets
-                            .GroupBy(g => g.Topic)
-                            .Select(r =>
-                                new OffsetFetchRequest.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
-                                    r.Key,
-                                    r.Select(p =>
-                                        p.Partition.Value
-                                    ).ToImmutableArray()
-                                )
-                            ).ToImmutableArray()
-                    )
-                }
-                .ToImmutableArray()
-            ;
-            var request = new OffsetFetchRequest(
-                config.GroupId ?? "",
-                topicsToFetch,
-                topicsInGroupToFetch,
-                false
-            );
-            return await connection.ExecuteRequest(
-                request,
-                OffsetFetchRequestSerde.Write,
-                OffsetFetchResponseSerde.Read,
-                cancellationToken
-            );
-        }
-
-        public static async Task<ListOffsetsResponse> ListOffsets(
-            IConnection connection,
-            ImmutableSortedSet<TopicPartition> topicPartitions,
-            IsolationLevel isolationLevel,
-            DateTimeOffset timestamp,
+        async ValueTask<FetchResponse> IConsumerProtocol.Fetch(
+            FetchRequest request,
             CancellationToken cancellationToken
+        ) =>
+            await ExecuteRequest(
+                request,
+                Fetch,
+                FetchError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private async ValueTask<SendRequestResult<FetchRequest, FetchResponse>> Fetch(
+            FetchRequest request,
+            CancellationToken cancellationToken
+        ) =>
+            await SendRequest(
+                request,
+                _fetchRequestEncoder,
+                _fetchResponseDecoder,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ImmutableArray<Error> FetchError(
+            FetchResponse response
         )
         {
-            var request = new ListOffsetsRequest(
-                -1,
-                (sbyte)isolationLevel,
-                topicPartitions
-                    .GroupBy(g => g.Topic)
-                    .Select(t =>
-                    new ListOffsetsRequest.ListOffsetsTopic(
-                        t.Key,
-                        t.Select(p =>
-                            new ListOffsetsRequest.ListOffsetsTopic.ListOffsetsPartition(
-                                p.Partition,
-                                -1,
-                                timestamp.ToUnixTimeMilliseconds(),
-                                1
-                            )
-                        )
-                        .ToImmutableArray()
-                    )
+            if (response.ErrorCodeField != 0)
+                return ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+            return response
+                .ResponsesField
+                .SelectMany(t => t.PartitionsField
+                    .Where(p => p.ErrorCodeField != 0)
+                    .Select(p => Errors.Translate(p.ErrorCodeField))
                 )
-                .ToImmutableArray()
-            );
-            return await connection
-                .ExecuteRequest(
-                    request,
-                    ListOffsetsRequestSerde.Write,
-                    ListOffsetsResponseSerde.Read,
-                    cancellationToken
-                )
-            ;
+                .ToImmutableArray();
         }
 
-        public static async Task<OffsetCommitResponse> CommitOffsets(
-            IConnection connection,
-            int generationId,
-            string memberId,
-            IEnumerable<TopicPartitionOffset> topicPartitionOffsets,
-            ConsumerConfig config,
-            CancellationToken cancellationToken
-        )
+        protected override void OnApiVersions(IReadOnlyDictionary<ApiKey, Api> versions)
         {
-            var offsetCommitRequestTopic = topicPartitionOffsets
-                .GroupBy(g => g.TopicPartition.Topic)
-                .Select(t =>
-                    new OffsetCommitRequest.OffsetCommitRequestTopic(
-                        t.Key.Value ?? "",
-                        t.Select(p =>
-                            new OffsetCommitRequest.OffsetCommitRequestTopic.OffsetCommitRequestPartition(
-                                p.TopicPartition.Partition,
-                                p.Offset,
-                                -1,
-                                Timestamp.Now().TimestampMs,
-                                null
-                            )
-                        ).ToImmutableArray()
-                    )
-                )
-                .ToImmutableArray()
-            ;
-            var request = new OffsetCommitRequest(
-                config.GroupId ?? "",
-                generationId,
-                memberId,
-                config.GroupInstanceId,
-                -1,
-                offsetCommitRequestTopic
-            );
-            return await connection.ExecuteRequest(
-                request,
-                OffsetCommitRequestSerde.Write,
-                OffsetCommitResponseSerde.Read,
-                cancellationToken
-            );
-        }
+            var heartbeatMax = versions[ApiKey.Heartbeat].Range.Max;
+            _heartbeatRequestEncoder = HeartbeatRequestSerde.CreateEncoder(heartbeatMax);
+            _heartbeatResponseDecoder = HeartbeatResponseSerde.CreateDecoder(heartbeatMax);
 
-        public static async Task<OffsetCommitResponse> CommitOffset(
-            IConnection connection,
-            int generationId,
-            string memberId,
-            TopicPartitionOffset topicPartitionOffset,
-            ConsumerConfig config,
-            CancellationToken cancellationToken
-        )
-        {
-            var offsetCommitRequestTopic = new[] {
-                new OffsetCommitRequest.OffsetCommitRequestTopic(
-                    topicPartitionOffset.TopicPartition.Topic,
-                    new[]{
-                        new OffsetCommitRequest.OffsetCommitRequestTopic.OffsetCommitRequestPartition(
-                            topicPartitionOffset.TopicPartition.Partition,
-                            topicPartitionOffset.Offset,
-                            -1,
-                            Timestamp.Now().TimestampMs,
-                            null
-                        )
-                    }.ToImmutableArray()
-                )
-            }.ToImmutableArray();
-            var request = new OffsetCommitRequest(
-                config.GroupId ?? "",
-                generationId,
-                memberId,
-                config.GroupInstanceId,
-                -1,
-                offsetCommitRequestTopic
-            );
-            return await connection.ExecuteRequest(
-                request,
-                OffsetCommitRequestSerde.Write,
-                OffsetCommitResponseSerde.Read,
-                cancellationToken
-            );
-        }
+            var joinGroupMax = versions[ApiKey.JoinGroup].Range.Max;
+            _joinGroupRequestEncoder = JoinGroupRequestSerde.CreateEncoder(joinGroupMax);
+            _joinGroupResponseDecoder = JoinGroupResponseSerde.CreateDecoder(joinGroupMax);
 
-        internal static async Task<FindCoordinatorResponse> FindCoordinator(
-            IConnection connection,
-            ConsumerConfig config,
-            ILogger logger,
-            CancellationToken cancellationToken
-        )
-        {
-            var groupId = config.GroupId ?? "";
-            var request = new FindCoordinatorRequest(
-                groupId,
-                (sbyte)CoordinatorType.GROUP,
-                new[] { groupId }.ToImmutableArray()
-            );
-            return await RetryHandler.Run(
-                connection,
-                request,
-                FindCoordinatorRequestSerde.Write,
-                FindCoordinatorResponseSerde.Read,
-                config.Retries,
-                config.RetryBackoffMs,
-                r => r.ErrorCodeField,
-                (l, e) => l.LogError("{error}", e),
-                logger,
-                cancellationToken
-            );
-        }
+            var syncGroupMax = versions[ApiKey.SyncGroup].Range.Max;
+            _syncGroupRequestEncoder = SyncGroupRequestSerde.CreateEncoder(syncGroupMax);
+            _syncGroupResponseDecoder = SyncGroupResponseSerde.CreateDecoder(syncGroupMax);
 
-        internal static async Task<FetchResponse> Fetch(
-            IConnection connection,
-            IEnumerable<KeyValuePair<TopicPartition, Offset>> topicPartitionOffsets,
-            ConsumerConfig config,
-            CancellationToken cancellationToken
-        )
-        {
-            var fetchTopics = topicPartitionOffsets
-                .GroupBy(g => g.Key.Topic)
-                .Select(t =>
-                    new FetchRequest.FetchTopic(
-                        t.Key,
-                        Guid.Empty,
-                        t.Select(tp =>
-                            new FetchRequest.FetchTopic.FetchPartition(
-                                PartitionField: tp.Key.Partition,
-                                CurrentLeaderEpochField: -1,
-                                FetchOffsetField: tp.Value,
-                                LastFetchedEpochField: -1,
-                                LogStartOffsetField: -1,
-                                PartitionMaxBytesField: 1048576
-                            )
-                        )
-                        .ToImmutableArray()
-                    )
-                )
-                .ToImmutableArray()
-            ;
-            var request = new FetchRequest(
-                ClusterIdField: null,
-                ReplicaIdField: -1,
-                MaxWaitMsField: config.FetchMaxWaitMs,
-                MinBytesField: config.FetchMinBytes,
-                MaxBytesField: config.FetchMaxBytes,
-                IsolationLevelField: (sbyte)config.IsolationLevel,
-                SessionIdField: -1,
-                SessionEpochField: -1,
-                TopicsField: fetchTopics,
-                ForgottenTopicsDataField: ImmutableArray<FetchRequest.ForgottenTopic>.Empty,
-                RackIdField: config.ClientRack
-            ) with
-            {
-                MaxVersion = 11
-            };
-            return await connection.ExecuteRequest(
-                request,
-                FetchRequestSerde.Write,
-                FetchResponseSerde.Read,
-                cancellationToken
-            );
+            var leaveGroupMax = versions[ApiKey.LeaveGroup].Range.Max;
+            _leaveGroupRequestEncoder = LeaveGroupRequestSerde.CreateEncoder(leaveGroupMax);
+            _leaveGroupResponseDecoder = LeaveGroupResponseSerde.CreateDecoder(leaveGroupMax);
+
+            var offsetCommitMax = versions[ApiKey.OffsetCommit].Range.Max;
+            _offsetCommitRequestEncoder = OffsetCommitRequestSerde.CreateEncoder(offsetCommitMax);
+            _offsetCommitResponseDecoder = OffsetCommitResponseSerde.CreateDecoder(offsetCommitMax);
+
+            var fetchMax = versions[ApiKey.Fetch].Range.Max;
+            _fetchRequestEncoder = FetchRequestSerde.CreateEncoder(fetchMax);
+            _fetchResponseDecoder = FetchResponseSerde.CreateDecoder(fetchMax);
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿namespace Kafka.Client.Clients.Admin.Model
+﻿using Kafka.Client.Model;
+
+namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed record ListTopicsOptions(
         int TimeoutMs,

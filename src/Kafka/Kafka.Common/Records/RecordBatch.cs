@@ -1,9 +1,35 @@
-﻿using System.Collections;
-using System.Collections.Immutable;
+﻿using Kafka.Common.Model;
+using System.Collections;
 
 namespace Kafka.Common.Records
 {
-    public sealed record RecordBatch(
+    /// <summary>
+    /// baseOffset: int64
+    /// batchLength: int32
+    /// partitionLeaderEpoch: int32
+    /// magic: int8(current magic value is 2)
+    /// crc: int32
+    /// attributes: int16
+    ///     bit 0~2:
+    ///         0: no compression
+    ///         1: gzip
+    ///         2: snappy
+    ///         3: lz4
+    ///         4: zstd
+    ///     bit 3: timestampType
+    ///     bit 4: isTransactional(0 means not transactional)
+    ///     bit 5: isControlBatch(0 means not a control batch)
+    ///     bit 6: hasDeleteHorizonMs(0 means baseTimestamp is not set as the delete horizon for compaction)
+    ///     bit 7~15: unused
+    /// lastOffsetDelta: int32
+    /// baseTimestamp: int64
+    /// maxTimestamp: int64
+    /// producerId: int64
+    /// producerEpoch: int16
+    /// baseSequence: int32
+    /// records: [Record]
+    /// </summary>
+    public record RecordBatch(
         long BaseOffset,
         int BatchLength,
         int PartitionLeaderEpoch,
@@ -16,77 +42,16 @@ namespace Kafka.Common.Records
         long ProducerId,
         short ProducerEpoch,
         int BaseSequence,
-        ImmutableArray<IRecord> Records
+        IReadOnlyList<IRecord> Records
     ) : IRecords
     {
-        public static RecordBatch Empty { get; } = new(
-            long.MinValue,
-            int.MinValue,
-            int.MinValue,
-            sbyte.MinValue,
-            0,
-            Attributes.None,
-            int.MinValue,
-            long.MinValue,
-            long.MinValue,
-            long.MinValue,
-            short.MinValue,
-            int.MinValue,
-            ImmutableArray<IRecord>.Empty
-        );
-        long IRecords.Offset => BaseOffset;
-
-        int IRecords.Size => BatchLength;
-
-        int IRecords.PartitionLeaderEpoch => PartitionLeaderEpoch;
-
-        int IRecords.Crc => Crc;
-
-        Attributes IRecords.Attributes => Attributes;
-
-        int IRecords.LastOffsetDelta => LastOffsetDelta;
-
-        long IRecords.BaseTimestamp => BaseTimestamp;
-
-        long IRecords.MaxTimestamp => MaxTimestamp;
-
-        long IRecords.ProducerId => ProducerId;
-
-        short IRecords.ProducerEpoch => ProducerEpoch;
-
-        int IRecords.BaseSequence => BaseSequence;
-
-        CompressionType IRecords.CompressionType => (CompressionType)(Attributes & Attributes.CompressionType);
-
-        TimestampType IRecords.TimestampType => (TimestampType)(Attributes & Attributes.TimestampType);
-
-        bool IRecords.IsTransactional => Attributes.HasFlag(Attributes.IsTransactional);
-
-        bool IRecords.IsControlBatch => Attributes.HasFlag(Attributes.IsControlBatch);
-
-        bool IRecords.HasDeleteHorizonMs => Attributes.HasFlag(Attributes.HasDeleteHorizonMs);
-
-        ControlRecord IRecords.ControlRecord => (ControlRecord)Records[0];
-
         IRecord IReadOnlyList<IRecord>.this[int index] => Records[index];
-
-        int IReadOnlyCollection<IRecord>.Count => Records.Length;
-
-        IEnumerator<IRecord> IEnumerable<IRecord>.GetEnumerator()
-        {
-            foreach (var record in Records)
-                yield return record;
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            foreach (var record in Records)
-                yield return record;
-        }
-
-        void IRecords.EnsureValid()
-        {
-            throw new NotImplementedException();
-        }
+        int IReadOnlyCollection<IRecord>.Count => Records.Count;
+        IEnumerator<IRecord> IEnumerable<IRecord>.GetEnumerator() =>
+            Records.GetEnumerator()
+        ;
+        IEnumerator IEnumerable.GetEnumerator() =>
+            Records.GetEnumerator()
+        ;
     }
 }

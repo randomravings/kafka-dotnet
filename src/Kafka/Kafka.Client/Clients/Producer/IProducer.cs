@@ -12,7 +12,7 @@ namespace Kafka.Client.Clients.Producer
         /// <param name="produceRecrod"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<ICommand<ProduceResult>> Send(
+        ValueTask<ICommand<ProduceResult>> Send(
             ProduceRecord<TKey, TValue> produceRecrod,
             CancellationToken cancellationToken = default
         );
@@ -24,27 +24,27 @@ namespace Kafka.Client.Clients.Producer
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task BeginTransaction(CancellationToken cancellationToken);
+        ValueTask BeginTransaction(CancellationToken cancellationToken);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task CommitTransaction(CancellationToken cancellationToken);
+        ValueTask CommitTransaction(CancellationToken cancellationToken);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task RollbackTransaction(CancellationToken cancellationToken);
+        ValueTask RollbackTransaction(CancellationToken cancellationToken);
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task Flush(CancellationToken cancellationToken);
+        ValueTask Flush(CancellationToken cancellationToken);
     }
 }

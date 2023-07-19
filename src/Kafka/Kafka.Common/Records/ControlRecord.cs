@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Kafka.Common.Model;
 
 namespace Kafka.Common.Records
 {
@@ -20,7 +21,8 @@ namespace Kafka.Common.Records
             Key,
             Value,
             Headers
-        )
+        ),
+        IControlRecord
     {
         public static ControlRecord Empty { get; } = new(
             -1,

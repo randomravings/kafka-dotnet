@@ -1,6 +1,4 @@
-﻿using Kafka.Common.Records;
-
-namespace Kafka.Common.Model
+﻿namespace Kafka.Common.Model
 {
     /// <summary>
     /// Creates a new timestamp.
@@ -47,5 +45,11 @@ namespace Kafka.Common.Model
         public static bool operator <(Timestamp a, Timestamp b) => a.TimestampMs < b.TimestampMs;
 
         public static implicit operator long(Timestamp timestamp) => timestamp.TimestampMs;
+
+        public static Timestamp operator +(Timestamp timestamp, long ms) => new(timestamp.TimestampType, timestamp.TimestampMs + ms);
+        public static Timestamp operator -(Timestamp timestamp, long ms) => new(timestamp.TimestampType, timestamp.TimestampMs - ms);
+        public static Timestamp operator *(Timestamp timestamp, long ms) => new(timestamp.TimestampType, timestamp.TimestampMs * ms);
+        public static Timestamp operator /(Timestamp timestamp, long ms) => new(timestamp.TimestampType, timestamp.TimestampMs / ms);
+        public static Timestamp operator %(Timestamp timestamp, long ms) => new(timestamp.TimestampType, timestamp.TimestampMs % ms);
     }
 }

@@ -4,8 +4,9 @@
         Guid Value
     )
     {
-        public static readonly TopicId Empty = new(Guid.Empty);
-        public static implicit operator TopicId(Guid id) => new(id);
+        public static readonly TopicId Empty = Guid.Empty;
+        public static implicit operator TopicId(Guid uuid) => new(uuid);
+        public static implicit operator TopicId(string? topicId) => Guid.TryParse(topicId, out var uuid) ? uuid : Guid.Empty;
         public static implicit operator Guid(TopicId topicId) => topicId.Value;
         public static bool operator <=(TopicId a, TopicId b) =>
             a.Value.CompareTo(b.Value) <= 0

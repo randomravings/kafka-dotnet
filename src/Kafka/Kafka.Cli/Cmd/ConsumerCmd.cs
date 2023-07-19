@@ -5,6 +5,7 @@ using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
+using System.IO;
 
 namespace Kafka.Cli.Cmd
 {
@@ -25,9 +26,9 @@ namespace Kafka.Cli.Cmd
                 Deserializers.Utf8
             );
             var topicNames = verb.TopicNames.Select(r => new TopicName(r)).ToHashSet();
+            var stream = default(IConsumerInstance<string, string>);
             try
             {
-                var stream = default(IInputStream<string, string>);
                 if (verb.PartitionAssign.Any())
                 {
                     var topicAssigns = ParseAssignments(verb);
@@ -37,24 +38,16 @@ namespace Kafka.Cli.Cmd
                 }
                 else
                 {
-                    stream = consumer
-                        .JoinGroup(topicNames)
-                    ;
+                    stream = await consumer.CreateInstance(
+                        topicNames,
+                        cancellationToken
+                    );
                 }
 
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var fetchResult = await stream.Fetch(cancellationToken);
-                    if (fetchResult.Error.Code == 0)
-                    {
-                        foreach (var record in fetchResult)
-                            Console.WriteLine(Formatter.Print(record));
-                    }
-                    else
-                    {
-                        Console.WriteLine(Formatter.Print(fetchResult.Error));
-                        break;
-                    }
+                    var consumerRecord = await stream.Fetch(cancellationToken);
+                    Console.WriteLine(Formatter.Print(consumerRecord));
                 }
             }
             catch (OperationCanceledException) { }
@@ -64,9 +57,25 @@ namespace Kafka.Cli.Cmd
             }
             finally
             {
-                await consumer.Close(CancellationToken.None);
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(5000);
+                if(stream != null)
+                    await CloseStream(stream, cts.Token);
+                await consumer.Close(cts.Token);
             }
             return 0;
+        }
+
+        private static async Task CloseStream(IConsumerInstance<string, string> instance, CancellationToken cancellationToken)
+        {
+            try
+            {
+                await instance.Close(cancellationToken);
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         private static SortedList<TopicPartition, Offset> ParseAssignments(ConsumerOpts opts)

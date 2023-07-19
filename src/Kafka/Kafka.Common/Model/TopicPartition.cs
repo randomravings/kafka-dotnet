@@ -1,15 +1,17 @@
 ﻿namespace Kafka.Common.Model
 {
     public readonly record struct TopicPartition(
-        TopicName Topic,
+        Topic Topic,
         Partition Partition
     )
     {
         public static TopicPartition Empty { get; } =
             new(
-                TopicName.Empty,
+                Topic.Empty,
                 Partition.Unassigned
             )
         ;
+
+        public static implicit operator TopicPartition((Guid Id, TopicName Name, Partition Partition) v) => new((v.Id, v.Name), v.Partition);
     }
 }

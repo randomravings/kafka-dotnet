@@ -4,8 +4,8 @@
         TaskCompletionSource<TResult> TaskCompletionSource
     ) : ICommand<TResult>
     {
-        async Task<TResult> ICommand<TResult>.Result() =>
-            await TaskCompletionSource.Task
+        async ValueTask<TResult> ICommand<TResult>.Result() =>
+            await TaskCompletionSource.Task.ConfigureAwait(false)
         ;
     }
 }

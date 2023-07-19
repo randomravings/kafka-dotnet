@@ -2,7 +2,7 @@
   "profiles": {
     "Kafka.CodeGen": {
       "commandName": "Project",
-      "commandLineArgs": "code -s E:\\GitHub\\kafka\\clients\\src\\main\\resources\\common\\message -o E:\\GitHub\\kafka-dotnet\\src\\Kafka\\Kafka.Client\\Messages"
+      "commandLineArgs": "code -s E:\\GitHub\\kafka\\clients\\src\\main\\resources\\common\\message -o E:\\GitHub\\kafka-dotnet\\src\\Kafka\\Kafka.Client"
     }
   }
 }

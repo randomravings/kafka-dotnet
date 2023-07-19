@@ -16,7 +16,6 @@ namespace Kafka.Cli.Cmd
             CancellationToken cancellationToken
         )
         {
-            var commands = new BlockingCollection<ICommand<ProduceResult>>();
             var config = new ProducerConfig
             {
                 ClientId = options.ClientId,
@@ -41,27 +40,28 @@ namespace Kafka.Cli.Cmd
                 .WithLogger(logger)
                 .Build()
             ;
-            var resultHandler = HandleResults(commands, cancellationToken);
-
+            var commands = new List<ICommand<ProduceResult>>();
             Console.WriteLine("Empty new line will terminate session.");
             while (!cancellationToken.IsCancellationRequested)
             {
                 var input = Console.ReadLine();
                 if (string.IsNullOrEmpty(input))
-                    return 0;
+                    break;
                 switch (input)
                 {
                     case "/bt":
-                        await producer.BeginTransaction(cancellationToken);
+                        await producer.BeginTransaction(cancellationToken).ConfigureAwait(false);
                         continue;
                     case "/ct":
-                        await producer.CommitTransaction(cancellationToken);
+                        await producer.CommitTransaction(cancellationToken).ConfigureAwait(false);
                         continue;
                     case "/rt":
-                        await producer.RollbackTransaction(cancellationToken);
+                        await producer.RollbackTransaction(cancellationToken).ConfigureAwait(false);
                         continue;
                     case "/fl":
-                        await producer.Flush(cancellationToken);
+                        await producer.Flush(cancellationToken).ConfigureAwait(false);
+                        await HandleResults(commands);
+                        commands.Clear();
                         continue;
                 }
                 var split = input.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -75,39 +75,32 @@ namespace Kafka.Cli.Cmd
                     split[0],
                     split[1]
                 );
-                var sendCommand = await producer.Send(
-                    record,
-                    cancellationToken
-                );
-
+                var sendCommand = await producer.Send(record, cancellationToken).ConfigureAwait(false);
+                commands.Add(sendCommand);
             }
+            await producer.Flush(cancellationToken).ConfigureAwait(false);
+            await HandleResults(commands);
+            commands.Clear();
             return 0;
-
         }
 
-        static Task HandleResults(BlockingCollection<ICommand<ProduceResult>> commands, CancellationToken cancellationToken)
+        static async ValueTask HandleResults(IReadOnlyList<ICommand< ProduceResult>> commands)
         {
-            return Task.Run(async () =>
+            if (commands.Count == 0)
+                return;
+            var results = await Task.WhenAll(commands.Select(async r => await r.Result())).ConfigureAwait(false);
+            foreach (var result in results)
             {
-                while (!cancellationToken.IsCancellationRequested)
+                if (result.Error.Code != 0)
                 {
-                    try
-                    {
-                        var command = commands.Take(cancellationToken);
-                        var produceResult = await command.Result();
-                        if (produceResult.Error.Code != 0)
-                        {
-                            Console.WriteLine(Formatter.Print(produceResult.Error));
-                            Console.WriteLine(Formatter.Print(produceResult.RecordError));
-                        }
-                        else
-                        {
-                            Console.WriteLine(Formatter.Print(produceResult.TopicPartitionOffset));
-                        }
-                    }
-                    catch (OperationCanceledException) { }
+                    Console.WriteLine(Formatter.Print(result.Error));
+                    Console.WriteLine(Formatter.Print(result.RecordError));
                 }
-            }, CancellationToken.None);
+                else
+                {
+                    Console.WriteLine(Formatter.Print(result.TopicPartitionOffset));
+                }
+            }
         }
     }
 }

@@ -2,7 +2,7 @@
 using Kafka.Common.Model;
 using Newtonsoft.Json;
 using System.Collections.Immutable;
-using Version = Kafka.Common.Model.Version;
+using VersionRange = Kafka.Common.Model.VersionRange;
 
 namespace Kafka.CodeGen.Serialization
 {
@@ -31,8 +31,8 @@ namespace Kafka.CodeGen.Serialization
             var type = "";
             var listeners = Array.Empty<string>();
             var name = "";
-            var validVersions = Version.Empty;
-            var flexibleVersions = Version.Empty;
+            var validVersions = VersionRange.Empty;
+            var flexibleVersions = VersionRange.Empty;
             var fields = new List<Field>();
             var structs = new Dictionary<string, StructDefinition>();
             while (reader.Read())
@@ -78,7 +78,7 @@ namespace Kafka.CodeGen.Serialization
                             case "commonStructs":
                                 reader.Read(); // Start array
                                 reader.Read(); // Start object
-                                ParseStructs(reader, flexibleVersions, structs);
+                                ParseStructs(reader, structs);
                                 break;
                             default:
                                 throw new InvalidOperationException($"Unknown message key '{reader.Value}'");
@@ -99,8 +99,8 @@ namespace Kafka.CodeGen.Serialization
                     structs.ToImmutableDictionary()
                 ),
                 "response" => new ApiResponseMessage(
-                    apiKey,
                     name,
+                    apiKey,
                     validVersions,
                     flexibleVersions,
                     fields.ToImmutableArray(),
@@ -143,7 +143,6 @@ namespace Kafka.CodeGen.Serialization
 
         private static void ParseStructs(
             JsonReader reader,
-            Version flexibleVersions,
             IDictionary<string, StructDefinition> structs
         )
         {
@@ -151,7 +150,6 @@ namespace Kafka.CodeGen.Serialization
             {
                 ParseStruct(
                     reader,
-                    flexibleVersions,
                     structs
                 );
                 reader.Read();
@@ -166,16 +164,16 @@ namespace Kafka.CodeGen.Serialization
         {
             var name = "";
             var type = (FieldType)EmptyFieldType.Instance;
-            var versions = Version.Empty;
+            var versions = VersionRange.Empty;
             var entityType = "";
             var about = "";
             var tag = -1;
             var ignorable = false;
             var mapKey = false;
-            var nullableVersions = Version.Empty;
+            var nullableVersions = VersionRange.Empty;
             var defaultValue = "";
-            var flexibleVersions = Version.All;
-            var taggedVersions = Version.Empty;
+            var flexibleVersions = VersionRange.All;
+            var taggedVersions = VersionRange.Empty;
             var zeroCopy = false;
             var localFields = new List<Field>();
             var localStructs = new Dictionary<string, StructDefinition>();
@@ -295,12 +293,10 @@ namespace Kafka.CodeGen.Serialization
 
         private static void ParseStruct(
             JsonReader reader,
-            Version flexibleVersions,
             IDictionary<string, StructDefinition> structs
         )
         {
             var name = "";
-            var versions = Version.Empty;
             var fields = new List<Field>();
             var localStructs = new Dictionary<string, StructDefinition>();
             while (reader.TokenType != JsonToken.EndObject && reader.Read())
@@ -315,7 +311,7 @@ namespace Kafka.CodeGen.Serialization
                                 break;
                             case "versions":
                                 var versionsValue = reader.ReadAsString() ?? "";
-                                versions = ParseVersion(versionsValue);
+                                _ = ParseVersion(versionsValue);
                                 break;
                             case "fields":
                                 reader.Read(); // Start array
@@ -366,18 +362,18 @@ namespace Kafka.CodeGen.Serialization
             }
         ;
 
-        private static Version ParseVersion(
+        private static VersionRange ParseVersion(
             string versionString
         )
         {
             return versionString switch
             {
-                "none" => Version.Empty,
+                "none" => VersionRange.Empty,
                 var v => (v.IndexOf('+'), v.IndexOf('-')) switch
                 {
-                    (var p, -1) when p >= 0 => new Version(short.Parse(v[..p]), short.MaxValue  ),
-                    (-1, var d) when d >= 0 => new Version(short.Parse(v[..d]), short.Parse(v[(d + 1)..])),
-                    _ => new Version(short.Parse(v), short.Parse(v))
+                    (var p, -1) when p >= 0 => new VersionRange(short.Parse(v[..p]), short.MaxValue  ),
+                    (-1, var d) when d >= 0 => new VersionRange(short.Parse(v[..d]), short.Parse(v[(d + 1)..])),
+                    _ => new VersionRange(short.Parse(v), short.Parse(v))
                 }
             };
         }

@@ -1,5 +1,5 @@
 ﻿using System.Collections.Immutable;
-using Version = Kafka.Common.Model.Version;
+using Kafka.Common.Model;
 
 namespace Kafka.CodeGen.Models
 {
@@ -10,8 +10,9 @@ namespace Kafka.CodeGen.Models
     ) :
         MessageDefinition(
             Name,
-            Version.All,
-            Version.All,
+            ApiKey.None,
+            VersionRange.All,
+            VersionRange.All,
             Fields,
             Structs
         )

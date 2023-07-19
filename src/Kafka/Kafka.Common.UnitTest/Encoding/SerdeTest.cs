@@ -29,8 +29,8 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestVarInt32Serde(int value)
         {
             var buffer = new byte[20];
-            var writeIndex = Encoder.WriteVarInt32(buffer, 0, value);
-            (var readIndex, var actual) = Decoder.ReadVarInt32(buffer, 0);
+            var writeIndex = BinaryEncoder.WriteVarInt32(buffer, 0, value);
+            (var readIndex, var actual) = BinaryDecoder.ReadVarInt32(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(readIndex, Is.EqualTo(writeIndex));
@@ -54,8 +54,8 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestVarUInt32Serde(uint value)
         {
             var buffer = new byte[20];
-            var writeIndex = Encoder.WriteVarUInt32(buffer, 0, value);
-            (var readIndex, var actual) = Decoder.ReadVarUInt32(buffer, 0);
+            var writeIndex = BinaryEncoder.WriteVarUInt32(buffer, 0, value);
+            (var readIndex, var actual) = BinaryDecoder.ReadVarUInt32(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(readIndex, Is.EqualTo(writeIndex));
@@ -109,8 +109,8 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestVarInt64Serde(long value)
         {
             var buffer = new byte[20];
-            var writeIndex = Encoder.WriteVarInt64(buffer, 0, value);
-            (var readIndex, var actual) = Decoder.ReadVarInt64(buffer, 0);
+            var writeIndex = BinaryEncoder.WriteVarInt64(buffer, 0, value);
+            (var readIndex, var actual) = BinaryDecoder.ReadVarInt64(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(readIndex, Is.EqualTo(writeIndex));

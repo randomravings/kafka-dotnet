@@ -1,6 +1,4 @@
-﻿using Kafka.Common.Model;
-using System.Collections.Immutable;
-using static Kafka.Client.Clients.Admin.Model.DeleteTopicsResult;
+﻿using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Admin.Model
 {
@@ -12,16 +10,6 @@ namespace Kafka.Client.Clients.Admin.Model
         public static DeleteTopicsResult Empty { get; } = new(
             ImmutableArray<DeleteTopicResult>.Empty,
             ImmutableArray<DeleteTopicError>.Empty
-        );
-
-        public sealed record DeleteTopicResult(
-            TopicId Id,
-            TopicName Name
-        );
-
-        public sealed record DeleteTopicError(
-            TopicName Name,
-            Error Error
         );
     };
 }

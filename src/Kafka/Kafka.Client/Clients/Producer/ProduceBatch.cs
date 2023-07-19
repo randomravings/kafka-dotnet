@@ -1,15 +1,14 @@
 ﻿using Kafka.Client.Clients.Producer.Model;
 using Kafka.Common.Model;
-using Kafka.Common.Records;
 using System.Collections;
 
 namespace Kafka.Client.Clients.Producer
 {
-    internal class ProduceBatch :
+    internal sealed class ProduceBatch :
         IEnumerable<KeyValuePair<TopicName, Dictionary<Partition, List<SendCommand>>>>
     {
         private readonly Dictionary<TopicName, Dictionary<Partition, List<SendCommand>>> _items = new();
-        private int _count = 0;
+        private int _count;
 
         public ProduceBatch(Attributes localAttributes) =>
             LocalAttributes = localAttributes
@@ -37,10 +36,10 @@ namespace Kafka.Client.Clients.Producer
             SendCommand command
         )
         {
-            if (!batch.TryGetValue(command.TopicPartition.Topic, out var partitions))
+            if (!batch.TryGetValue(command.TopicPartition.Topic.TopicName, out var partitions))
             {
                 partitions = new Dictionary<Partition, List<SendCommand>>();
-                batch.Add(command.TopicPartition.Topic, partitions);
+                batch.Add(command.TopicPartition.Topic.TopicName, partitions);
             }
             if (!partitions.TryGetValue(command.TopicPartition.Partition, out var commands))
             {

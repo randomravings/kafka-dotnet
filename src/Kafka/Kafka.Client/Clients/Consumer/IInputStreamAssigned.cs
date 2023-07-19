@@ -4,7 +4,7 @@ using System.Collections.Immutable;
 namespace Kafka.Client.Clients.Consumer
 {
     public interface IInputStreamAssigned<TKey, TValue> :
-        IInputStream<TKey, TValue>
+        IConsumerInstance<TKey, TValue>
     {
         ValueTask<ImmutableArray<TopicPartitionOffset>> SeekToBeginning(
             CancellationToken cancellationToken

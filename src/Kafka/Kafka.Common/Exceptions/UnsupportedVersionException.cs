@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Kafka.Common.Exceptions
 {
-    internal class UnsupportedVersionException :
+    public class UnsupportedVersionException :
         Exception
     {
         public UnsupportedVersionException()

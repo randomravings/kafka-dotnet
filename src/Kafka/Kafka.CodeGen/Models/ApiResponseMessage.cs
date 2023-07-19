@@ -1,20 +1,20 @@
 ﻿using Kafka.Common.Model;
 using System.Collections.Immutable;
-using Version = Kafka.Common.Model.Version;
+using VersionRange = Kafka.Common.Model.VersionRange;
 
 namespace Kafka.CodeGen.Models
 {
     public sealed record ApiResponseMessage(
-        ApiKey ApiKey,
         string Name,
-        Version ValidVersions,
-        Version FlexibleVersions,
+        ApiKey ApiKey,
+        VersionRange ValidVersions,
+        VersionRange FlexibleVersions,
         ImmutableArray<Field> Fields,
         IImmutableDictionary<string, StructDefinition> Structs
     ) :
         ApiMessage(
-            ApiKey,
             Name,
+            ApiKey,
             ValidVersions,
             FlexibleVersions,
             Fields,

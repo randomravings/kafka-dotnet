@@ -173,7 +173,7 @@ namespace Kafka.Cli.Cmd
                     options,
                     cancellationToken
                 );
-                foreach (var topic in result.Topics.Values)
+                foreach (var topic in result.Topics)
                 {
                     Console.WriteLine($"Id: {topic.TopicId}");
                     Console.WriteLine($"Name: {topic.Name}");
@@ -215,9 +215,14 @@ namespace Kafka.Cli.Cmd
                     .AddConsole()
                     .SetMinimumLevel(options.LogLevel)
                 )
-                .CreateLogger<AdminClient>()
+                .CreateLogger<IAdminClient>()
             ;
-            return new AdminClient(adminClientConfig, logger);
+            return AdminClientBuilder
+                .New()
+                .WithConfig(adminClientConfig)
+                .WithLogger(logger)
+                .Build()
+            ;
         }
     }
 }

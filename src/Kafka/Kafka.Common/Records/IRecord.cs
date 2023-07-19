@@ -1,7 +1,19 @@
-﻿using System.Collections.Immutable;
+﻿using Kafka.Common.Model;
 
 namespace Kafka.Common.Records
 {
+    /// <summary>
+    /// length: varint
+    /// attributes: int8
+    ///     bit 0~7: unused
+    /// timestampDelta: varlong
+    /// offsetDelta: varint
+    /// keyLength: varint
+    /// key: byte[]
+    /// valueLen: varint
+    /// value: byte[]
+    /// Headers => [Header]
+    /// </summary>
     public interface IRecord
     {        
         /// <summary>
@@ -39,6 +51,6 @@ namespace Kafka.Common.Records
         /// Get the headers.
         /// <para>For magic versions prior to 2, this always returns an empty array.</para>
         /// </summary>
-        ImmutableArray<RecordHeader> Headers { get; }
+        IReadOnlyList<RecordHeader> Headers { get; }
     }
 }

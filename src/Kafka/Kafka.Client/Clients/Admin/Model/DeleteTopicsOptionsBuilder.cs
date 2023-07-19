@@ -3,7 +3,7 @@
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed class DeleteTopicsOptionsBuilder :
-        ClientOptionsBuilder<DeleteTopicsOptionsBuilder, DeleteTopicsOptions>
+        AdminClientOptionsBuilder<DeleteTopicsOptionsBuilder, DeleteTopicsOptions>
     {
         private readonly List<Guid> _topicIds = new();
         private readonly List<string> _topicNames = new();
@@ -26,7 +26,7 @@ namespace Kafka.Client.Clients.Admin.Model
 
         public override DeleteTopicsOptions Build() =>
             new(
-                _timeoutMs,
+                TimeoutMs,
                 _topicIds.ToImmutableArray(),
                 _topicNames.ToImmutableArray()
             )

@@ -28,7 +28,7 @@ namespace Kafka.Client.Clients.Producer
         IProducer<TKey, TValue> Build();
     }
 
-    public class ProducerBuilder :
+    public sealed class ProducerBuilder :
         INewProducerBuilder,
         IConfiguredProducerBuilder
     {
@@ -103,7 +103,7 @@ namespace Kafka.Client.Clients.Producer
 
             IProducer<TKey, TValue> IProducerBuilder<TKey, TValue>.Build()
             {
-                return new ProducerClient<TKey, TValue>(_keySerializer, _valueSerializer, _partitioner, _producerConfig, _logger);
+                return new KafkaProducerClient<TKey, TValue>(_keySerializer, _valueSerializer, _partitioner, _producerConfig, _logger);
             }
         }
     }

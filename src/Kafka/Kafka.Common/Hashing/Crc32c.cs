@@ -121,5 +121,24 @@ namespace Kafka.Common.Hashing
                 c = CRC_TABLE[(c ^ bytes[n]) & 0xff] ^ (c >> 8);
             return c ^ 0xffffffffU;
         }
+
+        /// <summary>
+        /// Update CRC from span with a prior value.
+        /// </summary>
+        /// <param name="crc">Prior value.</param>
+        /// <param name="bytes">Span to compute from.</param>
+        /// <param name="index"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static uint Update(uint crc, Stream bytes, long upper)
+        {
+            var c = crc ^ 0xffffffffU;
+            while (bytes.Position < upper)
+            {
+                var b = (byte)bytes.ReadByte();
+                c = CRC_TABLE[(c ^ b) & 0xff] ^ (c >> 8);
+            }
+            return c ^ 0xffffffffU;
+        }
     }
 }

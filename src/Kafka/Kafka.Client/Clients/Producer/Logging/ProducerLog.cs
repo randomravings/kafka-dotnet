@@ -9,10 +9,13 @@ namespace Kafka.Client.Clients.Producer.Logging
         [LoggerMessage(EventId = 2000, Level = LogLevel.Warning, Message = "Topic: {topic}, Error: {error}", SkipEnabledCheck = true)]
         internal static partial void ProducePartitionError(ILogger logger, string topic, Error error);
 
-        [LoggerMessage(EventId = 9000, Level = LogLevel.Trace, Message = "Collect reason: {reason}, count: {count}")]
+        [LoggerMessage(EventId = 2001, Level = LogLevel.Trace, Message = "Collect reason: {reason}, count: {count}")]
         internal static partial void BatchCollected(ILogger logger, BatchCollectReason reason, int count);
 
-        [LoggerMessage(EventId = 9001, Level = LogLevel.Trace, Message = "Record Builder dequeued {recordCount} records")]
+        [LoggerMessage(EventId = 2002, Level = LogLevel.Trace, Message = "Record Builder dequeued {recordCount} records")]
         internal static partial void ProduceCommandDequeue(ILogger logger, int recordCount);
+
+        [LoggerMessage(EventId = 2003, Level = LogLevel.Trace, Message = "Unknown value 'acks={acks}, defaulting to 'acks=all'")]
+        internal static partial void DefaultAcks(ILogger logger, string acks);
     }
 }

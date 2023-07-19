@@ -3,11 +3,11 @@
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed class CreateTopicsOptionsBuilder :
-        ClientOptionsBuilder<CreateTopicsOptionsBuilder, CreateTopicsOptions>
+        AdminClientOptionsBuilder<CreateTopicsOptionsBuilder, CreateTopicsOptions>
     {
-        private bool _validateOnly = false;
+        private bool _validateOnly;
         private bool _retryOnQuotaViolation = true;
-        private readonly List<CreateTopicsOptions.NewTopic> _topics = new();
+        private readonly List<CreateTopicOptions> _topics = new();
         public CreateTopicsOptionsBuilder(AdminClientConfig adminClientConfig)
             : base(adminClientConfig) { }
 
@@ -23,31 +23,22 @@ namespace Kafka.Client.Clients.Admin.Model
             return this;
         }
 
-        public CreateTopicsOptionsBuilder NewTopic(Func<INewTopicBuilder, CreateTopicsOptions.NewTopic> topicBuilder)
+        public CreateTopicsOptionsBuilder NewTopic(Func<INewTopicBuilder, CreateTopicOptions> topicBuilder)
         {
+            if(topicBuilder == null)
+                throw new ArgumentNullException(nameof(topicBuilder));
             _topics.Add(topicBuilder(new NewTopicBuilder()));
             return this;
         }
 
         public override CreateTopicsOptions Build() =>
             new(
-                _timeoutMs,
+                TimeoutMs,
                 _validateOnly,
                 _retryOnQuotaViolation,
                 _topics.ToImmutableArray()
             )
         ;
-
-        public interface INewTopicBuilder
-        {
-            INewTopicBuilder Name(string name);
-            INewTopicBuilder NumPartitions(int numPartitions);
-            INewTopicBuilder ReplicationFactor(short replicationFactor);
-            INewTopicBuilder ReplicasAssignments(int partition, params int[] replicas);
-            INewTopicBuilder ReplicasAssignments(IDictionary<int, int[]> assinments);
-            INewTopicBuilder Configs(string key, string ? value);
-            CreateTopicsOptions.NewTopic Build();
-        }
 
         private sealed class NewTopicBuilder :
             INewTopicBuilder
@@ -95,7 +86,7 @@ namespace Kafka.Client.Clients.Admin.Model
                 return this;
             }
 
-            CreateTopicsOptions.NewTopic INewTopicBuilder.Build() =>
+            CreateTopicOptions INewTopicBuilder.Build() =>
                 new(
                     _name,
                     _numPartitions,

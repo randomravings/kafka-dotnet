@@ -1,6 +1,4 @@
-﻿using Kafka.Common.Model;
-using System.Collections.Immutable;
-using static Kafka.Client.Clients.Admin.Model.CreateTopicsResult;
+﻿using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Admin.Model
 {
@@ -12,19 +10,6 @@ namespace Kafka.Client.Clients.Admin.Model
         public static Model.CreateTopicsResult Empty { get; } = new(
             ImmutableArray<CreateTopicResult>.Empty,
             ImmutableArray<CreateTopicError>.Empty
-        );
-
-        public sealed record CreateTopicResult(
-            TopicId Id,
-            TopicName Name,
-            int NumPartitions,
-            int ReplicationFactor,
-            ImmutableSortedDictionary<string, string?> Config
-        );
-
-        public sealed record CreateTopicError(
-            TopicName Name,
-            Error Error
         );
     };
 }

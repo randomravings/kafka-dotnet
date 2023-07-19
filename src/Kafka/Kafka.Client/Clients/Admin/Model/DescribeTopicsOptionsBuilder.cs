@@ -3,11 +3,11 @@
 namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed class DescribeTopicsOptionsBuilder :
-        ClientOptionsBuilder<DescribeTopicsOptionsBuilder, DescribeTopicsOptions>
+        AdminClientOptionsBuilder<DescribeTopicsOptionsBuilder, DescribeTopicsOptions>
     {
         private readonly List<Guid> _topicIds = new();
         private readonly List<string> _topicNames = new();
-        private bool _includeTopicAuthorizedOperations = false;
+        private bool _includeTopicAuthorizedOperations;
         public DescribeTopicsOptionsBuilder(AdminClientConfig adminClientConfig)
             : base(adminClientConfig) { }
 
@@ -33,7 +33,7 @@ namespace Kafka.Client.Clients.Admin.Model
 
         public override DescribeTopicsOptions Build() =>
             new(
-                _timeoutMs,
+                TimeoutMs,
                 _topicIds.ToImmutableArray(),
                 _topicNames.ToImmutableArray(),
                 _includeTopicAuthorizedOperations

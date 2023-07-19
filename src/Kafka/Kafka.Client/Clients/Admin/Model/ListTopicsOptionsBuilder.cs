@@ -1,7 +1,7 @@
 ﻿namespace Kafka.Client.Clients.Admin.Model
 {
     public sealed class ListTopicsOptionsBuilder :
-        ClientOptionsBuilder<ListTopicsOptionsBuilder, ListTopicsOptions>
+        AdminClientOptionsBuilder<ListTopicsOptionsBuilder, ListTopicsOptions>
     {
         private bool _includeInternal;
         public ListTopicsOptionsBuilder(AdminClientConfig adminClientConfig)
@@ -15,7 +15,7 @@
 
         public override ListTopicsOptions Build() =>
             new(
-                _timeoutMs,
+                TimeoutMs,
                 _includeInternal
             )
         ;

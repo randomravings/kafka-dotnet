@@ -1,15 +1,17 @@
 ﻿using Kafka.CodeGen.Serialization;
+using Kafka.Common.Model;
 using Newtonsoft.Json;
 using System.Collections.Immutable;
-using Version = Kafka.Common.Model.Version;
+using VersionRange = Kafka.Common.Model.VersionRange;
 
 namespace Kafka.CodeGen.Models
 {
     [JsonConverter(typeof(MessageJsonConverter))]
     public abstract record MessageDefinition(
         string Name,
-        Version ValidVersions,
-        Version FlexibleVersions,
+        ApiKey ApiKey,
+        VersionRange ValidVersions,
+        VersionRange FlexibleVersions,
         ImmutableArray<Field> Fields,
         IImmutableDictionary<string, StructDefinition> Structs
     );

@@ -22,7 +22,7 @@ namespace Kafka.Cli.Text
             }
         ;
         public static string Print(TopicPartition value) =>
-            $"{Print(value.Topic)}:{Print(value.Partition)}"
+            $"{Print(value.Topic.TopicName)}:{Print(value.Partition)}"
         ;
         public static string Print(PartitionOffset value) =>
             $"{Print(value.Partition)}:{Print(value.Offset)}"

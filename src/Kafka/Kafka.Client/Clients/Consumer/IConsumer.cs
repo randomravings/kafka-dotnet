@@ -135,7 +135,7 @@ namespace Kafka.Client.Clients.Consumer
         /// <param name="topics"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        IInputStream<TKey, TValue> JoinGroup(TopicName topicName);
+        ValueTask<IInputStreamApplication<TKey, TValue>> CreateInstance(TopicName topicName, CancellationToken cancellationToken);
 
         /// <summary>
         /// Subscribes to consumer group specified by 'group.id' and returns an application stream.
@@ -145,7 +145,7 @@ namespace Kafka.Client.Clients.Consumer
         /// <param name="topics"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        IInputStream<TKey, TValue> JoinGroup(IReadOnlySet<TopicName> topicNames);
+        ValueTask<IInputStreamApplication<TKey, TValue>> CreateInstance(IReadOnlySet<TopicName> topicNames, CancellationToken cancellationToken);
 
         /// <summary>
         /// Creates a seekable stream on selected topic partitions.

@@ -1,38 +1,20 @@
-﻿using Kafka.Common.Encoding;
-using Kafka.Common.Model;
-using Kafka.Common.Protocol;
-
-namespace Kafka.Common.Network
+﻿namespace Kafka.Common.Network
 {
-    public interface IConnection :
-        IDisposable
+    public interface IConnection
     {
-        Task Init(
-            CancellationToken cancellationToken
-        );
-        ClusterNodeId NodeId { get; }
+        bool IsConnected { get; }
+        ValueTask Open(CancellationToken cancellationToken);
+        ValueTask Close(CancellationToken cancellationToken);
         string Host { get; }
         int Port { get; }
-        Task<Cluster> GetClusterInfo(CancellationToken cancellationToken);
-        Task<IEnumerable<ApiVersion>> GetApiKeys(CancellationToken cancellationToken);
-        Task<TResponse> ExecuteRequest<TRequest, TResponse>(
-            TRequest request,
-            EncodeVersionDelegate<TRequest> requestWriter,
-            DecodeVersionDelegate<TResponse> responseReader,
+        ValueTask Send(
+            byte[] requestBytes,
+            int offset,
+            int length,
             CancellationToken cancellationToken
-        )
-            where TRequest : notnull, Request
-            where TResponse : notnull, Response
-        ;
-
-        Task Send<TRequest>(
-            TRequest request,
-            EncodeVersionDelegate<TRequest> requestWriter,
+        );
+        ValueTask<byte[]> Receive(
             CancellationToken cancellationToken
-        )
-            where TRequest : notnull, Request
-        ;
-
-        Task Close(CancellationToken cancellationToken);
+        );
     }
 }

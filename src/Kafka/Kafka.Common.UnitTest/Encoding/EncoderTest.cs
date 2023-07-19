@@ -13,7 +13,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteBoolean(bool value, byte[] expected)
         {
             var buffer = new byte[20];
-            var len = Encoder.WriteBoolean(buffer, 0, value);
+            var len = BinaryEncoder.WriteBoolean(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -26,7 +26,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteInt8(sbyte value, byte[] expected)
         {
             var buffer = new byte[20];
-            var len = Encoder.WriteInt8(buffer, 0, value);
+            var len = BinaryEncoder.WriteInt8(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -43,7 +43,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteInt16(short value, byte[] expected)
         {
             var buffer = new byte[20];
-            var len = Encoder.WriteInt16(buffer, 0, value);
+            var len = BinaryEncoder.WriteInt16(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -64,7 +64,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteInt32(int value, byte[] expected)
         {
             var buffer = new byte[20];
-            var len = Encoder.WriteInt32(buffer, 0, value);
+            var len = BinaryEncoder.WriteInt32(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -81,7 +81,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteUInt32(uint value, byte[] expected)
         {
             var buffer = new byte[20];
-            var len = Encoder.WriteUInt32(buffer, 0, value);
+            var len = BinaryEncoder.WriteUInt32(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -106,7 +106,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteInt64(long value, byte[] expected)
         {
             var buffer = new byte[20];
-            var len = Encoder.WriteInt64(buffer, 0, value);
+            var len = BinaryEncoder.WriteInt64(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -134,11 +134,11 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(int.MinValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F })]
         public void TestWriteVarInt32(int value, byte[] expected)
         {
-            var sizeOf = Encoder.SizeOfInt32(value);
+            var sizeOf = BinaryEncoder.SizeOfVarInt32(value);
             Assert.That(sizeOf, Is.EqualTo(expected.Length));
 
             var buffer = new byte[20];
-            var len = Encoder.WriteVarInt32(buffer, 0, value);
+            var len = BinaryEncoder.WriteVarInt32(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -175,11 +175,11 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(4294967295U, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F })]
         public void TestWriteVarUInt32(uint value, byte[] expected)
         {
-            var sizeOf = Encoder.SizeOfUInt32(value);
+            var sizeOf = BinaryEncoder.SizeOfVarUInt32(value);
             Assert.That(sizeOf, Is.EqualTo(expected.Length));
 
             var buffer = new byte[20];
-            var len = Encoder.WriteVarUInt32(buffer, 0, value);
+            var len = BinaryEncoder.WriteVarUInt32(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -229,11 +229,11 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(long.MinValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x01 })]
         public void TestWriteVarInt64(long value, byte[] expected)
         {
-            var sizeOf = Encoder.SizeOfInt64(value);
+            var sizeOf = BinaryEncoder.SizeOfVarInt64(value);
             Assert.That(sizeOf, Is.EqualTo(expected.Length));
 
             var buffer = new byte[20];
-            var len = Encoder.WriteVarInt64(buffer, 0, value);
+            var len = BinaryEncoder.WriteVarInt64(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -245,7 +245,7 @@ namespace Kafka.Common.UnitTest.Encoding
         {
             Assert.That(Guid.TryParse(value, out var valueUuid), Is.True);
             var buffer = new byte[20];
-            var len = Encoder.WriteUuid(buffer, 0, valueUuid);
+            var len = BinaryEncoder.WriteUuid(buffer, 0, valueUuid);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -258,7 +258,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteFloat64(double value, byte[] expected)
         {
             var buffer = new byte[20];
-            var len = Encoder.WriteFloat64(buffer, 0, value);
+            var len = BinaryEncoder.WriteFloat64(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -274,7 +274,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteString(string value, byte[] expected)
         {
             var buffer = new byte[40];
-            var len = Encoder.WriteString(buffer, 0, value);
+            var len = BinaryEncoder.WriteString(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -290,7 +290,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteCompactString(string value, byte[] expected)
         {
             var buffer = new byte[40];
-            var len = Encoder.WriteCompactString(buffer, 0, value);
+            var len = BinaryEncoder.WriteCompactString(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -307,7 +307,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteNullableString(string? value, byte[] expected)
         {
             var buffer = new byte[40];
-            var len = Encoder.WriteNullableString(buffer, 0, value);
+            var len = BinaryEncoder.WriteNullableString(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -324,7 +324,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteCompactNullableString(string? value, byte[] expected)
         {
             var buffer = new byte[40];
-            var len = Encoder.WriteCompactNullableString(buffer, 0, value);
+            var len = BinaryEncoder.WriteCompactNullableString(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -335,7 +335,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteBytes(byte[] value, byte[] expected)
         {
             var buffer = new byte[20];
-            var len = Encoder.WriteBytes(buffer, 0, value);
+            var len = BinaryEncoder.WriteBytes(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -346,7 +346,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestWriteCompactBytes(byte[] value, byte[] expected)
         {
             var buffer = new byte[20];
-            var len = Encoder.WriteCompactBytes(buffer, 0, value);
+            var len = BinaryEncoder.WriteCompactBytes(buffer, 0, value);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -359,7 +359,7 @@ namespace Kafka.Common.UnitTest.Encoding
         {
             var buffer = new byte[20];
             var memory = value == null ? default(ReadOnlyMemory<byte>?) : value;
-            var len = Encoder.WriteNullableBytes(buffer, 0, memory);
+            var len = BinaryEncoder.WriteNullableBytes(buffer, 0, memory);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }
@@ -372,7 +372,7 @@ namespace Kafka.Common.UnitTest.Encoding
         {
             var buffer = new byte[20];
             var memory = value == null ? default(ReadOnlyMemory<byte>?) : value;
-            var len = Encoder.WriteCompactNullableBytes(buffer, 0, memory);
+            var len = BinaryEncoder.WriteCompactNullableBytes(buffer, 0, memory);
             Assert.That(len, Is.EqualTo(expected.Length));
             CollectionAssert.AreEqual(expected, buffer[0..len]);
         }

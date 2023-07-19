@@ -11,7 +11,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(true, new byte[] { 0x01 })]
         public void TestReadBoolean(bool expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadBoolean(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadBoolean(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -26,7 +26,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(sbyte.MinValue, new byte[] { 0x80 })]
         public void TestReadInt8(sbyte expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadInt8(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadInt8(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -45,7 +45,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(short.MinValue, new byte[] { 0x80, 0x00 })]
         public void TestReadInt16(short expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadInt16(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadInt16(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -68,7 +68,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(int.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00 })]
         public void TestReadInt32(int expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadInt32(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadInt32(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -87,7 +87,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(uint.MaxValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF })]
         public void TestReadUInt32(uint expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadUInt32(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadUInt32(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -114,7 +114,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(long.MinValue, new byte[] { 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 })]
         public void TestReadInt64(long expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadInt64(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadInt64(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -145,7 +145,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(int.MinValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F })]
         public void TestReadVarInt32(int expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadVarInt32(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadVarInt32(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -185,7 +185,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(4294967295U, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x0F })]
         public void TestReadVarUInt32(uint expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadVarUInt32(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadVarUInt32(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -238,7 +238,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(long.MinValue, new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x01 })]
         public void TestReadVarInt64(long expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadVarInt64(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadVarInt64(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -252,7 +252,7 @@ namespace Kafka.Common.UnitTest.Encoding
         public void TestReadUUID(string expected, byte[] buffer)
         {
             Assert.That(Guid.TryParse(expected, out var expectedUuid), Is.True);
-            (var index, var actualUuid) = Decoder.ReadUuid(buffer, 0);
+            (var index, var actualUuid) = BinaryDecoder.ReadUuid(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -267,7 +267,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(double.MaxValue, new byte[] { 0x7F, 0xEF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF })]
         public void TestReadFloat64(double expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadFloat64(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadFloat64(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -285,7 +285,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x00, 0x20, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestReadString(string expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadString(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadString(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -303,7 +303,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x21, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestReadCompactString(string expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadCompactString(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadCompactString(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -322,7 +322,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x00, 0x20, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestReadNullableString(string? expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadNullableString(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadNullableString(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -341,7 +341,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(" !#$%&'()*+,-./0123456789:;<=>?@", new byte[] { 0x21, 0x20, 0x21, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40 })]
         public void TestReadCompactNullableString(string? expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadCompactNullableString(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadCompactNullableString(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -354,7 +354,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x00, 0x00, 0x00, 0x02, 0x00, 0x1A })]
         public void TestReadBytes(byte[] expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadBytes(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadBytes(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -367,7 +367,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x03, 0x00, 0x1A })]
         public void TestReadCompactBytes(byte[] expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadCompactBytes(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadCompactBytes(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -381,7 +381,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x00, 0x00, 0x00, 0x02, 0x00, 0x1A })]
         public void TestReadNullableBytes(byte[]? expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadNullableBytes(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadNullableBytes(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));
@@ -394,7 +394,7 @@ namespace Kafka.Common.UnitTest.Encoding
         [TestCase(new byte[] { 0x00, 0x1A }, new byte[] { 0x03, 0x00, 0x1A })]
         public void TestReadCompactNullableBytes(byte[]? expected, byte[] buffer)
         {
-            (var index, var actual) = Decoder.ReadCompactNullableBytes(buffer, 0);
+            (var index, var actual) = BinaryDecoder.ReadCompactNullableBytes(buffer, 0);
             Assert.Multiple(() =>
             {
                 Assert.That(index, Is.EqualTo(buffer.Length));

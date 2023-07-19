@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Kafka.Client.Model;
 
 namespace Kafka.Client.Clients.Admin.Model
 {

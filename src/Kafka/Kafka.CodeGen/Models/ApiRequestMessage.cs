@@ -1,6 +1,6 @@
 ﻿using Kafka.Common.Model;
 using System.Collections.Immutable;
-using Version = Kafka.Common.Model.Version;
+using VersionRange = Kafka.Common.Model.VersionRange;
 
 namespace Kafka.CodeGen.Models
 {
@@ -8,14 +8,14 @@ namespace Kafka.CodeGen.Models
         ApiKey ApiKey,
         string[] Listeners,
         string Name,
-        Version ValidVersions,
-        Version FlexibleVersions,
+        VersionRange ValidVersions,
+        VersionRange FlexibleVersions,
         ImmutableArray<Field> Fields,
         IImmutableDictionary<string, StructDefinition> Structs
     ) :
         ApiMessage(
-            ApiKey,
             Name,
+            ApiKey,
             ValidVersions,
             FlexibleVersions,
             Fields,

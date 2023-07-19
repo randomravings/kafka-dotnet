@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using Kafka.Common.Model;
 
 namespace Kafka.Common.Records
 {
@@ -48,6 +49,6 @@ namespace Kafka.Common.Records
 
         ReadOnlyMemory<byte>? IRecord.Value => Value;
 
-        ImmutableArray<RecordHeader> IRecord.Headers => ImmutableArray<RecordHeader>.Empty;
+        IReadOnlyList<RecordHeader> IRecord.Headers => Headers;
     }
 }

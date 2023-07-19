@@ -1,6 +1,4 @@
-﻿using Kafka.Common.Records;
-using Kafka.Common.Model;
-using System.Collections.Immutable;
+﻿using Kafka.Common.Model;
 
 namespace Kafka.Client.Clients.Consumer.Models
 {
@@ -10,6 +8,6 @@ namespace Kafka.Client.Clients.Consumer.Models
         Timestamp Timestamp,
         TKey Key,
         TValue Value,
-        ImmutableArray<RecordHeader> Headers
+        IReadOnlyList<RecordHeader> Headers
     );
 }

@@ -1,15 +1,14 @@
 ﻿namespace Kafka.Common.Model
 {
     public readonly record struct Version(
-        short Min,
-        short Max
+        short Value
     )
     {
-        public static readonly Version Empty =
-            new(short.MaxValue, short.MinValue)
-        ;
-        public static readonly Version All =
-            new(short.MinValue, short.MaxValue)
-        ;
+        public static implicit operator Version(short value) => new(value);
+        public static implicit operator short(Version value) => value.Value;
+        public static bool operator >=(Version a, Version b) => a.Value >= b.Value;
+        public static bool operator <=(Version a, Version b) => a.Value <= b.Value;
+        public static bool operator >(Version a, Version b) => a.Value > b.Value;
+        public static bool operator <(Version a, Version b) => a.Value < b.Value;
     }
 }

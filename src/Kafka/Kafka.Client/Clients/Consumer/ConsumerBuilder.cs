@@ -96,7 +96,7 @@ namespace Kafka.Client.Clients.Consumer
 
             IConsumer<TKey, TValue> IConsumerBuilder<TKey, TValue>.Build()
             {
-                return new ConsumerClient<TKey, TValue>(_keyDedeserializer, _valueDedeserializer, _consumerConfig, _logger);
+                return new KafkaConsumerClient<TKey, TValue>(_keyDedeserializer, _valueDedeserializer, _consumerConfig, _logger);
             }
         }
     }

@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
+﻿using Kafka.Client.Model;
+using System.Text.Json.Serialization;
 
 namespace Kafka.Client.Clients.Consumer
 {
@@ -33,9 +33,10 @@ namespace Kafka.Client.Clients.Consumer
         [JsonPropertyName("max.partition.fetch.bytes")]
         public int MaxPartitionFetchBytes { get; set; } = 1048576;
         [JsonPropertyName("session.timeout.ms")]
-        public int SessionTimeoutMs { get; set; } = 45000;        
+        public int SessionTimeoutMs { get; set; } = 45000;
         [JsonPropertyName("max.poll.interval.ms")]
         public int MaxPollIntervalMs { get; set; } = 300000;
-
+        [JsonPropertyName("auto.offset.reset")]
+        public AutoOffsetReset AutoOffsetReset { get; set; } = AutoOffsetReset.Latest;
     }
 }

@@ -1,16 +1,16 @@
-﻿using Kafka.Client.Clients.Consumer.Models;
-using Kafka.Common.Model;
+﻿using Kafka.Common.Model;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.Clients.Consumer
 {
     public interface IInputStreamApplication<TKey, TValue> :
-        IInputStream<TKey, TValue>
+        IConsumerInstance<TKey, TValue>,
+        IDisposable
     {
-        ValueTask<CommitResult> Commit(
+        ValueTask Commit(
             CancellationToken cancellationToken
         );
-        ValueTask<CommitResult> Commit(
+        ValueTask Commit(
             TopicPartitionOffset topicPartitionOffset,
             CancellationToken cancellationToken
         );
