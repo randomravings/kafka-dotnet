@@ -25,6 +25,8 @@ Producing to a topic:
 ./kafka-cli.exe producer --topic test-topic --bootstrap-server localhost:9092 --client-id me.org
 ```
 
+The produce command only accepts comma separated key value pairs eg. "some_key,some_value".
+
 Consuming from a topic:
 
 ```bash
