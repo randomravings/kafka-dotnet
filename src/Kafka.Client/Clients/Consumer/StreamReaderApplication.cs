@@ -32,11 +32,13 @@ namespace Kafka.Client.Clients.Consumer
         private readonly ConcurrentTopicPartitionOffsets _commitedOffsets = new();
 
         private MemberInfo _memberInfo = MemberInfo.Empty;
-        private CancellationTokenSource _internalCTS = new();
         private Task _heartbeat = Task.CompletedTask;
         private Task _committer = Task.CompletedTask;
         private long _joined;
         private readonly SemaphoreSlim _commitSync = new(1, 1);
+        private readonly ManualResetEventSlim _joinGroupSync = new(false);
+        private CancellationTokenSource _heartbeatCts = new();
+        private CancellationTokenSource _dataCts = new();
 
         public StreamReaderApplication(
             IConsumerProtocol coordinatorProtocol,
@@ -113,34 +115,53 @@ namespace Kafka.Client.Clients.Consumer
             }
         }
 
-        protected override async ValueTask Fetching(CancellationToken cancellationToken)
+        protected override async ValueTask PrepareFetch(CancellationToken cancellationToken)
         {
-            if (Interlocked.Read(ref _joined) == 0)
+            if (_heartbeat.IsCompleted)
             {
-                await CleanUp(cancellationToken).ConfigureAwait(false);
-                var nodeAssignments = await JoinGroup(cancellationToken).ConfigureAwait(false);
-                _internalCTS = new();
-                _heartbeat = Task.Run(async () => await HeartbeatLoop(_internalCTS.Token).ConfigureAwait(false), CancellationToken.None);
-                if (_enableAutoCommit)
-                    _committer = Task.Run(async () => await AutoCommitLoop(_internalCTS.Token).ConfigureAwait(false), CancellationToken.None);
-                ResetFetchResults();
-                foreach ((var nodeId, var assignment) in nodeAssignments)
-                {
-                    foreach (var topicPartitionOffset in assignment.TopicPartitionOffsets)
-                        _trackedOffsets[topicPartitionOffset.Key] = topicPartitionOffset.Value;
-                    var channel = CreateChannel(assignment);
-                    _consumerChannels.Add(channel);
-                }
-                foreach (var channel in _consumerChannels)
-                    await channel.Start(_internalCTS.Token).ConfigureAwait(false);
-                _logger.ConsumerGroupJoin(_groupId, _memberInfo.MemberId, _memberInfo.GenerationId, _groupInstanceId);
-                Interlocked.Exchange(ref _joined, 1);
+                _heartbeatCts = new CancellationTokenSource();
+                _heartbeat = Task.Run(
+                    async () => await HeartbeatLoop(_heartbeatCts.Token).ConfigureAwait(false),
+                    CancellationToken.None
+                );
+                await Task.Yield();
             }
+
+            if (!_joinGroupSync.IsSet)
+                _joinGroupSync.Wait(cancellationToken);
+        }
+
+        private async Task Setup(CancellationToken cancellationToken)
+        {
+            var nodeAssignments = await JoinGroup(cancellationToken).ConfigureAwait(false);
+            _logger.ConsumerGroupJoin(
+                _groupId,
+                _memberInfo.MemberId,
+                _memberInfo.GenerationId,
+                _groupInstanceId,
+                nodeAssignments.Values.SelectMany(r => r.TopicPartitionOffsets.Keys.Select(k => $"{k.Topic.TopicName.Value}:{k.Partition.Value}"))
+            );
+            _dataCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            if (_enableAutoCommit)
+                _committer = Task.Run(async () => await AutoCommitLoop(_dataCts.Token).ConfigureAwait(false), CancellationToken.None);
+            ResetFetchResults();
+            foreach ((var nodeId, var assignment) in nodeAssignments)
+            {
+                foreach (var topicPartitionOffset in assignment.TopicPartitionOffsets)
+                    _trackedOffsets[topicPartitionOffset.Key] = topicPartitionOffset.Value;
+                var channel = CreateChannel(assignment);
+                _consumerChannels.Add(channel);
+            }
+            var startTasks = _consumerChannels.Select(c => c.Start(_dataCts.Token));
+            await Task.WhenAll(startTasks).ConfigureAwait(false);
+            await Task.Yield();
         }
 
         protected override async ValueTask Closing(CancellationToken cancellationToken)
         {
-            await CleanUp(cancellationToken).ConfigureAwait(false);
+            await TearDown(cancellationToken).ConfigureAwait(false);
+            _heartbeatCts.Cancel();
+            await _heartbeat.ConfigureAwait(false);
             var leaveGroupRequest = new LeaveGroupRequestData(
                 _groupId,
                 _memberInfo.MemberId,
@@ -167,17 +188,17 @@ namespace Kafka.Client.Clients.Consumer
             }
         }
 
-        private async ValueTask CleanUp(CancellationToken cancellationToken)
+        private async ValueTask TearDown(CancellationToken cancellationToken)
         {
-            if (!_internalCTS.IsCancellationRequested)
-                _internalCTS.Cancel();
-            var closeTasks = _consumerChannels.Select(r => r.Stop(cancellationToken));
+            if (!_dataCts.IsCancellationRequested)
+                _dataCts.Cancel();
+            var closeTasks = _consumerChannels.Select(r => r.Stop(cancellationToken)).ToArray();
             await Task.WhenAll(closeTasks).ConfigureAwait(false);
-            _consumerChannels.Clear();
             await _committer.ConfigureAwait(false);
-            await _heartbeat.ConfigureAwait(false);
+            _consumerChannels.Clear();
             _trackedOffsets.Clear();
             _commitedOffsets.Clear();
+            _dataCts.Dispose();
         }
 
         private async Task<ImmutableSortedDictionary<ClusterNodeId, NodeAssignment>> JoinGroup(
@@ -308,7 +329,7 @@ namespace Kafka.Client.Clients.Consumer
                 syncGroupResponse.AssignmentField.ToArray()
             );
 
-            var topicPartitionOffsets = topicPartitions.ToImmutableSortedDictionary(
+            var topicPartitionOffsets = synchedTopicPartitions.ToImmutableSortedDictionary(
                 k => k,
                 v => Offset.Unset,
                 TopicPartitionCompare.Instance
@@ -373,7 +394,10 @@ namespace Kafka.Client.Clients.Consumer
             {
                 var nodeTopicPartitionOffsets = ImmutableSortedDictionary.CreateBuilder<TopicPartition, Offset>(TopicPartitionCompare.Instance);
                 foreach (var topicPartition in assignment)
-                    nodeTopicPartitionOffsets.Add(topicPartition, topicPartitionOffsets[topicPartition]);
+                    if (topicPartitionOffsets.TryGetValue(topicPartition, out var offset))
+                        nodeTopicPartitionOffsets.Add(topicPartition, offset);
+                if (!nodeTopicPartitionOffsets.Any())
+                    continue;
                 var node = metadataResponse.BrokersField.First(r => r.NodeIdField == nodeId);
                 nodeTopicPartitions.Add(nodeId, new NodeAssignment(nodeId, node.HostField, node.PortField, nodeTopicPartitionOffsets.ToImmutable()));
             }
@@ -390,6 +414,15 @@ namespace Kafka.Client.Clients.Consumer
             {
                 try
                 {
+                    if (Interlocked.Read(ref _joined) == 0)
+                    {
+                        await TearDown(cancellationToken).ConfigureAwait(false);
+                        await Setup(cancellationToken).ConfigureAwait(false);
+                        Interlocked.Exchange(ref _joined, 1);
+                        _joinGroupSync.Set();
+                    }
+
+
                     await Task.Delay(_config.HeartbeatIntervalMs, cancellationToken).ConfigureAwait(false);
                     var heartbeatRequest = new HeartbeatRequestData(
                         _groupId,
@@ -410,7 +443,7 @@ namespace Kafka.Client.Clients.Consumer
                         if (error.Code == Errors.Known.REBALANCE_IN_PROGRESS.Code)
                         {
                             Interlocked.Exchange(ref _joined, 0);
-                            break;
+                            _joinGroupSync.Reset();
                         }
                     }
                 }
@@ -563,5 +596,18 @@ namespace Kafka.Client.Clients.Consumer
             commitedOffsets.TryGetValue(topicPartition, out var commitedOffset) &&
             offset <= commitedOffset
         ;
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                _commitSync.Dispose();
+                _commitSync.Dispose();
+                _joinGroupSync.Dispose();
+                _heartbeatCts.Dispose();
+                _dataCts.Dispose();
+            }
+        }
     }
 }

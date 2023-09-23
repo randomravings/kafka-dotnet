@@ -56,7 +56,7 @@ namespace Kafka.Client.Clients.Consumer
             throw new NotImplementedException();
         }
 
-        protected override ValueTask Fetching(
+        protected override ValueTask PrepareFetch(
             CancellationToken cancellationToken
         )
         {

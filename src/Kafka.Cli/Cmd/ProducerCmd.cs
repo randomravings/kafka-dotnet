@@ -5,12 +5,18 @@ using Kafka.Client.Clients.Producer.Model;
 using Kafka.Client.Commands;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 
 namespace Kafka.Cli.Cmd
 {
     internal static class ProducerCmd
     {
+        private enum CommandState
+        {
+            None,
+            SingleRecord,
+            Batch,
+            Transaction
+        };
         public static async ValueTask<int> Parse(
             ProducerOpts options,
             CancellationToken cancellationToken
@@ -41,6 +47,8 @@ namespace Kafka.Cli.Cmd
                 .WithLogger(logger)
                 .Build()
             ;
+
+            var commandState = CommandState.SingleRecord;
             var commands = new List<ICommand<ProduceResult>>();
             Console.WriteLine("Empty new line will terminate session.");
             while (!cancellationToken.IsCancellationRequested)
@@ -48,18 +56,21 @@ namespace Kafka.Cli.Cmd
                 var input = Console.ReadLine();
                 if (string.IsNullOrEmpty(input))
                     break;
-                switch (input)
+                switch (commandState, input)
                 {
-                    case "/bt":
+                    case (CommandState.SingleRecord, "/bt"):
                         await producer.BeginTransaction(cancellationToken).ConfigureAwait(false);
+                        commandState = CommandState.Transaction;
                         continue;
-                    case "/ct":
+                    case (CommandState.Transaction, "/ct"):
                         await producer.CommitTransaction(cancellationToken).ConfigureAwait(false);
+                        commandState = CommandState.SingleRecord;
                         continue;
-                    case "/rt":
+                    case (CommandState.Transaction, "/rt"):
                         await producer.RollbackTransaction(cancellationToken).ConfigureAwait(false);
+                        commandState = CommandState.SingleRecord;
                         continue;
-                    case "/fl":
+                    case (_, "/fl"):
                         await producer.Flush(cancellationToken).ConfigureAwait(false);
                         await HandleResults(commands);
                         commands.Clear();
@@ -78,6 +89,8 @@ namespace Kafka.Cli.Cmd
                 );
                 var sendCommand = await producer.Send(record, cancellationToken).ConfigureAwait(false);
                 commands.Add(sendCommand);
+                await HandleResults(commands);
+                commands.Clear();
             }
             await producer.Flush(cancellationToken).ConfigureAwait(false);
             await HandleResults(commands);

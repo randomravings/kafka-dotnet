@@ -374,7 +374,8 @@ namespace Kafka.Client.Protocol
                 LogError(_logger, requestHeader, errors);
                 if (tries < _retries && IsTransient(errors))
                     cancellationToken.WaitHandle.WaitOne(_retryBackOffMs);
-                return response;
+                else
+                    return response;
             }
         }
 

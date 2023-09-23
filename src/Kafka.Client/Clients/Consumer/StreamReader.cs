@@ -19,11 +19,10 @@ namespace Kafka.Client.Clients.Consumer
         protected readonly IList<IConsumerChannel> _consumerChannels = new List<IConsumerChannel>();
         protected readonly ConcurrentTopicPartitionOffsets _trackedOffsets = new();
 
-        private readonly BlockingCollection<FetchResultEnumerator> _fetchResultEnumerators = new();
+        private readonly ConcurrentQueue<FetchResultEnumerator> _fetchResultEnumerators = new();
         private FetchResultEnumerator _enumerator = FetchResultEnumerator.Empty;
-        private CancellationTokenSource _internalCTS = new();
-        private readonly AutoResetEvent _autoCommitHandle = new(false);
-        private readonly SemaphoreSlim _commitSync = new(1, 1);
+        private bool disposedValue;
+        private readonly ManualResetEventSlim _resetEvent = new(true);
 
         protected StreamReader(
             IDeserializer<TKey> keyDeserializer,
@@ -42,8 +41,7 @@ namespace Kafka.Client.Clients.Consumer
 
         async Task<ConsumerRecord<TKey, TValue>> IStreamReader<TKey, TValue>.Fetch(CancellationToken cancellationToken)
         {
-            await Fetching(cancellationToken).ConfigureAwait(false);
-            var record = NextRecord(cancellationToken);
+            var record = await NextRecord(cancellationToken).ConfigureAwait(false);
             _trackedOffsets[record.TopicPartition] = record.Offset + 1;
             return record;
         }
@@ -52,27 +50,13 @@ namespace Kafka.Client.Clients.Consumer
             await Closing(cancellationToken).ConfigureAwait(false)
         ;
 
-        void IDisposable.Dispose()
-        {
-            _fetchResultEnumerators.Dispose();
-            _internalCTS.Dispose();
-            _commitSync.Dispose();
-            _autoCommitHandle.Dispose();
-            _enumerator.Dispose();
-        }
-
-        protected abstract ValueTask Fetching(CancellationToken cancellationToken);
+        protected abstract ValueTask PrepareFetch(CancellationToken cancellationToken);
 
         protected abstract ValueTask Closing(CancellationToken cancellationToken);
 
         protected void ResetFetchResults()
         {
-            while (_fetchResultEnumerators.Count > 0)
-            {
-                var enumerator = _fetchResultEnumerators.Take();
-                enumerator.Dispose();
-            }
-            _enumerator.Dispose();
+            _fetchResultEnumerators.Clear();
             _enumerator = FetchResultEnumerator.Empty;
         }
 
@@ -80,17 +64,60 @@ namespace Kafka.Client.Clients.Consumer
         {
             var connection = new SaslPlaintextTransport(assignment.Host, assignment.Port);
             var protocol = new ConsumerProtocol(connection, _config, _logger);
-            return new ConsumerChannel(assignment.NodeId, protocol, assignment.TopicPartitionOffsets, _fetchResultEnumerators, _config, _logger);
+            return new ConsumerChannel(
+                assignment.NodeId,
+                protocol,
+                assignment.TopicPartitionOffsets,
+                _fetchResultEnumerators,
+                _resetEvent,
+                _config,
+                _logger
+            );
         }
 
-        private ConsumerRecord<TKey, TValue> NextRecord(CancellationToken cancellationToken)
+        private async ValueTask<ConsumerRecord<TKey, TValue>> NextRecord(CancellationToken cancellationToken)
         {
-            while (!_enumerator.MoveNext())
+            await PrepareFetch(cancellationToken).ConfigureAwait(false);
+            while (true)
             {
-                _enumerator.Dispose();
-                _enumerator = _fetchResultEnumerators.Take(cancellationToken);
+                switch (_enumerator.MoveNext())
+                {
+                    case FetchEnumeratorState.Active:
+                        return _enumerator.ReadRecord(_keyDeserializer, _valueDeserializer);
+                    case FetchEnumeratorState.End:
+                        var record = _enumerator.ReadRecord(_keyDeserializer, _valueDeserializer);
+                        _enumerator.Close();
+                        return record;
+                }
+                while (true)
+                {
+                    if (_fetchResultEnumerators.TryDequeue(out var enumerator))
+                    {
+                        _enumerator = enumerator;
+                        break;
+                    }
+                    _resetEvent.Wait(cancellationToken);
+                    _resetEvent.Reset();
+                }
             }
-            return _enumerator.ReadRecord(_keyDeserializer, _valueDeserializer);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    _resetEvent.Dispose();
+                }
+                disposedValue = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

@@ -4,6 +4,7 @@ using Kafka.Client.Messages;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
+using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -16,7 +17,7 @@ namespace Kafka.Client.Clients.Consumer
     {
         private readonly ClusterNodeId _nodeId;
         private readonly IConsumerProtocol _protocol;
-        private readonly BlockingCollection<FetchResultEnumerator> _fetchCallbacks;
+        private readonly ConcurrentQueue<FetchResultEnumerator> _fetchCallbacks;
         private readonly SortedList<TopicPartition, Offset> _topicPartitionOffsets;
         private readonly int _fetchMaxWaitMs;
         private readonly int _fetchMinBytes;
@@ -28,18 +29,21 @@ namespace Kafka.Client.Clients.Consumer
         private Task _task = Task.CompletedTask;
         private bool _running;
         private readonly ILogger _logger;
+        private readonly ManualResetEventSlim _resetEvent;
 
         public ConsumerChannel(
             ClusterNodeId nodeId,
             IConsumerProtocol protocol,
             ImmutableSortedDictionary<TopicPartition, Offset> topicPartitionOffsets,
-            BlockingCollection<FetchResultEnumerator> fetchCallbacks,
+            ConcurrentQueue<FetchResultEnumerator> fetchCallbacks,
+            ManualResetEventSlim resetEvent,
             ConsumerConfig config,
             ILogger logger
         )
         {
             _nodeId = nodeId;
             _protocol = protocol;
+            _resetEvent = resetEvent;
             _fetchCallbacks = fetchCallbacks;
             _fetchMaxWaitMs = config.FetchMaxWaitMs;
             _fetchMinBytes = config.FetchMinBytes;
@@ -59,6 +63,7 @@ namespace Kafka.Client.Clients.Consumer
             CancellationToken cancellationToken
         )
         {
+            _logger.ConsumerChannelStart(_nodeId, _topicPartitionOffsets.Keys.Select(r => $"{r.Topic.TopicName.Value}:{r.Partition.Value}"));
             _running = true;
             await CheckState(cancellationToken).ConfigureAwait(false);
             _task = Task.Run(async () => await FetchLoop(cancellationToken).ConfigureAwait(false), CancellationToken.None);
@@ -132,11 +137,11 @@ namespace Kafka.Client.Clients.Consumer
                     var fetchTopics = _topicPartitionOffsets
                         .GroupBy(g => g.Key.Topic)
                         .Select(t =>
-                            new FetchRequestData.FetchTopic(
+                            new FetchTopic(
                                 t.Key.TopicName,
                                 t.Key.TopicId,
                                 t.Select(tp =>
-                                    new FetchRequestData.FetchTopic.FetchPartition(
+                                    new FetchTopic.FetchPartition(
                                         PartitionField: tp.Key.Partition,
                                         CurrentLeaderEpochField: -1,
                                         FetchOffsetField: tp.Value,
@@ -163,7 +168,7 @@ namespace Kafka.Client.Clients.Consumer
                         SessionIdField: 0,
                         SessionEpochField: -1,
                         TopicsField: fetchTopics,
-                        ForgottenTopicsDataField: ImmutableArray<FetchRequestData.ForgottenTopic>.Empty,
+                        ForgottenTopicsDataField: ImmutableArray<ForgottenTopic>.Empty,
                         RackIdField: _clientRack,
                         ImmutableArray<TaggedField>.Empty
                     );
@@ -172,28 +177,32 @@ namespace Kafka.Client.Clients.Consumer
                         cancellationToken
                     ).ConfigureAwait(false);
 
-                    var fetchRecords = CheckResult(fetchResponse);
+                    var fetchRecords = Flatten(fetchResponse);
                     if (fetchRecords.Length == 0)
                         continue;
 
-                    var taskCompletionSource = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-                    _fetchCallbacks.Add(new(fetchRecords, SetReadOffset, taskCompletionSource), cancellationToken);
-                    await taskCompletionSource.Task.ConfigureAwait(false);
+                    var taskCompletionSource = new TaskCompletionSource();
+                    _fetchCallbacks.Enqueue(new(fetchRecords, SetReadOffset, taskCompletionSource));
+                    _resetEvent.Set();
+                    await taskCompletionSource
+                        .Task
+                        .WaitAsync(cancellationToken)
+                        .ConfigureAwait(false)
+                    ;
                 }
-                catch (OperationCanceledException)
-                {
-                    _logger.FetchLoopStop();
-                }
+                catch (TaskCanceledException) { }
+                catch (OperationCanceledException) { }
             }
+            _logger.FetchLoopStop();
         }
 
-        private void SetReadOffset(TopicPartition topicPartition, Offset offset) =>
-            _topicPartitionOffsets[topicPartition] = offset + 1
+        private void SetReadOffset(RawConsumerRecord rawConsumerRecord) =>
+            _topicPartitionOffsets[rawConsumerRecord.TopicPartition] = rawConsumerRecord.Offset + 1
         ;
 
-        private ImmutableArray<FetchRecords> CheckResult(FetchResponseData fetchResponse)
+        private ImmutableArray<RawConsumerRecord> Flatten(FetchResponseData fetchResponse)
         {
-            var flattenBuilder = ImmutableArray.CreateBuilder<FetchRecords>();
+            var flattenBuilder = ImmutableArray.CreateBuilder<RawConsumerRecord>();
             foreach (var response in fetchResponse.ResponsesField)
             {
                 var topic = new Topic(response.TopicIdField, response.TopicField);
@@ -206,9 +215,39 @@ namespace Kafka.Client.Clients.Consumer
                     {
                         var topicPartition = new TopicPartition(topic, partition.PartitionIndexField);
                         if (records.Attributes.HasFlag(Attributes.IsControlBatch))
+                        {
                             _topicPartitionOffsets[topicPartition] = records.BaseSequence + 1;
-                        else
-                            flattenBuilder.Add(new(topicPartition, records, partition.ErrorCodeField));
+                            continue;
+                        }
+                        if (partition.ErrorCodeField > 0)
+                        {
+                            var errorRecord = new RawConsumerRecord(
+                                topicPartition,
+                                _topicPartitionOffsets[topicPartition],
+                                Timestamp.None,
+                                null,
+                                null,
+                                ImmutableArray<RecordHeader>.Empty,
+                                Errors.Translate(partition.ErrorCodeField)
+                            );
+                            flattenBuilder.Add(errorRecord);
+                        }
+                        for (int i = 0; i < records.Count; i++)
+                        {
+                            var record = records[i];
+                            var offset = records.BaseOffset + i;
+                            var timestamp = records.BaseTimestamp + record.TimestampDelta;
+                            var rawConsumerRecord = new RawConsumerRecord(
+                                TopicPartition: topicPartition,
+                                Offset: offset,
+                                Timestamp: records.Attributes.HasFlag(Attributes.LogAppendTime) ? Timestamp.LogAppend(timestamp) : Timestamp.Created(timestamp),
+                                Key: record.Key,
+                                Value: record.Value,
+                                Headers: record.Headers,
+                                Error: Errors.Known.NONE
+                            );
+                            flattenBuilder.Add(rawConsumerRecord);
+                        }
                     }
                 }
             }
