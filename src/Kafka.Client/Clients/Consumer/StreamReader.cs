@@ -60,14 +60,15 @@ namespace Kafka.Client.Clients.Consumer
             _enumerator = FetchResultEnumerator.Empty;
         }
 
-        protected IConsumerChannel CreateChannel(NodeAssignment assignment)
+        protected IConsumerChannel CreateChannel(
+            NodeAssignment assignment
+        )
         {
             var connection = new SaslPlaintextTransport(assignment.Host, assignment.Port);
             var protocol = new ConsumerProtocol(connection, _config, _logger);
             return new ConsumerChannel(
                 assignment.NodeId,
                 protocol,
-                assignment.TopicPartitionOffsets,
                 _fetchResultEnumerators,
                 _resetEvent,
                 _config,

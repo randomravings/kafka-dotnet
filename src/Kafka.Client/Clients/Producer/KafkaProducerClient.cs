@@ -409,8 +409,10 @@ namespace Kafka.Client.Clients.Producer
             var enableIdempotence = config.EnableIdempotence || !string.IsNullOrEmpty(transactionalId);
 
             var connection = RandomizeConnection();
+#pragma warning disable CA2000 // Dispose objects before losing scope
             var protocol = CreateProtocol(connection);
-            if(transactionalId != null)
+#pragma warning restore CA2000 // Dispose objects before losing scope
+            if (transactionalId != null)
                 protocol = await GetCoordinator(
                     protocol,
                     transactionalId,

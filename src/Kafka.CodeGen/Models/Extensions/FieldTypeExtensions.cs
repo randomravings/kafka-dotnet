@@ -26,7 +26,7 @@
                 "uuid" => "Guid",
                 "float64" => "double",
                 "string" => "string",
-                "bytes" => "ReadOnlyMemory<byte>",
+                "bytes" => "byte[]",
                 var s => s
             }
         ;

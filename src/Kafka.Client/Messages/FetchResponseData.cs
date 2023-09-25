@@ -3,11 +3,11 @@ using Kafka.Common.Records;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
 using AbortedTransaction = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.AbortedTransaction;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
-using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
 using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
+using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
 
 namespace Kafka.Client.Messages {
     /// <summary>

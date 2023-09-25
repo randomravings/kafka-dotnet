@@ -27,14 +27,13 @@ namespace Kafka.Client.Clients.Consumer
         private readonly int _maxPartitionFetchBytes;
         private readonly AutoOffsetReset _autoOffsetReset;
         private Task _task = Task.CompletedTask;
-        private bool _running;
         private readonly ILogger _logger;
         private readonly ManualResetEventSlim _resetEvent;
+        private CancellationTokenSource _cancellationTokenSource;
 
         public ConsumerChannel(
             ClusterNodeId nodeId,
             IConsumerProtocol protocol,
-            ImmutableSortedDictionary<TopicPartition, Offset> topicPartitionOffsets,
             ConcurrentQueue<FetchResultEnumerator> fetchCallbacks,
             ManualResetEventSlim resetEvent,
             ConsumerConfig config,
@@ -53,125 +52,86 @@ namespace Kafka.Client.Clients.Consumer
             _maxPartitionFetchBytes = config.MaxPartitionFetchBytes;
             _autoOffsetReset = config.AutoOffsetReset;
             _logger = logger;
-            _topicPartitionOffsets = new SortedList<TopicPartition, Offset>(
-                topicPartitionOffsets,
-                TopicPartitionCompare.Instance
-            );
+            _topicPartitionOffsets = new(TopicPartitionCompare.Instance);
+            _cancellationTokenSource= new();
         }
 
+        ClusterNodeId IConsumerChannel.NodeId => _protocol.NodeId;
+
+        IReadOnlyList<TopicPartition> IConsumerChannel.Assignments => _topicPartitionOffsets.Keys.ToImmutableList();
+
         async Task IConsumerChannel.Start(
+            IReadOnlyDictionary<TopicPartition, Offset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
         {
-            _logger.ConsumerChannelStart(_nodeId, _topicPartitionOffsets.Keys.Select(r => $"{r.Topic.TopicName.Value}:{r.Partition.Value}"));
-            _running = true;
-            await CheckState(cancellationToken).ConfigureAwait(false);
-            _task = Task.Run(async () => await FetchLoop(cancellationToken).ConfigureAwait(false), CancellationToken.None);
+            await EnsureOffsets(
+                topicPartitionOffsets,
+                cancellationToken
+            ).ConfigureAwait(false);
+            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
+                cancellationToken
+            );
+            _task = Task.Run(
+                async () => await FetchLoop(cancellationToken).ConfigureAwait(false),
+                CancellationToken.None
+            );
+            _logger.ConsumerChannelStart(
+                _nodeId,
+                _topicPartitionOffsets.Keys.Select(r => $"{r.Topic.TopicName.Value}:{r.Partition.Value}")
+            );
         }
 
         async Task IConsumerChannel.Stop(CancellationToken cancellationToken)
         {
-            _running = false;
             cancellationToken.ThrowIfCancellationRequested();
+            _cancellationTokenSource.Cancel();
             await _task.ConfigureAwait(false);
         }
 
-        Task IConsumerChannel.Seek(TopicPartition topicPartition, DateTimeOffset timestamp)
+        private async Task EnsureOffsets(
+            IReadOnlyDictionary<TopicPartition, Offset> topicPartitionOffsets,
+            CancellationToken cancellationToken
+        )
         {
-            throw new NotImplementedException();
-        }
-
-        Task IConsumerChannel.Seek(TopicPartition topicPartition, Offset offset)
-        {
-            throw new NotImplementedException();
-        }
-
-        private async Task CheckState(CancellationToken cancellationToken)
-        {
+            _topicPartitionOffsets.Clear();
+            foreach (var topicPartitionOffset in topicPartitionOffsets)
+                _topicPartitionOffsets.Add(topicPartitionOffset.Key, topicPartitionOffset.Value);
+            var timestampField = _autoOffsetReset == AutoOffsetReset.Earliest ?
+                Offset.Beginning.Value :
+                Offset.End.Value
+            ;
             var missingOffsets = _topicPartitionOffsets
                 .Where(r => r.Value < 0)
-                .ToImmutableArray()
+                .Select(r => r.Key)
+                .ToImmutableSortedDictionary(
+                    k => k,
+                    v => timestampField,
+                    TopicPartitionCompare.Instance
+                )
             ;
-
-            if (missingOffsets.Length > 0)
-            {
-                var listOffsetsRequest = new ListOffsetsRequestData(
-                    _nodeId.Value,
-                    _isolationLevel,
-                    missingOffsets
-                        .GroupBy(r => r.Key.Topic)
-                        .Select(t => new ListOffsetsRequestData.ListOffsetsTopic(
-                            t.Key.TopicName,
-                            t.Select(p => new ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition(
-                                p.Key.Partition.Value,
-                                -1,
-                                _autoOffsetReset == AutoOffsetReset.Latest ? Offset.Beginning.Value : Offset.End.Value,
-                                1,
-                                ImmutableArray<TaggedField>.Empty
-                            )).ToImmutableArray(),
-                            ImmutableArray<TaggedField>.Empty
-                        )).ToImmutableArray(),
-                    ImmutableArray<TaggedField>.Empty
-                );
-                var listOffsetsResponse = await _protocol.ListOffsets(
-                    listOffsetsRequest,
-                    cancellationToken
-                ).ConfigureAwait(false);
-                foreach (var topic in listOffsetsResponse.TopicsField)
-                {
-                    foreach (var partition in topic.PartitionsField)
-                    {
-                        var key = _topicPartitionOffsets.Keys.First(r => r.Topic.TopicName == topic.NameField && r.Partition == partition.PartitionIndexField);
-                        _topicPartitionOffsets[key] = partition.OffsetField;
-                    }
-                }
-            }
+            if (missingOffsets.Count == 0)
+                return;
+            var listOffsetsRequest = CreateListOffsetsRequest(
+                missingOffsets
+            );
+            var listOffsetsResponse = await _protocol.ListOffsets(
+                listOffsetsRequest,
+                cancellationToken
+            ).ConfigureAwait(false);
+            UpdateTopicPartitionOffsets(
+                _topicPartitionOffsets,
+                listOffsetsResponse
+            );
         }
 
         private async Task FetchLoop(CancellationToken cancellationToken)
         {
-            while (_running && !cancellationToken.IsCancellationRequested)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
-                    var fetchTopics = _topicPartitionOffsets
-                        .GroupBy(g => g.Key.Topic)
-                        .Select(t =>
-                            new FetchTopic(
-                                t.Key.TopicName,
-                                t.Key.TopicId,
-                                t.Select(tp =>
-                                    new FetchTopic.FetchPartition(
-                                        PartitionField: tp.Key.Partition,
-                                        CurrentLeaderEpochField: -1,
-                                        FetchOffsetField: tp.Value,
-                                        LastFetchedEpochField: -1,
-                                        LogStartOffsetField: -1,
-                                        PartitionMaxBytesField: _maxPartitionFetchBytes,
-                                        ImmutableArray<TaggedField>.Empty
-                                    )
-                                )
-                                .ToImmutableArray(),
-                                ImmutableArray<TaggedField>.Empty
-                            )
-                        )
-                        .ToImmutableArray()
-                    ;
-                    var fetchRequest = new FetchRequestData(
-                        ClusterIdField: null,
-                        ReplicaIdField: -1,
-                        ReplicaStateField: ReplicaState.Empty,
-                        MaxWaitMsField: _fetchMaxWaitMs,
-                        MinBytesField: _fetchMinBytes,
-                        MaxBytesField: _fetchMaxBytes,
-                        IsolationLevelField: _isolationLevel,
-                        SessionIdField: 0,
-                        SessionEpochField: -1,
-                        TopicsField: fetchTopics,
-                        ForgottenTopicsDataField: ImmutableArray<ForgottenTopic>.Empty,
-                        RackIdField: _clientRack,
-                        ImmutableArray<TaggedField>.Empty
-                    );
+                    var fetchRequest = CreateFetchRequest();
                     var fetchResponse = await _protocol.Fetch(
                         fetchRequest,
                         cancellationToken
@@ -194,6 +154,11 @@ namespace Kafka.Client.Clients.Consumer
                 catch (OperationCanceledException) { }
             }
             _logger.FetchLoopStop();
+        }
+
+        public void Dispose()
+        {
+            _cancellationTokenSource.Dispose();
         }
 
         private void SetReadOffset(RawConsumerRecord rawConsumerRecord) =>
@@ -252,6 +217,81 @@ namespace Kafka.Client.Clients.Consumer
                 }
             }
             return flattenBuilder.ToImmutable();
+        }
+
+        private FetchRequestData CreateFetchRequest()
+        {
+            var fetchTopics = _topicPartitionOffsets
+                .GroupBy(g => g.Key.Topic)
+                .Select(t =>
+                    new FetchTopic(
+                        t.Key.TopicName,
+                        t.Key.TopicId,
+                        t.Select(tp =>
+                            new FetchTopic.FetchPartition(
+                                PartitionField: tp.Key.Partition,
+                                CurrentLeaderEpochField: -1,
+                                FetchOffsetField: tp.Value,
+                                LastFetchedEpochField: -1,
+                                LogStartOffsetField: -1,
+                                PartitionMaxBytesField: _maxPartitionFetchBytes,
+                                ImmutableArray<TaggedField>.Empty
+                            )
+                        )
+                        .ToImmutableArray(),
+                        ImmutableArray<TaggedField>.Empty
+                    )
+                )
+                .ToImmutableArray()
+            ;
+            return new(
+                ClusterIdField: null,
+                ReplicaIdField: -1,
+                ReplicaStateField: ReplicaState.Empty,
+                MaxWaitMsField: _fetchMaxWaitMs,
+                MinBytesField: _fetchMinBytes,
+                MaxBytesField: _fetchMaxBytes,
+                IsolationLevelField: _isolationLevel,
+                SessionIdField: 0,
+                SessionEpochField: -1,
+                TopicsField: fetchTopics,
+                ForgottenTopicsDataField: ImmutableArray<ForgottenTopic>.Empty,
+                RackIdField: _clientRack,
+                ImmutableArray<TaggedField>.Empty
+            );
+        }
+
+        private ListOffsetsRequestData CreateListOffsetsRequest(
+            IReadOnlyDictionary<TopicPartition, long> topicPartitionOffsets
+        ) =>
+            new(
+                _nodeId.Value,
+                _isolationLevel,
+                topicPartitionOffsets
+                    .GroupBy(r => r.Key.Topic)
+                    .Select(t => new ListOffsetsRequestData.ListOffsetsTopic(
+                        t.Key.TopicName,
+                        t.Select(p => new ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition(
+                            p.Key.Partition.Value,
+                            -1,
+                            p.Value,
+                            1,
+                            ImmutableArray<TaggedField>.Empty
+                        )).ToImmutableArray(),
+                        ImmutableArray<TaggedField>.Empty
+                    )).ToImmutableArray(),
+                ImmutableArray<TaggedField>.Empty
+            )
+        ;
+
+        private static void UpdateTopicPartitionOffsets(
+            IDictionary<TopicPartition, Offset> topicPartitionOffsets,
+            ListOffsetsResponseData offsetListResponse
+        )
+        {
+            foreach (var topic in offsetListResponse.TopicsField)
+                foreach (var partition in topic.PartitionsField)
+                    topicPartitionOffsets[new(topic.NameField, partition.PartitionIndexField)] = partition.OffsetField;
         }
     }
 }

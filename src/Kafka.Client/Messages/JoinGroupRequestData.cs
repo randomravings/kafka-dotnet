@@ -45,13 +45,13 @@ namespace Kafka.Client.Messages {
         [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record JoinGroupRequestProtocol (
             string NameField,
-            ReadOnlyMemory<byte> MetadataField,
+            byte[] MetadataField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
             public static JoinGroupRequestProtocol Empty { get; } = new(
                 "",
-                ReadOnlyMemory<byte>.Empty,
+                Array.Empty<byte>(),
                 ImmutableArray<TaggedField>.Empty
             );
         };

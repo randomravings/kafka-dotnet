@@ -1,9 +1,9 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using TopicProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse;
 using PartitionProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse;
 using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
-using TopicProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse;
 
 namespace Kafka.Client.Messages {
     /// <summary>

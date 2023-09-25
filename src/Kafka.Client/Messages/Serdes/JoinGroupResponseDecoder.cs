@@ -461,7 +461,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
                 (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
@@ -476,7 +476,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
                 (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
@@ -491,7 +491,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
                 (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
@@ -506,7 +506,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
                 (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
@@ -521,7 +521,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
                 (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
@@ -536,7 +536,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
                 (index, groupInstanceIdField) = BinaryDecoder.ReadNullableString(buffer, index);
@@ -552,7 +552,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
                 (index, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
@@ -580,7 +580,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
                 (index, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
@@ -608,7 +608,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
                 (index, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
@@ -636,7 +636,7 @@ namespace Kafka.Client.Messages.Serdes
             {
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
-                var metadataField = ReadOnlyMemory<byte>.Empty;
+                var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
                 (index, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, index);

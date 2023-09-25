@@ -42,13 +42,13 @@ namespace Kafka.Client.Messages {
         [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record SyncGroupRequestAssignment (
             string MemberIdField,
-            ReadOnlyMemory<byte> AssignmentField,
+            byte[] AssignmentField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
             public static SyncGroupRequestAssignment Empty { get; } = new(
                 "",
-                ReadOnlyMemory<byte>.Empty,
+                Array.Empty<byte>(),
                 ImmutableArray<TaggedField>.Empty
             );
         };

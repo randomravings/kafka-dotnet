@@ -1,5 +1,6 @@
 ﻿using Kafka.Common.Model;
 using Microsoft.Extensions.Logging;
+using System.Net.Sockets;
 
 namespace Kafka.Client.Clients.Consumer.Logging
 {
@@ -57,5 +58,12 @@ namespace Kafka.Client.Clients.Consumer.Logging
 
         [LoggerMessage(EventId = 4004, Level = LogLevel.Warning, Message = "Commit operation cancelled", SkipEnabledCheck = false)]
         public static partial void CommitLoopInterrupted(this ILogger logger);
+
+        [LoggerMessage(EventId = 5101, Level = LogLevel.Warning, Message = "Unexpected correllation id: '{correllationId}'", SkipEnabledCheck = false)]
+        public static partial void UnexpectedCorrellationId(this ILogger logger, int correllationId);
+        [LoggerMessage(EventId = 5901, Level = LogLevel.Warning, Message = "Socket exception during send", SkipEnabledCheck = false)]
+        public static partial void SndSocketException(this ILogger logger, SocketException ex);
+        [LoggerMessage(EventId = 5902, Level = LogLevel.Warning, Message = "Socket exception during receive", SkipEnabledCheck = false)]
+        public static partial void RcvSocketException(this ILogger logger, SocketException ex);
     }
 }

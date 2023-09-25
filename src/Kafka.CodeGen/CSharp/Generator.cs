@@ -1683,7 +1683,7 @@ namespace Kafka.CodeGen.CSharp
             (fieldType.Name, nullable) switch
             {
                 ("string", false) => @"""""",
-                ("bytes", false) => @"ReadOnlyMemory<byte>.Empty",
+                ("bytes", false) => @"Array.Empty<byte>()",
                 _ => $"default({fieldType.ToSystemType()}{(nullable ? "?" : "")})"
             }
         ;

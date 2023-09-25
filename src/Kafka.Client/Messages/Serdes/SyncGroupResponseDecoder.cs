@@ -45,7 +45,7 @@ namespace Kafka.Client.Messages.Serdes
             var errorCodeField = default(short);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = ReadOnlyMemory<byte>.Empty;
+            var assignmentField = Array.Empty<byte>();
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
             (index, assignmentField) = BinaryDecoder.ReadBytes(buffer, index);
@@ -64,7 +64,7 @@ namespace Kafka.Client.Messages.Serdes
             var errorCodeField = default(short);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = ReadOnlyMemory<byte>.Empty;
+            var assignmentField = Array.Empty<byte>();
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
             (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
@@ -84,7 +84,7 @@ namespace Kafka.Client.Messages.Serdes
             var errorCodeField = default(short);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = ReadOnlyMemory<byte>.Empty;
+            var assignmentField = Array.Empty<byte>();
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
             (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
@@ -104,7 +104,7 @@ namespace Kafka.Client.Messages.Serdes
             var errorCodeField = default(short);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = ReadOnlyMemory<byte>.Empty;
+            var assignmentField = Array.Empty<byte>();
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
             (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
@@ -124,7 +124,7 @@ namespace Kafka.Client.Messages.Serdes
             var errorCodeField = default(short);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = ReadOnlyMemory<byte>.Empty;
+            var assignmentField = Array.Empty<byte>();
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
             (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
@@ -156,7 +156,7 @@ namespace Kafka.Client.Messages.Serdes
             var errorCodeField = default(short);
             var protocolTypeField = default(string?);
             var protocolNameField = default(string?);
-            var assignmentField = ReadOnlyMemory<byte>.Empty;
+            var assignmentField = Array.Empty<byte>();
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
             (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);

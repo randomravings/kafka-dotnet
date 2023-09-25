@@ -50,14 +50,14 @@ namespace Kafka.Client.Messages {
         public sealed record JoinGroupResponseMember (
             string MemberIdField,
             string? GroupInstanceIdField,
-            ReadOnlyMemory<byte> MetadataField,
+            byte[] MetadataField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
             public static JoinGroupResponseMember Empty { get; } = new(
                 "",
                 default(string?),
-                ReadOnlyMemory<byte>.Empty,
+                Array.Empty<byte>(),
                 ImmutableArray<TaggedField>.Empty
             );
         };

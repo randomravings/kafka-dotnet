@@ -1,4 +1,5 @@
 ﻿using Kafka.Client.Clients;
+using Kafka.Client.Clients.Consumer.Logging;
 using Kafka.Client.Clients.Logging;
 using Kafka.Client.Exceptions;
 using Kafka.Client.Messages;
@@ -157,7 +158,7 @@ namespace Kafka.Client.Protocol
                 catch (OperationCanceledException) { }
                 catch (SocketException ex)
                 {
-                    _logger.LogError(ex.ToString());
+                    _logger.SndSocketException(ex);
                 }
             }
         }
@@ -173,12 +174,12 @@ namespace Kafka.Client.Protocol
                     if (_pendingRequests.Remove(correlationId, out var taskCompletionSource))
                         taskCompletionSource.SetResult(data);
                     else
-                        _logger.LogWarning($"Unknown Correlation Id: {correlationId}");
+                        _logger.UnexpectedCorrellationId(correlationId);
                 }
                 catch (OperationCanceledException) { }
                 catch (SocketException ex)
                 {
-                    _logger.LogError(ex.ToString());
+                    _logger.RcvSocketException(ex);
                 }
             }
         }

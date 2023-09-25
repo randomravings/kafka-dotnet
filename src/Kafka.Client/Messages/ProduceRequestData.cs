@@ -2,8 +2,8 @@ using Kafka.Common.Model;
 using Kafka.Common.Records;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using TopicProduceData = Kafka.Client.Messages.ProduceRequestData.TopicProduceData;
 using PartitionProduceData = Kafka.Client.Messages.ProduceRequestData.TopicProduceData.PartitionProduceData;
+using TopicProduceData = Kafka.Client.Messages.ProduceRequestData.TopicProduceData;
 
 namespace Kafka.Client.Messages {
     /// <summary>

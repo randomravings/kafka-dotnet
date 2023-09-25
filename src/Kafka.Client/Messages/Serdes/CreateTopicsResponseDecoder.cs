@@ -4,8 +4,8 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using CreatableTopicConfigs = Kafka.Client.Messages.CreateTopicsResponseData.CreatableTopicResult.CreatableTopicConfigs;
 using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponseData.CreatableTopicResult;
+using CreatableTopicConfigs = Kafka.Client.Messages.CreateTopicsResponseData.CreatableTopicResult.CreatableTopicConfigs;
 
 namespace Kafka.Client.Messages.Serdes
 {

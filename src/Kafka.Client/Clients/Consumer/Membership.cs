@@ -7,7 +7,9 @@ namespace Kafka.Client.Clients.Consumer
 {
     internal static class Membership
     {
-        public static byte[] Pack(ImmutableSortedSet<TopicPartition> assignments)
+        public static byte[] Pack(
+            IReadOnlySet<TopicPartition> assignments
+        )
         {
             var groupedTopics = assignments
                 .GroupBy(r => r.Topic.TopicName.Value ?? "")
@@ -42,7 +44,9 @@ namespace Kafka.Client.Clients.Consumer
             return bytes;
         }
 
-        public static ImmutableSortedSet<TopicPartition> Unpack(byte[] data)
+        public static IReadOnlySet<TopicPartition> Unpack(
+            byte[] data
+        )
         {
             var set = ImmutableSortedSet.CreateBuilder(TopicPartitionCompare.Instance);
             var offset = 0;
@@ -61,7 +65,9 @@ namespace Kafka.Client.Clients.Consumer
             return set.ToImmutable();
         }
 
-        public static byte[] Pack(ImmutableSortedSet<TopicName> assignments)
+        public static byte[] Pack(
+            IReadOnlySet<TopicName> assignments
+        )
         {
             var metadataSize =
                 2 + // version

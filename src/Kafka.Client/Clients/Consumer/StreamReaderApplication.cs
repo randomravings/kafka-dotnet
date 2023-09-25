@@ -141,20 +141,24 @@ namespace Kafka.Client.Clients.Consumer
                 _groupInstanceId,
                 nodeAssignments.Values.SelectMany(r => r.TopicPartitionOffsets.Keys.Select(k => $"{k.Topic.TopicName.Value}:{k.Partition.Value}"))
             );
+            ResetFetchResults();
             _dataCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             if (_enableAutoCommit)
                 _committer = Task.Run(async () => await AutoCommitLoop(_dataCts.Token).ConfigureAwait(false), CancellationToken.None);
-            ResetFetchResults();
+            var startList = new List<Task>();
             foreach ((var nodeId, var assignment) in nodeAssignments)
             {
                 foreach (var topicPartitionOffset in assignment.TopicPartitionOffsets)
                     _trackedOffsets[topicPartitionOffset.Key] = topicPartitionOffset.Value;
+#pragma warning disable CA2000 // Dispose objects before losing scope
                 var channel = CreateChannel(assignment);
+#pragma warning restore CA2000 // Dispose objects before losing scope
                 _consumerChannels.Add(channel);
+                startList.Add(channel.Start(assignment.TopicPartitionOffsets, _dataCts.Token));
             }
-            var startTasks = _consumerChannels.Select(c => c.Start(_dataCts.Token));
-            await Task.WhenAll(startTasks).ConfigureAwait(false);
+            await Task.WhenAll(startList).ConfigureAwait(false);
             await Task.Yield();
+            startList.Clear();
         }
 
         protected override async ValueTask Closing(CancellationToken cancellationToken)
@@ -205,7 +209,6 @@ namespace Kafka.Client.Clients.Consumer
             CancellationToken cancellationToken
         )
         {
-            (var memberId, var generationId) = _memberInfo;
             var metadataRequest = new MetadataRequestData(
                 _topics.Select(t => new MetadataRequestData.MetadataRequestTopic(
                     Guid.Empty,
@@ -230,8 +233,87 @@ namespace Kafka.Client.Clients.Consumer
                 .ThenBy(r => r.Partition, PartitionCompare.Instance)
                 .ToImmutableArray()
             ;
-            var topicMetadata = Membership.Pack(_topics.ToImmutableSortedSet(TopicNameCompare.Instance));
-            var joinGroupRequest = new JoinGroupRequestData(
+            var joinGroupRequest = CreateJoinGroupRequest(
+                _memberInfo.MemberId
+            );
+            var joinGroupResponse = await _coordinatorProtocol.JoinGroup(
+                joinGroupRequest,
+                cancellationToken
+            ).ConfigureAwait(false);
+            if (joinGroupResponse.ErrorCodeField == Errors.Known.MEMBER_ID_REQUIRED.Code)
+            {
+                joinGroupRequest = joinGroupRequest with
+                {
+                    MemberIdField = joinGroupResponse.MemberIdField,
+                };
+                joinGroupResponse = await _coordinatorProtocol.JoinGroup(
+                    joinGroupRequest,
+                    cancellationToken
+                ).ConfigureAwait(false);
+            }
+            if (joinGroupResponse.ErrorCodeField != 0)
+            {
+                var error = Errors.Translate(joinGroupResponse.ErrorCodeField);
+                throw new ApiException(error);
+            }
+            _memberInfo = new MemberInfo(
+                joinGroupResponse.MemberIdField,
+                joinGroupResponse.GenerationIdField
+            );
+
+            var syncGroupRequest = CreateSyncGroupRequest(
+                joinGroupResponse,
+                topicPartitions
+            );
+            var syncGroupResponse = await _coordinatorProtocol.SyncGroup(
+                syncGroupRequest,
+                cancellationToken
+            ).ConfigureAwait(false);
+            if (syncGroupResponse.ErrorCodeField != 0)
+            {
+                var error = Errors.Translate(syncGroupResponse.ErrorCodeField);
+                throw new ApiException(error);
+            }
+            var synchedTopicPartitions = Membership.Unpack(
+                syncGroupResponse.AssignmentField
+            );
+            var offsetFetchRequest = CreateOffsetFetchRequest(
+                synchedTopicPartitions
+            );
+            var offsetFetchResponse = await _coordinatorProtocol.OffsetFetch(
+                offsetFetchRequest,
+                cancellationToken
+            ).ConfigureAwait(false);
+            var topicPartitionOffsets = TopicPartitionHelper.UpdateTopicPartitionOffsets(
+                synchedTopicPartitions,
+                offsetFetchResponse
+            );
+
+            if (_autoOffsetReset == AutoOffsetReset.None && topicPartitionOffsets.Values.Any(r => r.Value == Offset.Unset))
+                throw new InvalidOperationException("Unset partitions found with auto.offset.reset=none");
+
+            var nodeTopicPartitions = ImmutableSortedDictionary.CreateBuilder<ClusterNodeId, NodeAssignment>(ClusterNodeIdCompare.Instance);
+            foreach ((var nodeId, var assignment) in nodeAssignments)
+            {
+                var nodeTopicPartitionOffsets = ImmutableSortedDictionary.CreateBuilder<TopicPartition, Offset>(TopicPartitionCompare.Instance);
+                foreach (var topicPartition in assignment)
+                    if (topicPartitionOffsets.TryGetValue(topicPartition, out var offset))
+                        nodeTopicPartitionOffsets.Add(topicPartition, offset);
+                if (!nodeTopicPartitionOffsets.Any())
+                    continue;
+                var node = metadataResponse.BrokersField.First(r => r.NodeIdField == nodeId);
+                nodeTopicPartitions.Add(nodeId, new NodeAssignment(nodeId, node.HostField, node.PortField, nodeTopicPartitionOffsets.ToImmutable()));
+            }
+
+            return nodeTopicPartitions.ToImmutable();
+        }
+
+        private JoinGroupRequestData CreateJoinGroupRequest(
+            string memberId
+        )
+        {
+            var topicMetadata = Membership.Pack(_topics);
+            return new(
                 _groupId,
                 _sessionTimeoutMs,
                 _maxPollIntervalMs,
@@ -248,37 +330,18 @@ namespace Kafka.Client.Clients.Consumer
                 null,
                 ImmutableArray<TaggedField>.Empty
             );
-            var joinGroupResponse = await _coordinatorProtocol.JoinGroup(
-                joinGroupRequest,
-                cancellationToken
-            ).ConfigureAwait(false);
-            if (joinGroupResponse.ErrorCodeField == Errors.Known.MEMBER_ID_REQUIRED.Code)
-            {
-                joinGroupRequest = joinGroupRequest with
-                {
-                    MemberIdField = joinGroupResponse.MemberIdField
-                };
-                joinGroupResponse = await _coordinatorProtocol.JoinGroup(
-                    joinGroupRequest,
-                    cancellationToken
-                ).ConfigureAwait(false);
-            }
-            if (joinGroupResponse.ErrorCodeField != 0)
-            {
-                var error = Errors.Translate(joinGroupResponse.ErrorCodeField);
-                throw new ApiException(error);
-            }
-            memberId = joinGroupResponse.MemberIdField;
-            generationId = joinGroupResponse.GenerationIdField;
+        }
 
-            _memberInfo = new MemberInfo(
-                memberId,
-                generationId
-            );
-
+        private SyncGroupRequestData CreateSyncGroupRequest(
+            JoinGroupResponseData joinGroupResponse,
+            ImmutableArray<TopicPartition> topicPartitions
+        )
+        {
+            var memberId = joinGroupResponse.MemberIdField;
+            var generationId = joinGroupResponse.GenerationIdField;
             var assignments = new Dictionary<string, List<TopicPartition>>();
             // Am I the leader?
-            if (memberId == joinGroupResponse.LeaderField)
+            if (joinGroupResponse.MemberIdField == joinGroupResponse.LeaderField)
             {
                 assignments = joinGroupResponse.MembersField.ToDictionary(k => k.MemberIdField, v => new List<TopicPartition>());
                 var keys = assignments.Keys.ToArray();
@@ -305,38 +368,23 @@ namespace Kafka.Client.Clients.Consumer
                 ))
                 .ToImmutableArray()
             ;
-            var syncGroupRequest = new SyncGroupRequestData(
+            return new(
                 _groupId,
-                generationId,
-                memberId,
+                joinGroupResponse.GenerationIdField,
+                joinGroupResponse.MemberIdField,
                 _groupInstanceId,
                 PROTOCOL_TYPE,
                 joinGroupResponse.ProtocolNameField,
                 syncGroupRequestAssignments,
                 ImmutableArray<TaggedField>.Empty
             );
-            var syncGroupResponse = await _coordinatorProtocol.SyncGroup(
-                syncGroupRequest,
-                cancellationToken
-            ).ConfigureAwait(false);
-            if (syncGroupResponse.ErrorCodeField != 0)
-            {
-                var error = Errors.Translate(syncGroupResponse.ErrorCodeField);
-                throw new ApiException(error);
-            }
+        }
 
-            var synchedTopicPartitions = Membership.Unpack(
-                syncGroupResponse.AssignmentField.ToArray()
-            );
-
-            var topicPartitionOffsets = synchedTopicPartitions.ToImmutableSortedDictionary(
-                k => k,
-                v => Offset.Unset,
-                TopicPartitionCompare.Instance
-            );
-
-            var topicsToFetch = topicPartitionOffsets
-                .Keys
+        private OffsetFetchRequestData CreateOffsetFetchRequest(
+            IReadOnlySet<TopicPartition> topicPartitions
+        )
+        {
+            var topicsToFetch = topicPartitions
                 .GroupBy(g => g.Topic)
                 .Select(
                     r => new OffsetFetchRequestData.OffsetFetchRequestTopic(
@@ -354,8 +402,7 @@ namespace Kafka.Client.Clients.Consumer
                 ImmutableArray.Create(
                     new OffsetFetchRequestData.OffsetFetchRequestGroup(
                         _groupId,
-                        topicPartitionOffsets
-                            .Keys
+                        topicPartitions
                             .GroupBy(g => g.Topic)
                             .Select(r =>
                                 new OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
@@ -370,41 +417,14 @@ namespace Kafka.Client.Clients.Consumer
                     )
                 )
             ;
-            var offsetFetchRequest = new OffsetFetchRequestData(
+            return new(
                 _groupId,
                 topicsToFetch,
                 topicsInGroupToFetch,
                 false,
                 ImmutableArray<TaggedField>.Empty
             );
-            var offsetFetchResponse = await _coordinatorProtocol.OffsetFetch(
-                offsetFetchRequest,
-                cancellationToken
-            ).ConfigureAwait(false);
-            topicPartitionOffsets = TopicPartitionHelper.UpdateTopicPartitionOffsets(
-                topicPartitionOffsets,
-                offsetFetchResponse
-            );
-
-            if (_autoOffsetReset == AutoOffsetReset.None && topicPartitionOffsets.Values.Any(r => r.Value == Offset.Unset))
-                throw new InvalidOperationException("Unset partitions found with auto.offset.reset=none");
-
-            var nodeTopicPartitions = ImmutableSortedDictionary.CreateBuilder<ClusterNodeId, NodeAssignment>(ClusterNodeIdCompare.Instance);
-            foreach ((var nodeId, var assignment) in nodeAssignments)
-            {
-                var nodeTopicPartitionOffsets = ImmutableSortedDictionary.CreateBuilder<TopicPartition, Offset>(TopicPartitionCompare.Instance);
-                foreach (var topicPartition in assignment)
-                    if (topicPartitionOffsets.TryGetValue(topicPartition, out var offset))
-                        nodeTopicPartitionOffsets.Add(topicPartition, offset);
-                if (!nodeTopicPartitionOffsets.Any())
-                    continue;
-                var node = metadataResponse.BrokersField.First(r => r.NodeIdField == nodeId);
-                nodeTopicPartitions.Add(nodeId, new NodeAssignment(nodeId, node.HostField, node.PortField, nodeTopicPartitionOffsets.ToImmutable()));
-            }
-
-            return nodeTopicPartitions.ToImmutable();
         }
-
 
         private async Task HeartbeatLoop(
             CancellationToken cancellationToken
@@ -607,6 +627,8 @@ namespace Kafka.Client.Clients.Consumer
                 _joinGroupSync.Dispose();
                 _heartbeatCts.Dispose();
                 _dataCts.Dispose();
+                foreach(var channel in _consumerChannels)
+                    channel.Dispose();
             }
         }
     }

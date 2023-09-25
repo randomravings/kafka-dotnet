@@ -2,11 +2,12 @@
 
 namespace Kafka.Client.Clients.Consumer
 {
-    internal interface IConsumerChannel
+    internal interface IConsumerChannel :
+        IDisposable
     {
-        Task Seek(TopicPartition topicPartition, DateTimeOffset timestamp);
-        Task Seek(TopicPartition topicPartition, Offset offset);
-        Task Start(CancellationToken cancellationToken);
+        ClusterNodeId NodeId { get; }
+        IReadOnlyList<TopicPartition> Assignments { get; }
+        Task Start(IReadOnlyDictionary<TopicPartition, Offset> topicPartition, CancellationToken cancellationToken);
         Task Stop(CancellationToken cancellationToken);
     }
 }

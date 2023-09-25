@@ -16,7 +16,7 @@ namespace Kafka.Client.Messages {
         short ErrorCodeField,
         string? ProtocolTypeField,
         string? ProtocolNameField,
-        ReadOnlyMemory<byte> AssignmentField,
+        byte[] AssignmentField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
@@ -25,7 +25,7 @@ namespace Kafka.Client.Messages {
             default(short),
             default(string?),
             default(string?),
-            ReadOnlyMemory<byte>.Empty,
+            Array.Empty<byte>(),
             ImmutableArray<TaggedField>.Empty
         );
     };

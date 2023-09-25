@@ -7,7 +7,7 @@ namespace Kafka.Client.Clients.Consumer
 {
     internal static class TopicPartitionHelper
     {
-        internal static ImmutableSortedDictionary<ClusterNodeId, ImmutableArray<TopicPartition>> GetAssignments(
+        internal static IReadOnlyDictionary<ClusterNodeId, ImmutableArray<TopicPartition>> GetAssignments(
             MetadataResponseData metadataResponse
         ) =>
             metadataResponse
@@ -23,14 +23,14 @@ namespace Kafka.Client.Clients.Consumer
                 )
             ;
 
-        internal static ImmutableSortedDictionary<TopicPartition, Offset> UpdateTopicPartitionOffsets(
-            ImmutableSortedDictionary<TopicPartition, Offset> topicPartitionOffsets,
+        internal static IReadOnlyDictionary<TopicPartition, Offset> UpdateTopicPartitionOffsets(
+            IReadOnlySet<TopicPartition> topicPartitions,
             OffsetFetchResponseData offsetFetchResponse
         )
         {
             var builder = ImmutableSortedDictionary.CreateBuilder<TopicPartition, Offset>(TopicPartitionCompare.Instance);
-            foreach ((var topicPartition, var offset) in topicPartitionOffsets)
-                builder[topicPartition] = offset;
+            foreach (var topicPartition in topicPartitions)
+                builder[topicPartition] = Offset.Unset;
             // Check if stored by group. This assumes one and only one group.
             var group = offsetFetchResponse.GroupsField.FirstOrDefault();
             if (group != null)
@@ -42,16 +42,6 @@ namespace Kafka.Client.Clients.Consumer
                 foreach (var partition in topic.PartitionsField)
                     builder[new(topic.NameField, partition.PartitionIndexField)] = partition.CommittedOffsetField;
             return builder.ToImmutable();
-        }
-
-        internal static void UpdateTopicPartitionOffsets(
-            IDictionary<TopicPartition, Offset> topicPartitionOffsets,
-            ListOffsetsResponseData offsetListResponse
-        )
-        {
-            foreach (var topic in offsetListResponse.TopicsField)
-                foreach (var partition in topic.PartitionsField)
-                    topicPartitionOffsets[new(topic.NameField, partition.PartitionIndexField)] = partition.OffsetField;
         }
     }
 }
