@@ -43,8 +43,8 @@ namespace Kafka.Client.Clients
             {
                 await connection.Close(cancellationToken).ConfigureAwait(false);
                 connection = KafkaClient<TClient, TConfig>.CreateConnection(controller.HostField, controller.PortField);
+                protocol = builder(connection, _config, _logger);
             }
-            protocol = builder(connection, _config, _logger);
             return protocol;
         }
 

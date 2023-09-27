@@ -43,7 +43,7 @@ namespace Kafka.Client.Clients.Producer
             _sendDelegate = Send;
         }
 
-        async ValueTask<ICommand<ProduceResult>> IProducer<TKey, TValue>.Send(
+        async Task<ICommand<ProduceResult>> IProducer<TKey, TValue>.Send(
             ProduceRecord<TKey, TValue> produceRecord,
             CancellationToken cancellationToken
         )
@@ -59,7 +59,7 @@ namespace Kafka.Client.Clients.Producer
             finally { _semaphoreSlim.Release(); }
         }
 
-        async ValueTask IProducer<TKey, TValue>.BeginTransaction(CancellationToken cancellationToken)
+        async Task<ITransaction> IProducer<TKey, TValue>.BeginTransaction(CancellationToken cancellationToken)
         {
             await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -72,6 +72,7 @@ namespace Kafka.Client.Clients.Producer
                 await FlushChannels(cancellationToken).ConfigureAwait(false);
                 _attributes |= Attributes.IsTransactional;
                 _sendDelegate = SendTransational;
+                return new Transaction(EndTransaction);
             }
             finally { _semaphoreSlim.Release(); }
         }
@@ -125,14 +126,6 @@ namespace Kafka.Client.Clients.Producer
 
             _transactionMembers.Add(sendCommand.TopicPartition);
         }
-
-        async ValueTask IProducer<TKey, TValue>.CommitTransaction(CancellationToken cancellationToken) =>
-            await EndTransaction(true, cancellationToken).ConfigureAwait(false)
-        ;
-
-        async ValueTask IProducer<TKey, TValue>.RollbackTransaction(CancellationToken cancellationToken) =>
-            await EndTransaction(false, cancellationToken).ConfigureAwait(false)
-        ;
 
         private async ValueTask<ICommand<ProduceResult>> Send(
             ProduceRecord<TKey, TValue> produceRecord,
@@ -192,7 +185,7 @@ namespace Kafka.Client.Clients.Producer
             await Task.WhenAll(_brokerChannels.Values.Select(r => r.Flush(cancellationToken).AsTask())).ConfigureAwait(false)
         ;
 
-        async ValueTask IProducer<TKey, TValue>.Flush(CancellationToken cancellationToken)
+        async Task IProducer<TKey, TValue>.Flush(CancellationToken cancellationToken)
         {
             await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
             try

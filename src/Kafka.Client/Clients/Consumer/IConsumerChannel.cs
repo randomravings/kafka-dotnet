@@ -1,13 +1,16 @@
 ﻿using Kafka.Common.Model;
+using System.Collections.Concurrent;
 
 namespace Kafka.Client.Clients.Consumer
 {
-    internal interface IConsumerChannel :
-        IDisposable
+    internal interface IConsumerChannel
     {
-        ClusterNodeId NodeId { get; }
-        IReadOnlyList<TopicPartition> Assignments { get; }
-        Task Start(IReadOnlyDictionary<TopicPartition, Offset> topicPartition, CancellationToken cancellationToken);
-        Task Stop(CancellationToken cancellationToken);
+        Task FetchLoop { get; }
+        Task Start(
+            IReadOnlyDictionary<TopicPartition, Offset> topicPartitionOffsets,
+            ConcurrentQueue<FetchResultEnumerator> fetchCallbacks,
+            ManualResetEventSlim resetEvent,
+            CancellationToken cancellationToken
+        );
     }
 }

@@ -13,12 +13,11 @@ namespace Kafka.Client.Clients.Consumer
             CancellationToken cancellationToken
         );
         ValueTask<ImmutableArray<TopicPartitionOffset>> Seek(
-            ImmutableArray<TopicPartitionOffset> topicPartitionOffsets,
+            IReadOnlyDictionary<TopicPartition, Offset> topicPartitionOffsets,
             CancellationToken cancellationToken
         );
         ValueTask<ImmutableArray<TopicPartitionOffset>> Seek(
-            ImmutableArray<TopicPartition> topicPartitionOffsets,
-            DateTimeOffset timestamp,
+            IReadOnlyDictionary<TopicPartition, Timestamp> topicPartitionTimestamp,
             CancellationToken cancellationToken
         );
     }

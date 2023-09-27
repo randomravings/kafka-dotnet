@@ -8,10 +8,10 @@ namespace Kafka.Cli.Options
         [Option("bootstrap-server", Required = true)]
         public string BootstrapServer { get; set; } = "";
 
-        [Option("client-id")]
-        public string ClientId { get; set; } = "";
-
         [Option("log-level", Required = false, Default = LogLevel.Warning)]
         public LogLevel LogLevel { get; set; } = LogLevel.Warning;
+
+        [Option("property")]
+        public IEnumerable<string> Properties { get; set; } = Array.Empty<string>();
     }
 }

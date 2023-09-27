@@ -6,6 +6,6 @@
     public interface ICommand<TResult> :
         ICommand
     {
-        ValueTask<TResult> Result();
+        Task<TResult> Result();
     }
 }

@@ -10,17 +10,12 @@ namespace Kafka.Client.Clients.Admin.Model
         public DeleteTopicsOptionsBuilder(AdminClientConfig adminClientConfig)
             : base(adminClientConfig) { }
 
-        public DeleteTopicsOptionsBuilder TopicId(Guid topicId)
+        public DeleteTopicsOptionsBuilder Topic(string topic)
         {
-            if (topicId != Guid.Empty)
+            if(Guid.TryParse(topic, out var topicId))
                 _topicIds.Add(topicId);
-            return this;
-        }
-
-        public DeleteTopicsOptionsBuilder TopicName(string name)
-        {
-            if (!string.IsNullOrEmpty(name))
-                _topicNames.Add(name);
+            else if (!string.IsNullOrEmpty(topic))
+                _topicNames.Add(topic);
             return this;
         }
 

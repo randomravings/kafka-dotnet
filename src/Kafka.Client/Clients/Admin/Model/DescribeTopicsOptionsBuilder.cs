@@ -11,17 +11,12 @@ namespace Kafka.Client.Clients.Admin.Model
         public DescribeTopicsOptionsBuilder(AdminClientConfig adminClientConfig)
             : base(adminClientConfig) { }
 
-        public DescribeTopicsOptionsBuilder TopicId(Guid topicId)
+        public DescribeTopicsOptionsBuilder Topic(string topic)
         {
-            if (topicId != Guid.Empty)
+            if (Guid.TryParse(topic, out var topicId))
                 _topicIds.Add(topicId);
-            return this;
-        }
-
-        public DescribeTopicsOptionsBuilder TopicName(string name)
-        {
-            if (!string.IsNullOrEmpty(name))
-                _topicNames.Add(name);
+            if (!string.IsNullOrEmpty(topic))
+                _topicNames.Add(topic);
             return this;
         }
 

@@ -97,6 +97,7 @@ namespace Kafka.Client.Protocol
             {
                 _internalCts.Cancel();
                 await Task.WhenAll(_senderThread, _receiverThread).ConfigureAwait(false);
+                await Task.Yield();
                 foreach (var penndingRequest in _pendingRequests)
                     penndingRequest.Value.SetCanceled(CancellationToken.None);
                 _pendingRequests.Clear();
@@ -109,11 +110,12 @@ namespace Kafka.Client.Protocol
                     await SendLoop(_internalCts.Token).ConfigureAwait(false),
                     CancellationToken.None
                 );
+                await Task.Yield();
                 _receiverThread = Task.Run(async () =>
                     await ReceiveLoop(_internalCts.Token).ConfigureAwait(false),
                     CancellationToken.None
                 );
-
+                await Task.Yield();
                 var apiVersionsResponse = await ApiKeyBootstrap(
                     cancellationToken
                 ).ConfigureAwait(false);

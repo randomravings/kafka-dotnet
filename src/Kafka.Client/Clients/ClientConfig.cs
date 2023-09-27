@@ -361,9 +361,10 @@ namespace Kafka.Client.Clients
 
 
         private static SortedList<string, object?> EnumerateJsonConfig<T>(T instance)
+            where T : notnull
         {
             var items = new SortedList<string, object?>();
-            foreach (var property in typeof(T).GetProperties())
+            foreach (var property in instance.GetType().GetProperties())
             {
                 var jsonPropertyName = property.GetCustomAttribute<JsonPropertyNameAttribute>();
                 if (jsonPropertyName == null)

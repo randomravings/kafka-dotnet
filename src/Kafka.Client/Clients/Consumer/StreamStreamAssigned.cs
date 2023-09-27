@@ -19,7 +19,7 @@ namespace Kafka.Client.Clients.Consumer
         }
 
         ValueTask<ImmutableArray<TopicPartitionOffset>> IStreamReaderAssigned<TKey, TValue>.Seek(
-            ImmutableArray<TopicPartitionOffset> topicPartitionOffsets,
+            IReadOnlyDictionary<TopicPartition, Offset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
         {
@@ -27,8 +27,7 @@ namespace Kafka.Client.Clients.Consumer
         }
 
         ValueTask<ImmutableArray<TopicPartitionOffset>> IStreamReaderAssigned<TKey, TValue>.Seek(
-            ImmutableArray<TopicPartition> topicPartitionOffsets,
-            DateTimeOffset timestamp,
+            IReadOnlyDictionary<TopicPartition, Timestamp> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
         {

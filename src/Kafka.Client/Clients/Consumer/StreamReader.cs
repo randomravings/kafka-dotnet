@@ -1,5 +1,6 @@
 ﻿using Kafka.Client.Clients.Consumer.Models;
 using Kafka.Common.Collections;
+using Kafka.Common.Model;
 using Kafka.Common.Network;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
@@ -12,17 +13,18 @@ namespace Kafka.Client.Clients.Consumer
     {
         private readonly IDeserializer<TKey> _keyDeserializer;
         private readonly IDeserializer<TValue> _valueDeserializer;
-        protected readonly ConsumerConfig _config;
-        protected readonly ILogger<IConsumer<TKey, TValue>> _logger;
-        protected readonly int _sessionTimeoutMs;
-        protected readonly int _maxPollIntervalMs;
-        protected readonly IList<IConsumerChannel> _consumerChannels = new List<IConsumerChannel>();
-        protected readonly ConcurrentTopicPartitionOffsets _trackedOffsets = new();
-
+        private readonly IList<IConsumerChannel> _consumerChannels = new List<IConsumerChannel>();
         private readonly ConcurrentQueue<FetchResultEnumerator> _fetchResultEnumerators = new();
         private FetchResultEnumerator _enumerator = FetchResultEnumerator.Empty;
         private bool disposedValue;
         private readonly ManualResetEventSlim _resetEvent = new(true);
+        private CancellationTokenSource _channelCts = new();
+
+        protected readonly ConcurrentTopicPartitionOffsets _trackedOffsets = new();
+        protected readonly ConsumerConfig _config;
+        protected readonly ILogger<IConsumer<TKey, TValue>> _logger;
+        protected readonly int _sessionTimeoutMs;
+        protected readonly int _maxPollIntervalMs;
 
         protected StreamReader(
             IDeserializer<TKey> keyDeserializer,
@@ -69,11 +71,40 @@ namespace Kafka.Client.Clients.Consumer
             return new ConsumerChannel(
                 assignment.NodeId,
                 protocol,
-                _fetchResultEnumerators,
-                _resetEvent,
                 _config,
                 _logger
             );
+        }
+
+        protected async Task StartChannels(
+            IReadOnlyList<NodeAssignment> nodeAssignments,
+            CancellationToken cancellationToken
+        )
+        {
+            _channelCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var startList = new List<Task>();
+            foreach (var nodeAssignment in nodeAssignments)
+            {
+                foreach (var topicPartitionOffset in nodeAssignment.TopicPartitionOffsets)
+                    _trackedOffsets[topicPartitionOffset.Key] = topicPartitionOffset.Value;
+                var channel = CreateChannel(nodeAssignment);
+                _consumerChannels.Add(channel);
+                startList.Add(
+                    channel.Start(
+                        nodeAssignment.TopicPartitionOffsets,
+                        _fetchResultEnumerators,
+                        _resetEvent,
+                        cancellationToken
+                    )
+                );
+            }
+            await Task.WhenAll(startList).ConfigureAwait(false);
+        }
+
+        protected async Task StopChannels()
+        {
+            _channelCts.Cancel();
+            await Task.WhenAll(_consumerChannels.Select(r => r.FetchLoop)).ConfigureAwait(false);
         }
 
         private async ValueTask<ConsumerRecord<TKey, TValue>> NextRecord(CancellationToken cancellationToken)
@@ -103,12 +134,21 @@ namespace Kafka.Client.Clients.Consumer
             }
         }
 
+        protected bool IsTracked(
+            in TopicPartition topicPartition,
+            in Offset offset
+        ) =>
+            _trackedOffsets.TryGetValue(topicPartition, out var trackedOffset) ||
+            offset <= trackedOffset
+        ;
+
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
+                    _channelCts.Dispose();
                     _resetEvent.Dispose();
                 }
                 disposedValue = true;

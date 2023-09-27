@@ -1,33 +1,44 @@
-﻿using Kafka.Cli.Options;
+﻿using CommandLine;
+using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Client.Clients.Producer;
 using Kafka.Client.Clients.Producer.Model;
 using Kafka.Client.Commands;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 
 namespace Kafka.Cli.Cmd
 {
     internal static class ProducerCmd
     {
-        private enum CommandState
-        {
-            None,
-            SingleRecord,
-            Batch,
-            Transaction
-        };
         public static async ValueTask<int> Parse(
+            IEnumerable<string> args,
+            CancellationToken cancellationToken
+        ) => await new Parser(with =>
+        {
+            with.CaseSensitive = true;
+            with.HelpWriter = Console.Out;
+            with.IgnoreUnknownArguments = false;
+            with.CaseInsensitiveEnumValues = true;
+            with.GetoptMode = true;
+        }).ParseArguments<ProducerOpts>(args)
+            .MapResult(
+                (ProducerOpts opts) => Run(opts, cancellationToken),
+                errs => new ValueTask<int>(-1)
+            )
+        ;
+
+        private static async ValueTask<int> Run(
             ProducerOpts options,
             CancellationToken cancellationToken
         )
         {
+
             var config = new ProducerConfig
             {
-                ClientId = options.ClientId,
+                ClientId = "kafka-cli.net",
                 BootstrapServers = options.BootstrapServer,
-                EnableIdempotence = options.EnableItempotence,
-                TransactionalId = options.TransactionalId,
                 LingerMs = options.LingerMs,
                 MaxInFlightRequestsPerConnection = options.MaxInFlightRequestsPerConnection,
                 MaxRequestSize = options.MaxRequestSize
@@ -48,32 +59,39 @@ namespace Kafka.Cli.Cmd
                 .Build()
             ;
 
-            var commandState = CommandState.SingleRecord;
-            var commands = new List<ICommand<ProduceResult>>();
             Console.WriteLine("Empty new line will terminate session.");
+            var id = 0L;
+            var commands = new ConcurrentDictionary<long, Task<ProduceResult>>();
+            var transaction = default(ITransaction);
             while (!cancellationToken.IsCancellationRequested)
             {
                 var input = Console.ReadLine();
                 if (string.IsNullOrEmpty(input))
                     break;
-                switch (commandState, input)
+                switch (input)
                 {
-                    case (CommandState.SingleRecord, "/bt"):
-                        await producer.BeginTransaction(cancellationToken).ConfigureAwait(false);
-                        commandState = CommandState.Transaction;
+                    case "/bt":
+                        if (transaction == null)
+                            transaction = await producer.BeginTransaction(cancellationToken).ConfigureAwait(false);
+                        else
+                            Console.WriteLine("Transaction in progress");
                         continue;
-                    case (CommandState.Transaction, "/ct"):
-                        await producer.CommitTransaction(cancellationToken).ConfigureAwait(false);
-                        commandState = CommandState.SingleRecord;
+                    case "/ct":
+                        if (transaction != null)
+                        {
+                            await transaction.Commit(cancellationToken).ConfigureAwait(false);
+                            transaction = null;
+                        }
                         continue;
-                    case (CommandState.Transaction, "/rt"):
-                        await producer.RollbackTransaction(cancellationToken).ConfigureAwait(false);
-                        commandState = CommandState.SingleRecord;
+                    case "/rt":
+                        if (transaction != null)
+                        {
+                            await transaction.Rollback(cancellationToken).ConfigureAwait(false);
+                            transaction = null;
+                        }
                         continue;
-                    case (_, "/fl"):
+                    case "/fl":
                         await producer.Flush(cancellationToken).ConfigureAwait(false);
-                        await HandleResults(commands);
-                        commands.Clear();
                         continue;
                 }
                 var split = input.Split(',', StringSplitOptions.RemoveEmptyEntries);
@@ -83,38 +101,46 @@ namespace Kafka.Cli.Cmd
                     continue;
                 }
                 var record = new ProduceRecord<string, string>(
-                    options.TopicName,
+                    options.Topic,
                     split[0],
                     split[1]
                 );
-                var sendCommand = await producer.Send(record, cancellationToken).ConfigureAwait(false);
-                commands.Add(sendCommand);
-                await HandleResults(commands);
-                commands.Clear();
+                var command = await producer.Send(record, cancellationToken).ConfigureAwait(false);
+                id = unchecked(id + 1);
+                HandleCommand(command, commands, id);
             }
             await producer.Flush(cancellationToken).ConfigureAwait(false);
-            await HandleResults(commands);
+            await Task.WhenAll(commands.Values);
             commands.Clear();
+
+            transaction?.Dispose();
             return 0;
         }
 
-        static async ValueTask HandleResults(IReadOnlyList<ICommand< ProduceResult>> commands)
+        static void HandleCommand(
+            ICommand<ProduceResult> command,
+            ConcurrentDictionary<long, Task<ProduceResult>> commands,
+            long id
+        )
         {
-            if (commands.Count == 0)
-                return;
-            var results = await Task.WhenAll(commands.Select(async r => await r.Result())).ConfigureAwait(false);
-            foreach (var result in results)
+            var cb = command.Result();
+            commands.TryAdd(id, cb);
+            command.Result().ContinueWith(t =>
             {
-                if (result.Error.Code != 0)
+                commands.Remove(id, out _);
+                if (t.IsCompletedSuccessfully)
                 {
-                    Console.WriteLine(Formatter.Print(result.Error));
-                    Console.WriteLine(Formatter.Print(result.RecordError));
-                }
-                else
-                {
+                    var result = t.Result;
                     Console.WriteLine(Formatter.Print(result.TopicPartitionOffset));
                 }
-            }
+
+                if (t.IsFaulted)
+                {
+                    var exception = t.Exception?.ToString() ?? "Faulted without exception";
+                    Console.WriteLine(exception);
+                    return;
+                }
+            });
         }
     }
 }

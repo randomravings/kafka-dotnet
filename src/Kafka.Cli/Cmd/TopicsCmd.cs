@@ -5,7 +5,6 @@ using Kafka.Client.Clients.Admin;
 using Kafka.Client.Clients.Admin.Model;
 using Kafka.Common.Model;
 using Microsoft.Extensions.Logging;
-using System.Collections.Immutable;
 
 namespace Kafka.Cli.Cmd
 {
@@ -21,6 +20,7 @@ namespace Kafka.Cli.Cmd
                 with.HelpWriter = Console.Out;
                 with.IgnoreUnknownArguments = false;
                 with.CaseInsensitiveEnumValues = true;
+                with.GetoptMode = true;
             }).ParseArguments<TopicsListOpts, TopicsCreateOpts, TopicsDescribeOpts, TopicsDeleteOpts>(args)
                 .MapResult(
                     (TopicsListOpts verb) => List(verb, cancellationToken),
@@ -32,15 +32,17 @@ namespace Kafka.Cli.Cmd
             ;
 
         public static async ValueTask<int> List(
-            TopicsListOpts verb,
+            TopicsListOpts opts,
             CancellationToken cancellationToken
         )
         {
             try
             {
-                using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
-                var options = new ListTopicsOptionsBuilder(adminClientConfig)
-                    .IncludeInternal(!verb.ExcludeInternal)
+                if (!TryCreateConfig(opts, out var config))
+                    return -1;
+                using var adminClient = CreateAdminClient(opts, config);
+                var options = new ListTopicsOptionsBuilder(config)
+                    .IncludeInternal(!opts.ExcludeInternal)
                     .Build()
                 ;
                 var result = await adminClient.ListTopics(
@@ -60,15 +62,17 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> Create(
-            TopicsCreateOpts verb,
+            TopicsCreateOpts opts,
             CancellationToken cancellationToken
         )
         {
             try
             {
-                using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
+                if (!TryCreateConfig(opts, out var config))
+                    return -1;
+                using var adminClient = CreateAdminClient(opts, config);
                 var replicaAssinment = new Dictionary<int, int[]>();
-                var partitionReplicaAssignments = verb.ReplicaAssignment.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                var partitionReplicaAssignments = opts.ReplicaAssignment.Split(';', StringSplitOptions.RemoveEmptyEntries);
                 foreach (var partitionReplicaAssignment in partitionReplicaAssignments)
                 {
                     var kv = partitionReplicaAssignment.Split('=', StringSplitOptions.RemoveEmptyEntries);
@@ -76,11 +80,11 @@ namespace Kafka.Cli.Cmd
                     var value = kv[1].Split(',', StringSplitOptions.RemoveEmptyEntries).Select(r => int.Parse(r)).ToArray();
                     replicaAssinment.Add(key, value);
                 }
-                var options = new CreateTopicsOptionsBuilder(adminClientConfig)
+                var options = new CreateTopicsOptionsBuilder(config)
                     .NewTopic(b => b
-                        .Name(verb.Topic)
-                        .NumPartitions(verb.PartitionCount)
-                        .ReplicationFactor(verb.ReplicationFactor)
+                        .Name(opts.Topic)
+                        .NumPartitions(opts.PartitionCount)
+                        .ReplicationFactor(opts.ReplicationFactor)
                         .ReplicasAssignments(replicaAssinment)
                         .Build()
                     )
@@ -130,16 +134,17 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> Delete(
-            TopicsDeleteOpts verb,
+            TopicsDeleteOpts opts,
             CancellationToken cancellationToken
         )
         {
             try
             {
-                using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
-                var options = new DeleteTopicsOptionsBuilder(adminClientConfig)
-                    .TopicName(verb.Topic)
-                    .TopicId(verb.TopicId)
+                if (!TryCreateConfig(opts, out var config))
+                    return -1;
+                using var adminClient = CreateAdminClient(opts, config);
+                var options = new DeleteTopicsOptionsBuilder(config)
+                    .Topic(opts.Topic)
                     .Build()
                 ;
                 var result = await adminClient.DeleteTopics(
@@ -161,16 +166,17 @@ namespace Kafka.Cli.Cmd
         }
 
         public static async ValueTask<int> Describe(
-            TopicsDescribeOpts verb,
+            TopicsDescribeOpts opts,
             CancellationToken cancellationToken
         )
         {
             try
             {
-                using var adminClient = CreateAdminClient(verb, out var adminClientConfig);
-                var options = new DescribeTopicsOptionsBuilder(adminClientConfig)
-                    .TopicName(verb.Topic)
-                    .TopicId(verb.TopicId)
+                if (!TryCreateConfig(opts, out var config))
+                    return -1;
+                using var adminClient = CreateAdminClient(opts, config);
+                var options = new DescribeTopicsOptionsBuilder(config)
+                    .Topic(opts.Topic)
                     .Build()
                 ;
                 var result = await adminClient.DescribeTopics(
@@ -205,25 +211,34 @@ namespace Kafka.Cli.Cmd
             }
         }
 
-        private static IAdminClient CreateAdminClient(
-            KafkaCliOpts options,
-            out AdminClientConfig adminClientConfig
+        private static bool TryCreateConfig(
+            KafkaCliOpts opts,
+            out AdminClientConfig config
         )
         {
-            adminClientConfig = new AdminClientConfig
+            config = new AdminClientConfig
             {
-                BootstrapServers = options.BootstrapServer
+                ClientId = "kafka-cli.net",
+                BootstrapServers = opts.BootstrapServer
             };
+            return OptionsMapper.SetProperties(config, opts.Properties, Console.Out);
+        }
+
+        private static IAdminClient CreateAdminClient(
+            KafkaCliOpts opts,
+            AdminClientConfig config
+        )
+        {
             var logger = LoggerFactory
                 .Create(builder => builder
                     .AddConsole()
-                    .SetMinimumLevel(options.LogLevel)
+                    .SetMinimumLevel(opts.LogLevel)
                 )
                 .CreateLogger<IAdminClient>()
             ;
             return AdminClientBuilder
                 .New()
-                .WithConfig(adminClientConfig)
+                .WithConfig(config)
                 .WithLogger(logger)
                 .Build()
             ;

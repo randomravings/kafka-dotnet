@@ -1,4 +1,5 @@
-﻿using Kafka.Cli.Options;
+﻿using CommandLine;
+using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Client.Clients.Consumer;
 using Kafka.Common.Model;
@@ -11,27 +12,48 @@ namespace Kafka.Cli.Cmd
 {
     internal static class ConsumerCmd
     {
+
         public static async ValueTask<int> Parse(
-            ConsumerOpts verb,
+            IEnumerable<string> args,
+            CancellationToken cancellationToken
+        ) => await new Parser(with =>
+        {
+            with.CaseSensitive = true;
+            with.HelpWriter = Console.Out;
+            with.IgnoreUnknownArguments = false;
+            with.CaseInsensitiveEnumValues = true;
+            with.GetoptMode = true;
+        }).ParseArguments<ConsumerOpts>(args)
+            .MapResult(
+                (ConsumerOpts opts) => Run(opts, cancellationToken),
+                errs => new ValueTask<int>(-1)
+            )
+        ;
+
+        public static async ValueTask<int> Run(
+            ConsumerOpts opts,
             CancellationToken cancellationToken
         )
         {
             var config = CreateConfig(
-                verb
+                opts
             );
+            if (!OptionsMapper.SetProperties(config, opts.Properties, Console.Out))
+                return -1;
+
             using var consumer = CreateConsumer(
-                verb,
+                opts,
                 config,
                 StringDeserializer.Instance,
                 StringDeserializer.Instance
             );
             try
             {
-                var topicNames = verb.TopicNames.Select(r => new TopicName(r)).ToHashSet();
-                if (verb.PartitionAssign.Any())
+                var topicNames = opts.Topics.Select(r => new TopicName(r)).ToHashSet();
+                if (opts.PartitionAssign.Any())
                     await RunAssignedConsumer(consumer, cancellationToken);
                 else
-                    await RunApplicationConsumer(consumer, topicNames, verb.Interactive, cancellationToken);
+                    await RunApplicationConsumer(consumer, topicNames, opts.Interactive, cancellationToken);
             }
             finally
             {
@@ -54,7 +76,7 @@ namespace Kafka.Cli.Cmd
             try
             {
                 if (interactive)
-                    await Interactive(consumer, streamReader, topicNames, cancellationToken);
+                    await Interactive(streamReader, topicNames, cancellationToken);
                 else
                     await Fetch(streamReader, cancellationToken);
             }
@@ -73,7 +95,6 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task Interactive<TKey, TValue>(
-            IConsumer<TKey, TValue> consumer,
             IStreamReaderApplication<TKey, TValue> streamReader,
             IReadOnlySet<TopicName> topicNames,
             CancellationToken cancellationToken
@@ -93,8 +114,10 @@ namespace Kafka.Cli.Cmd
                     switch (args[0])
                     {
                         case "fetch":
-                            var n = int.Parse(args[1]);
-                            await Fetch(streamReader, n, 1000, cancellationToken);
+                            var recordsToFetch = int.Parse(args[1]);
+                            if (args.Length < 3 || !int.TryParse(args[2], out var waitTimeout))
+                                waitTimeout = 1000;
+                            await Fetch(streamReader, recordsToFetch, waitTimeout, cancellationToken);
                             break;
                         case "commit":
                             var commitArgs = args.Skip(1).ToArray();
@@ -245,7 +268,7 @@ namespace Kafka.Cli.Cmd
         private static SortedList<TopicPartition, Offset> ParseAssignments(ConsumerOpts opts)
         {
             var topicPartitionOffsets = new SortedList<TopicPartition, Offset>(TopicPartitionCompare.Instance);
-            var topicArray = opts.TopicNames.ToArray();
+            var topicArray = opts.Topics.ToArray();
             var assignmentArray = opts.PartitionAssign.ToArray();
             if (topicArray.Length != assignmentArray.Length)
                 throw new FormatException("number of assignments must match number of topics");
@@ -277,10 +300,10 @@ namespace Kafka.Cli.Cmd
                 groupId = $"{Guid.NewGuid()}";
             return new ConsumerConfig
             {
-                ClientId = verb.ClientId,
+                ClientId = "kafka-cli.net",
                 BootstrapServers = verb.BootstrapServer,
                 GroupId = groupId,
-                EnableAutoCommit = verb.EnableAutoCommit
+                EnableAutoCommit = !verb.Interactive
             };
         }
 

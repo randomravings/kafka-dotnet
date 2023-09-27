@@ -17,7 +17,6 @@ namespace Kafka.Client.Clients.Consumer
     {
         private readonly ClusterNodeId _nodeId;
         private readonly IConsumerProtocol _protocol;
-        private readonly ConcurrentQueue<FetchResultEnumerator> _fetchCallbacks;
         private readonly SortedList<TopicPartition, Offset> _topicPartitionOffsets;
         private readonly int _fetchMaxWaitMs;
         private readonly int _fetchMinBytes;
@@ -26,24 +25,19 @@ namespace Kafka.Client.Clients.Consumer
         private readonly string _clientRack;
         private readonly int _maxPartitionFetchBytes;
         private readonly AutoOffsetReset _autoOffsetReset;
-        private Task _task = Task.CompletedTask;
         private readonly ILogger _logger;
-        private readonly ManualResetEventSlim _resetEvent;
-        private CancellationTokenSource _cancellationTokenSource;
+
+        private Task _task = Task.CompletedTask;
 
         public ConsumerChannel(
             ClusterNodeId nodeId,
             IConsumerProtocol protocol,
-            ConcurrentQueue<FetchResultEnumerator> fetchCallbacks,
-            ManualResetEventSlim resetEvent,
             ConsumerConfig config,
             ILogger logger
         )
         {
             _nodeId = nodeId;
             _protocol = protocol;
-            _resetEvent = resetEvent;
-            _fetchCallbacks = fetchCallbacks;
             _fetchMaxWaitMs = config.FetchMaxWaitMs;
             _fetchMinBytes = config.FetchMinBytes;
             _fetchMaxBytes = config.FetchMaxBytes;
@@ -53,27 +47,29 @@ namespace Kafka.Client.Clients.Consumer
             _autoOffsetReset = config.AutoOffsetReset;
             _logger = logger;
             _topicPartitionOffsets = new(TopicPartitionCompare.Instance);
-            _cancellationTokenSource= new();
         }
 
-        ClusterNodeId IConsumerChannel.NodeId => _protocol.NodeId;
-
-        IReadOnlyList<TopicPartition> IConsumerChannel.Assignments => _topicPartitionOffsets.Keys.ToImmutableList();
+        Task IConsumerChannel.FetchLoop => _task;
 
         async Task IConsumerChannel.Start(
             IReadOnlyDictionary<TopicPartition, Offset> topicPartitionOffsets,
+            ConcurrentQueue<FetchResultEnumerator> fetchCallbacks,
+            ManualResetEventSlim resetEvent,
             CancellationToken cancellationToken
         )
         {
-            await EnsureOffsets(
+            if (!_task.IsCompleted)
+                throw new InvalidOperationException("Channel is already active");
+            await InitializeOffsets(
                 topicPartitionOffsets,
                 cancellationToken
             ).ConfigureAwait(false);
-            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(
-                cancellationToken
-            );
             _task = Task.Run(
-                async () => await FetchLoop(cancellationToken).ConfigureAwait(false),
+                async () => await FetchLoop(
+                    fetchCallbacks,
+                    resetEvent,
+                    cancellationToken
+                ).ConfigureAwait(false),
                 CancellationToken.None
             );
             _logger.ConsumerChannelStart(
@@ -82,14 +78,7 @@ namespace Kafka.Client.Clients.Consumer
             );
         }
 
-        async Task IConsumerChannel.Stop(CancellationToken cancellationToken)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            _cancellationTokenSource.Cancel();
-            await _task.ConfigureAwait(false);
-        }
-
-        private async Task EnsureOffsets(
+        private async Task InitializeOffsets(
             IReadOnlyDictionary<TopicPartition, Offset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
@@ -125,7 +114,11 @@ namespace Kafka.Client.Clients.Consumer
             );
         }
 
-        private async Task FetchLoop(CancellationToken cancellationToken)
+        private async Task FetchLoop(
+            ConcurrentQueue<FetchResultEnumerator> fetchCallbacks,
+            ManualResetEventSlim resetEvent,
+            CancellationToken cancellationToken
+        )
         {
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -142,8 +135,8 @@ namespace Kafka.Client.Clients.Consumer
                         continue;
 
                     var taskCompletionSource = new TaskCompletionSource();
-                    _fetchCallbacks.Enqueue(new(fetchRecords, SetReadOffset, taskCompletionSource));
-                    _resetEvent.Set();
+                    fetchCallbacks.Enqueue(new(fetchRecords, SetReadOffset, taskCompletionSource));
+                    resetEvent.Set();
                     await taskCompletionSource
                         .Task
                         .WaitAsync(cancellationToken)
@@ -154,11 +147,6 @@ namespace Kafka.Client.Clients.Consumer
                 catch (OperationCanceledException) { }
             }
             _logger.FetchLoopStop();
-        }
-
-        public void Dispose()
-        {
-            _cancellationTokenSource.Dispose();
         }
 
         private void SetReadOffset(RawConsumerRecord rawConsumerRecord) =>
