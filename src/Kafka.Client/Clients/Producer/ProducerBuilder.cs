@@ -2,6 +2,7 @@
 using Kafka.Common.Model;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Kafka.Client.Clients.Producer.Logging;
 
 namespace Kafka.Client.Clients.Producer
 {
@@ -103,6 +104,7 @@ namespace Kafka.Client.Clients.Producer
 
             IProducer<TKey, TValue> IProducerBuilder<TKey, TValue>.Build()
             {
+                _logger.ProducerConfig(_producerConfig);
                 return new KafkaProducerClient<TKey, TValue>(_keySerializer, _valueSerializer, _partitioner, _producerConfig, _logger);
             }
         }

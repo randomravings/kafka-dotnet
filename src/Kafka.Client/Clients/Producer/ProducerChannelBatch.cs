@@ -90,10 +90,9 @@ namespace Kafka.Client.Clients.Producer
                                     _lingerTime,
                                     cancellationToken
                                 );
-                                // Send batch for delivery.
-                                if(batch.Count > 0)
+                                _logger.BatchCollected(reason, batch.Count);
+                                if (batch.Count > 0)
                                     _sendQueue.Add(batch, cancellationToken);
-                                ProducerLog.BatchCollected(_logger, reason, batch.Count);
                                 break;
                             case null:
                                 carryOver = _commandQueue.Take(cancellationToken);
@@ -176,7 +175,7 @@ namespace Kafka.Client.Clients.Producer
                     while (!cancellationToken.IsCancellationRequested)
                     {
                         var batch = _sendQueue.Take(cancellationToken);
-                        ProducerLog.ProduceCommandDequeue(_logger, batch.Count);
+                        _logger.ProduceCommandDequeue(batch.Count);
                         await _sendDelegate(
                             batch,
                             cancellationToken
@@ -359,6 +358,6 @@ namespace Kafka.Client.Clients.Producer
             _internalCts.Dispose();
             _commandQueue.Dispose();
             _sendQueue.Dispose();
-    }
+        }
     }
 }

@@ -120,6 +120,7 @@ namespace Kafka.Client.Clients.Consumer
             CancellationToken cancellationToken
         )
         {
+            var initialOffsets = new SortedList<TopicPartition, Offset>(_topicPartitionOffsets, TopicPartitionCompare.Instance);
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -133,6 +134,13 @@ namespace Kafka.Client.Clients.Consumer
                     var fetchRecords = Flatten(fetchResponse);
                     if (fetchRecords.Length == 0)
                         continue;
+
+                    // TODO: Turn this into a initial state and then transition into a loop without this check.
+                    if (initialOffsets.Count > 0)
+                        fetchRecords = TrimLeading(
+                            fetchRecords,
+                            initialOffsets
+                        );
 
                     var taskCompletionSource = new TaskCompletionSource();
                     fetchCallbacks.Enqueue(new(fetchRecords, SetReadOffset, taskCompletionSource));
@@ -205,6 +213,23 @@ namespace Kafka.Client.Clients.Consumer
                 }
             }
             return flattenBuilder.ToImmutable();
+        }
+
+        private static ImmutableArray<RawConsumerRecord> TrimLeading(
+            ImmutableArray<RawConsumerRecord> fetchRecords,
+            IDictionary<TopicPartition, Offset> initialOffsets
+        )
+        {
+            var builder = ImmutableArray.CreateBuilder<RawConsumerRecord>();
+            foreach (var fetchRecord in fetchRecords)
+            {
+                if (initialOffsets.TryGetValue(fetchRecord.TopicPartition, out var offset) && fetchRecord.Offset < offset)
+                    continue;
+                if (fetchRecord.Offset == offset)
+                    initialOffsets.Remove(fetchRecord.TopicPartition);
+                builder.Add(fetchRecord);
+            }
+            return builder.ToImmutable();
         }
 
         private FetchRequestData CreateFetchRequest()

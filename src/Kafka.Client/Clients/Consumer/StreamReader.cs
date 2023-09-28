@@ -16,7 +16,7 @@ namespace Kafka.Client.Clients.Consumer
         private readonly IList<IConsumerChannel> _consumerChannels = new List<IConsumerChannel>();
         private readonly ConcurrentQueue<FetchResultEnumerator> _fetchResultEnumerators = new();
         private FetchResultEnumerator _enumerator = FetchResultEnumerator.Empty;
-        private bool disposedValue;
+        private bool _disposed;
         private readonly ManualResetEventSlim _resetEvent = new(true);
         private CancellationTokenSource _channelCts = new();
 
@@ -144,14 +144,14 @@ namespace Kafka.Client.Clients.Consumer
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposed)
             {
                 if (disposing)
                 {
                     _channelCts.Dispose();
                     _resetEvent.Dispose();
                 }
-                disposedValue = true;
+                _disposed = true;
             }
         }
 

@@ -20,7 +20,7 @@ namespace Kafka.Cli.Cmd
                 with.HelpWriter = Console.Out;
                 with.IgnoreUnknownArguments = false;
                 with.CaseInsensitiveEnumValues = true;
-                with.GetoptMode = true;
+                with.AllowMultiInstance = false;
             }).ParseArguments<TopicsListOpts, TopicsCreateOpts, TopicsDescribeOpts, TopicsDeleteOpts>(args)
                 .MapResult(
                     (TopicsListOpts verb) => List(verb, cancellationToken),

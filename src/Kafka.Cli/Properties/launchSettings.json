@@ -7,10 +7,10 @@
       //"commandLineArgs": "topics list --bootstrap-server localhost:9092 --log-level trace"
       //"commandLineArgs": "topics describe --topic test --bootstrap-server localhost:9092 --log-level trace"
       //"commandLineArgs": "topics delete --topic test --bootstrap-server localhost:9092 --log-level trace"
-      //"commandLineArgs": "producer --topic test --bootstrap-server localhost:9092,localhost:9093,localhost:9094 --client-id me.org --transactional-id xyz --linger-ms 50000 --log-level trace"
-      //"commandLineArgs": "producer --topic test --bootstrap-server localhost:9092 --log-level trace --linger 50000"
+      //"commandLineArgs": "producer --topic test  --bootstrap-server localhost:9092 --log-level trace --properties transactional.id=xyz linger.ms=50000000"
+      //"commandLineArgs": "producer --topic test  --bootstrap-server localhost:9092 --log-level trace"
       //"commandLineArgs": "consumer --topic test --bootstrap-server localhost:9092 --client-id me.org --group-id test-5 --log-level trace --property enable.auto.commit=true --property client.id=me.org"
-      "commandLineArgs": "consumer --topic test --bootstrap-server localhost:9092 --group-id test-1 --log-level trace --interactive"
+      "commandLineArgs": "consumer --topic test --bootstrap-server localhost:9092 --group-id test-cg --log-level trace --interactive --properties enable.auto.commit=false auto.offset.reset=earliest"
       //"commandLineArgs": "consumer --bootstrap-server localhost:9092,localhost:9093,localhost:9094  --topic test --partition-assign 0:-1,1:-1,2:-1,3:-1,4:-1,5:-1 --log-level trace"
     }
   }

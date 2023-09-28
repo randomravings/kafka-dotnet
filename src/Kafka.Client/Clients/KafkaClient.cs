@@ -13,8 +13,8 @@ namespace Kafka.Client.Clients
         where TClient : notnull, IClient
         where TConfig : notnull, ClientConfig
     {
-        private readonly TConfig _config;
-        private readonly ILogger<TClient> _logger;
+        protected readonly TConfig _config;
+        protected readonly ILogger<TClient> _logger;
 
         private bool _disposed;
         protected KafkaClient(

@@ -10,9 +10,6 @@ await new Parser(with =>
     {
         with.CaseSensitive = true;
         with.HelpWriter = Console.Out;
-        with.IgnoreUnknownArguments = true;
-        with.CaseInsensitiveEnumValues = true;
-        with.GetoptMode = true;
     })
     .ParseArguments<TopicsVerb, ProducerVerb, ConsumerVerb>(args.Any() ? args.Take(1) : empty)
     .MapResult(

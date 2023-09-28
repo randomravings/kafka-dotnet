@@ -11,7 +11,7 @@ namespace Kafka.Cli.Options
         [Option("log-level", Required = false, Default = LogLevel.Warning)]
         public LogLevel LogLevel { get; set; } = LogLevel.Warning;
 
-        [Option("property")]
+        [Option("properties")]
         public IEnumerable<string> Properties { get; set; } = Array.Empty<string>();
     }
 }

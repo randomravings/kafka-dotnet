@@ -72,6 +72,7 @@ namespace Kafka.Client.Clients.Producer
                 await FlushChannels(cancellationToken).ConfigureAwait(false);
                 _attributes |= Attributes.IsTransactional;
                 _sendDelegate = SendTransational;
+                _logger.TransactionBegin();
                 return new Transaction(EndTransaction);
             }
             finally { _semaphoreSlim.Release(); }
@@ -177,6 +178,10 @@ namespace Kafka.Client.Clients.Producer
                 if (endTxnResponse.ErrorCodeField != 0)
                     throw new ApiException(Errors.Translate(endTxnResponse.ErrorCodeField));
                 _transactionMembers.Clear();
+                if (commit)
+                    _logger.TransactionCommit();
+                else
+                    _logger.TransactionRollback();
             }
             finally { _semaphoreSlim.Release(); }
         }

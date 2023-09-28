@@ -3,10 +3,8 @@ using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Client.Clients.Consumer;
 using Kafka.Common.Model;
-using Kafka.Common.Model.Comparison;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
-using System.Linq.Expressions;
 
 namespace Kafka.Cli.Cmd
 {
@@ -22,7 +20,7 @@ namespace Kafka.Cli.Cmd
             with.HelpWriter = Console.Out;
             with.IgnoreUnknownArguments = false;
             with.CaseInsensitiveEnumValues = true;
-            with.GetoptMode = true;
+            with.AllowMultiInstance = false;
         }).ParseArguments<ConsumerOpts>(args)
             .MapResult(
                 (ConsumerOpts opts) => Run(opts, cancellationToken),
@@ -125,7 +123,6 @@ namespace Kafka.Cli.Cmd
                             {
                                 case { Length: 0 }:
                                     await streamReader.Commit(cancellationToken);
-                                    Console.WriteLine("No partition offsets to commit");
                                     break;
                                 case { Length: 1 }:
                                     if(TryParseTopicPartitionOffset(topicNames, args[1], out var topicPartitionOffset))
@@ -227,32 +224,6 @@ namespace Kafka.Cli.Cmd
             throw new NotImplementedException();
         }
 
-        private static async Task ReadStream<TKey, TValue>(
-            IStreamReader<TKey, TValue> reader,
-            CancellationToken cancellationToken
-        )
-        {
-            try
-            {
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    var consumerRecord = await reader.Fetch(cancellationToken);
-                    Console.WriteLine(Formatter.Print(consumerRecord));
-                }
-            }
-            catch (OperationCanceledException) { }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-            finally
-            {
-                using var cts = new CancellationTokenSource();
-                cts.CancelAfter(5000);
-                await CloseStream(reader, cts.Token);
-            }
-        }
-
         private static async Task CloseStream<TKey, TValue>(IStreamReader<TKey, TValue> instance, CancellationToken cancellationToken)
         {
             try
@@ -263,32 +234,6 @@ namespace Kafka.Cli.Cmd
             {
                 Console.WriteLine(ex);
             }
-        }
-
-        private static SortedList<TopicPartition, Offset> ParseAssignments(ConsumerOpts opts)
-        {
-            var topicPartitionOffsets = new SortedList<TopicPartition, Offset>(TopicPartitionCompare.Instance);
-            var topicArray = opts.Topics.ToArray();
-            var assignmentArray = opts.PartitionAssign.ToArray();
-            if (topicArray.Length != assignmentArray.Length)
-                throw new FormatException("number of assignments must match number of topics");
-            for (int i = 0; i < topicArray.Length; i++)
-            {
-                var topic = topicArray[i];
-                var partitionAssignment = assignmentArray[i].Split(',', StringSplitOptions.RemoveEmptyEntries);
-                for (int j = 0; j < partitionAssignment.Length; j++)
-                {
-                    var partitionOffsetPair = partitionAssignment[j].Split(':', StringSplitOptions.RemoveEmptyEntries);
-                    if (partitionOffsetPair.Length != 2)
-                        throw new FormatException("partition offset pair must be (int:long)");
-                    if (!int.TryParse(partitionOffsetPair[0], out var partition))
-                        throw new FormatException("partition must be parsable to int");
-                    if (!long.TryParse(partitionOffsetPair[1], out var offset))
-                        throw new FormatException("partition must be parsable to long");
-                    topicPartitionOffsets[new(topic, partition)] = offset;
-                }
-            }
-            return topicPartitionOffsets;
         }
 
         private static ConsumerConfig CreateConfig(
@@ -305,25 +250,6 @@ namespace Kafka.Cli.Cmd
                 GroupId = groupId,
                 EnableAutoCommit = !verb.Interactive
             };
-        }
-
-        private static Expression CreateConsumerInstanceExpression(
-            ConsumerOpts verb,
-            ConsumerConfig config
-        )
-        {
-            var parameterVerb = Expression.Variable(typeof(ConsumerOpts), "verb");
-            var parameterConfig = Expression.Variable(typeof(ConsumerConfig), "config");
-            var parameterKeyDeserializer = Expression.Variable(typeof(ConsumerConfig), "keyDeserializer ");
-            var parameterValueDeserializer = Expression.Variable(typeof(ConsumerConfig), "valueDeserializer");
-
-            var assignParameterVerb = Expression.Assign(parameterVerb, Expression.Constant(verb));
-            var assignParameterConfig = Expression.Assign(parameterConfig, Expression.Constant(config));
-
-            var keyDeserializer = Expression.Constant(0);
-            var valueDeserializer = Expression.Constant(0);
-
-            return Expression.Empty();
         }
 
         private static IConsumer<TKey, TValue> CreateConsumer<TKey, TValue>(

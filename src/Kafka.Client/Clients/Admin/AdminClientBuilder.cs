@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Kafka.Client.Clients.Admin.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Kafka.Client.Clients.Admin
@@ -36,7 +37,10 @@ namespace Kafka.Client.Clients.Admin
             return this;
         }
 
-        IAdminClient IAdminClientBuilder.Build() =>
-            new KafkaAdminClient(_config, _logger);
+        IAdminClient IAdminClientBuilder.Build()
+        {
+            _logger.AdminConfig(_config);
+            return new KafkaAdminClient(_config, _logger);
+        }
     }
 }

@@ -21,7 +21,7 @@ namespace Kafka.Cli.Cmd
             with.HelpWriter = Console.Out;
             with.IgnoreUnknownArguments = false;
             with.CaseInsensitiveEnumValues = true;
-            with.GetoptMode = true;
+            with.AllowMultiInstance = false;
         }).ParseArguments<ProducerOpts>(args)
             .MapResult(
                 (ProducerOpts opts) => Run(opts, cancellationToken),
@@ -30,7 +30,7 @@ namespace Kafka.Cli.Cmd
         ;
 
         private static async ValueTask<int> Run(
-            ProducerOpts options,
+            ProducerOpts opts,
             CancellationToken cancellationToken
         )
         {
@@ -38,15 +38,18 @@ namespace Kafka.Cli.Cmd
             var config = new ProducerConfig
             {
                 ClientId = "kafka-cli.net",
-                BootstrapServers = options.BootstrapServer,
-                LingerMs = options.LingerMs,
-                MaxInFlightRequestsPerConnection = options.MaxInFlightRequestsPerConnection,
-                MaxRequestSize = options.MaxRequestSize
+                BootstrapServers = opts.BootstrapServer,
+                LingerMs = opts.LingerMs,
+                MaxInFlightRequestsPerConnection = opts.MaxInFlightRequestsPerConnection,
+                MaxRequestSize = opts.MaxRequestSize
             };
+            if (!OptionsMapper.SetProperties(config, opts.Properties, Console.Out))
+                return -1;
+
             var logger = LoggerFactory
                 .Create(builder => builder
                     .AddConsole()
-                    .SetMinimumLevel(options.LogLevel)
+                    .SetMinimumLevel(opts.LogLevel)
                 )
                 .CreateLogger<IProducer<string, string>>()
             ;
@@ -101,7 +104,7 @@ namespace Kafka.Cli.Cmd
                     continue;
                 }
                 var record = new ProduceRecord<string, string>(
-                    options.Topic,
+                    opts.Topic,
                     split[0],
                     split[1]
                 );
