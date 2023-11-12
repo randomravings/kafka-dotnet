@@ -1,7 +1,10 @@
 ﻿using CommandLine;
 using Kafka.Cli.Options;
 using Kafka.Cli.Text;
-using Kafka.Client.Clients.Consumer;
+using Kafka.Client;
+using Kafka.Client.Clients.Admin;
+using Kafka.Client.Config;
+using Kafka.Client.IO;
 using Kafka.Common.Model;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
@@ -10,8 +13,7 @@ namespace Kafka.Cli.Cmd
 {
     internal static class ConsumerCmd
     {
-
-        public static async ValueTask<int> Parse(
+        public static async Task<int> Parse(
             IEnumerable<string> args,
             CancellationToken cancellationToken
         ) => await new Parser(with =>
@@ -24,59 +26,69 @@ namespace Kafka.Cli.Cmd
         }).ParseArguments<ConsumerOpts>(args)
             .MapResult(
                 (ConsumerOpts opts) => Run(opts, cancellationToken),
-                errs => new ValueTask<int>(-1)
+                errs => Task.FromResult(-1)
             )
         ;
 
-        public static async ValueTask<int> Run(
+        public static async Task<int> Run(
             ConsumerOpts opts,
             CancellationToken cancellationToken
         )
         {
-            var config = CreateConfig(
+            var (clientConfig, consumerConfig) = CreateConfig(
                 opts
             );
-            if (!OptionsMapper.SetProperties(config, opts.Properties, Console.Out))
-                return -1;
+            OptionsMapper.SetProperties(clientConfig, opts.Properties, Console.Out);
+            OptionsMapper.SetProperties(consumerConfig, opts.Properties, Console.Out);
 
-            using var consumer = CreateConsumer(
+            using var client = CreateClient(
                 opts,
-                config,
-                StringDeserializer.Instance,
-                StringDeserializer.Instance
+                clientConfig
             );
+
             try
             {
                 var topicNames = opts.Topics.Select(r => new TopicName(r)).ToHashSet();
                 if (opts.PartitionAssign.Any())
-                    await RunAssignedConsumer(consumer, cancellationToken);
+                    await RunAssignedConsumer(client, cancellationToken);
                 else
-                    await RunApplicationConsumer(consumer, topicNames, opts.Interactive, cancellationToken);
+                    await RunApplicationConsumer(client, topicNames, consumerConfig, opts.Interactive, cancellationToken);
             }
             finally
             {
-                await consumer.Close(CancellationToken.None);
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(5000);
+                await CloseClient(client, cts.Token);
             }
             return 0;
         }
 
-        private static async Task RunApplicationConsumer<TKey, TValue>(
-            IConsumer<TKey, TValue> consumer,
+        private static async Task RunApplicationConsumer(
+            IClient client,
             IReadOnlySet<TopicName> topicNames,
+            InputStreamConfig consumerConfig,
             bool interactive,
             CancellationToken cancellationToken
         )
         {
-            using var streamReader = await consumer.CreateInstance(
-                topicNames,
-                cancellationToken
-            );
+            using var stream = client
+                .CreateInputStream(consumerConfig)
+                .AsApplication(topicNames)
+                .Build()
+            ;
+
+            using var reader = stream
+                .CreateReader()
+                .WithKey(StringDeserializer.Instance)
+                .WithValue(StringDeserializer.Instance)
+                .Build()
+            ;
             try
             {
                 if (interactive)
-                    await Interactive(streamReader, topicNames, cancellationToken);
+                    await Interactive(stream, reader, topicNames, cancellationToken);
                 else
-                    await Fetch(streamReader, cancellationToken);
+                    await Fetch(reader, cancellationToken);
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)
@@ -87,13 +99,15 @@ namespace Kafka.Cli.Cmd
             {
                 using var cts = new CancellationTokenSource();
                 cts.CancelAfter(5000);
-                await CloseStream(streamReader, cts.Token);
-                await consumer.Close(cts.Token);
+                await CloseReader(reader, cts.Token);
+                await CloseStream(stream, cts.Token);
+                await CloseClient(client, cts.Token);
             }
         }
 
         private static async Task Interactive<TKey, TValue>(
-            IStreamReaderApplication<TKey, TValue> streamReader,
+            IApplicationInputStream inputStream,
+            IStreamReader<TKey, TValue> streamReader,
             IReadOnlySet<TopicName> topicNames,
             CancellationToken cancellationToken
         )
@@ -122,15 +136,15 @@ namespace Kafka.Cli.Cmd
                             switch (commitArgs)
                             {
                                 case { Length: 0 }:
-                                    await streamReader.Commit(cancellationToken);
+                                    await inputStream.Commit(cancellationToken);
                                     break;
                                 case { Length: 1 }:
                                     if(TryParseTopicPartitionOffset(topicNames, args[1], out var topicPartitionOffset))
-                                        await streamReader.Commit(topicPartitionOffset, cancellationToken);
+                                        await inputStream.Commit(topicPartitionOffset, cancellationToken);
                                     break;
                                 default:
                                     if (TryParseTopicPartitionOffsets(topicNames, args.Skip(1).ToArray(), out var topicPartitionOffsets))
-                                        await streamReader.Commit(topicPartitionOffsets, cancellationToken);
+                                        await inputStream.Commit(topicPartitionOffsets, cancellationToken);
                                     break;
                             }
                             break;
@@ -187,8 +201,12 @@ namespace Kafka.Cli.Cmd
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var consumerRecord = await streamReader.Fetch(cancellationToken);
-                Console.WriteLine(Formatter.Print(consumerRecord));
+                var consumerRecord = await streamReader.Read(cancellationToken);
+                Console.WriteLine(
+                    Formatter.Print(
+                        consumerRecord
+                    )
+                );
             }
         }
 
@@ -205,8 +223,12 @@ namespace Kafka.Cli.Cmd
                 cts.CancelAfter(timeoutMs);
                 for (int i = 0; i < recordCount && !cts.Token.IsCancellationRequested; i++)
                 {
-                    var consumerRecord = await streamReader.Fetch(cts.Token);
-                    Console.WriteLine(Formatter.Print(consumerRecord));
+                    var consumerRecord = await streamReader.Read(cts.Token);
+                    Console.WriteLine(
+                        Formatter.Print(
+                            consumerRecord
+                        )
+                    );
                 }
             }
             catch (OperationCanceledException)
@@ -217,18 +239,21 @@ namespace Kafka.Cli.Cmd
         }
 
         private static Task RunAssignedConsumer(
-            IConsumer<string, string> consumer,
+            IClient client,
             CancellationToken cancellationToken
         )
         {
             throw new NotImplementedException();
         }
 
-        private static async Task CloseStream<TKey, TValue>(IStreamReader<TKey, TValue> instance, CancellationToken cancellationToken)
+        private static async Task CloseClient(
+            IClient client,
+            CancellationToken cancellationToken
+        )
         {
             try
             {
-                await instance.Close(cancellationToken);
+                await client.Close(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -236,27 +261,60 @@ namespace Kafka.Cli.Cmd
             }
         }
 
-        private static ConsumerConfig CreateConfig(
+        private static async Task CloseStream(
+            IInputStream inputStream,
+            CancellationToken cancellationToken
+        )
+        {
+            try
+            {
+                await inputStream.Close(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        private static async Task CloseReader<TKey, TValue>(
+            IStreamReader<TKey, TValue> streamReader,
+            CancellationToken cancellationToken
+        )
+        {
+            try
+            {
+                await streamReader.Close(cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        private static (ClientConfig, InputStreamConfig) CreateConfig(
             ConsumerOpts verb
         )
         {
             var groupId = verb.GroupId;
             if (string.IsNullOrEmpty(groupId))
                 groupId = $"{Guid.NewGuid()}";
-            return new ConsumerConfig
-            {
-                ClientId = "kafka-cli.net",
-                BootstrapServers = verb.BootstrapServer,
-                GroupId = groupId,
-                EnableAutoCommit = !verb.Interactive
-            };
+            return (
+                new ClientConfig
+                {
+                    ClientId = "kafka-cli.net",
+                    BootstrapServers = verb.BootstrapServer,
+                },
+                new InputStreamConfig
+                {
+                    GroupId = groupId,
+                    EnableAutoCommit = !verb.Interactive
+                }
+            );
         }
 
-        private static IConsumer<TKey, TValue> CreateConsumer<TKey, TValue>(
+        private static IClient CreateClient(
             ConsumerOpts verb,
-            ConsumerConfig config,
-            IDeserializer<TKey> keyDeserializer,
-            IDeserializer<TValue> valueDeserializer
+            ClientConfig clientConfig
         )
         {
             var logger = LoggerFactory
@@ -265,13 +323,11 @@ namespace Kafka.Cli.Cmd
                     .SetMinimumLevel(verb.LogLevel)
 
                 )
-                .CreateLogger<IConsumer<TKey, TValue>>()
+                .CreateLogger<IClient>()
             ;
-            return ConsumerBuilder
+            return ClientBuilder
                 .New()
-                .WithConfig(config)
-                .WithKey(keyDeserializer)
-                .WithValue(valueDeserializer)
+                .WithConfig(clientConfig)
                 .WithLogger(logger)
                 .Build()
             ;

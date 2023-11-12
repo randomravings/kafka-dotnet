@@ -1,5 +1,5 @@
-﻿using Kafka.Client.Clients.Producer;
-using Kafka.Client.Clients.Producer.Model;
+﻿using Kafka.Client.IO.Stream;
+using Kafka.Client.Model;
 using Kafka.Common.Model;
 using System.Collections.Immutable;
 
@@ -297,23 +297,26 @@ namespace Kafka.Client.UnitTest.Producer
         }
 
 
-        private static SendCommand CreateSendCommand(
+        private static ProduceCommand CreateSendCommand(
             int partition,
             Timestamp timestamp,
             ReadOnlyMemory<byte>? key,
             ReadOnlyMemory<byte>? value
         ) =>
             new(
-                new TopicPartition(new Topic(Guid.Empty, "test"), partition),
-                timestamp,
-                key,
-                value,
-                ImmutableArray<RecordHeader>.Empty,
-                Attributes.None
+                new(
+                    new TopicPartition(new Topic(Guid.Empty, "test"), partition),
+                    timestamp,
+                    key,
+                    value,
+                    ImmutableArray<RecordHeader>.Empty,
+                    Attributes.None
+                ),
+                new TaskCompletionSource<ProduceResult>()
             )
         ;
 
-        private static SendCommand CreateSendCommand(
+        private static ProduceCommand CreateSendCommand(
             int partition,
             Timestamp timestamp,
             ReadOnlyMemory<byte>? key,
@@ -321,23 +324,25 @@ namespace Kafka.Client.UnitTest.Producer
             params (string, byte[])[] headers
         ) =>
             new(
-                new TopicPartition(new Topic(Guid.Empty, "test"), partition),
-                timestamp,
-                key,
-                value,
-                headers.Select(r => new RecordHeader(r.Item1, r.Item2)).ToImmutableArray(),
-                Attributes.None
+                new(
+                    new TopicPartition(new Topic(Guid.Empty, "test"), partition),
+                    timestamp,
+                    key,
+                    value,
+                    headers.Select(r => new RecordHeader(r.Item1, r.Item2)).ToImmutableArray(),
+                    Attributes.None
+                ),
+                new TaskCompletionSource<ProduceResult>()
             )
         ;
 
-        private static ProduceBatchV2 CreateBatch(
+        private static ProduceBatch CreateBatch(
             int size
         ) =>
             new(
                 size,
                 0,
                 Attributes.None,
-                0,
                 0,
                 0
             )

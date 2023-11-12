@@ -11,7 +11,7 @@ namespace Kafka.Cli.Options
             TConfig clientConfig,
             IEnumerable<string> strings,
             TextWriter output
-        ) where TConfig : notnull, ClientConfig =>
+        ) =>
             CreatePropertyDictionary(strings, output, out var properties) &&
             ApplyProperties(clientConfig, properties, output)
         ;
@@ -52,7 +52,7 @@ namespace Kafka.Cli.Options
             TConfig clientConfig,
             IReadOnlyDictionary<string, string?> properties,
             TextWriter output
-        ) where TConfig : notnull, ClientConfig
+        )
         {
             var success = true;
             var propertyInfos = MapProperties<TConfig>();
@@ -95,7 +95,6 @@ namespace Kafka.Cli.Options
         }
 
         private static IReadOnlyDictionary<string, PropertyInfo> MapProperties<TConfig>()
-            where TConfig : notnull, ClientConfig
         {
             var type = typeof(TConfig);
             var properties = type

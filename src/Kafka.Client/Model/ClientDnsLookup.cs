@@ -7,7 +7,7 @@ namespace Kafka.Client.Model
         [EnumMember(Value = "use_all_dns_ips")]
         UseAllDnsIps,
 
-        [EnumMember(Value = "use_all_dns_ips")]
+        [EnumMember(Value = "resolve_canonical_bootstrap_servers_only")]
         ResolveCanonicalBootstrapServersOnly
     }
 }

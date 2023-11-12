@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Kafka.Client.Clients.Producer;
+using Kafka.Client.IO;
+using Kafka.Client.IO.Stream;
 using Microsoft.Extensions.Logging.Abstractions;
 using System.Buffers;
 

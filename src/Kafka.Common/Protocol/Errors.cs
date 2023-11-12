@@ -119,8 +119,11 @@ namespace Kafka.Common.Protocol
             public static readonly Error FETCH_SESSION_TOPIC_ID_ERROR = new(106, "FETCH_SESSION_TOPIC_ID_ERROR", true, "The fetch session encountered inconsistent topic ID usage");
             public static readonly Error INELIGIBLE_REPLICA = new(107, "INELIGIBLE_REPLICA", false, "The new ISR contains at least one ineligible replica.");
             public static readonly Error NEW_LEADER_ELECTED = new(108, "NEW_LEADER_ELECTED", false, "The AlterPartition request successfully updated the partition state but the leader has changed.");
-
-
+            public static readonly Error OFFSET_MOVED_TO_TIERED_STORAGE = new(109, "OFFSET_MOVED_TO_TIERED_STORAGE", false, "The requested offset is moved to tiered storage.");
+            public static readonly Error FENCED_MEMBER_EPOCH = new(110, "FENCED_MEMBER_EPOCH", false, "The member epoch is fenced by the group coordinator.The member must abandon all its partitions and rejoin.");
+            public static readonly Error UNRELEASED_INSTANCE_ID = new(111, "UNRELEASED_INSTANCE_ID", false, "The instance ID is still used by another member in the consumer group.That member must leave first.");
+            public static readonly Error UNSUPPORTED_ASSIGNOR = new(112, "UNSUPPORTED_ASSIGNOR", false, "The assignor or its version range is not supported by the consumer group.");
+            public static readonly Error STALE_MEMBER_EPOCH = new(113, "STALE_MEMBER_EPOCH", false, "The member epoch is stale.The member must retry after receiving its updated member epoch via the ConsumerGroupHeartbeat API.");
         }
 
         /// <summary>

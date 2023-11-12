@@ -43,15 +43,5 @@ namespace Kafka.Common.Records
         short ProducerEpoch,
         int BaseSequence,
         IReadOnlyList<IRecord> Records
-    ) : IRecords
-    {
-        IRecord IReadOnlyList<IRecord>.this[int index] => Records[index];
-        int IReadOnlyCollection<IRecord>.Count => Records.Count;
-        IEnumerator<IRecord> IEnumerable<IRecord>.GetEnumerator() =>
-            Records.GetEnumerator()
-        ;
-        IEnumerator IEnumerable.GetEnumerator() =>
-            Records.GetEnumerator()
-        ;
-    }
+    ) : IRecords;
 }

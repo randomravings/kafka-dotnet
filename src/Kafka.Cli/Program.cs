@@ -6,7 +6,7 @@ var empty = Array.Empty<string>();
 var cts = new CancellationTokenSource();
 Console.CancelKeyPress += (s, e) => { e.Cancel = true; cts.Cancel(); };
 
-await new Parser(with =>
+var result = await new Parser(with =>
     {
         with.CaseSensitive = true;
         with.HelpWriter = Console.Out;
@@ -16,6 +16,7 @@ await new Parser(with =>
         (TopicsVerb verb) => TopicsCmd.Parse(args.Skip(1), cts.Token),
         (ProducerVerb verb) => ProducerCmd.Parse(args.Skip(1), cts.Token),
         (ConsumerVerb verb) => ConsumerCmd.Parse(args.Skip(1), cts.Token),
-        errs => new ValueTask<int>(-1)
+        errs => Task.FromResult(-1)
     );
 ;
+return result;

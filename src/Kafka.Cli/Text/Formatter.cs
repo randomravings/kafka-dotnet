@@ -1,4 +1,4 @@
-﻿using Kafka.Client.Clients.Consumer.Models;
+﻿using Kafka.Client.Model;
 using Kafka.Common.Model;
 
 namespace Kafka.Cli.Text
@@ -6,10 +6,14 @@ namespace Kafka.Cli.Text
     public static class Formatter
     {
         public static string Print<TKey, TValue>(in ConsumerRecord<TKey, TValue> value) =>
-            $"{Print(value.TopicPartition)}:{Print(value.Offset)}:{Print(value.Key)}:{Print(value.Value)}"
+            $"{Print(value.Record.TopicPartition)}:{Print(value.Record.Offset)}:{Print(value.Key)}:{Print(value.Value)}"
         ;
         public static string Print(in Error value) =>
-            $"{value.Code} - {value.Label} - {value.Message}"
+            value.Code switch
+            {
+                0 => value.Label,
+                _ => $"{value.Code} - {value.Label} - {value.Message}"
+            }
         ;
         public static string Print(TopicPartitionOffset value) =>
             $"{Print(value.TopicPartition)}:{Print(value.Offset)}"

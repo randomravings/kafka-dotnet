@@ -33,4 +33,8 @@
     <ProjectReference Include="..\..\src\Kafka.Client\Kafka.Client.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Consumer\" />
+  </ItemGroup>
+
 </Project>

@@ -78,7 +78,7 @@ namespace Kafka.CodeGen.Cmd
 
             var baseNamespace = "Kafka.Client";
             var baseMessageNamespace = "Messages";
-            var baseMessageSerdeNamespace = "Serdes";
+            var baseMessageSerdeNamespace = "Encoding";
 
             var messageNamespace = $"{baseNamespace}.{baseMessageNamespace}";
             var messageSerdeNamespace = $"{messageNamespace}.{baseMessageSerdeNamespace}";

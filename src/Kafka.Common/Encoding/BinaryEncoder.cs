@@ -365,9 +365,26 @@ namespace Kafka.Common.Encoding
             return index;
         }
 
-        private const int RECORDS_HEADER_SIZE = 61;
-        private const int RECORDS_LOG_OVERHEAD = 12;
-        private const int RECORDS_SIZE_PADDING = RECORDS_HEADER_SIZE - RECORDS_LOG_OVERHEAD;
+        public const int RECORDS_BATCH_OFFSET_IX = 0;
+        public const int RECORDS_BATCH_LENGTH_IX = 8;
+        public const int RECORDS_PARTITION_LEADER_EPOCH_IX = 12;
+        public const int RECORDS_MAGIC_BYTE_IX = 16;
+        public const int RECORDS_CRC_IX = 17;
+        public const int RECORDS_ATTRIBUTES_IX = 21;
+        public const int RECORDS_LAST_OFFSET_DELTA_IX = 23;
+        public const int RECORDS_BASE_TIMESTAMP_IX = 27;
+        public const int RECORDS_MAX_TIMESTAMP_IX = 35;
+        public const int RECORDS_PRODUCER_ID_IX = 43;
+        public const int RECORDS_PRODUCER_EPOCH_IX = 51;
+        public const int RECORDS_BASE_SEQUENCE_IX = 53;
+        public const int RECORDS_COUNT_IX = 57;
+
+        public const sbyte RECORDS_MAGIC_BYTE = 2;
+        public const int RECORDS_MAX_BATCH_SIZE = int.MaxValue - RECORDS_HEADER_SIZE;
+
+        public const int RECORDS_HEADER_SIZE = 61;
+        public const int RECORDS_LOG_OVERHEAD = 12;
+        public const int RECORDS_SIZE_PADDING = RECORDS_HEADER_SIZE - RECORDS_LOG_OVERHEAD;
 
         private static void WriteRecordBatch(Stream buffer, IRecords records)
         {
@@ -386,10 +403,10 @@ namespace Kafka.Common.Encoding
             WriteInt64(buffer, records.ProducerId);
             WriteInt16(buffer, records.ProducerEpoch);
             WriteInt32(buffer, records.BaseSequence);
-            WriteInt32(buffer, records.Count);
+            WriteInt32(buffer, records.Records.Count);
 
             // Write records.
-            foreach (var record in records)
+            foreach (var record in records.Records)
                 WriteRecord(buffer, record);
 
             var crcEnd = buffer.Position;
@@ -419,10 +436,10 @@ namespace Kafka.Common.Encoding
             index = WriteInt64(buffer, index, records.ProducerId);
             index = WriteInt16(buffer, index, records.ProducerEpoch);
             index = WriteInt32(buffer, index, records.BaseSequence);
-            index = WriteInt32(buffer, index, records.Count);
+            index = WriteInt32(buffer, index, records.Records.Count);
 
             // Write records.
-            foreach (var record in records)
+            foreach (var record in records.Records)
                 index = WriteRecord(buffer, index, record);
 
             // Compute and store crc.
@@ -503,53 +520,6 @@ namespace Kafka.Common.Encoding
             // Write headers.
             index = WriteVarInt32(buffer, index, record.Headers.Count);
             foreach (var header in record.Headers)
-                index = WriteRecordHeader(buffer, index, header);
-            return index;
-        }
-
-        public static int WriteRecord(
-            byte[] buffer,
-            long timestampDelta,
-            int offsetDelta,
-            ReadOnlyMemory<byte>? key,
-            ReadOnlyMemory<byte>? value,
-            ImmutableArray<RecordHeader> headers
-        )
-        {
-            var index = 0;
-            // Write record header.
-            index = WriteVarInt32(buffer, index, buffer.Length);
-            index = WriteInt8(buffer, index, 0);
-            index = WriteVarInt64(buffer, index, timestampDelta);
-            index = WriteVarInt32(buffer, index, offsetDelta);
-
-            // Write record key.
-            if (key.HasValue)
-            {
-                index = WriteVarInt32(buffer, index, key.Value.Length);
-                foreach (var b in key.Value.Span)
-                    buffer[index++] = b;
-            }
-            else
-            {
-                index = WriteVarInt32(buffer, index, -1);
-            }
-
-            // Write record value.
-            if (value.HasValue)
-            {
-                index = WriteVarInt32(buffer, index, value.Value.Length);
-                foreach (var b in value.Value.Span)
-                    buffer[index++] = b;
-            }
-            else
-            {
-                index = WriteVarInt32(buffer, index, -1);
-            }
-
-            // Write headers.
-            index = WriteVarInt32(buffer, index, headers.Length);
-            foreach (var header in headers)
                 index = WriteRecordHeader(buffer, index, header);
             return index;
         }
@@ -645,7 +615,7 @@ namespace Kafka.Common.Encoding
             int offsetDelta,
             ReadOnlyMemory<byte>? key,
             ReadOnlyMemory<byte>? value,
-            ImmutableArray<RecordHeader> headers
+            IReadOnlyList<RecordHeader> headers
         ) =>
             SizeOfVarInt64(timestampDelta) +
             SizeOfVarInt32(offsetDelta) +
@@ -663,9 +633,9 @@ namespace Kafka.Common.Encoding
         /// <param name="headers"></param>
         /// <returns></returns>
         public static int ComputeHeadersSize(
-            ImmutableArray<RecordHeader> headers
+            IReadOnlyList<RecordHeader> headers
         ) =>
-            SizeOfVarInt32(headers.Length) +
+            SizeOfVarInt32(headers.Count) +
             headers.Sum(
                 r =>
                     SizeOfVarInt32(r.Key.Length) +

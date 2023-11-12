@@ -1,16 +1,19 @@
 ﻿using CommandLine;
 using Kafka.Cli.Options;
 using Kafka.Cli.Text;
+using Kafka.Client;
 using Kafka.Client.Clients.Admin;
-using Kafka.Client.Clients.Admin.Model;
+using Kafka.Client.Config;
+using Kafka.Client.Model;
 using Kafka.Common.Model;
 using Microsoft.Extensions.Logging;
+using System.Collections.Immutable;
 
 namespace Kafka.Cli.Cmd
 {
     internal static class TopicsCmd
     {
-        public static async ValueTask<int> Parse(
+        public static async Task<int> Parse(
             IEnumerable<string> args,
             CancellationToken cancellationToken
         ) =>
@@ -27,11 +30,11 @@ namespace Kafka.Cli.Cmd
                     (TopicsCreateOpts verb) => Create(verb, cancellationToken),
                     (TopicsDescribeOpts verb) => Describe(verb, cancellationToken),
                     (TopicsDeleteOpts verb) => Delete(verb, cancellationToken),
-                    errs => new ValueTask<int>(-1)
+                    errs => Task.FromResult(-1)
                 )
             ;
 
-        public static async ValueTask<int> List(
+        public static async Task<int> List(
             TopicsListOpts opts,
             CancellationToken cancellationToken
         )
@@ -40,18 +43,17 @@ namespace Kafka.Cli.Cmd
             {
                 if (!TryCreateConfig(opts, out var config))
                     return -1;
-                using var adminClient = CreateAdminClient(opts, config);
-                var options = new ListTopicsOptionsBuilder(config)
-                    .IncludeInternal(!opts.ExcludeInternal)
-                    .Build()
-                ;
-                var result = await adminClient.ListTopics(
+                using var client = CreateAdminClient(opts, config);
+                var options = new ListTopicsOptions(
+                    !opts.ExcludeInternal
+                );
+                var result = await client.Topics.List(
                     options,
                     cancellationToken
                 );
-                foreach (var topic in result.Topics)
+                foreach (var topic in result.Topics.Where(t => options.IncludeInternal || t.IsInternal == false))
                     Console.WriteLine(topic.Name);
-                await adminClient.Close(CancellationToken.None);
+                await client.Close(CancellationToken.None);
                 return 0;
             }
             catch (Exception ex)
@@ -61,7 +63,7 @@ namespace Kafka.Cli.Cmd
             }
         }
 
-        public static async ValueTask<int> Create(
+        public static async Task<int> Create(
             TopicsCreateOpts opts,
             CancellationToken cancellationToken
         )
@@ -70,7 +72,7 @@ namespace Kafka.Cli.Cmd
             {
                 if (!TryCreateConfig(opts, out var config))
                     return -1;
-                using var adminClient = CreateAdminClient(opts, config);
+                using var client = CreateAdminClient(opts, config);
                 var replicaAssinment = new Dictionary<int, int[]>();
                 var partitionReplicaAssignments = opts.ReplicaAssignment.Split(';', StringSplitOptions.RemoveEmptyEntries);
                 foreach (var partitionReplicaAssignment in partitionReplicaAssignments)
@@ -80,18 +82,16 @@ namespace Kafka.Cli.Cmd
                     var value = kv[1].Split(',', StringSplitOptions.RemoveEmptyEntries).Select(r => int.Parse(r)).ToArray();
                     replicaAssinment.Add(key, value);
                 }
-                var options = new CreateTopicsOptionsBuilder(config)
-                    .NewTopic(b => b
-                        .Name(opts.Topic)
-                        .NumPartitions(opts.PartitionCount)
-                        .ReplicationFactor(opts.ReplicationFactor)
-                        .ReplicasAssignments(replicaAssinment)
-                        .Build()
-                    )
-                    .Build()
-                ;
-                var result = await adminClient.CreateTopics(
-                    options,
+                var definition = new CreateTopicDefinition(
+                    opts.Topic,
+                    opts.PartitionCount,
+                    opts.ReplicationFactor,
+                    ImmutableDictionary<int, IReadOnlyList<int>>.Empty,
+                    ImmutableDictionary<string, string?>.Empty
+                );
+                var result = await client.Topics.Create(
+                    definition,
+                    CreateTopicOptions.Empty,
                     cancellationToken
                 );
                 foreach (var topic in result.CreatedTopics)
@@ -108,7 +108,7 @@ namespace Kafka.Cli.Cmd
                     Console.WriteLine();
                     Console.WriteLine($"    {Formatter.Print(topic.Error)}");
                 }
-                await adminClient.Close(CancellationToken.None);
+                await client.Close(CancellationToken.None);
                 return 0;
             }
             catch (Exception ex)
@@ -133,7 +133,7 @@ namespace Kafka.Cli.Cmd
             Console.WriteLine($"    Replication Factor: {replicationFactor}");
         }
 
-        public static async ValueTask<int> Delete(
+        public static async Task<int> Delete(
             TopicsDeleteOpts opts,
             CancellationToken cancellationToken
         )
@@ -142,20 +142,16 @@ namespace Kafka.Cli.Cmd
             {
                 if (!TryCreateConfig(opts, out var config))
                     return -1;
-                using var adminClient = CreateAdminClient(opts, config);
-                var options = new DeleteTopicsOptionsBuilder(config)
-                    .Topic(opts.Topic)
-                    .Build()
-                ;
-                var result = await adminClient.DeleteTopics(
-                    options,
+                using var client = CreateAdminClient(opts, config);
+                var result = await client.Topics.Delete(
+                    opts.Topic,
                     cancellationToken
                 );
                 foreach (var topic in result.DeletedTopics)
                     Console.WriteLine(topic);
                 foreach (var error in result.ErrorTopics)
                     Console.WriteLine(error);
-                await adminClient.Close(CancellationToken.None);
+                await client.Close(CancellationToken.None);
                 return 0;
             }
             catch (Exception ex)
@@ -165,7 +161,7 @@ namespace Kafka.Cli.Cmd
             }
         }
 
-        public static async ValueTask<int> Describe(
+        public static async Task<int> Describe(
             TopicsDescribeOpts opts,
             CancellationToken cancellationToken
         )
@@ -174,22 +170,24 @@ namespace Kafka.Cli.Cmd
             {
                 if (!TryCreateConfig(opts, out var config))
                     return -1;
-                using var adminClient = CreateAdminClient(opts, config);
-                var options = new DescribeTopicsOptionsBuilder(config)
-                    .Topic(opts.Topic)
-                    .Build()
-                ;
-                var result = await adminClient.DescribeTopics(
-                    options,
+                using var client = CreateAdminClient(opts, config);
+                var result = await client.Topics.Describe(
+                    opts.Topic,
+                    DescribeTopicOptions.Empty,
                     cancellationToken
                 );
                 foreach (var topic in result.Topics)
                 {
+                    if(topic.Error.Code != 0)
+                    {
+                        Console.WriteLine($"Name: {topic.Name}");
+                        Console.WriteLine($"Error: {Formatter.Print(topic.Error)}");
+                        continue;
+                    }
                     Console.WriteLine($"Id: {topic.TopicId}");
                     Console.WriteLine($"Name: {topic.Name}");
                     Console.WriteLine($"Internal: {topic.IsInternal}");
                     Console.WriteLine($"AuthorizedOperations: {topic.TopicAuthorizedOperations}");
-                    Console.WriteLine($"Error: {Formatter.Print(topic.Error)}");
                     foreach (var partition in topic.Partitions.OrderBy(r => r.PartitionIndex))
                     {
                         Console.WriteLine($"Partition: {partition.PartitionIndex}");
@@ -201,7 +199,7 @@ namespace Kafka.Cli.Cmd
                         Console.WriteLine($"  OfflineReplicas: [{string.Join(',', partition.OfflineReplicas)}]");
                     }
                 }
-                await adminClient.Close(CancellationToken.None);
+                await client.Close(CancellationToken.None);
                 return 0;
             }
             catch (Exception ex)
@@ -213,10 +211,10 @@ namespace Kafka.Cli.Cmd
 
         private static bool TryCreateConfig(
             KafkaCliOpts opts,
-            out AdminClientConfig config
+            out ClientConfig config
         )
         {
-            config = new AdminClientConfig
+            config = new ClientConfig
             {
                 ClientId = "kafka-cli.net",
                 BootstrapServers = opts.BootstrapServer
@@ -224,9 +222,9 @@ namespace Kafka.Cli.Cmd
             return OptionsMapper.SetProperties(config, opts.Properties, Console.Out);
         }
 
-        private static IAdminClient CreateAdminClient(
+        private static IClient CreateAdminClient(
             KafkaCliOpts opts,
-            AdminClientConfig config
+            ClientConfig config
         )
         {
             var logger = LoggerFactory
@@ -234,9 +232,9 @@ namespace Kafka.Cli.Cmd
                     .AddConsole()
                     .SetMinimumLevel(opts.LogLevel)
                 )
-                .CreateLogger<IAdminClient>()
+                .CreateLogger<IClient>()
             ;
-            return AdminClientBuilder
+            return ClientBuilder
                 .New()
                 .WithConfig(config)
                 .WithLogger(logger)

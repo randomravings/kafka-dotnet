@@ -1629,9 +1629,9 @@ namespace Kafka.CodeGen.CSharp
         )
         {
             if (flexible)
-                writer.Write($"{nameof(BinaryDecoder)}.ReadCompactRecords(buffer, index)");
+                writer.Write($"{nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadCompactRecords)}(buffer, index)");
             else
-                writer.Write($"{nameof(BinaryDecoder)}.ReadRecords(buffer, index)");
+                writer.Write($"{nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadRecords)}(buffer, index)");
             if (!nullable)
             {
                 writer.WriteLine($";");

@@ -28,8 +28,7 @@ namespace Kafka.Common.Records
     /// baseSequence: int32
     /// records: [Record]
     /// </summary>
-    public interface IRecords :
-        IReadOnlyList<IRecord>
+    public interface IRecords
     {
         long BaseOffset { get; }
 
@@ -54,5 +53,6 @@ namespace Kafka.Common.Records
         short ProducerEpoch { get; }
 
         int BaseSequence { get; }
+        IReadOnlyList<IRecord> Records { get; }
     }
 }
