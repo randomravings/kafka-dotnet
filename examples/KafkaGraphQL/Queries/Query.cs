@@ -6,15 +6,26 @@ namespace KafkaGraphQL.Queries
 {
     public class Query
     {
+        [GraphQLDescription("Gets a list of topic descriptions.")]
         public async ValueTask<IQueryable<TopicDescription>> GetTopics(
-            [GraphQLType<ListType<StringType>>] TopicName[]? topicNames,
-            [Service] IKafkaClient kafkaClient,
+
+            [GraphQLType<ListType<StringType>>]
+            [GraphQLDescription("List of topics to get, omit for all topics.")]
+            TopicName[]? topicNames,
+
+
+            [GraphQLDescription("Options fetching topics.")] 
+            GetTopicsOptions? options,
+
+            [Service]
+            IKafkaClient kafkaClient,
+
             CancellationToken cancellationToken
         )
         {
             var result = await kafkaClient.Topics.Get(
                 topicNames ?? Array.Empty<TopicName>(),
-                GetTopicsOptions.Empty,
+                options ?? GetTopicsOptions.Empty,
                 cancellationToken
             );
             return result.Topics.AsQueryable();

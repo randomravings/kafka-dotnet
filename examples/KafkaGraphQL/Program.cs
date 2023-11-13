@@ -1,5 +1,6 @@
 using Kafka.Client.Extensions.DependencyInjection;
 using Kafka.Common.Model;
+using KafkaGraphQL.InputTypes;
 using KafkaGraphQL.Queries;
 using KafkaGraphQL.Types;
 
@@ -16,6 +17,7 @@ builder.Services
     .AddType<TopicType>()
     .AddType<PartitionType>()
     .AddType<ErrorType>()
+    .AddType<GetTopicOptionsInputType>()
 
     .AddTypeConverter<TopicId, Guid>(
         t => t.Value
