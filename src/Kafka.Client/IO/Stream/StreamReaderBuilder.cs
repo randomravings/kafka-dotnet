@@ -51,7 +51,7 @@ namespace Kafka.Client.IO.Stream
         IStreamReaderBuilder<TKey, TValue>
     {
         private readonly IDeserializer<TValue> _valueDeserializer;
-        private ILogger<IClient> _logger = NullLogger<IClient>.Instance;
+        private ILogger<IKafkaClient> _logger = NullLogger<IKafkaClient>.Instance;
         internal StreamReaderBuilder(
             IInputStream stream,
             IDeserializer<TKey> keyDeserializer,
@@ -60,7 +60,7 @@ namespace Kafka.Client.IO.Stream
         {
             _valueDeserializer = valueDeserializer;
         }
-        IStreamReaderBuilder<TKey, TValue> IStreamReaderBuilder<TKey, TValue>.WithLogger(ILogger<IClient> logger)
+        IStreamReaderBuilder<TKey, TValue> IStreamReaderBuilder<TKey, TValue>.WithLogger(ILogger<IKafkaClient> logger)
         {
             _logger = logger;
             return this;

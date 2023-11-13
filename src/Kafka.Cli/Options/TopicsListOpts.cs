@@ -4,9 +4,11 @@ namespace Kafka.Cli.Options
 {
     [Verb("list")]
     public sealed class TopicsListOpts
-        : KafkaCliOpts
+        : Opts
     {
-        [Option("exclude-internal")]
-        public bool ExcludeInternal { get; set; } = false;
+        [Option("include-internal")]
+        public bool IncludeInternal { get; set; } = false;
+        [Option("show-allowed-operations")]
+        public bool ShowAllowedOperations { get; set; } = true;
     }
 }

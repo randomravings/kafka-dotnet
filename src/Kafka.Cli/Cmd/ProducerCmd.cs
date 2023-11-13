@@ -1,8 +1,8 @@
 ﻿using CommandLine;
+using Kafka.Cli.Client;
 using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Client;
-using Kafka.Client.Clients.Admin;
 using Kafka.Client.Config;
 using Kafka.Client.IO;
 using Kafka.Common.Serialization;
@@ -34,36 +34,20 @@ namespace Kafka.Cli.Cmd
             CancellationToken cancellationToken
         )
         {
-            var clientConfig = new ClientConfig
-            {
-                ClientId = "kafka-cli.net",
-                BootstrapServers = opts.BootstrapServer,
-            };
-            var producerConfig = new OutputStreamConfig
-            {
-                LingerMs = opts.LingerMs,
-                MaxInFlightRequestsPerConnection = opts.MaxInFlightRequestsPerConnection,
-                MaxRequestSize = opts.MaxRequestSize
-            };
-            OptionsMapper.SetProperties(clientConfig, opts.Properties, Console.Out);
-            OptionsMapper.SetProperties(producerConfig, opts.Properties, Console.Out);
+            var config = CreateConfig(
+                opts
+            );
 
-            var logger = LoggerFactory
-                .Create(builder => builder
-                    .AddConsole()
-                    .SetMinimumLevel(opts.LogLevel)
-                )
-                .CreateLogger<IClient>()
-            ;
-            using var client = ClientBuilder
-                .New()
-                .WithConfig(clientConfig)
-                .WithLogger(logger)
-                .Build()
-            ;
+            if (!ClientUtils.TrySetProperties(config, opts, Console.Out))
+                return -1;
+
+            using var client = ClientUtils.CreateClient(
+                opts,
+                config
+            );
 
             using var outputStream = client
-                .CreateOuputStream(producerConfig)
+                .CreateOuputStream()
                 .Build()
             ;
 
@@ -133,6 +117,24 @@ namespace Kafka.Cli.Cmd
 
             transaction?.Dispose();
             return 0;
+        }
+
+        private static KafkaClientConfig CreateConfig(
+            ProducerOpts opts
+        )
+        {
+            var config = new KafkaClientConfig
+            {
+                ClientId = "kafka-cli.net",
+                BootstrapServers = opts.BootstrapServer,
+                Producer = new OutputStreamConfig
+                {
+                    LingerMs = opts.LingerMs,
+                    MaxInFlightRequestsPerConnection = opts.MaxInFlightRequestsPerConnection,
+                    MaxRequestSize = opts.MaxRequestSize
+                }
+            };
+            return config;
         }
     }
 }

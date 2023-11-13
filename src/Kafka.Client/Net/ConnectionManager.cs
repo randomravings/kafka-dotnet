@@ -17,7 +17,7 @@ namespace Kafka.Client.Net
     {
         private readonly ImmutableArray<string> _bootstrapUrls;
         private readonly SortedList<ClusterNodeId, IClientConnection> _connections = new(ClusterNodeIdCompare.Instance);
-        private readonly ClientConfig _config;
+        private readonly KafkaClientConfig _config;
         private readonly ILogger _logger;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
 
@@ -25,7 +25,7 @@ namespace Kafka.Client.Net
         private bool _closed;
 
         public ConnectionManager(
-            ClientConfig config,
+            KafkaClientConfig config,
             ILogger logger
         )
         {

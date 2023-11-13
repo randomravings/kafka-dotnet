@@ -14,17 +14,17 @@ using System.Collections.Immutable;
 namespace Kafka.Client
 {
     internal sealed class KafkaClient :
-        IClient,
+        IKafkaClient,
         ITopics,
         IConsumerGroups
     {
-        private readonly ClientConfig _config;
-        private readonly ILogger<IClient> _logger;
+        private readonly KafkaClientConfig _config;
+        private readonly ILogger<IKafkaClient> _logger;
         private readonly IConnectionManager<IClientConnection> _connections;
 
         public KafkaClient(
-            ClientConfig config,
-            ILogger<IClient> logger
+            KafkaClientConfig config,
+            ILogger<IKafkaClient> logger
         )
         {
             _config = config;
@@ -32,10 +32,10 @@ namespace Kafka.Client
             _connections = new ConnectionManager(_config, _logger);
         }
 
-        ITopics IClient.Topics => this;
-        IConsumerGroups IClient.ConsumerGroups => this;
+        ITopics IKafkaClient.Topics => this;
+        IConsumerGroups IKafkaClient.ConsumerGroups => this;
 
-        async ValueTask IClient.Close(
+        async ValueTask IKafkaClient.Close(
             CancellationToken cancellationToken
         )
         {
@@ -45,15 +45,15 @@ namespace Kafka.Client
             await Task.Yield();
         }
 
-        IInputStreamBuilder IClient.CreateInputStream(InputStreamConfig config) =>
+        IInputStreamBuilder IKafkaClient.CreateInputStream() =>
             new InputStreamBuilder(
                 _connections,
-                config,
+                _config.Consumer,
                 _logger
             )
         ;
 
-        IInputStreamBuilder IClient.CreateInputStream(Action<InputStreamConfig> configure)
+        IInputStreamBuilder IKafkaClient.CreateInputStream(Action<InputStreamConfig> configure)
         {
             var config = new InputStreamConfig();
             configure(config);
@@ -64,15 +64,15 @@ namespace Kafka.Client
             );
         }
 
-        IOutputStreamBuilder IClient.CreateOuputStream(OutputStreamConfig config) =>
+        IOutputStreamBuilder IKafkaClient.CreateOuputStream() =>
             new OutputStreamBuilder(
                 _connections,
-                config,
+                _config.Producer,
                 _logger
             )
         ;
 
-        IOutputStreamBuilder IClient.CreateOuputStream(Action<OutputStreamConfig> configure)
+        IOutputStreamBuilder IKafkaClient.CreateOuputStream(Action<OutputStreamConfig> configure)
         {
             var config = new OutputStreamConfig();
             configure(config);
@@ -263,88 +263,44 @@ namespace Kafka.Client
             );
         }
 
-        async ValueTask<DescribeTopicsResult> ITopics.Describe(
+        async ValueTask<GetTopicsResult> ITopics.Get(
             TopicName topic,
-            DescribeTopicOptions options,
+            GetTopicsOptions options,
             CancellationToken cancellationToken
         ) =>
-            await DescribeTopics(
+            await Get(
                 ImmutableArray.Create(topic),
                 options,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<DescribeTopicsResult> ITopics.Describe(
+        async ValueTask<GetTopicsResult> ITopics.Get(
             IReadOnlyList<TopicName> topics,
-            DescribeTopicOptions options,
+            GetTopicsOptions options,
             CancellationToken cancellationToken
         ) =>
-            await DescribeTopics(
+            await Get(
                 topics,
                 options,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private async ValueTask<DescribeTopicsResult> DescribeTopics(
-            IReadOnlyList<TopicName> topics,
-            DescribeTopicOptions options,
+        async ValueTask<GetTopicsResult> ITopics.Get(
+            GetTopicsOptions options,
             CancellationToken cancellationToken
-        )
-        {
-            var protocol = await _connections.Controller(
+        ) =>
+            await Get(
+                ImmutableSortedSet<TopicName>.Empty,
+                options,
                 cancellationToken
-            ).ConfigureAwait(false);
+            ).ConfigureAwait(false)
+        ;
 
-            var metadataRequestTopics = topics
-                .Select(
-                    r => new MetadataRequestData.MetadataRequestTopic(
-                        Guid.Empty,
-                        r,
-                        ImmutableArray<TaggedField>.Empty
-                    )
-                )
-                .ToImmutableArray()
-            ;
-            var request = new MetadataRequestData(
-                metadataRequestTopics,
-                false,
-                false,
-                true,
-                ImmutableArray<TaggedField>.Empty
-            );
-            var response = await protocol.Metadata(
-                request,
-                cancellationToken
-            ).ConfigureAwait(false);
-            return new(
-                response.TopicsField.Select(
-                    t => new DescribeTopicResult(
-                        t.TopicIdField,
-                        t.NameField,
-                        t.IsInternalField,
-                        t.TopicAuthorizedOperationsField,
-                        Errors.Translate(t.ErrorCodeField),
-                        t.PartitionsField.Select(
-                            p => new TopicPartitionDescription(
-                                p.PartitionIndexField,
-                                p.LeaderIdField,
-                                p.LeaderEpochField,
-                                Errors.Translate(p.ErrorCodeField),
-                                p.ReplicaNodesField,
-                                p.IsrNodesField,
-                                p.OfflineReplicasField
-                            )
-                        ).ToImmutableArray()
-                    )
-                )
-                .ToImmutableArray()
-            );
-        }
-
-        async ValueTask<ListTopicsResult> ITopics.List(
-            ListTopicsOptions options,
+        private async ValueTask<GetTopicsResult> Get(
+            IReadOnlyList<TopicName> topics,
+            GetTopicsOptions options,
             CancellationToken cancellationToken
         )
         {
@@ -352,11 +308,20 @@ namespace Kafka.Client
                 .ConfigureAwait(false)
             ;
 
+            var metadataTopicsReques = topics
+                .Select(t => new MetadataRequestData.MetadataRequestTopic(
+                    Guid.Empty,
+                    t.Value,
+                    ImmutableArray<TaggedField>.Empty
+                ))
+                .ToImmutableArray();
+            ;
+
             var request = new MetadataRequestData(
-                null,
+                metadataTopicsReques.Length == 0 ? null : metadataTopicsReques,
                 false,
                 false,
-                false,
+                options.IncludeTopicAuthorizedOperations,
                 ImmutableArray<TaggedField>.Empty
             );
             var response = await protocol.Metadata(
@@ -364,28 +329,44 @@ namespace Kafka.Client
                 cancellationToken
             ).ConfigureAwait(false);
 
-            var topics = response
+            var topicDescriptions = response
                 .TopicsField
-                .Where(r => options.IncludeInternal || r.IsInternalField == false)
-                .Select(r => new TopicInfo(
-                    r.TopicIdField,
-                    r.NameField,
-                    r.IsInternalField,
-                    r.PartitionsField
-                        .Select(p => new TopicInfo.PartitionInfo(
+                .Where(t => options.IncludeInternal || t.IsInternalField == false)
+                .Select(t => new TopicDescription(
+                    t.TopicIdField,
+                    t.NameField,
+                    t.IsInternalField,
+                    t.PartitionsField
+                        .Select(p => new PartitionDescription(
                             p.PartitionIndexField,
                             p.LeaderIdField,
+                            p.LeaderEpochField,
+                            p.ReplicaNodesField
+                                .Select(i => new ClusterNodeId(i))
+                                .ToImmutableArray(),
                             p.IsrNodesField
                                 .Select(i => new ClusterNodeId(i))
-                                .ToImmutableArray()
+                                .ToImmutableArray(),
+                            p.OfflineReplicasField
+                                .Select(i => new ClusterNodeId(i))
+                                .ToImmutableArray(),
+                            p.ErrorCodeField == 0 ?
+                                Errors.Known.NONE :
+                                Errors.Translate(p.ErrorCodeField)
                         ))
-                        .ToImmutableArray()
-                    ))
-                .OrderBy(r => r.Name, TopicNameCompare.Instance)
-                .ThenBy(r => r.Id)
+                        .ToImmutableArray(),
+                    options.IncludeTopicAuthorizedOperations ?
+                        t.TopicAuthorizedOperationsField :
+                        0,
+                    t.ErrorCodeField == 0 ?
+                        Errors.Known.NONE :
+                        Errors.Translate(t.ErrorCodeField)
+                ))
+                .OrderBy(t => t.TopicName, TopicNameCompare.Instance)
+                .ThenBy(t => t.TopicId)
                 .ToImmutableArray()
             ;
-            return new(topics);
+            return new(topicDescriptions);
         }
 
         async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsStart(
@@ -536,9 +517,9 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        ValueTask<ListTopicsResult> IConsumerGroups.List(
+        ValueTask<GetTopicsResult> IConsumerGroups.Get(
             ConsumerGroup consumerGroup,
-            ListTopicsOptions options,
+            GetConsumerGroupsOptions options,
             CancellationToken cancellationToken
         )
         {

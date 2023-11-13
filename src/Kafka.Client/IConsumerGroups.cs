@@ -13,9 +13,9 @@ namespace Kafka.Client
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        ValueTask<ListTopicsResult> List(
+        ValueTask<GetTopicsResult> Get(
             ConsumerGroup consumerGroup,
-            ListTopicsOptions options,
+            GetConsumerGroupsOptions options,
             CancellationToken cancellationToken
         );
 

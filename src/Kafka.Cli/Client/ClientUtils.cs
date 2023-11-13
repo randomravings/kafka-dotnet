@@ -1,29 +1,58 @@
-﻿using Kafka.Client.Clients;
+﻿using Kafka.Cli.Options;
+using Kafka.Client;
+using Kafka.Client.Config;
+using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
-namespace Kafka.Cli.Options
+namespace Kafka.Cli.Client
 {
-    public static class OptionsMapper
+    internal static class ClientUtils
     {
-        public static bool SetProperties<TConfig>(
-            TConfig clientConfig,
-            IEnumerable<string> strings,
-            TextWriter output
-        ) =>
-            CreatePropertyDictionary(strings, output, out var properties) &&
-            ApplyProperties(clientConfig, properties, output)
-        ;
+        internal static IKafkaClient CreateClient<TOpts>(
+            TOpts opts,
+            KafkaClientConfig config
+        ) 
+            where TOpts : notnull, Opts
+        {
+            var logger = LoggerFactory
+                .Create(builder => builder
+                    .AddSimpleConsole()
+                    .SetMinimumLevel(opts.LogLevel)
 
-        private static bool CreatePropertyDictionary(
-            IEnumerable<string> strings,
+                )
+                .CreateLogger<IKafkaClient>()
+            ;
+            return KafkaClientBuilder
+                .New()
+                .WithConfig(config)
+                .WithLogger(logger)
+                .Build()
+            ;
+        }
+
+        internal static bool TrySetProperties<TOpts>(
+            KafkaClientConfig clientConfig,
+            TOpts opts,
+            TextWriter output
+        )
+            where TOpts : notnull, Opts
+        {
+            return CreatePropertyDictionary(opts, output, out var properties) &&
+                ApplyProperties(clientConfig, properties, output)
+            ;
+        }
+
+        private static bool CreatePropertyDictionary<TOpts>(
+            TOpts opts,
             TextWriter output,
             out IReadOnlyDictionary<string, string?> properties
         )
+            where TOpts : notnull, Opts
         {
             properties = ImmutableDictionary<string, string?>.Empty;
-            var splits = strings.Select(r =>
+            var splits = opts.Properties.Select(r =>
             {
                 var i = r.IndexOf('=');
                 if (i < 1 || i == r.Length - 1)
@@ -44,18 +73,17 @@ namespace Kafka.Cli.Options
                 k => k[0],
                 v => v[1] == "null" ? null : v[1]
             );
-
             return true;
         }
 
-        private static bool ApplyProperties<TConfig>(
-            TConfig clientConfig,
+        private static bool ApplyProperties(
+            KafkaClientConfig clientConfig,
             IReadOnlyDictionary<string, string?> properties,
             TextWriter output
         )
         {
             var success = true;
-            var propertyInfos = MapProperties<TConfig>();
+            var propertyInfos = MapProperties();
             foreach (var property in properties)
             {
                 if (!propertyInfos.TryGetValue(property.Key, out var propertyInfo))
@@ -72,33 +100,39 @@ namespace Kafka.Cli.Options
             return success;
         }
 
-        private static bool ApplyProperty<TConfig>(
-            TConfig clientConfig,
+        private static bool ApplyProperty(
+            KafkaClientConfig clientConfig,
             PropertyInfo propertyInfo,
             string? value
         )
         {
             var type = propertyInfo.PropertyType;
+            var instance = (object)clientConfig;
+            if (propertyInfo.DeclaringType?.Equals(typeof(InputStreamConfig)) ?? false)
+                instance = clientConfig.Consumer;
+            if (propertyInfo.DeclaringType?.Equals(typeof(OutputStreamConfig)) ?? false)
+                instance = clientConfig.Producer;
             if (type.Equals(typeof(string)))
-                propertyInfo.SetValue(clientConfig, value);
+                propertyInfo.SetValue(instance, value);
             else if (type.Equals(typeof(bool)) && bool.TryParse(value, out var boolValue))
-                propertyInfo.SetValue(clientConfig, boolValue);
+                propertyInfo.SetValue(instance, boolValue);
             else if (type.Equals(typeof(int)) && int.TryParse(value, out var intValue))
-                propertyInfo.SetValue(clientConfig, intValue);
+                propertyInfo.SetValue(instance, intValue);
             else if (type.Equals(typeof(long)) && long.TryParse(value, out var longValue))
-                propertyInfo.SetValue(clientConfig, longValue);
+                propertyInfo.SetValue(instance, longValue);
             else if (type.IsEnum && Enum.TryParse(type, value, true, out var enumValue))
-                propertyInfo.SetValue(clientConfig, enumValue);
+                propertyInfo.SetValue(instance, enumValue);
             else
                 return false;
             return true;
         }
 
-        private static IReadOnlyDictionary<string, PropertyInfo> MapProperties<TConfig>()
+        private static IReadOnlyDictionary<string, PropertyInfo> MapProperties()
         {
-            var type = typeof(TConfig);
-            var properties = type
+            var properties = typeof(KafkaClientConfig)
                 .GetProperties()
+                .Concat(typeof(InputStreamConfig).GetProperties())
+                .Concat(typeof(OutputStreamConfig).GetProperties())
                 .Select(r => new { Name = r.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? "", Property = r })
                 .Where(r => r.Name != "")
                 .ToImmutableSortedDictionary(

@@ -16,7 +16,7 @@ namespace Kafka.Client.IO
     public interface IStreamWriterBuilder<TKey, TValue>
     {
         IStreamWriterBuilder<TKey, TValue> WithPartitioner(IPartitioner partitioner);
-        IStreamWriterBuilder<TKey, TValue> WithLogger(ILogger<IClient> logger);
+        IStreamWriterBuilder<TKey, TValue> WithLogger(ILogger<IKafkaClient> logger);
         IStreamWriter<TKey, TValue> Build();
     }
 }

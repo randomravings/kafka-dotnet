@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Options
 {
-    public abstract class KafkaCliOpts
+    public abstract class Opts
     {
         [Option("bootstrap-server", Required = true)]
         public string BootstrapServer { get; set; } = "";

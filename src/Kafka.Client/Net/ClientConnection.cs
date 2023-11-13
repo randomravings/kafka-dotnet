@@ -105,7 +105,7 @@ namespace Kafka.Client.Net
 
         public ClientConnection(
             ITransport connection,
-            ClientConfig config,
+            KafkaClientConfig config,
             ILogger logger
         )
         {

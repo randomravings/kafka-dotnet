@@ -1,12 +1,10 @@
 ﻿using CommandLine;
+using Kafka.Cli.Client;
 using Kafka.Cli.Options;
 using Kafka.Cli.Text;
-using Kafka.Client;
-using Kafka.Client.Clients.Admin;
 using Kafka.Client.Config;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
-using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 
 namespace Kafka.Cli.Cmd
@@ -41,17 +39,27 @@ namespace Kafka.Cli.Cmd
         {
             try
             {
-                if (!TryCreateConfig(opts, out var config))
-                    return -1;
-                using var client = CreateAdminClient(opts, config);
-                var options = new ListTopicsOptions(
-                    !opts.ExcludeInternal
+                var config = CreateConfig(
+                    opts
                 );
-                var result = await client.Topics.List(
+
+                if (!ClientUtils.TrySetProperties(config, opts, Console.Out))
+                    return -1;
+
+                using var client = ClientUtils.CreateClient(
+                    opts,
+                    config
+                );
+
+                var options = new GetTopicsOptions(
+                    opts.IncludeInternal,
+                    opts.ShowAllowedOperations
+                );
+                var result = await client.Topics.Get(
                     options,
                     cancellationToken
                 );
-                foreach (var topic in result.Topics.Where(t => options.IncludeInternal || t.IsInternal == false))
+                foreach (var topic in result.Topics.Where(t => options.IncludeInternal || t.Internal == false))
                     Console.WriteLine(topic.Name);
                 await client.Close(CancellationToken.None);
                 return 0;
@@ -70,9 +78,19 @@ namespace Kafka.Cli.Cmd
         {
             try
             {
-                if (!TryCreateConfig(opts, out var config))
+
+                var config = CreateConfig(
+                    opts
+                );
+
+                if (!ClientUtils.TrySetProperties(config, opts, Console.Out))
                     return -1;
-                using var client = CreateAdminClient(opts, config);
+
+                using var client = ClientUtils.CreateClient(
+                    opts,
+                    config
+                );
+
                 var replicaAssinment = new Dictionary<int, int[]>();
                 var partitionReplicaAssignments = opts.ReplicaAssignment.Split(';', StringSplitOptions.RemoveEmptyEntries);
                 foreach (var partitionReplicaAssignment in partitionReplicaAssignments)
@@ -140,9 +158,18 @@ namespace Kafka.Cli.Cmd
         {
             try
             {
-                if (!TryCreateConfig(opts, out var config))
+                var config = CreateConfig(
+                    opts
+                );
+
+                if (!ClientUtils.TrySetProperties(config, opts, Console.Out))
                     return -1;
-                using var client = CreateAdminClient(opts, config);
+
+                using var client = ClientUtils.CreateClient(
+                    opts,
+                    config
+                );
+
                 var result = await client.Topics.Delete(
                     opts.Topic,
                     cancellationToken
@@ -168,35 +195,44 @@ namespace Kafka.Cli.Cmd
         {
             try
             {
-                if (!TryCreateConfig(opts, out var config))
+                var config = CreateConfig(
+                    opts
+                );
+
+                if (!ClientUtils.TrySetProperties(config, opts, Console.Out))
                     return -1;
-                using var client = CreateAdminClient(opts, config);
-                var result = await client.Topics.Describe(
+
+                using var client = ClientUtils.CreateClient(
+                    opts,
+                    config
+                );
+
+                var result = await client.Topics.Get(
                     opts.Topic,
-                    DescribeTopicOptions.Empty,
+                    GetTopicsOptions.Empty,
                     cancellationToken
                 );
                 foreach (var topic in result.Topics)
                 {
                     if(topic.Error.Code != 0)
                     {
-                        Console.WriteLine($"Name: {topic.Name}");
+                        Console.WriteLine($"Name: {topic.Name.Value}");
                         Console.WriteLine($"Error: {Formatter.Print(topic.Error)}");
                         continue;
                     }
-                    Console.WriteLine($"Id: {topic.TopicId}");
-                    Console.WriteLine($"Name: {topic.Name}");
-                    Console.WriteLine($"Internal: {topic.IsInternal}");
+                    Console.WriteLine($"Id: {topic.Id}");
+                    Console.WriteLine($"Name: {topic.Name.Value}");
+                    Console.WriteLine($"Internal: {topic.Internal}");
                     Console.WriteLine($"AuthorizedOperations: {topic.TopicAuthorizedOperations}");
                     foreach (var partition in topic.Partitions.OrderBy(r => r.PartitionIndex))
                     {
-                        Console.WriteLine($"Partition: {partition.PartitionIndex}");
-                        Console.WriteLine($"  LeaderId: {partition.LeaderId}");
-                        Console.WriteLine($"  LeaderEpoch: {partition.LeaderEpoch}");
+                        Console.WriteLine($"Partition: {partition.PartitionIndex.Value}");
+                        Console.WriteLine($"  LeaderId: {partition.LeaderId.Value}");
+                        Console.WriteLine($"  LeaderEpoch: {partition.LeaderEpoch.Value}");
                         Console.WriteLine($"  Error: {Formatter.Print(topic.Error)}");
-                        Console.WriteLine($"  ReplicaNodes: [{string.Join(',', partition.ReplicaNodes)}]");
-                        Console.WriteLine($"  IsrNodes: [{string.Join(',', partition.IsrNodes)}]");
-                        Console.WriteLine($"  OfflineReplicas: [{string.Join(',', partition.OfflineReplicas)}]");
+                        Console.WriteLine($"  ReplicaNodes: [{string.Join(',', partition.ReplicaNodes.Select(r => r.Value))}]");
+                        Console.WriteLine($"  IsrNodes: [{string.Join(',', partition.IsrNodes.Select(r => r.Value))}]");
+                        Console.WriteLine($"  OfflineReplicas: [{string.Join(',', partition.OfflineReplicas.Select(r => r.Value))}]");
                     }
                 }
                 await client.Close(CancellationToken.None);
@@ -209,37 +245,16 @@ namespace Kafka.Cli.Cmd
             }
         }
 
-        private static bool TryCreateConfig(
-            KafkaCliOpts opts,
-            out ClientConfig config
+        private static KafkaClientConfig CreateConfig(
+            Opts opts
         )
         {
-            config = new ClientConfig
+            var config = new KafkaClientConfig
             {
                 ClientId = "kafka-cli.net",
                 BootstrapServers = opts.BootstrapServer
             };
-            return OptionsMapper.SetProperties(config, opts.Properties, Console.Out);
-        }
-
-        private static IClient CreateAdminClient(
-            KafkaCliOpts opts,
-            ClientConfig config
-        )
-        {
-            var logger = LoggerFactory
-                .Create(builder => builder
-                    .AddConsole()
-                    .SetMinimumLevel(opts.LogLevel)
-                )
-                .CreateLogger<IClient>()
-            ;
-            return ClientBuilder
-                .New()
-                .WithConfig(config)
-                .WithLogger(logger)
-                .Build()
-            ;
+            return config;
         }
     }
 }

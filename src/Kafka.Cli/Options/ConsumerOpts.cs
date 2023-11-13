@@ -3,7 +3,7 @@
 namespace Kafka.Cli.Options
 {
     public sealed class ConsumerOpts
-        : KafkaCliOpts
+        : Opts
     {
         [Option("topic", Required = true)]
         public IEnumerable<string> Topics { get; set; } = Array.Empty<string>();

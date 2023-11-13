@@ -3,7 +3,7 @@
 namespace Kafka.Cli.Options
 {
     public sealed class ProducerOpts
-        : KafkaCliOpts
+        : Opts
     {
         [Option("topic", Required = true)]
         public string Topic { get; set; } = "";

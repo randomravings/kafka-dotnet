@@ -14,7 +14,7 @@ namespace Kafka.Client.IO.Stream
         private readonly ISerializer<TKey> _keySerializer;
         private readonly ISerializer<TValue> _valueSerializer;
         private readonly IPartitioner _partitioner;
-        private readonly ILogger<IClient> _logger;
+        private readonly ILogger<IKafkaClient> _logger;
 
         private ProducerTopicMetadata _topicMetadata = ProducerTopicMetadata.Empty;
 
@@ -24,7 +24,7 @@ namespace Kafka.Client.IO.Stream
             ISerializer<TKey> keySerializer,
             ISerializer<TValue> valueSerializer,
             IPartitioner partitioner,
-            ILogger<IClient> logger
+            ILogger<IKafkaClient> logger
         )
         {
             _topic = topic;

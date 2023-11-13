@@ -1,13 +1,12 @@
 ﻿using CommandLine;
+using Kafka.Cli.Client;
 using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Client;
-using Kafka.Client.Clients.Admin;
 using Kafka.Client.Config;
 using Kafka.Client.IO;
 using Kafka.Common.Model;
 using Kafka.Common.Serialization;
-using Microsoft.Extensions.Logging;
 
 namespace Kafka.Cli.Cmd
 {
@@ -35,15 +34,16 @@ namespace Kafka.Cli.Cmd
             CancellationToken cancellationToken
         )
         {
-            var (clientConfig, consumerConfig) = CreateConfig(
+            var config = CreateConfig(
                 opts
             );
-            OptionsMapper.SetProperties(clientConfig, opts.Properties, Console.Out);
-            OptionsMapper.SetProperties(consumerConfig, opts.Properties, Console.Out);
 
-            using var client = CreateClient(
+            if (!ClientUtils.TrySetProperties(config, opts, Console.Out))
+                return -1;
+
+            using var client = ClientUtils.CreateClient(
                 opts,
-                clientConfig
+                config
             );
 
             try
@@ -52,7 +52,7 @@ namespace Kafka.Cli.Cmd
                 if (opts.PartitionAssign.Any())
                     await RunAssignedConsumer(client, cancellationToken);
                 else
-                    await RunApplicationConsumer(client, topicNames, consumerConfig, opts.Interactive, cancellationToken);
+                    await RunApplicationConsumer(client, topicNames, opts.Interactive, cancellationToken);
             }
             finally
             {
@@ -64,15 +64,14 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task RunApplicationConsumer(
-            IClient client,
+            IKafkaClient client,
             IReadOnlySet<TopicName> topicNames,
-            InputStreamConfig consumerConfig,
             bool interactive,
             CancellationToken cancellationToken
         )
         {
             using var stream = client
-                .CreateInputStream(consumerConfig)
+                .CreateInputStream()
                 .AsApplication(topicNames)
                 .Build()
             ;
@@ -239,7 +238,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static Task RunAssignedConsumer(
-            IClient client,
+            IKafkaClient client,
             CancellationToken cancellationToken
         )
         {
@@ -247,7 +246,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task CloseClient(
-            IClient client,
+            IKafkaClient client,
             CancellationToken cancellationToken
         )
         {
@@ -291,46 +290,24 @@ namespace Kafka.Cli.Cmd
             }
         }
 
-        private static (ClientConfig, InputStreamConfig) CreateConfig(
-            ConsumerOpts verb
+        private static KafkaClientConfig CreateConfig(
+            ConsumerOpts opts
         )
         {
-            var groupId = verb.GroupId;
+            var groupId = opts.GroupId;
             if (string.IsNullOrEmpty(groupId))
                 groupId = $"{Guid.NewGuid()}";
-            return (
-                new ClientConfig
-                {
-                    ClientId = "kafka-cli.net",
-                    BootstrapServers = verb.BootstrapServer,
-                },
-                new InputStreamConfig
+            var config = new KafkaClientConfig
+            {
+                ClientId = "kafka-cli.net",
+                BootstrapServers = opts.BootstrapServer,
+                Consumer = new InputStreamConfig
                 {
                     GroupId = groupId,
-                    EnableAutoCommit = !verb.Interactive
+                    EnableAutoCommit = !opts.Interactive
                 }
-            );
-        }
-
-        private static IClient CreateClient(
-            ConsumerOpts verb,
-            ClientConfig clientConfig
-        )
-        {
-            var logger = LoggerFactory
-                .Create(builder => builder
-                    .AddSimpleConsole()
-                    .SetMinimumLevel(verb.LogLevel)
-
-                )
-                .CreateLogger<IClient>()
-            ;
-            return ClientBuilder
-                .New()
-                .WithConfig(clientConfig)
-                .WithLogger(logger)
-                .Build()
-            ;
+            };
+            return config;
         }
     }
 }

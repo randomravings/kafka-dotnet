@@ -4,7 +4,7 @@ namespace Kafka.Cli.Options
 {
     [Verb("describe")]
     public sealed class TopicsDescribeOpts
-        : KafkaCliOpts
+        : Opts
     {
         [Option("topic", Required = true)]
         public string Topic { get; set; } = "";

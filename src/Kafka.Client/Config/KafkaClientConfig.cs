@@ -1,11 +1,13 @@
 ﻿using Kafka.Client.Model;
+using System.ComponentModel;
 using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
+using System.Runtime.Serialization;
 
 namespace Kafka.Client.Config
 {
-    public sealed class ClientConfig
+    public sealed class KafkaClientConfig
     {
         /// <summary>
         /// A list of host/port pairs to use for establishing the initial connection to the Kafka cluster.The client will make use of all servers irrespective of which servers are specified here for bootstrapping—this list only impacts the initial hosts used to discover the full set of servers. This list should be in the form host1:port1, host2:port2,.... Since these servers are just used for the initial connection to discover the full cluster membership (which may change dynamically), this list need not contain the full set of servers(you may want more than one, though, in case a server is down).
@@ -367,26 +369,88 @@ namespace Kafka.Client.Config
         [JsonPropertyName("retry.backoff.ms")]
         public long RetryBackoffMs { get; set; } = 100;
 
+        public OutputStreamConfig Producer { get; set; } = new();
+
+        public InputStreamConfig Consumer { get; set; } = new();
+
         public override string ToString()
         {
-            var sb = new StringBuilder();
-            var properties = EnumerateJsonConfig(this);
-            foreach ((var name, var value) in properties)
-            {
-                sb.Append(name);
-                sb.Append(": ");
-                if (value == null)
-                    sb.Append("<null>");
-                else
-                    sb.Append(value.ToString());
-                sb.AppendLine();
-            }
-            return sb.ToString();
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendLine("Client:");
+            WriteConfig(stringBuilder, this);
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("Client.Producer:");
+            WriteConfig(stringBuilder, Producer);
+            stringBuilder.AppendLine();
+            stringBuilder.AppendLine("Client.Consumer:");
+            WriteConfig(stringBuilder, Consumer);
+            stringBuilder.AppendLine();
+            return stringBuilder.ToString();
         }
 
+        private static void WriteConfig<TConfig>(StringBuilder stringBuilder, TConfig instance)
+            where TConfig : notnull, new()
+        {
+            var properties = EnumerateJsonConfig(instance);
+            foreach ((var name, var value) in properties)
+            {
+                stringBuilder.Append("  ");
+                stringBuilder.Append(name);
+                stringBuilder.Append(": ");
+                WriteValue(stringBuilder, value);
+                stringBuilder.AppendLine();
+            }
+        }
 
-        private static SortedList<string, object?> EnumerateJsonConfig<T>(T instance)
-            where T : notnull
+        private static void WriteValue(StringBuilder stringBuilder, object? value)
+        {
+            switch(value)
+            {
+                case null:
+                    stringBuilder.Append("<null>");
+                    break;
+                case true:
+                    stringBuilder.Append("true");
+                    break;
+                case false:
+                    stringBuilder.Append("false");
+                    break;
+                case Enum e:
+                    var enumType = e.GetType();
+                    var stringValue = e.ToString();
+                    var memberInfos = enumType.GetMember(stringValue);
+                    var enumValueMemberInfo = memberInfos
+                        .FirstOrDefault(m =>
+                            m.DeclaringType == enumType
+                        )
+                    ;
+                    if (enumValueMemberInfo == null)
+                    {
+                        stringBuilder.Append(stringValue);
+                        break;
+                    }
+
+                    var valueAttributes = enumValueMemberInfo
+                        .GetCustomAttributes(
+                            typeof(EnumMemberAttribute),
+                            false
+                        )
+                    ;
+
+                    if(valueAttributes == null || valueAttributes.Length != 1)
+                        stringBuilder.Append(stringValue);
+                    else
+                        stringBuilder.Append(((EnumMemberAttribute)valueAttributes[0]).Value);
+                    break;
+                default:
+                    stringBuilder.Append(value.ToString());
+                    break;
+
+            }
+        }
+
+        private static SortedList<string, object?> EnumerateJsonConfig<TConfig>(TConfig instance)
+            where TConfig : notnull, new()
         {
             var items = new SortedList<string, object?>();
             foreach (var property in instance.GetType().GetProperties())

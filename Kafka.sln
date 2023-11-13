@@ -25,6 +25,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kafka.Common.UnitTest", "te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kafka.Client.Benchmark", "benchmark\Kafka.Client.Benchmark\Kafka.Client.Benchmark.csproj", "{796278CF-D136-489E-96C1-53788ACCD106}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "examples", "examples", "{C001B5B1-5EE6-472C-83A5-23CAB1E8E43D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kafka.Client.Extensions.DependencyInjection", "src\Kafka.Client.Extensions.DependencyInjection\Kafka.Client.Extensions.DependencyInjection.csproj", "{2A39998C-1715-432E-9148-3CFE58AE4F80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KafkaGraphQL", "examples\KafkaGraphQL\KafkaGraphQL.csproj", "{61A10BA8-BCFF-4D0D-8F10-C7742EFE77BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +69,14 @@ Global
 		{796278CF-D136-489E-96C1-53788ACCD106}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{796278CF-D136-489E-96C1-53788ACCD106}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{796278CF-D136-489E-96C1-53788ACCD106}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A39998C-1715-432E-9148-3CFE58AE4F80}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A39998C-1715-432E-9148-3CFE58AE4F80}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A39998C-1715-432E-9148-3CFE58AE4F80}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A39998C-1715-432E-9148-3CFE58AE4F80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{61A10BA8-BCFF-4D0D-8F10-C7742EFE77BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61A10BA8-BCFF-4D0D-8F10-C7742EFE77BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61A10BA8-BCFF-4D0D-8F10-C7742EFE77BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61A10BA8-BCFF-4D0D-8F10-C7742EFE77BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -76,6 +90,8 @@ Global
 		{2ECF834C-E15F-4835-9E66-B42B9085BBAE} = {009E8015-FCB4-4ABC-8B79-BB2347D15F3F}
 		{67DA4690-0122-49C4-B4E6-2431D0F387D5} = {009E8015-FCB4-4ABC-8B79-BB2347D15F3F}
 		{796278CF-D136-489E-96C1-53788ACCD106} = {E9C5EBC3-80E6-479D-A05F-D0DD37F3BF78}
+		{2A39998C-1715-432E-9148-3CFE58AE4F80} = {99A4081F-9B7B-4580-832D-308F8E637BD6}
+		{61A10BA8-BCFF-4D0D-8F10-C7742EFE77BB} = {C001B5B1-5EE6-472C-83A5-23CAB1E8E43D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {46197DA8-A532-4C73-B3F1-D24847C7A0AC}

@@ -6,7 +6,7 @@ namespace Kafka.Client
     /// <summary>
     /// 
     /// </summary>
-    public interface IClient :
+    public interface IKafkaClient :
         IDisposable
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace Kafka.Client
         /// Creates a new input stream to cluster for writing records.
         /// </summary>
         /// <returns></returns>
-        IInputStreamBuilder CreateInputStream(InputStreamConfig config);
+        IInputStreamBuilder CreateInputStream();
 
         /// <summary>
         /// Creates a new input stream to cluster for writing records.
@@ -35,7 +35,7 @@ namespace Kafka.Client
         /// Creates a new output stream from cluster for reading records.
         /// </summary>
         /// <returns></returns>
-        IOutputStreamBuilder CreateOuputStream(OutputStreamConfig config);
+        IOutputStreamBuilder CreateOuputStream();
 
         /// <summary>
         /// Creates a new output stream from cluster for reading records.
