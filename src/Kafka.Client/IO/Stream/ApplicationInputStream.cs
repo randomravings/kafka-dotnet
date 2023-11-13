@@ -149,6 +149,7 @@ namespace Kafka.Client.IO.Stream
             _joinGroupSync.Wait(cancellationToken);
 
             var offsetFetchRequest = CreateOffsetFetchRequest(
+                _memberInfo,
                 _assignmentList
             );
 
@@ -384,6 +385,7 @@ namespace Kafka.Client.IO.Stream
         }
 
         private OffsetFetchRequestData CreateOffsetFetchRequest(
+            MemberInfo member,
             IReadOnlySet<TopicPartition> topicPartitions
         )
         {
@@ -405,6 +407,8 @@ namespace Kafka.Client.IO.Stream
                 ImmutableArray.Create(
                     new OffsetFetchRequestData.OffsetFetchRequestGroup(
                         _groupId,
+                        member.MemberId,
+                        member.GenerationId,
                         topicPartitions
                             .GroupBy(g => g.Topic)
                             .Select(r =>

@@ -2,8 +2,8 @@ using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestTopic;
-using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
 using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup;
+using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -30,17 +30,23 @@ namespace Kafka.Client.Messages {
         );
         /// <summary>
         /// <param name="GroupIdField">The group ID.</param>
+        /// <param name="MemberIdField">The member ID assigned by the group coordinator if using the new consumer protocol (KIP-848).</param>
+        /// <param name="MemberEpochField">The member epoch if using the new consumer protocol (KIP-848).</param>
         /// <param name="TopicsField">Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
         public sealed record OffsetFetchRequestGroup (
             string GroupIdField,
+            string? MemberIdField,
+            int MemberEpochField,
             ImmutableArray<OffsetFetchRequestTopics>? TopicsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
             public static OffsetFetchRequestGroup Empty { get; } = new(
                 "",
+                default(string?),
+                default(int),
                 default(ImmutableArray<OffsetFetchRequestTopics>?),
                 ImmutableArray<TaggedField>.Empty
             );

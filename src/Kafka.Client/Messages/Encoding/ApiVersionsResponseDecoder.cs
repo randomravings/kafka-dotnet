@@ -4,8 +4,8 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using FinalizedFeatureKey = Kafka.Client.Messages.ApiVersionsResponseData.FinalizedFeatureKey;
 using ApiVersion = Kafka.Client.Messages.ApiVersionsResponseData.ApiVersion;
+using FinalizedFeatureKey = Kafka.Client.Messages.ApiVersionsResponseData.FinalizedFeatureKey;
 using SupportedFeatureKey = Kafka.Client.Messages.ApiVersionsResponseData.SupportedFeatureKey;
 
 namespace Kafka.Client.Messages.Encoding

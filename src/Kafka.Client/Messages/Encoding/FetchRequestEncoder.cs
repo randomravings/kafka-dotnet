@@ -6,8 +6,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using FetchTopic = Kafka.Client.Messages.FetchRequestData.FetchTopic;
 using ReplicaState = Kafka.Client.Messages.FetchRequestData.ReplicaState;
-using ForgottenTopic = Kafka.Client.Messages.FetchRequestData.ForgottenTopic;
 using FetchPartition = Kafka.Client.Messages.FetchRequestData.FetchTopic.FetchPartition;
+using ForgottenTopic = Kafka.Client.Messages.FetchRequestData.ForgottenTopic;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -18,7 +18,7 @@ namespace Kafka.Client.Messages.Encoding
         public FetchRequestEncoder() :
             base(
                 ApiKey.Fetch,
-                new(0, 15),
+                new(0, 16),
                 new(12, 32767),
                 RequestHeaderEncoder.WriteV0,
                 WriteV0
@@ -50,6 +50,7 @@ namespace Kafka.Client.Messages.Encoding
                 13 => WriteV13,
                 14 => WriteV14,
                 15 => WriteV15,
+                16 => WriteV16,
                 _ => throw new NotSupportedException()
             }
         ;
@@ -313,6 +314,41 @@ namespace Kafka.Client.Messages.Encoding
             }
             return index;
         }
+        private static int WriteV16(byte[] buffer, int index, FetchRequestData message)
+        {
+            index = BinaryEncoder.WriteInt32(buffer, index, message.MaxWaitMsField);
+            index = BinaryEncoder.WriteInt32(buffer, index, message.MinBytesField);
+            index = BinaryEncoder.WriteInt32(buffer, index, message.MaxBytesField);
+            index = BinaryEncoder.WriteInt8(buffer, index, message.IsolationLevelField);
+            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionIdField);
+            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionEpochField);
+            index = BinaryEncoder.WriteCompactArray<FetchTopic>(buffer, index, message.TopicsField, FetchTopicEncoder.WriteV16);
+            index = BinaryEncoder.WriteCompactArray<ForgottenTopic>(buffer, index, message.ForgottenTopicsDataField, ForgottenTopicEncoder.WriteV16);
+            index = BinaryEncoder.WriteCompactString(buffer, index, message.RackIdField);
+            var taggedFieldsCount = 1u;
+            var previousTagged = 1;
+            if(message.ClusterIdField != null)
+                taggedFieldsCount++;
+            taggedFieldsCount += (uint)message.TaggedFields.Length;
+            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            if(message.ClusterIdField != null)
+            {
+                index = BinaryEncoder.WriteVarInt32(buffer, index, 0);
+                index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.ClusterIdField);
+            }
+            {
+                index = BinaryEncoder.WriteVarInt32(buffer, index, 1);
+                index = ReplicaStateEncoder.WriteV16(buffer, index, message.ReplicaStateField);
+            }
+            foreach(var taggedField in message.TaggedFields)
+            {
+                if(taggedField.Tag <= previousTagged)
+                    throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: 1");
+                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
+                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+            }
+            return index;
+        }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class FetchTopicEncoder
         {
@@ -443,6 +479,23 @@ namespace Kafka.Client.Messages.Encoding
             {
                 index = BinaryEncoder.WriteUuid(buffer, index, message.TopicIdField);
                 index = BinaryEncoder.WriteCompactArray<FetchPartition>(buffer, index, message.PartitionsField, FetchPartitionEncoder.WriteV15);
+                var taggedFieldsCount = 0u;
+                var previousTagged = -1;
+                taggedFieldsCount += (uint)message.TaggedFields.Length;
+                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                foreach(var taggedField in message.TaggedFields)
+                {
+                    if(taggedField.Tag <= previousTagged)
+                        throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
+                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
+                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                }
+                return index;
+            }
+            public static int WriteV16(byte[] buffer, int index, FetchTopic message)
+            {
+                index = BinaryEncoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = BinaryEncoder.WriteCompactArray<FetchPartition>(buffer, index, message.PartitionsField, FetchPartitionEncoder.WriteV16);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
@@ -637,6 +690,27 @@ namespace Kafka.Client.Messages.Encoding
                     }
                     return index;
                 }
+                public static int WriteV16(byte[] buffer, int index, FetchPartition message)
+                {
+                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionField);
+                    index = BinaryEncoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
+                    index = BinaryEncoder.WriteInt64(buffer, index, message.FetchOffsetField);
+                    index = BinaryEncoder.WriteInt32(buffer, index, message.LastFetchedEpochField);
+                    index = BinaryEncoder.WriteInt64(buffer, index, message.LogStartOffsetField);
+                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionMaxBytesField);
+                    var taggedFieldsCount = 0u;
+                    var previousTagged = -1;
+                    taggedFieldsCount += (uint)message.TaggedFields.Length;
+                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    foreach(var taggedField in message.TaggedFields)
+                    {
+                        if(taggedField.Tag <= previousTagged)
+                            throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
+                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
+                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    }
+                    return index;
+                }
             }
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
@@ -768,6 +842,23 @@ namespace Kafka.Client.Messages.Encoding
                 }
                 return index;
             }
+            public static int WriteV16(byte[] buffer, int index, ForgottenTopic message)
+            {
+                index = BinaryEncoder.WriteUuid(buffer, index, message.TopicIdField);
+                index = BinaryEncoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, BinaryEncoder.WriteInt32);
+                var taggedFieldsCount = 0u;
+                var previousTagged = -1;
+                taggedFieldsCount += (uint)message.TaggedFields.Length;
+                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                foreach(var taggedField in message.TaggedFields)
+                {
+                    if(taggedField.Tag <= previousTagged)
+                        throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
+                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
+                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                }
+                return index;
+            }
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class ReplicaStateEncoder
@@ -866,6 +957,23 @@ namespace Kafka.Client.Messages.Encoding
                 return index;
             }
             public static int WriteV15(byte[] buffer, int index, ReplicaState message)
+            {
+                index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
+                index = BinaryEncoder.WriteInt64(buffer, index, message.ReplicaEpochField);
+                var taggedFieldsCount = 0u;
+                var previousTagged = -1;
+                taggedFieldsCount += (uint)message.TaggedFields.Length;
+                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                foreach(var taggedField in message.TaggedFields)
+                {
+                    if(taggedField.Tag <= previousTagged)
+                        throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
+                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
+                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                }
+                return index;
+            }
+            public static int WriteV16(byte[] buffer, int index, ReplicaState message)
             {
                 index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
                 index = BinaryEncoder.WriteInt64(buffer, index, message.ReplicaEpochField);

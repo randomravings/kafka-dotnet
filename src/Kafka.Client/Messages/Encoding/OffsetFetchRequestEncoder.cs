@@ -5,8 +5,8 @@ using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestTopic;
-using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
 using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup;
+using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -17,7 +17,7 @@ namespace Kafka.Client.Messages.Encoding
         public OffsetFetchRequestEncoder() :
             base(
                 ApiKey.OffsetFetch,
-                new(0, 8),
+                new(0, 9),
                 new(6, 32767),
                 RequestHeaderEncoder.WriteV0,
                 WriteV0
@@ -42,6 +42,7 @@ namespace Kafka.Client.Messages.Encoding
                 6 => WriteV6,
                 7 => WriteV7,
                 8 => WriteV8,
+                9 => WriteV9,
                 _ => throw new NotSupportedException()
             }
         ;
@@ -137,6 +138,23 @@ namespace Kafka.Client.Messages.Encoding
             }
             return index;
         }
+        private static int WriteV9(byte[] buffer, int index, OffsetFetchRequestData message)
+        {
+            index = BinaryEncoder.WriteCompactArray<OffsetFetchRequestGroup>(buffer, index, message.GroupsField, OffsetFetchRequestGroupEncoder.WriteV9);
+            index = BinaryEncoder.WriteBoolean(buffer, index, message.RequireStableField);
+            var taggedFieldsCount = 0u;
+            var previousTagged = -1;
+            taggedFieldsCount += (uint)message.TaggedFields.Length;
+            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            foreach(var taggedField in message.TaggedFields)
+            {
+                if(taggedField.Tag <= previousTagged)
+                    throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
+                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
+                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+            }
+            return index;
+        }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class OffsetFetchRequestGroupEncoder
         {
@@ -211,6 +229,25 @@ namespace Kafka.Client.Messages.Encoding
                 }
                 return index;
             }
+            public static int WriteV9(byte[] buffer, int index, OffsetFetchRequestGroup message)
+            {
+                index = BinaryEncoder.WriteCompactString(buffer, index, message.GroupIdField);
+                index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.MemberIdField);
+                index = BinaryEncoder.WriteInt32(buffer, index, message.MemberEpochField);
+                index = BinaryEncoder.WriteCompactArray<OffsetFetchRequestTopics>(buffer, index, message.TopicsField, OffsetFetchRequestTopicsEncoder.WriteV9);
+                var taggedFieldsCount = 0u;
+                var previousTagged = -1;
+                taggedFieldsCount += (uint)message.TaggedFields.Length;
+                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                foreach(var taggedField in message.TaggedFields)
+                {
+                    if(taggedField.Tag <= previousTagged)
+                        throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
+                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
+                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                }
+                return index;
+            }
             [GeneratedCodeAttribute("kgen", "1.0.0.0")]
             private static class OffsetFetchRequestTopicsEncoder
             {
@@ -269,6 +306,23 @@ namespace Kafka.Client.Messages.Encoding
                     return index;
                 }
                 public static int WriteV8(byte[] buffer, int index, OffsetFetchRequestTopics message)
+                {
+                    index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
+                    index = BinaryEncoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, BinaryEncoder.WriteInt32);
+                    var taggedFieldsCount = 0u;
+                    var previousTagged = -1;
+                    taggedFieldsCount += (uint)message.TaggedFields.Length;
+                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    foreach(var taggedField in message.TaggedFields)
+                    {
+                        if(taggedField.Tag <= previousTagged)
+                            throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
+                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
+                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    }
+                    return index;
+                }
+                public static int WriteV9(byte[] buffer, int index, OffsetFetchRequestTopics message)
                 {
                     index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
                     index = BinaryEncoder.WriteCompactArray<int>(buffer, index, message.PartitionIndexesField, BinaryEncoder.WriteInt32);
@@ -361,6 +415,21 @@ namespace Kafka.Client.Messages.Encoding
                 return index;
             }
             public static int WriteV8(byte[] buffer, int index, OffsetFetchRequestTopic message)
+            {
+                var taggedFieldsCount = 0u;
+                var previousTagged = -1;
+                taggedFieldsCount += (uint)message.TaggedFields.Length;
+                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                foreach(var taggedField in message.TaggedFields)
+                {
+                    if(taggedField.Tag <= previousTagged)
+                        throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
+                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
+                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                }
+                return index;
+            }
+            public static int WriteV9(byte[] buffer, int index, OffsetFetchRequestTopic message)
             {
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;

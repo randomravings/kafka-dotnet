@@ -3,11 +3,12 @@ using Kafka.Common.Records;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
+using NodeEndpoint = Kafka.Client.Messages.FetchResponseData.NodeEndpoint;
 using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
 using AbortedTransaction = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.AbortedTransaction;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -15,6 +16,7 @@ namespace Kafka.Client.Messages {
     /// <param name="ErrorCodeField">The top level response error code.</param>
     /// <param name="SessionIdField">The fetch session ID, or 0 if this is not part of a fetch session.</param>
     /// <param name="ResponsesField">The response topics.</param>
+    /// <param name="NodeEndpointsField">Endpoints for all current-leaders enumerated in PartitionData, with errors NOT_LEADER_OR_FOLLOWER & FENCED_LEADER_EPOCH.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     public sealed record FetchResponseData (
@@ -22,6 +24,7 @@ namespace Kafka.Client.Messages {
         short ErrorCodeField,
         int SessionIdField,
         ImmutableArray<FetchableTopicResponse> ResponsesField,
+        ImmutableArray<NodeEndpoint> NodeEndpointsField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
@@ -30,6 +33,7 @@ namespace Kafka.Client.Messages {
             default(short),
             default(int),
             ImmutableArray<FetchableTopicResponse>.Empty,
+            ImmutableArray<NodeEndpoint>.Empty,
             ImmutableArray<TaggedField>.Empty
         );
         /// <summary>
@@ -163,6 +167,29 @@ namespace Kafka.Client.Messages {
                     );
                 };
             };
+        };
+        /// <summary>
+        /// <param name="NodeIdField">The ID of the associated node.</param>
+        /// <param name="HostField">The node's hostname.</param>
+        /// <param name="PortField">The node's port.</param>
+        /// <param name="RackField">The rack of the node, or null if it has not been assigned to a rack.</param>
+        /// </summary>
+        [GeneratedCode("kgen", "1.0.0.0")]
+        public sealed record NodeEndpoint (
+            int NodeIdField,
+            string HostField,
+            int PortField,
+            string? RackField,
+            ImmutableArray<TaggedField> TaggedFields
+        )
+        {
+            public static NodeEndpoint Empty { get; } = new(
+                default(int),
+                "",
+                default(int),
+                default(string?),
+                ImmutableArray<TaggedField>.Empty
+            );
         };
     };
 }

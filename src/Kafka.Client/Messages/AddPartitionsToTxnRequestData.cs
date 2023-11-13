@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using AddPartitionsToTxnTopic = Kafka.Client.Messages.AddPartitionsToTxnRequestData.AddPartitionsToTxnTopic;
 using AddPartitionsToTxnTransaction = Kafka.Client.Messages.AddPartitionsToTxnRequestData.AddPartitionsToTxnTransaction;
+using AddPartitionsToTxnTopic = Kafka.Client.Messages.AddPartitionsToTxnRequestData.AddPartitionsToTxnTopic;
 
 namespace Kafka.Client.Messages {
     /// <summary>

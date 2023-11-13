@@ -683,6 +683,8 @@ namespace Kafka.Client
                 .ToImmutableArray(),
                 ImmutableArray.Create(new OffsetFetchRequestData.OffsetFetchRequestGroup(
                     consumerGroup,
+                    null,
+                    -1,
                     metadataResponse.TopicsField.Select(t => new OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
                         t.NameField ?? "",
                         t.PartitionsField

@@ -4,8 +4,8 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using DeleteRecordsPartitionResult = Kafka.Client.Messages.DeleteRecordsResponseData.DeleteRecordsTopicResult.DeleteRecordsPartitionResult;
 using DeleteRecordsTopicResult = Kafka.Client.Messages.DeleteRecordsResponseData.DeleteRecordsTopicResult;
+using DeleteRecordsPartitionResult = Kafka.Client.Messages.DeleteRecordsResponseData.DeleteRecordsTopicResult.DeleteRecordsPartitionResult;
 
 namespace Kafka.Client.Messages.Encoding
 {
