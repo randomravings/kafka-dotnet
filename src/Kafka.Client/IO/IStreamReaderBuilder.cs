@@ -19,7 +19,7 @@ namespace Kafka.Client.IO
 
     public interface IStreamReaderBuilder<TKey, TValue>
     {
-        IStreamReaderBuilder<TKey, TValue> WithLogger(ILogger<IKafkaClient> logger);
+        IStreamReaderBuilder<TKey, TValue> WithLogger(ILogger logger);
         IStreamReader<TKey, TValue> Build();
     }
 }

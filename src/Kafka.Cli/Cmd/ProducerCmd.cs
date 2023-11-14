@@ -47,7 +47,7 @@ namespace Kafka.Cli.Cmd
             );
 
             using var outputStream = client
-                .CreateOuputStream()
+                .CreateOutputStream()
                 .Build()
             ;
 

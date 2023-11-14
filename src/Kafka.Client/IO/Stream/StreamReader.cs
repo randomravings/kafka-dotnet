@@ -43,7 +43,7 @@ namespace Kafka.Client.IO.Stream
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             cts.CancelAfter(timeout);
-            return await Read(cancellationToken)
+            return await Read(cts.Token)
                 .ConfigureAwait(false)
             ;
         }

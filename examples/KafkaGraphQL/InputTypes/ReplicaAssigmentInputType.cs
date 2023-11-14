@@ -17,6 +17,6 @@ namespace KafkaGraphQL.InputTypes
                 .DefaultValue(EMPTY_REPLICAS)
             ;
         }
-        private static int[] EMPTY_REPLICAS = Array.Empty<int>();
+        private static readonly int[] EMPTY_REPLICAS = Array.Empty<int>();
     }
 }

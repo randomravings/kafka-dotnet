@@ -10,6 +10,7 @@ using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.ComponentModel;
 using System.Net.Sockets;
 
 namespace Kafka.Client.Net
@@ -278,6 +279,8 @@ namespace Kafka.Client.Net
                 .Select(r => Errors.Translate(r.ErrorCodeField))
                 .ToImmutableArray()
             ;
+            if(errors.Length > 0 && errors.Any(r => r.Code == Errors.Known.UNKNOWN_TOPIC_OR_PARTITION.Code))
+                return (false, errors);
             return (IsTransient(errors), errors);
         }
 

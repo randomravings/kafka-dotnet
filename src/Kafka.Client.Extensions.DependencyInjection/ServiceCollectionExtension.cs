@@ -1,4 +1,6 @@
 ﻿using Kafka.Client.Config;
+using Kafka.Client.IO;
+using Kafka.Common.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -33,6 +35,59 @@ namespace Kafka.Client.Extensions.DependencyInjection
                 return KafkaClientBuilder
                     .New()
                     .WithConfig(config.Value)
+                    .WithLogger(logger)
+                    .Build()
+                ;
+            });
+            return collection;
+        }
+
+        public static IServiceCollection AddKafkaStreamWriter<TKey, TValue>(
+            this IServiceCollection collection,
+            string topic,
+            ISerializer<TKey> keySerializer,
+            ISerializer<TValue> valueSerializer
+        )
+        {
+            collection.AddSingleton(sp =>
+            {
+                var client = sp.GetRequiredService<IKafkaClient>();
+                var logger = sp.GetRequiredService<ILogger<IOutputStream>>();
+                var stream = client.CreateOutputStream()
+                    .WithLogger(logger)
+                    .Build()
+                ;
+                return stream
+                    .CreateWriter(topic)
+                    .WithKey(keySerializer)
+                    .WithValue(valueSerializer)
+                    .WithLogger(logger)
+                    .Build()
+                ;
+            });
+            return collection;
+        }
+
+        public static IServiceCollection AddKafkaStreamReader<TKey, TValue>(
+            this IServiceCollection collection,
+            string topic,
+            IDeserializer<TKey> keyDeserializer,
+            IDeserializer<TValue> valueDeserializer
+        )
+        {
+            collection.AddSingleton(sp =>
+            {
+                var client = sp.GetRequiredService<IKafkaClient>();
+                var logger = sp.GetRequiredService<ILogger<IApplicationInputStream>>();
+                var stream = client.CreateInputStream()
+                    .AsApplication(topic)
+                    .WithLogger(logger)
+                    .Build();
+                ;
+                return stream
+                    .CreateReader()
+                    .WithKey(keyDeserializer)
+                    .WithValue(valueDeserializer)
                     .WithLogger(logger)
                     .Build()
                 ;

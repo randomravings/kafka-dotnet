@@ -3,7 +3,8 @@
 namespace Kafka.Client.Model
 {
     public sealed record DeleteTopicResult(
-        TopicId Id,
-        TopicName Name
+        TopicId TopicId,
+        TopicName TopicName,
+        Error Error
     );
 }

@@ -128,7 +128,7 @@ namespace Kafka.Cli.Cmd
             CreateTopicsResult result
         )
         {
-            foreach (var topic in result.CreatedTopics)
+            foreach (var topic in result.Topics)
             {
                 if (topic.Error.Code == 0)
                 {
@@ -143,7 +143,6 @@ namespace Kafka.Cli.Cmd
                     Console.WriteLine($"    {Formatter.Print(topic.Error)}");
                 }
             }
-
         }
 
         public static async Task<int> Delete(
@@ -169,10 +168,19 @@ namespace Kafka.Cli.Cmd
                     opts.Topic,
                     cancellationToken
                 );
-                foreach (var topic in result.DeletedTopics)
-                    Console.WriteLine(topic);
-                foreach (var error in result.ErrorTopics)
-                    Console.WriteLine(error);
+                foreach (var topic in result.Topics)
+                {
+                    if (topic.Error.Code == 0)
+                    {
+                        Console.WriteLine($"  Topic Id:   {topic.TopicId.Value})");
+                        Console.WriteLine($"  Topic Name: {topic.TopicName.Value}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"  Topic Name: {topic.TopicName.Value}");
+                        Console.WriteLine($"    {Formatter.Print(topic.Error)}");
+                    }
+                }
                 await client.Close(CancellationToken.None);
                 return 0;
             }

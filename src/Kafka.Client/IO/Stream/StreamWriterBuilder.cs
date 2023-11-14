@@ -61,7 +61,7 @@ namespace Kafka.Client.IO.Stream
         IStreamWriterBuilder<TKey, TValue>
     {
         private readonly ISerializer<TValue> _valueSerializer;
-        private ILogger<IKafkaClient> _logger = new NullLogger<IKafkaClient>();
+        private ILogger _logger = NullLogger.Instance;
         private IPartitioner _partitioner = DefaultPartitioner.Instance;
 
         internal StreamWriterBuilder(
@@ -76,7 +76,7 @@ namespace Kafka.Client.IO.Stream
         }
 
         IStreamWriterBuilder<TKey, TValue> IStreamWriterBuilder<TKey, TValue>.WithLogger(
-            ILogger<IKafkaClient> logger
+            ILogger logger
         )
         {
             _logger = logger;

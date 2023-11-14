@@ -3,13 +3,11 @@
 namespace Kafka.Client.Model
 {
     public sealed record DeleteTopicsResult(
-        ImmutableArray<DeleteTopicResult> DeletedTopics,
-        ImmutableArray<DeleteTopicError> ErrorTopics
+        IReadOnlyList<DeleteTopicResult> Topics
     )
     {
         public static DeleteTopicsResult Empty { get; } = new(
-            ImmutableArray<DeleteTopicResult>.Empty,
-            ImmutableArray<DeleteTopicError>.Empty
+            ImmutableArray<DeleteTopicResult>.Empty
         );
     };
 }

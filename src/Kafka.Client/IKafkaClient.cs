@@ -35,13 +35,13 @@ namespace Kafka.Client
         /// Creates a new output stream from cluster for reading records.
         /// </summary>
         /// <returns></returns>
-        IOutputStreamBuilder CreateOuputStream();
+        IOutputStreamBuilder CreateOutputStream();
 
         /// <summary>
         /// Creates a new output stream from cluster for reading records.
         /// </summary>
         /// <returns></returns>
-        IOutputStreamBuilder CreateOuputStream(Action<OutputStreamConfig> configure);
+        IOutputStreamBuilder CreateOutputStream(Action<OutputStreamConfig> configure);
 
         /// <summary>
         /// Perform graceful shut down of client and free up resources.

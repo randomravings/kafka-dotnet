@@ -64,7 +64,7 @@ namespace Kafka.Client
             );
         }
 
-        IOutputStreamBuilder IKafkaClient.CreateOuputStream() =>
+        IOutputStreamBuilder IKafkaClient.CreateOutputStream() =>
             new OutputStreamBuilder(
                 _connections,
                 _config.Producer,
@@ -72,7 +72,7 @@ namespace Kafka.Client
             )
         ;
 
-        IOutputStreamBuilder IKafkaClient.CreateOuputStream(Action<OutputStreamConfig> configure)
+        IOutputStreamBuilder IKafkaClient.CreateOutputStream(Action<OutputStreamConfig> configure)
         {
             var config = new OutputStreamConfig();
             configure(config);
@@ -227,29 +227,19 @@ namespace Kafka.Client
             ).ConfigureAwait(false);
             var deletedTopics = response
                 .ResponsesField
-                .Where(r => r.ErrorCodeField == 0)
                 .Select(
                     r => new DeleteTopicResult(
                         r.TopicIdField,
-                        r.NameField
-                    )
-                )
-                .ToImmutableArray()
-            ;
-            var errorTopics = response
-                .ResponsesField
-                .Where(r => r.ErrorCodeField != 0)
-                .Select(
-                    r => new DeleteTopicError(
                         r.NameField,
-                        Errors.Translate(r.ErrorCodeField)
+                        r.ErrorCodeField == 0 ?
+                            Errors.Known.NONE :
+                            Errors.Translate(r.ErrorCodeField)
                     )
                 )
                 .ToImmutableArray()
             ;
             return new(
-                deletedTopics,
-                errorTopics
+                deletedTopics
             );
         }
 

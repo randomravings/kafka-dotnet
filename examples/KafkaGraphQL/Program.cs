@@ -1,6 +1,7 @@
 using Kafka.Client.Extensions.DependencyInjection;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
+using Kafka.Common.Serialization;
 using KafkaGraphQL.InputTypes;
 using KafkaGraphQL.Model;
 using KafkaGraphQL.Queries;
@@ -11,10 +12,23 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddKafkaClient(builder.Configuration);
+builder.Services
+    .AddKafkaClient(builder.Configuration)
+    .AddKafkaStreamWriter(
+        "test",
+        StringSerializer.Instance,
+        StringSerializer.Instance
+    )
+    .AddKafkaStreamReader(
+        "test",
+        StringDeserializer.Instance,
+        StringDeserializer.Instance
+    )
+;
 
 builder.Services
     .AddGraphQLServer()
+    .AddInMemorySubscriptions()
     .AddQueryType<Query>()
     .AddMutationType<Mutation>()
 
@@ -22,20 +36,28 @@ builder.Services
     .AddType<PartitionType>()
     .AddType<ErrorType>()
     .AddType<CreateTopicResultType>()
+    .AddType<DeleteTopicResultType>()
+    .AddType<TopicPartitionOffsetType>()
 
     .AddType<ReplicaAssigmentInputType>()
     .AddType<ConfigInputType>()
     .AddType<GetTopicOptionsInputType>()
     .AddType<CreateTopicDefinitionInputType>()
 
+    .AddTypeConverter<string, Topic>(
+        t => new(Guid.Empty, new TopicName(t))
+    )
+    .AddTypeConverter<TopicName, string>(
+        t => t.Value ?? ""
+    )
     .AddTypeConverter<TopicId, Guid>(
         t => t.Value
     )
     .AddTypeConverter<Guid, TopicId>(
         t => new(t)
     )
-    .AddTypeConverter<TopicName, string>(
-        t => t.Value ?? ""
+    .AddTypeConverter<Topic, string>(
+        t => t.TopicName.Value ?? ""
     )
     .AddTypeConverter<string, TopicName>(
         t => new(t)
@@ -44,6 +66,12 @@ builder.Services
         t => t.Value
     )
     .AddTypeConverter<int, Partition>(
+        t => new(t)
+    )
+    .AddTypeConverter<Offset, long>(
+        t => t.Value
+    )
+    .AddTypeConverter<long, Offset>(
         t => new(t)
     )
     .AddTypeConverter<ClusterNodeId, int>(
@@ -57,6 +85,12 @@ builder.Services
     )
     .AddTypeConverter<int, Epoch>(
         t => new(t)
+    )
+    .AddTypeConverter<Timestamp, DateTimeOffset>(
+        t => t
+    )
+    .AddTypeConverter<DateTimeOffset, Timestamp>(
+        t => Timestamp.Created(t)
     )
     .AddTypeConverter<List<ReplicaAssignment>, IReadOnlyDictionary<Partition, IReadOnlySet<ClusterNodeId>>>(
         t => t.ToImmutableSortedDictionary(
@@ -78,6 +112,8 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
+app.UseRouting();
+app.UseWebSockets();
 app.MapGraphQL();
 
 app.Run();
