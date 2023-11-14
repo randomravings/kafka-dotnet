@@ -6,7 +6,7 @@ namespace KafkaGraphQL.Queries
 {
     public class Query
     {
-        [GraphQLDescription("Gets a list of topic descriptions.")]
+        [GraphQLDescription("Gets a list of topic and partition descriptions.")]
         public async ValueTask<IQueryable<TopicDescription>> GetTopics(
 
             [GraphQLType<ListType<StringType>>]

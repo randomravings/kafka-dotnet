@@ -5,6 +5,7 @@ using Kafka.Cli.Text;
 using Kafka.Client.Config;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Kafka.Cli.Cmd
@@ -60,7 +61,7 @@ namespace Kafka.Cli.Cmd
                     cancellationToken
                 );
                 foreach (var topic in result.Topics.Where(t => options.IncludeInternal || t.Internal == false))
-                    Console.WriteLine(topic.Name);
+                    Console.WriteLine(topic.TopicName);
                 await client.Close(CancellationToken.None);
                 return 0;
             }
@@ -104,7 +105,7 @@ namespace Kafka.Cli.Cmd
                     opts.Topic,
                     opts.PartitionCount,
                     opts.ReplicationFactor,
-                    ImmutableDictionary<int, IReadOnlyList<int>>.Empty,
+                    ImmutableDictionary<Partition, IReadOnlySet<ClusterNodeId>>.Empty,
                     ImmutableDictionary<string, string?>.Empty
                 );
                 var result = await client.Topics.Create(
@@ -112,20 +113,7 @@ namespace Kafka.Cli.Cmd
                     CreateTopicOptions.Empty,
                     cancellationToken
                 );
-                foreach (var topic in result.CreatedTopics)
-                    PrintCreateTopic(
-                        topic.Id,
-                        topic.Name,
-                        topic.NumPartitions,
-                        topic.ReplicationFactor
-                    );
-
-                foreach (var topic in result.ErrorTopics)
-                {
-                    Console.Write($"  {topic.Name}");
-                    Console.WriteLine();
-                    Console.WriteLine($"    {Formatter.Print(topic.Error)}");
-                }
+                PrintCreateTopic(result);
                 await client.Close(CancellationToken.None);
                 return 0;
             }
@@ -137,18 +125,25 @@ namespace Kafka.Cli.Cmd
         }
 
         private static void PrintCreateTopic(
-            TopicId topicId,
-            TopicName topicName,
-            int partitions,
-            int replicationFactor
+            CreateTopicsResult result
         )
         {
-            Console.Write($"  {topicName.Value}");
-            if (topicId != TopicId.Empty)
-                Console.Write($" ({topicId.Value})");
-            Console.WriteLine();
-            Console.WriteLine($"    Partitions:         {partitions}");
-            Console.WriteLine($"    Replication Factor: {replicationFactor}");
+            foreach (var topic in result.CreatedTopics)
+            {
+                if (topic.Error.Code == 0)
+                {
+                    Console.WriteLine($"  Topic Id:   {topic.TopicId.Value})");
+                    Console.WriteLine($"  Topic Name: {topic.TopicName.Value}");
+                    Console.WriteLine($"    Partitions:         {topic.NumPartitions}");
+                    Console.WriteLine($"    Replication Factor: {topic.ReplicationFactor}");
+                }
+                else
+                {
+                    Console.WriteLine($"  Topic Name: {topic.TopicName.Value}");
+                    Console.WriteLine($"    {Formatter.Print(topic.Error)}");
+                }
+            }
+
         }
 
         public static async Task<int> Delete(
@@ -216,12 +211,12 @@ namespace Kafka.Cli.Cmd
                 {
                     if(topic.Error.Code != 0)
                     {
-                        Console.WriteLine($"Name: {topic.Name.Value}");
+                        Console.WriteLine($"Name: {topic.TopicName.Value}");
                         Console.WriteLine($"Error: {Formatter.Print(topic.Error)}");
                         continue;
                     }
-                    Console.WriteLine($"Id: {topic.Id}");
-                    Console.WriteLine($"Name: {topic.Name.Value}");
+                    Console.WriteLine($"Id: {topic.TopicId}");
+                    Console.WriteLine($"Name: {topic.TopicName.Value}");
                     Console.WriteLine($"Internal: {topic.Internal}");
                     Console.WriteLine($"AuthorizedOperations: {topic.TopicAuthorizedOperations}");
                     foreach (var partition in topic.Partitions.OrderBy(r => r.PartitionIndex))

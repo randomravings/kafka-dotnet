@@ -1,4 +1,5 @@
-﻿using System.Collections.Immutable;
+﻿using Kafka.Common.Model;
+using System.Collections.Immutable;
 
 namespace Kafka.Client.Model
 {
@@ -6,7 +7,7 @@ namespace Kafka.Client.Model
         string Name,
         int NumPartitions,
         short ReplicationFactor,
-        IReadOnlyDictionary<int, IReadOnlyList<int>> ReplicasAssignments,
+        IReadOnlyDictionary<Partition, IReadOnlySet<ClusterNodeId>> ReplicasAssignments,
         IReadOnlyDictionary<string, string?> Configs
     )
     {
@@ -14,7 +15,7 @@ namespace Kafka.Client.Model
             "",
             -1,
             -1,
-            ImmutableSortedDictionary<int, IReadOnlyList<int>>.Empty,
+            ImmutableSortedDictionary<Partition, IReadOnlySet<ClusterNodeId>>.Empty,
             ImmutableSortedDictionary<string, string?>.Empty
         );
     };

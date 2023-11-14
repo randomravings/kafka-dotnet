@@ -125,7 +125,7 @@ namespace Kafka.Client
                         t.ReplicasAssignments.Select(r =>
                             new CreateTopicsRequestData.CreatableTopic.CreatableReplicaAssignment(
                                 r.Key,
-                                r.Value.ToImmutableArray(),
+                                r.Value.Select(r => r.Value).ToImmutableArray(),
                                 ImmutableArray<TaggedField>.Empty
                             )
                         ).ToImmutableArray(),
@@ -149,7 +149,6 @@ namespace Kafka.Client
             ).ConfigureAwait(false);
             var createdTopics = response
                 .TopicsField
-                .Where(r => r.ErrorCodeField == 0)
                 .Select(
                     r => new CreateTopicResult(
                         r.TopicIdField,
@@ -161,25 +160,16 @@ namespace Kafka.Client
                                 k => k.NameField,
                                 v => v.ValueField
                             ) :
-                            ImmutableSortedDictionary<string, string?>.Empty
-                    )
-                )
-                .ToImmutableArray()
-            ;
-            var errorTopics = response
-                .TopicsField
-                .Where(r => r.ErrorCodeField != 0)
-                .Select(
-                    r => new CreateTopicError(
-                        r.NameField,
-                        Errors.Translate(r.ErrorCodeField)
+                            ImmutableSortedDictionary<string, string?>.Empty,
+                        r.ErrorCodeField == 0 ?
+                            Errors.Known.NONE :
+                            Errors.Translate(r.ErrorCodeField)
                     )
                 )
                 .ToImmutableArray()
             ;
             return new CreateTopicsResult(
-                createdTopics,
-                errorTopics
+                createdTopics
             );
         }
 

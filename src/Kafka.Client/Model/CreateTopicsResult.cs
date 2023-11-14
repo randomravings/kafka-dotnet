@@ -3,13 +3,11 @@
 namespace Kafka.Client.Model
 {
     public sealed record CreateTopicsResult(
-        ImmutableArray<CreateTopicResult> CreatedTopics,
-        ImmutableArray<CreateTopicError> ErrorTopics
+        ImmutableArray<CreateTopicResult> CreatedTopics
     )
     {
         public static Model.CreateTopicsResult Empty { get; } = new(
-            ImmutableArray<CreateTopicResult>.Empty,
-            ImmutableArray<CreateTopicError>.Empty
+            ImmutableArray<CreateTopicResult>.Empty
         );
     };
 }

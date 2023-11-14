@@ -1,13 +1,13 @@
 ﻿using Kafka.Common.Model;
-using System.Collections.Immutable;
 
 namespace Kafka.Client.Model
 {
     public sealed record CreateTopicResult(
-        TopicId Id,
-        TopicName Name,
+        TopicId TopicId,
+        TopicName TopicName,
         int NumPartitions,
         int ReplicationFactor,
-        ImmutableSortedDictionary<string, string?> Config
+        IReadOnlyDictionary<string, string?> Config,
+        Error Error
     );
 }
