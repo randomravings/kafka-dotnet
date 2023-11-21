@@ -13,7 +13,7 @@
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
-# Dotnet exutable lauch config file
+# Dotnet exutable launch config file
 Properties/
 
 # Mono auto generated files
