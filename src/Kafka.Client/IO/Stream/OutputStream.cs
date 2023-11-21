@@ -46,36 +46,38 @@ namespace Kafka.Client.IO.Stream
             _transactionalId = producerConfig.TransactionalId ?? "";
         }
 
-        async ValueTask<ProducerTopicMetadata> IOutputStream.MetadataForTopic(
+        async Task<ProducerTopicMetadata> IOutputStream.MetadataForTopic(
             TopicName topic,
             CancellationToken cancellationToken
-        ) =>
-            await MetadataForTopic(
-                topic,
-                cancellationToken
-            ).ConfigureAwait(false)
-        ;
+        )
+        {
+            await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                return await MetadataForTopic(
+                    topic,
+                    cancellationToken
+                ).ConfigureAwait(false);
+            }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
 
-        private async ValueTask<ProducerTopicMetadata> MetadataForTopic(
+        }
+
+
+        private async Task<ProducerTopicMetadata> MetadataForTopic(
             TopicName topic,
             CancellationToken cancellationToken
         )
         {
             if (_producerMetadata.TryGetValue(topic, out var metadata) && metadata.ExpireTime < DateTimeOffset.UtcNow)
                 return metadata;
-            await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                if (_producerMetadata.TryGetValue(topic, out metadata) && metadata.ExpireTime < DateTimeOffset.UtcNow)
-                    return metadata;
-                metadata = await CreateTopicMetadata(topic, cancellationToken).ConfigureAwait(false);
-                _producerMetadata[topic] = metadata;
-                return metadata;
-            }
-            finally
-            {
-                _semaphoreSlim.Release();
-            }
+            _producerMetadata.Remove(topic);
+            metadata = await CreateTopicMetadata(topic, cancellationToken).ConfigureAwait(false);
+            _producerMetadata.Add(topic, metadata);
+            return metadata;
         }
 
         IStreamWriterBuilder IOutputStream.CreateWriter(
@@ -87,12 +89,14 @@ namespace Kafka.Client.IO.Stream
             )
         ;
 
-        async Task<TaskCompletionSource<ProduceResult>> IOutputStream.Write(
+        async Task<ProduceResult> IOutputStream.Write(
             ProduceRecord produceRecord,
             CancellationToken cancellationToken
         )
         {
-            var callback = new TaskCompletionSource<ProduceResult>();
+            var callback = new TaskCompletionSource<ProduceResult>(
+                TaskCreationOptions.RunContinuationsAsynchronously
+            );
             var command = new ProduceCommand(
                 produceRecord,
                 callback
@@ -101,9 +105,13 @@ namespace Kafka.Client.IO.Stream
                 produceRecord.TopicPartition,
                 cancellationToken
             ).ConfigureAwait(false);
-            await Task.Yield();
             channel.Send(command, cancellationToken);
-            return callback;
+            await Task.Yield();
+            return await callback
+                .Task
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(false)
+            ;
         }
 
         async Task<ITransaction> IOutputStream.BeginTransaction(CancellationToken cancellationToken)
@@ -123,7 +131,7 @@ namespace Kafka.Client.IO.Stream
             finally { _semaphoreSlim.Release(); }
         }
 
-        private async ValueTask<IClientConnection> GetCoordinator(
+        private async Task<IClientConnection> GetCoordinator(
             CancellationToken cancellationToken
         )
         {
@@ -146,7 +154,7 @@ namespace Kafka.Client.IO.Stream
                 new AddPartitionsToTxnRequestData.AddPartitionsToTxnTopic(
                     topicPartition.Topic.TopicName,
                     ImmutableArray.Create(topicPartition.Partition.Value),
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 )
             );
             var transactions = ImmutableArray.Create(
@@ -156,7 +164,7 @@ namespace Kafka.Client.IO.Stream
                     _producerEpoch,
                     false,
                     partitions,
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 )
             );
             var addPartitionsToTxnRequest = new AddPartitionsToTxnRequestData(
@@ -165,7 +173,7 @@ namespace Kafka.Client.IO.Stream
                 V3AndBelowProducerIdField: _producerId,
                 V3AndBelowProducerEpochField: _producerEpoch,
                 V3AndBelowTopicsField: partitions,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
             var addPartitionsToTxnResponse = await coordinator.AddPartitionsToTxn(
@@ -193,7 +201,7 @@ namespace Kafka.Client.IO.Stream
                     _producerId,
                     _producerEpoch,
                     commit,
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 );
                 var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
                 var endTxnResponse = await coordinator.EndTxn(
@@ -211,7 +219,7 @@ namespace Kafka.Client.IO.Stream
             finally { _semaphoreSlim.Release(); }
         }
 
-        private async ValueTask FlushChannels(CancellationToken cancellationToken)
+        private async Task FlushChannels(CancellationToken cancellationToken)
         {
             var flushTasks = _brokerChannels.Values.Select(r => r.Flush(cancellationToken));
             await Task.WhenAll(flushTasks).ConfigureAwait(false);
@@ -227,39 +235,42 @@ namespace Kafka.Client.IO.Stream
             finally { _semaphoreSlim.Release(); }
         }
 
-        private async ValueTask<ProducerChannel> GetChannel(
+        private async Task<ProducerChannel> GetChannel(
             TopicPartition topicPartition,
             CancellationToken cancellationToken
         )
         {
-            if (_brokerChannelsByTopicPartition.TryGetValue(topicPartition, out var channel))
-                return channel;
-
-            var metadata = await MetadataForTopic(
-                topicPartition.Topic.TopicName,
-                cancellationToken
-            ).ConfigureAwait(false);
-            await Task.Yield();
-            var nodeId = metadata.PartitionMetadata[topicPartition.Partition].LeaderId;
-
-            if (_brokerChannels.TryGetValue(nodeId, out channel))
+            await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                _brokerChannelsByTopicPartition.Add(topicPartition, channel);
-                return channel;
+                if (_brokerChannelsByTopicPartition.TryGetValue(topicPartition, out var newChannel))
+                    return newChannel;
+
+                var metadata = await MetadataForTopic(
+                    topicPartition.Topic.TopicName,
+                    cancellationToken
+                ).ConfigureAwait(false);
+                var nodeId = metadata.PartitionMetadata[topicPartition.Partition].LeaderId;
+
+                if (!_brokerChannels.TryGetValue(nodeId, out newChannel))
+                {
+                    newChannel = await CreateChannel(
+                        nodeId,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+                    _brokerChannels.Add(nodeId, newChannel);
+                }
+
+                _brokerChannelsByTopicPartition.Add(topicPartition, newChannel);
+                return newChannel;
             }
-
-            channel = await CreateChannel(
-                nodeId,
-                cancellationToken
-            ).ConfigureAwait(false);
-            await Task.Yield();
-            _brokerChannels.Add(nodeId, channel);
-            _brokerChannelsByTopicPartition.Add(topicPartition, channel);
-
-            return channel;
+            finally
+            {
+                _semaphoreSlim?.Release();
+            }
         }
 
-        private async ValueTask<ProducerTopicMetadata> CreateTopicMetadata(
+        private async Task<ProducerTopicMetadata> CreateTopicMetadata(
             TopicName topic,
             CancellationToken cancellationToken
         )
@@ -269,13 +280,13 @@ namespace Kafka.Client.IO.Stream
                     new MetadataRequestData.MetadataRequestTopic(
                         Guid.Empty,
                         topic,
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 ),
                 false,
                 false,
                 false,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var controller = await _connections.Controller(cancellationToken).ConfigureAwait(false);
             var metadataResponse = await controller.Metadata(
@@ -309,7 +320,7 @@ namespace Kafka.Client.IO.Stream
             );
         }
 
-        private async ValueTask<ProducerChannel> CreateChannel(
+        private async Task<ProducerChannel> CreateChannel(
             ClusterNodeId nodeId,
             CancellationToken cancellationToken
         )
@@ -318,6 +329,7 @@ namespace Kafka.Client.IO.Stream
                 .ConfigureAwait(false)
             ;
             return new(
+                nodeId,
                 _producerId,
                 _producerEpoch,
                 connection,
@@ -326,7 +338,7 @@ namespace Kafka.Client.IO.Stream
             );
         }
 
-        private static async ValueTask<(long ProducerId, short ProducerEpoch)> GetProducerInstance(
+        private static async Task<(long ProducerId, short ProducerEpoch)> GetProducerInstance(
             IClientConnection protocol,
             string? transactionalId,
             int transactionTimeoutMs,
@@ -340,7 +352,7 @@ namespace Kafka.Client.IO.Stream
                 transactionTimeoutMs,
                 producerId,
                 producerEpoch,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var initProducerIdResponse = await protocol.InitProducerId(
                 initProducerIdRequest,
@@ -352,7 +364,7 @@ namespace Kafka.Client.IO.Stream
             );
         }
 
-        private async ValueTask<IClientConnection> CreateController(
+        private async Task<IClientConnection> CreateController(
             CancellationToken cancellationToken
         )
         {
@@ -381,7 +393,7 @@ namespace Kafka.Client.IO.Stream
             return coordinator;
         }
 
-        private async ValueTask<IClientConnection> FindCoordinator(
+        private async Task<IClientConnection> FindCoordinator(
             IClientConnection protocol,
             string transactionalId,
             CancellationToken cancellationToken
@@ -391,7 +403,7 @@ namespace Kafka.Client.IO.Stream
                 transactionalId,
                 (sbyte)CoordinatorType.TRANSACTION,
                 ImmutableArray.Create(transactionalId),
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var findCoordinatorResponse = await protocol.FindCoordinator(
                 findCoordinatorRequest,
@@ -413,7 +425,7 @@ namespace Kafka.Client.IO.Stream
             _internalCts.Cancel();
             var channelClose = _brokerChannels
                 .Values
-                .Select(r => r.Close(cancellationToken).AsTask())
+                .Select(r => r.Close(cancellationToken))
             ;
             await Task.WhenAll(channelClose).ConfigureAwait(false);
         }

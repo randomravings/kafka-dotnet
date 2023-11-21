@@ -30,7 +30,8 @@ namespace Kafka.Client.IO.Stream
 
         protected readonly SortedSet<TopicPartition> _assignmentList = new(TopicPartitionCompare.Instance);
         protected readonly IConnectionManager<IClientConnection> _connectionManager;
-        protected readonly ConcurrentTopicPartitionOffsets _trackedOffsets = new();
+        // TODO: figure out a better way to deal with compare by id or name.
+        protected readonly ConcurrentTopicPartitionOffsets _trackedOffsets = new(true);
         protected readonly ConcurrentTopicPartitionSet _pausedTopicPartitions = new();
         protected readonly InputStreamConfig _config;
         protected readonly ILogger _logger;
@@ -278,7 +279,7 @@ namespace Kafka.Client.IO.Stream
                 groupId,
                 (sbyte)CoordinatorType.GROUP,
                 ImmutableArray.Create(groupId),
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var findCoordinatorResponse = await protocol.FindCoordinator(
             request,
@@ -330,8 +331,19 @@ namespace Kafka.Client.IO.Stream
                 if (_autoOffsetReset == AutoOffsetReset.None && missingOffsets.Length > 0)
                     throw new InvalidOperationException("Unset partitions found with auto.offset.reset=none");
 
+                var apiVersions = await coordinator.ApiVersions(
+                    cancellationToken
+                ).ConfigureAwait(false);
+
+                // TODO: find a better way to determine API versions at the channels to satisfy KIP-516.
+                var fetchApi = apiVersions
+                    .ApiKeysField
+                    .FirstOrDefault(a => a.ApiKeyField == (short)ApiKey.Fetch)
+                ;
+                var fetchVersion = fetchApi?.MaxVersionField ?? 0;
                 var assignments = GetTopicPartitionAssignments(
-                    topicPartitionOffsets
+                    topicPartitionOffsets,
+                    fetchVersion >= 13
                 );
 
                 _channelCts = new();
@@ -342,7 +354,6 @@ namespace Kafka.Client.IO.Stream
                         assignedTopicPartitionOffsets,
                         cancellationToken
                     ).ConfigureAwait(false);
-                    await Task.Yield();
                 }
                 _stopwatch.Restart();
                 Interlocked.Exchange(ref _stateAltered, 0);
@@ -353,10 +364,15 @@ namespace Kafka.Client.IO.Stream
             }
         }
 
-        private static IReadOnlyDictionary<ClusterNodeId, IDictionary<TopicPartition, Offset>> GetTopicPartitionAssignments(
-            IReadOnlyDictionary<TopicPartition, LeaderAndOffset> topicPartitionDetails
+        private static ImmutableSortedDictionary<ClusterNodeId, IDictionary<TopicPartition, Offset>> GetTopicPartitionAssignments(
+            IReadOnlyDictionary<TopicPartition, LeaderAndOffset> topicPartitionDetails,
+            bool useTopicId
         )
         {
+            var topicPartitionCompare = useTopicId ?
+                TopicPartitionCompareById.Instance :
+                TopicPartitionCompare.Instance
+            ;
             var brokerGrouping = topicPartitionDetails
                 .GroupBy(k => k.Value.LeaderId)
             ;
@@ -367,7 +383,7 @@ namespace Kafka.Client.IO.Stream
             ;
             foreach(var broker in brokerGrouping)
             {
-                var topicPartitionOffsets = new SortedList<TopicPartition, Offset>(TopicPartitionCompare.Instance);
+                var topicPartitionOffsets = new SortedList<TopicPartition, Offset>(topicPartitionCompare);
                 foreach (var (topicPartition, leaderAndOffset) in broker)
                     topicPartitionOffsets.Add(topicPartition, leaderAndOffset.Offset);
                 topicPartitionAssignmentBuilder.Add(broker.Key, topicPartitionOffsets);
@@ -428,11 +444,11 @@ namespace Kafka.Client.IO.Stream
                             -1,
                             p.Value,
                             1,
-                            ImmutableArray<TaggedField>.Empty
+                            []
                         )).ToImmutableArray(),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )).ToImmutableArray(),
-                ImmutableArray<TaggedField>.Empty
+                []
             )
         ;
 
@@ -453,7 +469,8 @@ namespace Kafka.Client.IO.Stream
                 .ToImmutableSortedDictionary(
                     k => k,
                     v => timestampField,
-                    TopicPartitionCompare.Instance
+                    // TODO: get a more elegant solution for name vs id compare
+                    TopicPartitionCompareById.Instance
                 )
             ;
             if (missingOffsets.Count > 0)
@@ -487,11 +504,11 @@ namespace Kafka.Client.IO.Stream
                             -1,
                             p.Value,
                             1,
-                            ImmutableArray<TaggedField>.Empty
+                            []
                         )).ToImmutableArray(),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )).ToImmutableArray(),
-                ImmutableArray<TaggedField>.Empty
+                []
             )
         ;
 
@@ -501,8 +518,20 @@ namespace Kafka.Client.IO.Stream
         )
         {
             foreach (var topic in offsetListResponse.TopicsField)
+            {
                 foreach (var partition in topic.PartitionsField)
-                    topicPartitionOffsets[new(topic.NameField, partition.PartitionIndexField)] = partition.OffsetField;
+                {
+                    // TODO: better model for comparison name or id.
+                    var topicPartition = topicPartitionOffsets
+                        .Keys
+                        .FirstOrDefault(r =>
+                            r.Topic.TopicName == topic.NameField &&
+                            r.Partition == partition.PartitionIndexField
+                        )
+                    ;
+                    topicPartitionOffsets[topicPartition] = partition.OffsetField;
+                }
+            }
         }
 
         protected readonly record struct LeaderAndOffset(
@@ -520,12 +549,12 @@ namespace Kafka.Client.IO.Stream
                 topics.Select(t => new MetadataRequestData.MetadataRequestTopic(
                     Guid.Empty,
                     t,
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 )).ToImmutableArray(),
                 false,
                 false,
                 false,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var metadataResponse = await connection.Metadata(
             metadataRequest,
@@ -559,12 +588,12 @@ namespace Kafka.Client.IO.Stream
                 .Select(t => new MetadataRequestData.MetadataRequestTopic(
                     Guid.Empty,
                     t.Key,
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 )).ToImmutableArray(),
                 false,
                 false,
                 false,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var metadataResponse = await connection.Metadata(
             metadataRequest,

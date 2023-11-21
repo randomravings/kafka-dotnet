@@ -4,9 +4,9 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestTopic;
-using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup;
 using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
+using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup;
+using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestTopic;
 
 namespace Kafka.Client.Messages.Encoding
 {

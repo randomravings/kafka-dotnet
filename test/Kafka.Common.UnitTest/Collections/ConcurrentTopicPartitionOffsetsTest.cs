@@ -9,7 +9,7 @@ namespace Kafka.Common.UnitTest.Collections
         [Test]
         public void TestAdd()
         {
-            var topicPartitionOffsets = new ConcurrentTopicPartitionOffsets();
+            var topicPartitionOffsets = new ConcurrentTopicPartitionOffsets(true);
 
             var topicPartition = UpdateCollection(
                 topicPartitionOffsets,

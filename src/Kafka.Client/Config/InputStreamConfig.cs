@@ -1,4 +1,5 @@
 ﻿using Kafka.Client.Model;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Kafka.Client.Config
@@ -33,5 +34,11 @@ namespace Kafka.Client.Config
         public int MaxPollIntervalMs { get; set; } = 300000;
         [JsonPropertyName("auto.offset.reset")]
         public AutoOffsetReset AutoOffsetReset { get; set; } = AutoOffsetReset.Latest;
+        public override string ToString() =>
+            JsonSerializer.Serialize(
+                this,
+                KafkaClientConfig.JsonSerializerOptions
+            )
+        ;
     }
 }

@@ -2,6 +2,7 @@
 using Kafka.Client.IO;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
+using KafkaGraphQL.Model;
 using System.Diagnostics;
 
 namespace KafkaGraphQL.Queries
@@ -16,7 +17,7 @@ namespace KafkaGraphQL.Queries
             TopicName[]? topicNames,
 
 
-            [GraphQLDescription("Options fetching topics.")] 
+            [GraphQLDescription("Options fetching topics.")]
             GetTopicsOptions? options,
 
             [Service]
@@ -34,7 +35,7 @@ namespace KafkaGraphQL.Queries
         }
 
         [GraphQLDescription("Gets a list of topic and partition descriptions.")]
-        public async ValueTask<IQueryable<KeyValuePair<string, string>>> ReadFromTopic(
+        public async ValueTask<IQueryable<Record>> ReadFromTopic(
             [Service]
             IStreamReader<string, string> streamReader,
             int maxCount,
@@ -56,13 +57,15 @@ namespace KafkaGraphQL.Queries
                         waitTime,
                         cancellationToken
                     );
+                    if (result == null)
+                        break;
                     results.Add(new(result.Key.Value, result.Value.Value));
                     if (results.Count >= maxCount)
                         break;
                 }
             }
-            catch(OperationCanceledException) { }
-            return results.AsQueryable();
+            catch (OperationCanceledException) { }
+            return results.Select(r => new Record { Key = r.Key, Value = r.Value }).AsQueryable();
         }
     }
 }

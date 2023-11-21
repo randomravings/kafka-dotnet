@@ -299,9 +299,12 @@ namespace Kafka.Cli.Cmd
                 groupId = $"{Guid.NewGuid()}";
             var config = new KafkaClientConfig
             {
-                ClientId = "kafka-cli.net",
-                BootstrapServers = opts.BootstrapServer,
-                Consumer = new InputStreamConfig
+                Client = new()
+                {
+                    ClientId = "kafka-cli.net",
+                    BootstrapServers = opts.BootstrapServer
+                },
+                Consumer = new()
                 {
                     GroupId = groupId,
                     EnableAutoCommit = !opts.Interactive

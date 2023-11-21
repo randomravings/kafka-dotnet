@@ -2,6 +2,7 @@
 using Kafka.Client.IO;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
+using KafkaGraphQL.Model;
 
 namespace KafkaGraphQL.Queries
 {
@@ -14,7 +15,7 @@ namespace KafkaGraphQL.Queries
             CreateTopicDefinition definition,
 
 
-            [GraphQLDescription("Options creating topics.")] 
+            [GraphQLDescription("Options creating topics.")]
             CreateTopicOptions? options,
 
             [Service]
@@ -51,10 +52,9 @@ namespace KafkaGraphQL.Queries
             return result;
         }
 
-        [GraphQLDescription("Deletes a topic.")]
-        public async ValueTask<ProduceResult> WriteToTopic(
-            string key,
-            string value,
+        [GraphQLDescription("Writes a set of records to a topic.")]
+        public async ValueTask<IQueryable<ProduceResult>> WriteToTopic(
+            IEnumerable<Record> records,
 
             [Service]
             IStreamWriter<string, string> streamWriter,
@@ -62,12 +62,18 @@ namespace KafkaGraphQL.Queries
             CancellationToken cancellationToken
         )
         {
-            var result = await streamWriter.Write(
-                key,
-                value,
-                cancellationToken
-            );
-            return result;
+            var tasks = records
+                .Select(r =>
+                    streamWriter.Write(
+                        r.Key,
+                        r.Value,
+                        cancellationToken
+                    )
+                )
+                .ToArray()
+            ;
+            var results = await Task.WhenAll(tasks);
+            return results.AsQueryable();
         }
     }
 }

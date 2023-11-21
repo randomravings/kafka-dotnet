@@ -6,9 +6,9 @@ using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicRespons
 using NodeEndpoint = Kafka.Client.Messages.FetchResponseData.NodeEndpoint;
 using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
 using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
 using AbortedTransaction = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.AbortedTransaction;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
 
 namespace Kafka.Client.Messages {
     /// <summary>

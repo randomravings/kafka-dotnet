@@ -11,19 +11,21 @@ using Kafka.Common.Records;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Diagnostics;
 
 namespace Kafka.Client.IO.Stream
 {
     internal sealed class ProducerChannel :
         IDisposable
     {
+        private readonly ClusterNodeId _nodeId;
         private readonly int _maxRequestSize;
-        private readonly TimeSpan _lingerTime;
+        private readonly long _lingerMs;
         private readonly Task _recordsBuilderTask;
         private readonly Task _recordsAccumulatorTask;
         private readonly CancellationTokenSource _internalCts = new();
-        private readonly BlockingCollection<ProduceCommand> _commandQueue = new();
-        private readonly BlockingCollection<ProduceBatch> _sendQueue = new();
+        private readonly BlockingCollection<ProduceCommand> _commandQueue = [];
+        private readonly BlockingCollection<ProduceBatch> _sendQueue = [];
         private readonly ManualResetEventSlim _sendBlocker = new(true);
         private readonly long _producerId;
         private readonly short _producerEpoch;
@@ -32,9 +34,10 @@ namespace Kafka.Client.IO.Stream
         private readonly ILogger _logger;
         private readonly IClientConnection _protocol;
         private readonly SortedList<TopicPartition, int> _topicPartitionStates = new(TopicPartitionCompare.Instance);
-        private readonly Func<ProduceBatch, CancellationToken, ValueTask> _sendDelegate;
+        private readonly Func<ProduceBatch, CancellationToken, Task> _sendDelegate;
 
         public ProducerChannel(
+            ClusterNodeId nodeId,
             long producerId,
             short producerEpoch,
             IClientConnection protocol,
@@ -42,6 +45,7 @@ namespace Kafka.Client.IO.Stream
             ILogger logger
         )
         {
+            _nodeId = nodeId;
             _producerId = producerId;
             _producerEpoch = producerEpoch;
             _transactionalId = producerConfig.TransactionalId;
@@ -54,7 +58,7 @@ namespace Kafka.Client.IO.Stream
             _protocol = protocol;
             _logger = logger;
             _maxRequestSize = producerConfig.MaxRequestSize;
-            _lingerTime = TimeSpan.FromMilliseconds(producerConfig.LingerMs);
+            _lingerMs = producerConfig.LingerMs;
             _recordsBuilderTask = RunDispatch(_internalCts.Token);
             _recordsAccumulatorTask = RunCollector(_internalCts.Token);
         }
@@ -76,23 +80,29 @@ namespace Kafka.Client.IO.Stream
             CancellationToken cancellationToken
         )
         {
+            Task.Yield();
             return Task.Run(() =>
             {
+                _logger.LogInformation($"Node {_nodeId.Value} - Batch collector started.");
                 try
                 {
                     var carryOver = default(ProduceCommand?);
+                    var stopwatch = new Stopwatch();
+                    stopwatch.Start();
                     while (!cancellationToken.IsCancellationRequested)
                     {
                         (var batch, var reason, carryOver) = Collect(
+                            stopwatch,
                             carryOver,
                             cancellationToken
                         );
-                        _logger.BatchCollected(reason, batch.Count);
+                        _logger.BatchCollected(batch.Count, reason);
                         if (batch.Count > 0)
                             _sendQueue.Add(batch, cancellationToken);
                     }
                 }
                 catch (OperationCanceledException) { }
+                _logger.LogInformation($"Node {_nodeId.Value} - Batch collector stoppped.");
             }, CancellationToken.None);
         }
 
@@ -104,6 +114,7 @@ namespace Kafka.Client.IO.Stream
         /// <param name="cancellationToken">Cancellation token for linger time.</param>
         /// <returns></returns>
         private (ProduceBatch Batch, BatchCollectReason Reason, ProduceCommand? Overflow) Collect(
+            in Stopwatch stopwatch,
             in ProduceCommand? carryOver,
             in CancellationToken cancellationToken
         )
@@ -120,26 +131,23 @@ namespace Kafka.Client.IO.Stream
             {
                 produceCommand
             };
-
-            // Create linger time CTS.
-            using var localCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            localCts.CancelAfter(_lingerTime);
-
-            try
+            stopwatch.Reset();
+            while (true)
             {
-                while (true)
-                {
-                    produceCommand = _commandQueue.Take(localCts.Token);
-                    if (produceCommand.Record.Attributes != attributes)
-                        return (batch, BatchCollectReason.AttributesChanged, produceCommand);
-                    var (added, _) = batch.Add(produceCommand);
-                    if (!added)
-                        return (batch, BatchCollectReason.MaxSizeExceeded, produceCommand);
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                return (batch, BatchCollectReason.MaxLingerMsReached, null);
+                var elapsedMilliseconds = stopwatch.ElapsedMilliseconds;
+                if (elapsedMilliseconds >= _lingerMs)
+                    return (batch, BatchCollectReason.MaxLingerMsReached, null);
+
+                var millisecondTimeout = unchecked((int)(_lingerMs - elapsedMilliseconds));
+                if (!_commandQueue.TryTake(out produceCommand, millisecondTimeout, cancellationToken))
+                    return (batch, BatchCollectReason.MaxLingerMsReached, null);
+
+                if (produceCommand.Record.Attributes != attributes)
+                    return (batch, BatchCollectReason.AttributesChanged, produceCommand);
+
+                var (added, _) = batch.Add(produceCommand);
+                if (!added)
+                    return (batch, BatchCollectReason.MaxSizeExceeded, produceCommand);
             }
         }
 
@@ -147,19 +155,21 @@ namespace Kafka.Client.IO.Stream
             CancellationToken cancellationToken
         )
         {
+            Task.Yield();
             return Task.Run(async () =>
             {
+                _logger.LogInformation($"Node {_nodeId.Value} - Dispatcher started.");
                 try
                 {
                     while (!cancellationToken.IsCancellationRequested)
                     {
                         var batch = _sendQueue.Take(cancellationToken);
                         _logger.ProduceCommandDequeue(batch.Count);
+                        await Task.Yield();
                         await _sendDelegate(
                             batch,
                             cancellationToken
                         ).ConfigureAwait(false);
-                        await Task.Yield();
                     }
                 }
                 catch (OperationCanceledException) { }
@@ -167,11 +177,12 @@ namespace Kafka.Client.IO.Stream
                 {
                     ClientLog.CorrelationMismatch(_logger, ex);
                 }
+                _logger.LogInformation($"Node {_nodeId.Value} - Dispatcher stopped.");
 
             }, CancellationToken.None);
         }
 
-        private async ValueTask SendBatch(
+        private async Task SendBatch(
             ProduceBatch batch,
             CancellationToken cancellationToken
         )
@@ -185,7 +196,6 @@ namespace Kafka.Client.IO.Stream
                 request,
                 cancellationToken
             ).ConfigureAwait(false);
-            await Task.Yield();
             FinalizeSend(
                 batch,
                 response
@@ -195,7 +205,7 @@ namespace Kafka.Client.IO.Stream
                 _topicPartitionStates[state.Key] = state.Value;
         }
 
-        private async ValueTask SendBatchOneWay(
+        private async Task SendBatchOneWay(
             ProduceBatch batch,
             CancellationToken cancellationToken
         )
@@ -209,7 +219,6 @@ namespace Kafka.Client.IO.Stream
                 request,
                 cancellationToken
             ).ConfigureAwait(false);
-            await Task.Yield();
             FinalizeSend(
                 batch
             );
@@ -223,12 +232,15 @@ namespace Kafka.Client.IO.Stream
             in IDictionary<TopicPartition, int> partitionStates
         )
         {
-            var lastTopic = TopicName.Empty;
+            var topic = TopicName.Empty;
             var topicProduceDataBuilder = ImmutableArray.CreateBuilder<ProduceRequestData.TopicProduceData>();
             foreach (var (topicPartition, produceRecords) in batch)
             {
-                if (lastTopic != topicPartition.Topic.TopicName)
+                if (topic != topicPartition.Topic.TopicName)
+                {
                     topicProduceDataBuilder = ImmutableArray.CreateBuilder<ProduceRequestData.TopicProduceData>();
+                    topic = topicPartition.Topic.TopicName;
+                }
                 var partitionProduceDataBuilder = ImmutableArray.CreateBuilder<ProduceRequestData.TopicProduceData.PartitionProduceData>();
 
                 _topicPartitionStates.TryGetValue(topicPartition, out int baseSequence);
@@ -243,14 +255,14 @@ namespace Kafka.Client.IO.Stream
                     new(
                         topicPartition.Partition,
                         ImmutableArray.Create(records),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 );
                 topicProduceDataBuilder.Add(
                     new(
                         topicPartition.Topic.TopicName,
                         partitionProduceDataBuilder.ToImmutable(),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 );
             }
@@ -261,7 +273,7 @@ namespace Kafka.Client.IO.Stream
                 _acks,
                 requestTimeoutMs,
                 topicProduceDataBuilder.ToImmutable(),
-                ImmutableArray<TaggedField>.Empty
+                []
             );
         }
 
@@ -352,22 +364,21 @@ namespace Kafka.Client.IO.Stream
         }
 
         private static IRecords BuildRecords(
-            int baseSequence,
-            ProduceRecords records
+            in int baseSequence,
+            in ProduceRecords records
         )
         {
             records.SetBaseSequence(baseSequence);
             return records;
         }
 
-        public async ValueTask Close(
+        public async Task Close(
             CancellationToken cancellationToken
         )
         {
             _internalCts.Cancel();
             await Task.WhenAll(_recordsAccumulatorTask, _recordsBuilderTask).ConfigureAwait(false);
             await _protocol.Close(cancellationToken).ConfigureAwait(false);
-            await Task.Yield();
         }
 
         public async Task Flush(
@@ -383,7 +394,7 @@ namespace Kafka.Client.IO.Stream
                         cancellationToken
                     ).ConfigureAwait(false);
             }
-            catch(TaskCanceledException)
+            catch (TaskCanceledException)
             {
                 // Noop
             }

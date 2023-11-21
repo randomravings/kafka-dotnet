@@ -38,11 +38,13 @@ builder.Services
     .AddType<CreateTopicResultType>()
     .AddType<DeleteTopicResultType>()
     .AddType<TopicPartitionOffsetType>()
+    .AddType<RecordType>()
 
     .AddType<ReplicaAssigmentInputType>()
     .AddType<ConfigInputType>()
     .AddType<GetTopicOptionsInputType>()
     .AddType<CreateTopicDefinitionInputType>()
+    .AddType<RecordInputType>()
 
     .AddTypeConverter<string, Topic>(
         t => new(Guid.Empty, new TopicName(t))

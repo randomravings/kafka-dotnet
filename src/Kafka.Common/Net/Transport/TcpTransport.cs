@@ -40,7 +40,6 @@ namespace Kafka.Common.Net.Transport
             try
             {
                 await _socket.ConnectAsync(_endPoint.Host, _endPoint.Port, cancellationToken).ConfigureAwait(false);
-                await Task.Yield();
             }
             catch (Exception ex)
             {
@@ -48,7 +47,7 @@ namespace Kafka.Common.Net.Transport
             }
         }
 
-        async ValueTask ITransport.Close(
+        ValueTask ITransport.Close(
             CancellationToken cancellationToken
         )
         {
@@ -56,7 +55,7 @@ namespace Kafka.Common.Net.Transport
             {
                 if (_socket.Connected)
                     _socket.Close();
-                await Task.Yield();
+                return ValueTask.CompletedTask;
             }
             catch (Exception ex)
             {
@@ -93,11 +92,11 @@ namespace Kafka.Common.Net.Transport
         {
             var sizeBytes = new byte[4];
             if (!await ReadBytesFromNetwork(_socket, sizeBytes, cancellationToken).ConfigureAwait(false))
-                return Array.Empty<byte>();
+                return [];
             (_, var messageLen) = BinaryDecoder.ReadInt32(sizeBytes, 0);
             var responseBytes = new byte[messageLen];
             if (!await ReadBytesFromNetwork(_socket, responseBytes, cancellationToken).ConfigureAwait(false))
-                return Array.Empty<byte>();
+                return [];
             return responseBytes;
         }
 

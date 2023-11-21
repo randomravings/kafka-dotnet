@@ -3,7 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <AssemblyName>kgen</AssemblyName>
-    <TargetFramework>net7.0</TargetFramework>
+    <LangVersion>12.0</LangVersion>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>

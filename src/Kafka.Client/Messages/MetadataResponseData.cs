@@ -1,9 +1,9 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic;
 using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic.MetadataResponsePartition;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponseData.MetadataResponseBroker;
-using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic;
 
 namespace Kafka.Client.Messages {
     /// <summary>

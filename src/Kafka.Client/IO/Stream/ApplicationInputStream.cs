@@ -28,7 +28,7 @@ namespace Kafka.Client.IO.Stream
         private readonly bool _enableAutoCommit;
         private readonly int _autoCommitIntervalMs;
         private readonly IReadOnlySet<TopicName> _topics;
-        private readonly ConcurrentTopicPartitionOffsets _commitedOffsets = new();
+        private readonly ConcurrentTopicPartitionOffsets _commitedOffsets = new(true);
 
         private MemberInfo _memberInfo = MemberInfo.Empty;
         private Task _heartbeat = Task.CompletedTask;
@@ -143,7 +143,6 @@ namespace Kafka.Client.IO.Stream
                     async () => await HeartbeatLoop(_heartbeatCts.Token).ConfigureAwait(false),
                     CancellationToken.None
                 );
-                await Task.Yield();
             }
 
             _joinGroupSync.Wait(cancellationToken);
@@ -189,7 +188,6 @@ namespace Kafka.Client.IO.Stream
             _commitCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             if (_enableAutoCommit)
                 _committer = Task.Run(async () => await AutoCommitLoop(_commitCts.Token).ConfigureAwait(false), CancellationToken.None);
-            await Task.Yield();
         }
 
         protected override async ValueTask Closing(CancellationToken cancellationToken)
@@ -197,7 +195,6 @@ namespace Kafka.Client.IO.Stream
             _heartbeatCts.Cancel();
             await _heartbeat.ConfigureAwait(false);
             await TearDown().ConfigureAwait(false);
-            await Task.Yield();
             var leaveGroupRequest = new LeaveGroupRequestData(
                 _groupId,
                 _memberInfo.MemberId,
@@ -205,9 +202,9 @@ namespace Kafka.Client.IO.Stream
                     _memberInfo.MemberId,
                     _groupInstanceId,
                     "Closing",
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 )),
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
             var leaveGroupResponse = await coordinator
@@ -233,7 +230,6 @@ namespace Kafka.Client.IO.Stream
             _trackedOffsets.Clear();
             _commitedOffsets.Clear();
             _commitCts.Dispose();
-            await Task.Yield();
         }
 
         private async Task JoinGroup(
@@ -246,7 +242,6 @@ namespace Kafka.Client.IO.Stream
                 _topics,
                 cancellationToken
             ).ConfigureAwait(false);
-            await Task.Yield();
 
             var joinGroupRequest = CreateJoinGroupRequest(
                 _topics,
@@ -256,7 +251,6 @@ namespace Kafka.Client.IO.Stream
                 joinGroupRequest,
                 cancellationToken
             ).ConfigureAwait(false);
-            await Task.Yield();
 
             if (joinGroupResponse.ErrorCodeField == Errors.Known.MEMBER_ID_REQUIRED.Code)
             {
@@ -269,7 +263,6 @@ namespace Kafka.Client.IO.Stream
                     joinGroupRequest,
                     cancellationToken
                 ).ConfigureAwait(false);
-                await Task.Yield();
             }
             if (joinGroupResponse.ErrorCodeField != 0)
             {
@@ -289,7 +282,6 @@ namespace Kafka.Client.IO.Stream
                 syncGroupRequest,
                 cancellationToken
             ).ConfigureAwait(false);
-            await Task.Yield();
 
             if (syncGroupResponse.ErrorCodeField != 0)
             {
@@ -326,11 +318,11 @@ namespace Kafka.Client.IO.Stream
                     new JoinGroupRequestData.JoinGroupRequestProtocol(
                         r,
                         topicMetadata,
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 ).ToImmutableArray(),
                 null,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
         }
 
@@ -368,7 +360,7 @@ namespace Kafka.Client.IO.Stream
                 .Select(r => new SyncGroupRequestData.SyncGroupRequestAssignment(
                     r.Key,
                     r.Value,
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 ))
                 .ToImmutableArray()
             ;
@@ -380,7 +372,7 @@ namespace Kafka.Client.IO.Stream
                 PROTOCOL_TYPE,
                 joinGroupResponse.ProtocolNameField,
                 syncGroupRequestAssignments,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
         }
 
@@ -398,7 +390,7 @@ namespace Kafka.Client.IO.Stream
                             r.Partition.Value
                         )
                         .ToImmutableArray(),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 )
                 .ToImmutableArray()
@@ -417,10 +409,10 @@ namespace Kafka.Client.IO.Stream
                                     r.Select(p =>
                                         p.Partition.Value
                                     ).ToImmutableArray(),
-                                    ImmutableArray<TaggedField>.Empty
+                                    []
                                 )
                             ).ToImmutableArray(),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 )
             ;
@@ -429,7 +421,7 @@ namespace Kafka.Client.IO.Stream
                 topicsToFetch,
                 topicsInGroupToFetch,
                 false,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
         }
 
@@ -454,20 +446,18 @@ namespace Kafka.Client.IO.Stream
                     }
 
                     await Task.Delay(_config.HeartbeatIntervalMs, cancellationToken).ConfigureAwait(false);
-                    await Task.Yield();
                     var heartbeatRequest = new HeartbeatRequestData(
                         _groupId,
                         _memberInfo.GenerationId,
                         _memberInfo.MemberId,
                         _groupInstanceId,
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     );
                     var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
                     var heartbeatResponse = await coordinator.Heartbeat(
                         heartbeatRequest,
                         cancellationToken
                     ).ConfigureAwait(false);
-                    await Task.Yield();
                     if (heartbeatResponse.ErrorCodeField != 0)
                     {
                         var error = Errors.Translate(heartbeatResponse.ErrorCodeField);
@@ -486,6 +476,7 @@ namespace Kafka.Client.IO.Stream
             CancellationToken cancellationToken
         )
         {
+            await Task.Yield();
             _logger.CommitLoopStart();
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -547,7 +538,7 @@ namespace Kafka.Client.IO.Stream
                         -1,
                         Timestamp.Now().TimestampMs,
                         null,
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     );
                     offsetCommitRequestPartitionsBuilder.Add(offsetCommitRequestPartition);
                 }
@@ -555,7 +546,7 @@ namespace Kafka.Client.IO.Stream
                 var offsetCommitRequestTopic = new OffsetCommitRequestData.OffsetCommitRequestTopic(
                     topic.Key.TopicName,
                     offsetCommitRequestPartitions,
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 );
                 offsetCommitRequestTopicsBuilder.Add(offsetCommitRequestTopic);
             }
@@ -570,14 +561,13 @@ namespace Kafka.Client.IO.Stream
                     _groupInstanceId,
                     -1,
                     offsetCommitRequestTopics,
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 );
                 var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
                 var response = await coordinator.OffsetCommit(
                     offsetCommitRequest,
                     cancellationToken
                 ).ConfigureAwait(false);
-                await Task.Yield();
                 var anyErrors = response
                     .TopicsField
                     .SelectMany(r => r.PartitionsField)
@@ -647,7 +637,14 @@ namespace Kafka.Client.IO.Stream
                 {
                     foreach (var partition in topic.PartitionsField)
                     {
-                        var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
+                        // TODO: Need to find a more elegang solution for the sometimes name, sometimes id comparison.
+                        var topicPartition = topicPartitionOffsets
+                            .Keys
+                            .FirstOrDefault(r =>
+                                r.Topic.TopicName == topic.NameField &&
+                                r.Partition ==partition.PartitionIndexField
+                            )
+                        ;
                         var leaderAndOffset = topicPartitionOffsets[topicPartition];
                         topicPartitionOffsets[topicPartition] = leaderAndOffset with { Offset = partition.CommittedOffsetField };
                     }
@@ -668,7 +665,8 @@ namespace Kafka.Client.IO.Stream
 
         public IReadOnlyDictionary<TopicPartition, Offset> GetOffsetToCommit()
         {
-            var builder = ImmutableSortedDictionary.CreateBuilder<TopicPartition, Offset>(TopicPartitionCompare.Instance);
+            // TODO: Name vs Id compare
+            var builder = ImmutableSortedDictionary.CreateBuilder<TopicPartition, Offset>(TopicPartitionCompareById.Instance);
             foreach ((var topicPartition, var offset) in _trackedOffsets)
                 if (!_commitedOffsets.TryGetValue(topicPartition, out var otherOffset) || offset > otherOffset)
                     builder.Add(topicPartition, offset);

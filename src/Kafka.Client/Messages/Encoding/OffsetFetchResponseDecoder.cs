@@ -4,11 +4,11 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using OffsetFetchResponsePartition = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseTopic.OffsetFetchResponsePartition;
-using OffsetFetchResponseTopics = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics;
-using OffsetFetchResponsePartitions = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics.OffsetFetchResponsePartitions;
-using OffsetFetchResponseGroup = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup;
 using OffsetFetchResponseTopic = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseTopic;
+using OffsetFetchResponsePartitions = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics.OffsetFetchResponsePartitions;
+using OffsetFetchResponseTopics = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics;
+using OffsetFetchResponsePartition = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseTopic.OffsetFetchResponsePartition;
+using OffsetFetchResponseGroup = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup;
 
 namespace Kafka.Client.Messages.Encoding
 {

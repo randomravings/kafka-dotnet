@@ -29,30 +29,13 @@ namespace Kafka.Client.Net
             ILogger logger
         )
         {
-            _bootstrapUrls = config.BootstrapServers.Split(',', StringSplitOptions.RemoveEmptyEntries).ToImmutableArray();
+            _bootstrapUrls = config.Client.BootstrapServers.Split(',', StringSplitOptions.RemoveEmptyEntries).ToImmutableArray();
             _config = config;
             _logger = logger;
         }
 
-        async ValueTask<IClientConnection> IConnectionManager<IClientConnection>.Connection(
+        async Task<IClientConnection> IConnectionManager<IClientConnection>.Connection(
             ClusterNodeId nodeId,
-            CancellationToken cancellationToken
-        ) =>
-            await Connection(
-                nodeId,
-                cancellationToken
-            ).ConfigureAwait(false)
-        ;
-
-        async ValueTask<IClientConnection> IConnectionManager<IClientConnection>.Controller(
-            CancellationToken cancellationToken
-        ) =>
-            await Controller(
-                cancellationToken
-            ).ConfigureAwait(false)
-        ;
-
-        async ValueTask IConnectionManager<IClientConnection>.CloseAll(
             CancellationToken cancellationToken
         )
         {
@@ -61,6 +44,51 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false);
             try
             {
+                if (_closed)
+                    throw new InvalidOperationException("Connection pool closed");
+                return await Connection(
+                    nodeId,
+                    cancellationToken
+                ).ConfigureAwait(false);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        async Task<IClientConnection> IConnectionManager<IClientConnection>.Controller(
+            CancellationToken cancellationToken
+        )
+        {
+            await _semaphore.WaitAsync(
+                cancellationToken
+            ).ConfigureAwait(false);
+            try
+            {
+                if (_closed)
+                    throw new InvalidOperationException("Connection pool closed");
+                return await Controller(
+                    cancellationToken
+                ).ConfigureAwait(false);
+            }
+            finally
+            {
+                _semaphore.Release();
+            }
+        }
+
+        async Task IConnectionManager<IClientConnection>.CloseAll(
+            CancellationToken cancellationToken
+        )
+        {
+            await _semaphore.WaitAsync(
+                cancellationToken
+            ).ConfigureAwait(false);
+            try
+            {
+                if (_closed)
+                    return;
                 _closed = true;
                 foreach (var connection in _connections.Values)
                     await connection.Close(
@@ -80,57 +108,31 @@ namespace Kafka.Client.Net
             _semaphore.Dispose();
         }
 
-        private async ValueTask<IClientConnection> Connection(
+        private async Task<IClientConnection> Connection(
             ClusterNodeId nodeId,
             CancellationToken cancellationToken
         )
         {
             if (_connections.TryGetValue(nodeId, out var protocol))
                 return protocol;
-
-            await _semaphore.WaitAsync(
+            return await InitConnection(
+                nodeId,
                 cancellationToken
             ).ConfigureAwait(false);
-            try
-            {
-                if (_closed)
-                    throw new InvalidOperationException("Connection pool closed");
-                return await InitConnection(
-                    nodeId,
-                    cancellationToken
-                ).ConfigureAwait(false);
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
         }
 
-        private async ValueTask<IClientConnection> Controller(
+        private async Task<IClientConnection> Controller(
             CancellationToken cancellationToken
         )
         {
             if (_connections.TryGetValue(_controllerNodeId, out var protocol))
                 return protocol;
-
-            await _semaphore.WaitAsync(
+            return await InitController(
                 cancellationToken
             ).ConfigureAwait(false);
-            try
-            {
-                if (_closed)
-                    throw new InvalidOperationException("Connection pool closed");
-                return await InitController(
-                    cancellationToken
-                ).ConfigureAwait(false);
-            }
-            finally
-            {
-                _semaphore.Release();
-            }
         }
 
-        private async ValueTask<IClientConnection> InitConnection(
+        private async Task<IClientConnection> InitConnection(
             ClusterNodeId clusterNodeId,
             CancellationToken cancellationToken
         )
@@ -161,11 +163,14 @@ namespace Kafka.Client.Net
             protocol = CreateProtocol(
                 transport
             );
+            await protocol.Open(
+                cancellationToken
+            ).ConfigureAwait(false);
             _connections.Add(clusterNodeId, protocol);
             return protocol;
         }
 
-        private async ValueTask<IClientConnection> InitController(
+        private async Task<IClientConnection> InitController(
             CancellationToken cancellationToken
         )
         {
@@ -203,6 +208,9 @@ namespace Kafka.Client.Net
             controller = CreateProtocol(
                 transport
             );
+            await protocol.Open(
+                cancellationToken
+            ).ConfigureAwait(false);
             _connections.Add(_controllerNodeId, controller);
             return controller;
         }
@@ -213,7 +221,7 @@ namespace Kafka.Client.Net
             return _connections.ElementAt(randomIndex).Value;
         }
 
-        private async ValueTask<IClientConnection> RandomizeBootstrapConnection(
+        private async Task<IClientConnection> RandomizeBootstrapConnection(
             CancellationToken cancellationToken
         )
         {
@@ -243,7 +251,9 @@ namespace Kafka.Client.Net
             protocol = CreateProtocol(
                 randomTransport
             );
-
+            await protocol.Open(
+                cancellationToken
+            ).ConfigureAwait(false);
             // Determine controller node.
             var metadataResponse = await protocol
                 .Metadata(cancellationToken)

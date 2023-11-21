@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Kafka.Client.Config
 {
@@ -26,6 +27,12 @@ namespace Kafka.Client.Config
         public int TransactionTimeoutMs { get; set; } = 60000;
         [JsonPropertyName("delivery.timeout.ms")]
         public int DeliveryTimeoutMs { get; set; } = 120000;
+        public override string ToString() =>
+            JsonSerializer.Serialize(
+                this,
+                KafkaClientConfig.JsonSerializerOptions
+            )
+        ;
 
     }
 }

@@ -42,7 +42,6 @@ namespace Kafka.Client
             await _connections.CloseAll(
                 cancellationToken
             ).ConfigureAwait(false);
-            await Task.Yield();
         }
 
         IInputStreamBuilder IKafkaClient.CreateInputStream() =>
@@ -126,22 +125,22 @@ namespace Kafka.Client
                             new CreateTopicsRequestData.CreatableTopic.CreatableReplicaAssignment(
                                 r.Key,
                                 r.Value.Select(r => r.Value).ToImmutableArray(),
-                                ImmutableArray<TaggedField>.Empty
+                                []
                             )
                         ).ToImmutableArray(),
                         t.Configs.Select(c =>
                             new CreateTopicsRequestData.CreatableTopic.CreateableTopicConfig(
                                 c.Key,
                                 c.Value,
-                                ImmutableArray<TaggedField>.Empty
+                                []
                             )
                         ).ToImmutableArray(),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 ).ToImmutableArray(),
-                _config.RequestTimeoutMs,
+                _config.Client.RequestTimeoutMs,
                 options.ValidateOnly,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var response = await protocol.CreateTopics(
                 request,
@@ -206,7 +205,7 @@ namespace Kafka.Client
                     r => new DeleteTopicsRequestData.DeleteTopicState(
                         r,
                         Guid.Empty,
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 )
                 .ToImmutableArray()
@@ -218,8 +217,8 @@ namespace Kafka.Client
             var request = new DeleteTopicsRequestData(
                 deleteTopicStates,
                 topicNames,
-                _config.RequestTimeoutMs,
-                ImmutableArray<TaggedField>.Empty
+                _config.Client.RequestTimeoutMs,
+                []
             );
             var response = await protocol.DeleteTopics(
                 request,
@@ -292,7 +291,7 @@ namespace Kafka.Client
                 .Select(t => new MetadataRequestData.MetadataRequestTopic(
                     Guid.Empty,
                     t.Value,
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 ))
                 .ToImmutableArray();
             ;
@@ -302,7 +301,7 @@ namespace Kafka.Client
                 false,
                 false,
                 options.IncludeTopicAuthorizedOperations,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var response = await protocol.Metadata(
                 request,
@@ -547,14 +546,14 @@ namespace Kafka.Client
                     new MetadataRequestData.MetadataRequestTopic(
                         Guid.Empty,
                         t,
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 )
                 .ToImmutableArray(),
                 false,
                 false,
                 false,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var metadataResponse = await protocol.Metadata(
                 metadataRequest,
@@ -574,15 +573,15 @@ namespace Kafka.Client
                                 p.LeaderEpochField,
                                 timestamp.ToUnixTimeMilliseconds(),
                                 1,
-                                ImmutableArray<TaggedField>.Empty
+                                []
                             )
                         )
                         .ToImmutableArray(),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 )
                 .ToImmutableArray(),
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var listOffsetsResponse = await protocol.ListOffsets(
                 listOffsetsRequest,
@@ -615,14 +614,14 @@ namespace Kafka.Client
                     new MetadataRequestData.MetadataRequestTopic(
                         Guid.Empty,
                         t,
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 )
                 .ToImmutableArray(),
                 false,
                 false,
                 false,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var metadataResponse = await protocol.Metadata(
                 metadataRequest,
@@ -638,7 +637,7 @@ namespace Kafka.Client
                             p.PartitionIndexField
                         )
                         .ToImmutableArray(),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 )
                 .ToImmutableArray(),
@@ -654,14 +653,14 @@ namespace Kafka.Client
                                 p.PartitionIndexField
                             )
                             .ToImmutableArray(),
-                            ImmutableArray<TaggedField>.Empty
+                            []
                         )
                     )
                     .ToImmutableArray(),
-                    ImmutableArray<TaggedField>.Empty
+                    []
                 )),
                 false,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
             var offsetFetchResponse = await protocol.OffsetFetch(
                 offsetFetchRequest,

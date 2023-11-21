@@ -97,7 +97,7 @@ namespace Kafka.Client.IO.Stream
             ).ConfigureAwait(false)
         ;
 
-        private async ValueTask<ProduceResult> Write(
+        private async Task<ProduceResult> Write(
             TKey? key,
             TValue? value,
             Timestamp timestamp,
@@ -112,20 +112,13 @@ namespace Kafka.Client.IO.Stream
                 headers,
                 cancellationToken
             ).ConfigureAwait(false);
-            await Task.Yield();
-            var callback = await _stream.Write(
+            return await _stream.Write(
                 record,
                 cancellationToken
             ).ConfigureAwait(false);
-            await Task.Yield();
-            return await callback
-                .Task
-                .WaitAsync(cancellationToken)
-                .ConfigureAwait(false)
-            ;
         }
 
-        private async ValueTask<ProduceRecord> CreateRecord(
+        private async Task<ProduceRecord> CreateRecord(
             TKey? key,
             TValue? value,
             Timestamp timestamp,
@@ -156,7 +149,7 @@ namespace Kafka.Client.IO.Stream
             );
         }
 
-        async ValueTask<ProducerTopicMetadata> GetTopicMetadata(
+        async Task<ProducerTopicMetadata> GetTopicMetadata(
             CancellationToken cancellationToken
         )
         {

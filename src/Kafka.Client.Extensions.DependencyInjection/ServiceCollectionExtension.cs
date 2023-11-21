@@ -102,21 +102,28 @@ namespace Kafka.Client.Extensions.DependencyInjection
             IReadOnlyDictionary<string, PropertyInfo> properties
         )
         {
-            var clientSection = configuration.GetSection(configSection);
-            foreach (var item in clientSection.GetChildren())
+            var section = configuration.GetSection(configSection);
+            foreach (var item in section.GetChildren())
             {
                 if (properties.TryGetValue(item.Key, out var property))
                     ApplyProperty(config, property, item.Value);
             }
 
-            var producerSection = clientSection.GetSection("Producer");
+            var clientSection = section.GetSection("Client");
+            foreach (var item in clientSection.GetChildren())
+            {
+                if (properties.TryGetValue(item.Key, out var property))
+                    ApplyProperty(config.Client, property, item.Value);
+            }
+
+            var producerSection = section.GetSection("Producer");
             foreach (var item in producerSection.GetChildren())
             {
                 if (properties.TryGetValue(item.Key, out var property))
                     ApplyProperty(config.Producer, property, item.Value);
             }
 
-            var consumerSection = clientSection.GetSection("Consumer");
+            var consumerSection = section.GetSection("Consumer");
             foreach (var item in consumerSection.GetChildren())
             {
                 if (properties.TryGetValue(item.Key, out var property))
@@ -150,6 +157,7 @@ namespace Kafka.Client.Extensions.DependencyInjection
         {
             var properties = typeof(KafkaClientConfig)
                 .GetProperties()
+                .Concat(typeof(ClientConfig).GetProperties())
                 .Concat(typeof(InputStreamConfig).GetProperties())
                 .Concat(typeof(OutputStreamConfig).GetProperties())
                 .Select(r => new { Name = r.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? "", Property = r })

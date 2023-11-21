@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic;
 using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition;
+using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic;
 
 namespace Kafka.Client.Messages {
     /// <summary>

@@ -107,11 +107,18 @@ namespace Kafka.Cli.Client
         )
         {
             var type = propertyInfo.PropertyType;
-            var instance = (object)clientConfig;
-            if (propertyInfo.DeclaringType?.Equals(typeof(InputStreamConfig)) ?? false)
-                instance = clientConfig.Consumer;
-            if (propertyInfo.DeclaringType?.Equals(typeof(OutputStreamConfig)) ?? false)
-                instance = clientConfig.Producer;
+            var instance = propertyInfo.DeclaringType switch
+            {
+                null => default(object),
+                Type t when t.Equals(typeof(ClientConfig)) => clientConfig.Client,
+                Type t when t.Equals(typeof(InputStreamConfig)) => clientConfig.Consumer,
+                Type t when t.Equals(typeof(OutputStreamConfig)) => clientConfig.Producer,
+                _ => default
+            };
+
+            if (instance == null)
+                return false;
+
             if (type.Equals(typeof(string)))
                 propertyInfo.SetValue(instance, value);
             else if (type.Equals(typeof(bool)) && bool.TryParse(value, out var boolValue))
@@ -131,6 +138,7 @@ namespace Kafka.Cli.Client
         {
             var properties = typeof(KafkaClientConfig)
                 .GetProperties()
+                .Concat(typeof(ClientConfig).GetProperties())
                 .Concat(typeof(InputStreamConfig).GetProperties())
                 .Concat(typeof(OutputStreamConfig).GetProperties())
                 .Select(r => new { Name = r.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? "", Property = r })

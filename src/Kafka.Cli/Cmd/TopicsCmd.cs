@@ -254,8 +254,11 @@ namespace Kafka.Cli.Cmd
         {
             var config = new KafkaClientConfig
             {
-                ClientId = "kafka-cli.net",
-                BootstrapServers = opts.BootstrapServer
+                Client = new()
+                {
+                    ClientId = "kafka-cli.net",
+                    BootstrapServers = opts.BootstrapServer
+                },
             };
             return config;
         }

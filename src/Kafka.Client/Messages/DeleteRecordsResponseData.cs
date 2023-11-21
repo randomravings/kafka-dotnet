@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using DeleteRecordsTopicResult = Kafka.Client.Messages.DeleteRecordsResponseData.DeleteRecordsTopicResult;
 using DeleteRecordsPartitionResult = Kafka.Client.Messages.DeleteRecordsResponseData.DeleteRecordsTopicResult.DeleteRecordsPartitionResult;
+using DeleteRecordsTopicResult = Kafka.Client.Messages.DeleteRecordsResponseData.DeleteRecordsTopicResult;
 
 namespace Kafka.Client.Messages {
     /// <summary>

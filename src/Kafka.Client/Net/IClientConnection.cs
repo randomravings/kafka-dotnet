@@ -6,95 +6,95 @@ namespace Kafka.Client.Net
     internal interface IClientConnection :
         IConnection
     {
-        ValueTask<ApiVersionsResponseData> ApiVersions(
+        Task<ApiVersionsResponseData> ApiVersions(
             CancellationToken cancellationToken
         );
 
-        ValueTask<MetadataResponseData> Metadata(
+        Task<MetadataResponseData> Metadata(
             CancellationToken cancellationToken
         );
 
-        ValueTask<MetadataResponseData> Metadata(
+        Task<MetadataResponseData> Metadata(
             MetadataRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<CreateTopicsResponseData> CreateTopics(
+        Task<CreateTopicsResponseData> CreateTopics(
             CreateTopicsRequestData options,
             CancellationToken cancellationToken
         );
 
-        ValueTask<DeleteTopicsResponseData> DeleteTopics(
+        Task<DeleteTopicsResponseData> DeleteTopics(
             DeleteTopicsRequestData options,
             CancellationToken cancellationToken
         );
 
-        ValueTask<FindCoordinatorResponseData> FindCoordinator(
+        Task<FindCoordinatorResponseData> FindCoordinator(
             FindCoordinatorRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<OffsetFetchResponseData> OffsetFetch(
+        Task<OffsetFetchResponseData> OffsetFetch(
             OffsetFetchRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<ListOffsetsResponseData> ListOffsets(
+        Task<ListOffsetsResponseData> ListOffsets(
             ListOffsetsRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<ProduceResponseData> Produce(
+        Task<ProduceResponseData> Produce(
             ProduceRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask ProduceNoAck(
+        Task ProduceNoAck(
             ProduceRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<InitProducerIdResponseData> InitProducerId(
+        Task<InitProducerIdResponseData> InitProducerId(
             InitProducerIdRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<AddPartitionsToTxnResponseData> AddPartitionsToTxn(
+        Task<AddPartitionsToTxnResponseData> AddPartitionsToTxn(
             AddPartitionsToTxnRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<EndTxnResponseData> EndTxn(
+        Task<EndTxnResponseData> EndTxn(
             EndTxnRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<HeartbeatResponseData> Heartbeat(
+        Task<HeartbeatResponseData> Heartbeat(
             HeartbeatRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<JoinGroupResponseData> JoinGroup(
+        Task<JoinGroupResponseData> JoinGroup(
             JoinGroupRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<SyncGroupResponseData> SyncGroup(
+        Task<SyncGroupResponseData> SyncGroup(
             SyncGroupRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<LeaveGroupResponseData> LeaveGroup(
+        Task<LeaveGroupResponseData> LeaveGroup(
             LeaveGroupRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<OffsetCommitResponseData> OffsetCommit(
+        Task<OffsetCommitResponseData> OffsetCommit(
             OffsetCommitRequestData request,
             CancellationToken cancellationToken
         );
 
-        ValueTask<FetchResponseData> Fetch(
+        Task<FetchResponseData> Fetch(
             FetchRequestData request,
             CancellationToken cancellationToken
         );

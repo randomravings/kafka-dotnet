@@ -6,16 +6,16 @@ namespace Kafka.Common.Net
         IDisposable
         where TConnection : IConnection
     {
-        ValueTask<TConnection> Controller(
+        Task<TConnection> Controller(
             CancellationToken cancellationToken
         );
 
-        ValueTask<TConnection> Connection(
+        Task<TConnection> Connection(
             ClusterNodeId nodeId,
             CancellationToken cancellationToken
         );
 
-        ValueTask CloseAll(
+        Task CloseAll(
             CancellationToken cancellationToken
         );
     }

@@ -7,7 +7,7 @@ namespace Kafka.Common.Net
     {
         ClusterNodeId NodeId { get; }
         ITransport Transport { get; }
-        ValueTask Open(CancellationToken cancellationToken);
-        ValueTask Close(CancellationToken cancellationToken);
+        Task Open(CancellationToken cancellationToken);
+        Task Close(CancellationToken cancellationToken);
     }
 }

@@ -4,8 +4,8 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic;
 using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition;
+using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic;
 
 namespace Kafka.Client.Messages.Encoding
 {

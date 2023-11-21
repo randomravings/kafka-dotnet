@@ -6,7 +6,7 @@ namespace Kafka.Client.IO
     public interface IOutputStream :
         IDisposable
     {
-        internal ValueTask<ProducerTopicMetadata> MetadataForTopic(
+        internal Task<ProducerTopicMetadata> MetadataForTopic(
             TopicName topicName,
             CancellationToken cancellationToken
         );
@@ -26,7 +26,7 @@ namespace Kafka.Client.IO
         /// <param name="record"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<TaskCompletionSource<ProduceResult>> Write(
+        Task<ProduceResult> Write(
             ProduceRecord record,
             CancellationToken cancellationToken
         );

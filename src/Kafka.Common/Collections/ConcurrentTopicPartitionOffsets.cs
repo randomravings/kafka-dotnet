@@ -7,12 +7,19 @@ namespace Kafka.Common.Collections
     public sealed class ConcurrentTopicPartitionOffsets :
         IEnumerable<KeyValuePair<TopicPartition, Offset>>
     {
+        private readonly IComparer<TopicPartition> _comparer;
         private readonly ReaderWriterLockSlim _lock = new();
         private readonly SortedList<TopicPartition, Offset> _topicPartitionOffsets;
 
-        public ConcurrentTopicPartitionOffsets()
+        public ConcurrentTopicPartitionOffsets(
+            bool useId
+        )
         {
-            _topicPartitionOffsets = new(TopicPartitionCompare.Instance);
+            _comparer = useId ?
+                TopicPartitionCompareById.Instance :
+                TopicPartitionCompare.Instance
+            ;
+            _topicPartitionOffsets = new(_comparer);
         }
 
         public int Count => _topicPartitionOffsets.Count;

@@ -3,6 +3,7 @@ using Kafka.Client.Messages;
 using Kafka.Client.Model;
 using Kafka.Client.Net;
 using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
@@ -10,29 +11,18 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client.IO.Stream
 {
-    internal sealed class ConsumerChannel
+    internal sealed class ConsumerChannel(
+        InputStreamConfig config,
+        ILogger logger
+    )
     {
-        private readonly int _fetchMaxWaitMs;
-        private readonly int _fetchMinBytes;
-        private readonly int _fetchMaxBytes;
-        private readonly sbyte _isolationLevel;
-        private readonly string _clientRack;
-        private readonly int _maxPartitionFetchBytes;
-        private readonly ILogger _logger;
-
-        public ConsumerChannel(
-            InputStreamConfig config,
-            ILogger logger
-        )
-        {
-            _fetchMaxWaitMs = config.FetchMaxWaitMs;
-            _fetchMinBytes = config.FetchMinBytes;
-            _fetchMaxBytes = config.FetchMaxBytes;
-            _isolationLevel = (sbyte)config.IsolationLevel;
-            _clientRack = config.ClientRack;
-            _maxPartitionFetchBytes = config.MaxPartitionFetchBytes;
-            _logger = logger;
-        }
+        private readonly int _fetchMaxWaitMs = config.FetchMaxWaitMs;
+        private readonly int _fetchMinBytes = config.FetchMinBytes;
+        private readonly int _fetchMaxBytes = config.FetchMaxBytes;
+        private readonly sbyte _isolationLevel = (sbyte)config.IsolationLevel;
+        private readonly string _clientRack = config.ClientRack;
+        private readonly int _maxPartitionFetchBytes = config.MaxPartitionFetchBytes;
+        private readonly ILogger _logger = logger;
 
         public async Task Run(
             IClientConnection connection,
@@ -51,7 +41,6 @@ namespace Kafka.Client.IO.Stream
                         fetchRequest,
                         cancellationToken
                     ).ConfigureAwait(false);
-                    await Task.Yield();
 
                     var (offsetsProcessed, records) = ProcessFetchResponse(
                         fetchResponse,
@@ -60,7 +49,9 @@ namespace Kafka.Client.IO.Stream
 
                     if (records.Length > 0)
                     {
-                        var taskCompletionSource = new TaskCompletionSource();
+                        var taskCompletionSource = new TaskCompletionSource(
+                            TaskCreationOptions.RunContinuationsAsynchronously
+                        );
                         var result = new FetchResult(records, taskCompletionSource);
                         queue.Enqueue(result);
                         resetEvent.Set();
@@ -196,7 +187,8 @@ namespace Kafka.Client.IO.Stream
         )
         {
             var fetchTopics = topicPartitionOffsets
-                .GroupBy(g => g.Key.Topic)
+                // TODO: more elegant solution for topic compare
+                .GroupBy(g => g.Key.Topic, TopicCompareById.Equality)
                 .Select(t =>
                     new FetchRequestData.FetchTopic(
                         t.Key.TopicName,
@@ -209,11 +201,11 @@ namespace Kafka.Client.IO.Stream
                                 LastFetchedEpochField: -1,
                                 LogStartOffsetField: -1,
                                 PartitionMaxBytesField: _maxPartitionFetchBytes,
-                                ImmutableArray<TaggedField>.Empty
+                                []
                             )
                         )
                         .ToImmutableArray(),
-                        ImmutableArray<TaggedField>.Empty
+                        []
                     )
                 )
                 .ToImmutableArray()
@@ -231,7 +223,7 @@ namespace Kafka.Client.IO.Stream
                 TopicsField: fetchTopics,
                 ForgottenTopicsDataField: ImmutableArray<FetchRequestData.ForgottenTopic>.Empty,
                 RackIdField: _clientRack,
-                ImmutableArray<TaggedField>.Empty
+                []
             );
         }
     }

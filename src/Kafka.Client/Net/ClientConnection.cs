@@ -32,7 +32,7 @@ namespace Kafka.Client.Net
         private static readonly ApiVersionsRequestData API_VERSION_REQUEST = new(
             CLIENT_NAME,
             CLIENT_VERSION,
-            ImmutableArray<TaggedField>.Empty
+            []
         );
 
         private static readonly MetadataRequestData CLUSTER_METADATA_REQUEST = new(
@@ -40,7 +40,7 @@ namespace Kafka.Client.Net
             false,
             false,
             false,
-            ImmutableArray<TaggedField>.Empty
+            []
         );
 
         private readonly IRequestEncoder<RequestHeaderData, ApiVersionsRequestData> _apiVersionRequestHandler = new ApiVersionsRequestEncoder();
@@ -111,9 +111,9 @@ namespace Kafka.Client.Net
         )
         {
             _connection = connection;
-            _clientId = config.ClientId;
-            _retries = config.Retries;
-            _retryBackOffMs = TimeSpan.FromMilliseconds(config.RetryBackoffMs);
+            _clientId = config.Client.ClientId;
+            _retries = config.Client.Retries;
+            _retryBackOffMs = TimeSpan.FromMilliseconds(config.Client.RetryBackoffMs);
             _logger = logger;
         }
 
@@ -121,17 +121,15 @@ namespace Kafka.Client.Net
 
         ClusterNodeId IConnection.NodeId => _nodeId;
 
-        async ValueTask IConnection.Open(CancellationToken cancellationToken) =>
+        async Task IConnection.Open(CancellationToken cancellationToken) =>
             await EnsureConnection(
                 cancellationToken
             )
             .ConfigureAwait(false)
         ;
 
-        async ValueTask IConnection.Close(CancellationToken cancellationToken)
+        async Task IConnection.Close(CancellationToken cancellationToken)
         {
-            if (!_connection.IsConnected)
-                return;
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
@@ -146,7 +144,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        async ValueTask<ApiVersionsResponseData> IClientConnection.ApiVersions(
+        async Task<ApiVersionsResponseData> IClientConnection.ApiVersions(
             CancellationToken cancellationToken
         ) =>
             await ApiVersions(
@@ -155,7 +153,7 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private async ValueTask<ApiVersionsResponseData> ApiVersions(
+        private async Task<ApiVersionsResponseData> ApiVersions(
             ApiVersionsRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -176,7 +174,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<MetadataResponseData> IClientConnection.Metadata(
+        async Task<MetadataResponseData> IClientConnection.Metadata(
             CancellationToken cancellationToken
         ) =>
             await Metadata(
@@ -185,7 +183,7 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<MetadataResponseData> IClientConnection.Metadata(
+        async Task<MetadataResponseData> IClientConnection.Metadata(
             MetadataRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -195,7 +193,7 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private async ValueTask<MetadataResponseData> Metadata(
+        private async Task<MetadataResponseData> Metadata(
             MetadataRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -231,7 +229,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<CreateTopicsResponseData> IClientConnection.CreateTopics(
+        async Task<CreateTopicsResponseData> IClientConnection.CreateTopics(
             CreateTopicsRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -257,7 +255,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<DeleteTopicsResponseData> IClientConnection.DeleteTopics(
+        async Task<DeleteTopicsResponseData> IClientConnection.DeleteTopics(
             DeleteTopicsRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -284,7 +282,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<FindCoordinatorResponseData> IClientConnection.FindCoordinator(
+        async Task<FindCoordinatorResponseData> IClientConnection.FindCoordinator(
             FindCoordinatorRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -311,7 +309,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<OffsetFetchResponseData> IClientConnection.OffsetFetch(
+        async Task<OffsetFetchResponseData> IClientConnection.OffsetFetch(
             OffsetFetchRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -334,7 +332,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<ListOffsetsResponseData> IClientConnection.ListOffsets(
+        async Task<ListOffsetsResponseData> IClientConnection.ListOffsets(
             ListOffsetsRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -362,7 +360,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<InitProducerIdResponseData> IClientConnection.InitProducerId(
+        async Task<InitProducerIdResponseData> IClientConnection.InitProducerId(
             InitProducerIdRequestData request,
             CancellationToken cancellationToken
         ) => await Execute(
@@ -382,7 +380,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<ProduceResponseData> IClientConnection.Produce(
+        async Task<ProduceResponseData> IClientConnection.Produce(
             ProduceRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -408,7 +406,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask IClientConnection.ProduceNoAck(
+        async Task IClientConnection.ProduceNoAck(
             ProduceRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -419,7 +417,7 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<AddPartitionsToTxnResponseData> IClientConnection.AddPartitionsToTxn(
+        async Task<AddPartitionsToTxnResponseData> IClientConnection.AddPartitionsToTxn(
             AddPartitionsToTxnRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -447,7 +445,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<EndTxnResponseData> IClientConnection.EndTxn(
+        async Task<EndTxnResponseData> IClientConnection.EndTxn(
             EndTxnRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -470,7 +468,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<HeartbeatResponseData> IClientConnection.Heartbeat(
+        async Task<HeartbeatResponseData> IClientConnection.Heartbeat(
             HeartbeatRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -493,7 +491,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<JoinGroupResponseData> IClientConnection.JoinGroup(
+        async Task<JoinGroupResponseData> IClientConnection.JoinGroup(
             JoinGroupRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -516,7 +514,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<SyncGroupResponseData> IClientConnection.SyncGroup(
+        async Task<SyncGroupResponseData> IClientConnection.SyncGroup(
             SyncGroupRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -539,7 +537,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<LeaveGroupResponseData> IClientConnection.LeaveGroup(
+        async Task<LeaveGroupResponseData> IClientConnection.LeaveGroup(
             LeaveGroupRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -562,7 +560,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<OffsetCommitResponseData> IClientConnection.OffsetCommit(
+        async Task<OffsetCommitResponseData> IClientConnection.OffsetCommit(
             OffsetCommitRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -590,7 +588,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async ValueTask<FetchResponseData> IClientConnection.Fetch(
+        async Task<FetchResponseData> IClientConnection.Fetch(
             FetchRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -629,7 +627,7 @@ namespace Kafka.Client.Net
             GC.SuppressFinalize(this);
         }
 
-        private async ValueTask<TResponse> Execute<TRequest, TResponse>(
+        private async Task<TResponse> Execute<TRequest, TResponse>(
             TRequest requestMessage,
             IRequestEncoder<RequestHeaderData, TRequest> requestEncoder,
             IResponseDecoder<ResponseHeaderData, TResponse> responseDecoder,
@@ -645,10 +643,12 @@ namespace Kafka.Client.Net
             {
                 await EnsureConnection(cancellationToken).ConfigureAwait(false);
                 var offset = 0;
-                var requestHeader = CreateRequestHeader(requestEncoder, ImmutableArray<TaggedField>.Empty);
+                var requestHeader = CreateRequestHeader(requestEncoder, []);
                 offset = requestEncoder.WriteHeader(requestBytes, offset, requestHeader);
                 offset = requestEncoder.WriteMessage(requestBytes, offset, requestMessage);
-                var taskCompletionSource = new TaskCompletionSource<byte[]>();
+                var taskCompletionSource = new TaskCompletionSource<byte[]>(
+                    TaskCreationOptions.RunContinuationsAsynchronously
+                );
                 var sendThing = new SendThing(
                     requestHeader.CorrelationId,
                     requestBytes.AsMemory(0, offset),
@@ -679,7 +679,7 @@ namespace Kafka.Client.Net
             TaskCompletionSource<byte[]> TaskCompletionSource
         );
 
-        private async ValueTask ExecuteOneWay<TRequest>(
+        private async Task ExecuteOneWay<TRequest>(
             TRequest requestMessage,
             IRequestEncoder<RequestHeaderData, TRequest> requestEncoder,
             CancellationToken cancellationToken
@@ -692,7 +692,7 @@ namespace Kafka.Client.Net
             {
                 await EnsureConnection(cancellationToken).ConfigureAwait(false);
                 var offset = 0;
-                var requestHeader = CreateRequestHeader(requestEncoder, ImmutableArray<TaggedField>.Empty);
+                var requestHeader = CreateRequestHeader(requestEncoder, []);
                 offset = requestEncoder.WriteHeader(requestBytes, offset, requestHeader);
                 offset = requestEncoder.WriteMessage(requestBytes, offset, requestMessage);
                 var taskCompletionSource = new TaskCompletionSource<byte[]>();
@@ -711,7 +711,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        private async ValueTask ApiKeyBootstrap(
+        private async Task ApiKeyBootstrap(
             CancellationToken cancellationToken
         )
         {
@@ -722,7 +722,7 @@ namespace Kafka.Client.Net
             while (true)
             {
                 var offset = 0;
-                var requestHeader = CreateRequestHeader(_apiVersionRequestHandler, ImmutableArray<TaggedField>.Empty);
+                var requestHeader = CreateRequestHeader(_apiVersionRequestHandler, []);
                 offset = _apiVersionRequestHandler.WriteHeader(requestBytes, offset, requestHeader);
                 offset = _apiVersionRequestHandler.WriteMessage(requestBytes, offset, API_VERSION_REQUEST);
 
@@ -747,7 +747,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        private async ValueTask MetadataBootstrap(
+        private async Task MetadataBootstrap(
             CancellationToken cancellationToken
         )
         {
@@ -756,7 +756,7 @@ namespace Kafka.Client.Net
             while (true)
             {
                 var offset = 0;
-                var requestHeader = CreateRequestHeader(_metadataRequestHandler, ImmutableArray<TaggedField>.Empty);
+                var requestHeader = CreateRequestHeader(_metadataRequestHandler, []);
                 offset = _metadataRequestHandler.WriteHeader(requestBytes, offset, requestHeader);
                 offset = _metadataRequestHandler.WriteMessage(requestBytes, offset, CLUSTER_METADATA_REQUEST);
 
@@ -787,7 +787,7 @@ namespace Kafka.Client.Net
             )
         ;
 
-        private async ValueTask OpenTransport(
+        private async Task OpenTransport(
             CancellationToken cancellationToken
         )
         {
@@ -810,7 +810,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        private async ValueTask EnsureConnection(CancellationToken cancellationToken)
+        private async Task EnsureConnection(CancellationToken cancellationToken)
         {
             if (_connection.IsConnected)
                 return;
@@ -833,6 +833,7 @@ namespace Kafka.Client.Net
 
         private async Task SendLoop(CancellationToken cancellationToken)
         {
+            await Task.Yield();
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -855,6 +856,7 @@ namespace Kafka.Client.Net
 
         private async Task ReceiveLoop(CancellationToken cancellationToken)
         {
+            await Task.Yield();
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -971,18 +973,17 @@ namespace Kafka.Client.Net
             SetCodecVersion(_fetchResponseHandler, _apiVersions);
         }
 
-        private async ValueTask NetworkLoopStop(CancellationToken cancellationToken)
+        private async Task NetworkLoopStop(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             _internalCts.Cancel();
             await Task.WhenAll(_senderThread, _receiverThread).ConfigureAwait(false);
-            await Task.Yield();
             var pendingRequests = _pendingRequests.Select(r => r.Value).ToImmutableArray();
             foreach (var pendingRequest in pendingRequests)
                 pendingRequest.SetCanceled(CancellationToken.None);
         }
 
-        private async ValueTask NetworkLoopStart(CancellationToken cancellationToken)
+        private async Task NetworkLoopStart(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             _internalCts = new();

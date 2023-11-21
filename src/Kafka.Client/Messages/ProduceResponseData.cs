@@ -1,11 +1,11 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
-using TopicProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse;
-using NodeEndpoint = Kafka.Client.Messages.ProduceResponseData.NodeEndpoint;
-using LeaderIdAndEpoch = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.LeaderIdAndEpoch;
 using PartitionProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse;
+using NodeEndpoint = Kafka.Client.Messages.ProduceResponseData.NodeEndpoint;
+using TopicProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse;
+using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
+using LeaderIdAndEpoch = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.LeaderIdAndEpoch;
 
 namespace Kafka.Client.Messages {
     /// <summary>

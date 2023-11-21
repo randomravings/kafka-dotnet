@@ -9,8 +9,8 @@
       //"commandLineArgs": "topics delete --topic test --bootstrap-server localhost:9092 --log-level trace"
       //"commandLineArgs": "producer --topic test  --bootstrap-server localhost:9092 --properties enable.idempotence=true --log-level trace"
       //"commandLineArgs": "producer --topic test  --bootstrap-server localhost:9092 --log-level trace"
-      //"commandLineArgs": "consumer --topic test --bootstrap-server localhost:9092 --group-id test-cg --log-level trace --properties auto.offset.reset=latest client.id=me.org"
-      "commandLineArgs": "consumer --topic test --bootstrap-server localhost:9092 --group-id test-cg --log-level trace --properties client.id=me.org enable.auto.commit=true auto.offset.reset=earliest"
+      "commandLineArgs": "consumer --topic test --bootstrap-server localhost:9092 --group-id test-cg-4 --log-level trace --properties auto.offset.reset=earliest client.id=me.org"
+      //"commandLineArgs": "consumer --topic test --bootstrap-server localhost:9092 --group-id test-cg --log-level trace --properties client.id=me.org enable.auto.commit=true auto.offset.reset=earliest"
       //"commandLineArgs": "consumer --bootstrap-server localhost:9092,localhost:9093,localhost:9094  --topic test --partition-assign 0:-1,1:-1,2:-1,3:-1,4:-1,5:-1 --log-level trace"
     }
   }

@@ -1,6 +1,6 @@
 ﻿namespace Kafka.Client.Model
 {
-    internal readonly record struct ProduceCommand(
+    internal sealed record ProduceCommand(
         ProduceRecord Record,
         TaskCompletionSource<ProduceResult> Callback
     );

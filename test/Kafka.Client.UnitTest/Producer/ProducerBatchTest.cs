@@ -312,7 +312,7 @@ namespace Kafka.Client.UnitTest.Producer
                     ImmutableArray<RecordHeader>.Empty,
                     Attributes.None
                 ),
-                new TaskCompletionSource<ProduceResult>()
+                new()
             )
         ;
 
@@ -332,7 +332,7 @@ namespace Kafka.Client.UnitTest.Producer
                     headers.Select(r => new RecordHeader(r.Item1, r.Item2)).ToImmutableArray(),
                     Attributes.None
                 ),
-                new TaskCompletionSource<ProduceResult>()
+                new()
             )
         ;
 
