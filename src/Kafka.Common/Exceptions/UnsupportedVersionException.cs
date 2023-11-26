@@ -21,9 +21,5 @@ namespace Kafka.Common.Exceptions
         public UnsupportedVersionException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
-        protected UnsupportedVersionException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Kafka.Client.Config;
+﻿using Kafka.Client.Collections;
+using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Messages.Encoding;
@@ -8,9 +9,7 @@ using Kafka.Common.Model;
 using Kafka.Common.Net;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.Net.Sockets;
 
 namespace Kafka.Client.Net
@@ -21,8 +20,8 @@ namespace Kafka.Client.Net
         private const string CLIENT_NAME = "kafka-dotnet";
         private const string CLIENT_VERSION = "0.1.0";
 
-        private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]>> _pendingRequests = new();
-        private readonly BlockingCollection<SendThing> _sendQueue = new();
+        private readonly SpinningDictionary<int, TaskCompletionSource<byte[]>> _pendingRequests = new(Compare.Int32);
+        private readonly System.Collections.Concurrent.BlockingCollection<SendThing> _sendQueue = [];
 
         private CancellationTokenSource _internalCts = new();
         private Task _senderThread = Task.CompletedTask;
@@ -844,7 +843,9 @@ namespace Kafka.Client.Net
                         cancellationToken
                     ).ConfigureAwait(false);
                     if (!sendThing.OneWay)
-                        _pendingRequests[sendThing.CorrelationId] = sendThing.TaskCompletionSource;
+                        _pendingRequests.Add(sendThing.CorrelationId, sendThing.TaskCompletionSource);
+                    else
+                        sendThing.TaskCompletionSource.SetResult([]);
                 }
                 catch (OperationCanceledException) { }
                 catch (SocketException ex)
@@ -976,7 +977,7 @@ namespace Kafka.Client.Net
         private async Task NetworkLoopStop(CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            _internalCts.Cancel();
+            await _internalCts.CancelAsync().ConfigureAwait(false);
             await Task.WhenAll(_senderThread, _receiverThread).ConfigureAwait(false);
             var pendingRequests = _pendingRequests.Select(r => r.Value).ToImmutableArray();
             foreach (var pendingRequest in pendingRequests)

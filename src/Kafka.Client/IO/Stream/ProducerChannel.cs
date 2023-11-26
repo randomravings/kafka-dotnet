@@ -376,7 +376,7 @@ namespace Kafka.Client.IO.Stream
             CancellationToken cancellationToken
         )
         {
-            _internalCts.Cancel();
+            await _internalCts.CancelAsync().ConfigureAwait(false);
             await Task.WhenAll(_recordsAccumulatorTask, _recordsBuilderTask).ConfigureAwait(false);
             await _protocol.Close(cancellationToken).ConfigureAwait(false);
         }

@@ -30,10 +30,9 @@ namespace Kafka.Client.IO.Stream
             ILogger logger
         )
         {
-            if (memory <= 0)
-                throw new ArgumentOutOfRangeException(nameof(memory));
-            if (poolableSize <= 0 || poolableSize > memory)
-                throw new ArgumentOutOfRangeException(nameof(poolableSize));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(memory, nameof(memory));
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(poolableSize, nameof(memory));
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(poolableSize, memory, nameof(poolableSize));
             var maxPoolCount = (int)Math.Ceiling((double)memory / poolableSize);
             return new BufferPool(memory, poolableSize, maxPoolCount, logger);
         }

@@ -1,4 +1,5 @@
-﻿using Kafka.Client.Config;
+﻿using Kafka.Client.Collections;
+using Kafka.Client.Config;
 using Kafka.Client.Net;
 using Kafka.Common.Model;
 using Kafka.Common.Net;
@@ -105,7 +106,7 @@ namespace Kafka.Client.IO.Stream
             throw new NotImplementedException();
         }
 
-        protected override ValueTask<IReadOnlyDictionary<TopicPartition, LeaderAndOffset>> GetTopicPartitionOffsets(CancellationToken cancellationToken)
+        protected override ValueTask<TopicPartitionDictionary<LeaderAndOffset>> GetTopicPartitionOffsets(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

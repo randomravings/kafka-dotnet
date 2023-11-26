@@ -1,9 +1,9 @@
-﻿using Kafka.Client.Config;
+﻿using Kafka.Client.Collections;
+using Kafka.Client.Config;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
 using Kafka.Client.Net;
 using Kafka.Common.Model;
-using Kafka.Common.Model.Comparison;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
@@ -26,7 +26,7 @@ namespace Kafka.Client.IO.Stream
 
         public async Task Run(
             IClientConnection connection,
-            IDictionary<TopicPartition, Offset> topicPartitionOffsets,
+            TopicPartitionDictionary<Offset> topicPartitionOffsets,
             ConcurrentQueue<FetchResult> queue,
             ManualResetEventSlim resetEvent,
             CancellationToken cancellationToken
@@ -72,13 +72,14 @@ namespace Kafka.Client.IO.Stream
 
         private static (int offsetsProcessed, ImmutableArray<ConsumerRecord> Records) ProcessFetchResponse(
             in FetchResponseData fetchResponse,
-            in IDictionary<TopicPartition, Offset> watermarks
+            in TopicPartitionDictionary<Offset> watermarks
         )
         {
             var totalOffsetsProcessed = 0;
             var recordsBuilder = ImmutableArray.CreateBuilder<ConsumerRecord>();
-            foreach (var topicResponse in fetchResponse.ResponsesField)
+            for (int i = 0; i < fetchResponse.ResponsesField.Length; i++)
             {
+                var topicResponse = fetchResponse.ResponsesField[i];
                 var topic = new Topic(topicResponse.TopicIdField, topicResponse.TopicField);
                 var processedOffsets = ProcessTopicResponse(
                     topic,
@@ -95,12 +96,13 @@ namespace Kafka.Client.IO.Stream
             in Topic topic,
             in FetchResponseData.FetchableTopicResponse topicResponse,
             in ImmutableArray<ConsumerRecord>.Builder recordsBuilder,
-            in IDictionary<TopicPartition, Offset> watermarks
+            in TopicPartitionDictionary<Offset> watermarks
         )
         {
             var offsetsProcessed = 0;
-            foreach (var partition in topicResponse.PartitionsField)
+            for (int i = 0; i < topicResponse.PartitionsField.Length; i++)
             {
+                var partition = topicResponse.PartitionsField[i];
                 var topicPartition = new TopicPartition(topic, partition.PartitionIndexField);
                 if (partition.ErrorCodeField != 0)
                 {
@@ -133,33 +135,38 @@ namespace Kafka.Client.IO.Stream
             in TopicPartition topicPartition,
             in FetchResponseData.FetchableTopicResponse.PartitionData partition,
             in ImmutableArray<ConsumerRecord>.Builder recordsBuilder,
-            in IDictionary<TopicPartition, Offset> watermarks
+            in TopicPartitionDictionary<Offset> watermarks
         )
         {
             // Skip empty records.
-            if (partition.RecordsField == null)
+            var recordBatches = partition.RecordsField.GetValueOrDefault([]);
+            if (recordBatches.Length == 0)
                 return 0;
 
             var offsetsProcessed = 0;
             var watermark = watermarks[topicPartition];
-            foreach (var recordBatch in partition.RecordsField)
+            for (int i = 0; i < recordBatches.Length; i++)
             {
+                var recordBatch = recordBatches[i];
                 offsetsProcessed += recordBatch.Records.Count;
                 var offset = recordBatch.BaseOffset;
 
                 // Control batches are expected to have exactly one record.
                 if (recordBatch.Attributes.HasFlag(Attributes.IsControlBatch))
                 {
-                    watermarks[topicPartition] = offset + recordBatch.Records.Count;
+                    watermarks.Set(
+                        topicPartition,
+                        offset + recordBatch.Records.Count
+                    );
                     continue;
                 }
 
-                for (int i = 0; i < recordBatch.Records.Count; i++, offset++)
+                for (int j = 0; j < recordBatch.Records.Count; j++, offset++)
                 {
                     if (offset < watermark)
                         continue;
 
-                    var record = recordBatch.Records[i];
+                    var record = recordBatch.Records[j];
                     var timestampMs = recordBatch.BaseTimestamp + record.TimestampDelta;
                     var timestamp = recordBatch.Attributes.HasFlag(Attributes.LogAppendTime) ?
                         Timestamp.LogAppend(timestampMs) :
@@ -177,39 +184,54 @@ namespace Kafka.Client.IO.Stream
                     );
                     recordsBuilder.Add(rawConsumerRecord);
                 }
-                watermarks[topicPartition] = offset;
+                watermarks.Set(
+                    topicPartition,
+                    offset
+                );
             }
             return offsetsProcessed;
         }
 
         private FetchRequestData CreateFetchRequest(
-            in IDictionary<TopicPartition, Offset> topicPartitionOffsets
+            in TopicPartitionDictionary<Offset> topicPartitionOffsets
         )
         {
-            var fetchTopics = topicPartitionOffsets
-                // TODO: more elegant solution for topic compare
-                .GroupBy(g => g.Key.Topic, TopicCompareById.Equality)
-                .Select(t =>
-                    new FetchRequestData.FetchTopic(
-                        t.Key.TopicName,
-                        t.Key.TopicId,
-                        t.Select(tp =>
-                            new FetchRequestData.FetchTopic.FetchPartition(
-                                PartitionField: tp.Key.Partition,
-                                CurrentLeaderEpochField: -1,
-                                FetchOffsetField: tp.Value,
-                                LastFetchedEpochField: -1,
-                                LogStartOffsetField: -1,
-                                PartitionMaxBytesField: _maxPartitionFetchBytes,
-                                []
-                            )
-                        )
-                        .ToImmutableArray(),
+            var items = topicPartitionOffsets.CopyItems();
+            if(items.Length == 0)
+                return FetchRequestData.Empty;
+            var fetchTopicsBuilder = ImmutableArray.CreateBuilder<FetchRequestData.FetchTopic>();
+            var fetchPartitionsBuilder = ImmutableArray.CreateBuilder<FetchRequestData.FetchTopic.FetchPartition>();
+            var index = 0;
+            var length = items.Length;
+            var currentTopic = items[0].Key.Topic;
+            while (index < length)
+            {
+                (var (topic, partition), var offset) = items[index];
+                var fetchPartition = new FetchRequestData.FetchTopic.FetchPartition(
+                    PartitionField: partition,
+                    CurrentLeaderEpochField: -1,
+                    FetchOffsetField: offset,
+                    LastFetchedEpochField: -1,
+                    LogStartOffsetField: -1,
+                    PartitionMaxBytesField: _maxPartitionFetchBytes,
+                    []
+                );
+                fetchPartitionsBuilder.Add(fetchPartition);
+                index++;
+                if (currentTopic != topic || index == length)
+                {
+                    var fetchPartitions = fetchPartitionsBuilder.DrainToImmutable();
+                    var fetchTopic = new FetchRequestData.FetchTopic(
+                        currentTopic.TopicName,
+                        currentTopic.TopicId,
+                        fetchPartitions,
                         []
-                    )
-                )
-                .ToImmutableArray()
-            ;
+                    );
+                    fetchTopicsBuilder.Add(fetchTopic);
+                    currentTopic = topic;
+                }
+            }
+            var fetchTopics = fetchTopicsBuilder.ToImmutable();
             return new(
                 ClusterIdField: null,
                 ReplicaIdField: -1,
@@ -221,7 +243,7 @@ namespace Kafka.Client.IO.Stream
                 SessionIdField: 0,
                 SessionEpochField: -1,
                 TopicsField: fetchTopics,
-                ForgottenTopicsDataField: ImmutableArray<FetchRequestData.ForgottenTopic>.Empty,
+                ForgottenTopicsDataField: [],
                 RackIdField: _clientRack,
                 []
             );

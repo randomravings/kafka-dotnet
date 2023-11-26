@@ -691,19 +691,19 @@ namespace Kafka.Client
             return builder.ToImmutable();
         }
 
-        private static IReadOnlySet<TopicName> ToNameReadonlySet(TopicPartition topicPartition) =>
+        private static ImmutableSortedSet<TopicName> ToNameReadonlySet(TopicPartition topicPartition) =>
             ToReadOnlySet(topicPartition.Topic.TopicName)
         ;
 
-        private static IReadOnlySet<TopicName> ToNameReadonlySet(IReadOnlySet<TopicPartition> topicPartitions) =>
+        private static ImmutableSortedSet<TopicName> ToNameReadonlySet(IReadOnlySet<TopicPartition> topicPartitions) =>
             ToReadOnlySet(topicPartitions.Select(r => r.Topic.TopicName))
         ;
 
-        private static IReadOnlySet<TopicName> ToReadOnlySet(TopicName topic) =>
+        private static ImmutableSortedSet<TopicName> ToReadOnlySet(TopicName topic) =>
             ImmutableSortedSet.Create(TopicNameCompare.Instance, topic)
         ;
 
-        private static IReadOnlySet<TopicName> ToReadOnlySet(IEnumerable<TopicName> topicNames) =>
+        private static ImmutableSortedSet<TopicName> ToReadOnlySet(IEnumerable<TopicName> topicNames) =>
             topicNames
             .ToImmutableSortedSet(TopicNameCompare.Instance)
         ;

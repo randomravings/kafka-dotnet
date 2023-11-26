@@ -4,6 +4,7 @@
         Guid Value
     )
     {
+        public bool IsEmpty => Value == Guid.Empty;
         public static readonly TopicId Empty = Guid.Empty;
         public static implicit operator TopicId(Guid? uuid) => uuid.HasValue ? new(uuid.Value) : Empty;
         public static implicit operator TopicId(string? topicId) => Guid.TryParse(topicId, out var uuid) ? uuid : Guid.Empty;

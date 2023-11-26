@@ -16,9 +16,5 @@ namespace Kafka.Common.Exceptions
         public IllegalStateException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
-        protected IllegalStateException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

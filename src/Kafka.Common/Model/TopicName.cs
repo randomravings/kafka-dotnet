@@ -4,6 +4,7 @@
         string? Value
     )
     {
+        public bool IsEmpty => string.IsNullOrEmpty(Value);
         public static readonly TopicName Empty = new(null);
         public static implicit operator TopicName(string? id) => new(id);
         public static implicit operator string(TopicName topicName) => topicName.Value ?? "";

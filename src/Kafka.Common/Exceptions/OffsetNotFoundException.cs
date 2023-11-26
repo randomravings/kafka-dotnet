@@ -16,9 +16,5 @@ namespace Kafka.Common.Exceptions
         public OffsetNotFoundException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
-        protected OffsetNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

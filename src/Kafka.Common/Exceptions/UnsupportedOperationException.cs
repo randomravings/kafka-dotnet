@@ -16,9 +16,5 @@ namespace Kafka.Common.Exceptions
         public UnsupportedOperationException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
-        protected UnsupportedOperationException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

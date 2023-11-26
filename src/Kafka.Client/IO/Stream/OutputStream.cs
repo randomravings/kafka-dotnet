@@ -1,11 +1,11 @@
-﻿using Kafka.Client.Config;
+﻿using Kafka.Client.Collections;
+using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
 using Kafka.Client.Net;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
-using Kafka.Common.Model.Comparison;
 using Kafka.Common.Net;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
@@ -13,38 +13,30 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client.IO.Stream
 {
-    internal sealed class OutputStream :
+    internal sealed class OutputStream(
+        IConnectionManager<IClientConnection> connections,
+        OutputStreamConfig producerConfig,
+        ILogger logger
+    ) :
         IOutputStream
     {
         private readonly CancellationTokenSource _internalCts = new();
-        private readonly SortedList<ClusterNodeId, ProducerChannel> _brokerChannels = new(ClusterNodeIdCompare.Instance);
-        private readonly SortedList<TopicPartition, ProducerChannel> _brokerChannelsByTopicPartition = new(TopicPartitionCompare.Instance);
-        private readonly SortedList<TopicName, ProducerTopicMetadata> _producerMetadata = new(TopicNameCompare.Instance);
-        private readonly SortedSet<TopicPartition> _transactionMembers = new(TopicPartitionCompare.Instance);
+        private readonly ClusterNodeDictionary<ProducerChannel> _brokerChannels = [];
+        private readonly TopicPartitionDictionary<ProducerChannel> _brokerChannelsByTopicPartition = new ();
+        private readonly TopicDictionary<ProducerTopicMetadata> _producerMetadata = [];
+        private readonly TopicPartitionSet _transactionMembers = new();
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
         private Attributes _attributes = Attributes.None;
-        private readonly string _transactionalId;
+        private readonly string _transactionalId = producerConfig.TransactionalId ?? "";
         private readonly int _transactionTimeoutMs;
         private readonly bool _enableIdempotence;
-        private readonly OutputStreamConfig _producerConfig;
-        private readonly ILogger _logger;
-        private readonly IConnectionManager<IClientConnection> _connections;
+        private readonly OutputStreamConfig _producerConfig = producerConfig;
+        private readonly ILogger _logger = logger;
+        private readonly IConnectionManager<IClientConnection> _connections = connections;
 
         private long _producerId = -1;
         private short _producerEpoch = -1;
         private IClientConnection? _coordinator;
-
-        public OutputStream(
-            IConnectionManager<IClientConnection> connections,
-            OutputStreamConfig producerConfig,
-            ILogger logger
-        )
-        {
-            _producerConfig = producerConfig;
-            _logger = logger;
-            _connections = connections;
-            _transactionalId = producerConfig.TransactionalId ?? "";
-        }
 
         async Task<ProducerTopicMetadata> IOutputStream.MetadataForTopic(
             TopicName topic,
@@ -72,7 +64,7 @@ namespace Kafka.Client.IO.Stream
             CancellationToken cancellationToken
         )
         {
-            if (_producerMetadata.TryGetValue(topic, out var metadata) && metadata.ExpireTime < DateTimeOffset.UtcNow)
+            if (_producerMetadata.Get(topic, out var metadata) && metadata.ExpireTime < DateTimeOffset.UtcNow)
                 return metadata;
             _producerMetadata.Remove(topic);
             metadata = await CreateTopicMetadata(topic, cancellationToken).ConfigureAwait(false);
@@ -153,7 +145,7 @@ namespace Kafka.Client.IO.Stream
             var partitions = ImmutableArray.Create(
                 new AddPartitionsToTxnRequestData.AddPartitionsToTxnTopic(
                     topicPartition.Topic.TopicName,
-                    ImmutableArray.Create(topicPartition.Partition.Value),
+                    [topicPartition.Partition.Value],
                     []
                 )
             );
@@ -221,7 +213,7 @@ namespace Kafka.Client.IO.Stream
 
         private async Task FlushChannels(CancellationToken cancellationToken)
         {
-            var flushTasks = _brokerChannels.Values.Select(r => r.Flush(cancellationToken));
+            var flushTasks = _brokerChannels.Select(r => r.Value.Flush(cancellationToken));
             await Task.WhenAll(flushTasks).ConfigureAwait(false);
         }
 
@@ -240,33 +232,35 @@ namespace Kafka.Client.IO.Stream
             CancellationToken cancellationToken
         )
         {
+            if (_brokerChannelsByTopicPartition.Get(topicPartition, out var channel))
+                return channel;
+
             await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (_brokerChannelsByTopicPartition.TryGetValue(topicPartition, out var newChannel))
-                    return newChannel;
-
+                if (_brokerChannelsByTopicPartition.Get(topicPartition, out channel))
+                    return channel;
                 var metadata = await MetadataForTopic(
                     topicPartition.Topic.TopicName,
                     cancellationToken
                 ).ConfigureAwait(false);
                 var nodeId = metadata.PartitionMetadata[topicPartition.Partition].LeaderId;
 
-                if (!_brokerChannels.TryGetValue(nodeId, out newChannel))
+                if (!_brokerChannels.Get(nodeId, out channel))
                 {
-                    newChannel = await CreateChannel(
+                    channel = await CreateChannel(
                         nodeId,
                         cancellationToken
                     ).ConfigureAwait(false);
-                    _brokerChannels.Add(nodeId, newChannel);
+                    _brokerChannels.Add(nodeId, channel);
                 }
 
-                _brokerChannelsByTopicPartition.Add(topicPartition, newChannel);
-                return newChannel;
+                _brokerChannelsByTopicPartition.Add(topicPartition, channel);
+                return channel;
             }
             finally
             {
-                _semaphoreSlim?.Release();
+                _semaphoreSlim.Release();
             }
         }
 
@@ -422,10 +416,9 @@ namespace Kafka.Client.IO.Stream
 
         async Task IOutputStream.Close(CancellationToken cancellationToken)
         {
-            _internalCts.Cancel();
+            await _internalCts.CancelAsync().ConfigureAwait(false);
             var channelClose = _brokerChannels
-                .Values
-                .Select(r => r.Close(cancellationToken))
+                .Select(r => r.Value.Close(cancellationToken))
             ;
             await Task.WhenAll(channelClose).ConfigureAwait(false);
         }

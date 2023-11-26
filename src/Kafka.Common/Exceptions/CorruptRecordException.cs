@@ -15,9 +15,5 @@ namespace Kafka.Common.Exceptions
         public CorruptRecordException(string? message, Exception? innerException) : base(message, innerException)
         {
         }
-
-        protected CorruptRecordException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }
