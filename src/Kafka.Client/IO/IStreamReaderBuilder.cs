@@ -5,6 +5,8 @@ namespace Kafka.Client.IO
 {
     public interface IStreamReaderBuilder
     {
+        IStreamReaderBuilder WithLogger(ILogger logger);
+        IStreamReader Build();
         IStreamReaderBuilder<TKey> WithKey<TKey>(
             IDeserializer<TKey> keyDeserializer
         );
@@ -19,7 +21,6 @@ namespace Kafka.Client.IO
 
     public interface IStreamReaderBuilder<TKey, TValue>
     {
-        IStreamReaderBuilder<TKey, TValue> WithLogger(ILogger logger);
         IStreamReader<TKey, TValue> Build();
     }
 }

@@ -1,5 +1,4 @@
-﻿using Kafka.Common.Model;
-using Kafka.Common.Serialization;
+﻿using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -9,18 +8,52 @@ namespace Kafka.Client.IO.Stream
         IStreamWriterBuilder
     {
         protected readonly IOutputStream _stream;
+        protected IPartitioner _partitioner = DefaultPartitioner.Instance;
+        protected ILogger _logger = NullLogger.Instance;
+
         internal StreamWriterBuilder(
-            IOutputStream stream
+            IOutputStream stream,
+            IPartitioner partitioner,
+            ILogger logger
         )
         {
             _stream = stream;
+            _partitioner = partitioner;
+            _logger = logger;
         }
+
+        IStreamWriterBuilder IStreamWriterBuilder.WithLogger(
+            ILogger logger
+        )
+        {
+            _logger = logger;
+            return this;
+        }
+
+        IStreamWriterBuilder IStreamWriterBuilder.WithPartitioner(
+            IPartitioner partitioner
+        )
+        {
+            _partitioner = partitioner;
+            return this;
+        }
+
         IStreamWriterBuilder<TKey> IStreamWriterBuilder.WithKey<TKey>(
             ISerializer<TKey> keySerializer
         ) =>
             new StreamWriterBuilder<TKey>(
                 _stream,
-                keySerializer
+                keySerializer,
+                _partitioner,
+                _logger
+            )
+        ;
+
+        IStreamWriter IStreamWriterBuilder.Build() =>
+            new StreamWriter(
+                _stream,
+                _partitioner,
+                _logger
             )
         ;
     }
@@ -30,11 +63,14 @@ namespace Kafka.Client.IO.Stream
         IStreamWriterBuilder<TKey>
     {
         protected readonly ISerializer<TKey> _keySerializer;
+
         internal StreamWriterBuilder(
             IOutputStream stream,
-            ISerializer<TKey> keySerializer
+            ISerializer<TKey> keySerializer,
+            IPartitioner partitioner,
+            ILogger logger
         )
-            : base(stream)
+            : base(stream, partitioner, logger)
         {
             _keySerializer = keySerializer;
         }
@@ -45,7 +81,9 @@ namespace Kafka.Client.IO.Stream
             new StreamWriterBuilder<TKey, TValue>(
                 _stream,
                 _keySerializer,
-                valueSerialzier
+                valueSerialzier,
+                _partitioner,
+                _logger
             )
         ;
     }
@@ -55,33 +93,17 @@ namespace Kafka.Client.IO.Stream
         IStreamWriterBuilder<TKey, TValue>
     {
         private readonly ISerializer<TValue> _valueSerializer;
-        private ILogger _logger = NullLogger.Instance;
-        private IPartitioner _partitioner = DefaultPartitioner.Instance;
 
         internal StreamWriterBuilder(
             IOutputStream stream,
             ISerializer<TKey> keySerializer,
-            ISerializer<TValue> valueSerializer
-        )
-            : base(stream, keySerializer)
-        {
-            _valueSerializer = valueSerializer;
-        }
-
-        IStreamWriterBuilder<TKey, TValue> IStreamWriterBuilder<TKey, TValue>.WithLogger(
+            ISerializer<TValue> valueSerializer,
+            IPartitioner partitioner,
             ILogger logger
         )
+            : base(stream, keySerializer, partitioner, logger)
         {
-            _logger = logger;
-            return this;
-        }
-
-        IStreamWriterBuilder<TKey, TValue> IStreamWriterBuilder<TKey, TValue>.WithPartitioner(
-            IPartitioner partitioner
-        )
-        {
-            _partitioner = partitioner;
-            return this;
+            _valueSerializer = valueSerializer;
         }
 
         IStreamWriter<TKey, TValue> IStreamWriterBuilder<TKey, TValue>.Build() =>

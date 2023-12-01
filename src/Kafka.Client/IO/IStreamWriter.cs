@@ -3,6 +3,39 @@ using Kafka.Common.Model;
 
 namespace Kafka.Client.IO
 {
+    public interface IStreamWriter :
+        IDisposable
+    {
+        Task<ProduceResult> Write(
+            TopicName Topic,
+            ReadOnlyMemory<byte>? key,
+            ReadOnlyMemory<byte>? value,
+            CancellationToken cancellationToken
+        );
+        Task<ProduceResult> Write(
+            TopicName Topic,
+            ReadOnlyMemory<byte>? key,
+            ReadOnlyMemory<byte>? value,
+            IReadOnlyList<RecordHeader> headers,
+            CancellationToken cancellationToken
+        );
+        Task<ProduceResult> Write(
+            TopicName Topic,
+            ReadOnlyMemory<byte>? key,
+            ReadOnlyMemory<byte>? value,
+            Timestamp timestamp,
+            CancellationToken cancellationToken
+        );
+        Task<ProduceResult> Write(
+            TopicName Topic,
+            ReadOnlyMemory<byte>? key,
+            ReadOnlyMemory<byte>? value,
+            Timestamp timestamp,
+            IReadOnlyList<RecordHeader> headers,
+            CancellationToken cancellationToken
+        );
+    }
+
     public interface IStreamWriter<TKey, TValue> :
         IDisposable
     {

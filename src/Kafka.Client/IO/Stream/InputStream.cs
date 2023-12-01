@@ -58,7 +58,8 @@ namespace Kafka.Client.IO.Stream
 
         IStreamReaderBuilder IInputStream.CreateReader() =>
             new StreamReaderBuilder(
-                this
+                this,
+                _logger
             )
         ;
 

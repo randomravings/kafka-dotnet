@@ -8,18 +8,37 @@ namespace Kafka.Client.IO.Stream
         IStreamReaderBuilder
     {
         protected readonly IInputStream _stream;
+        protected ILogger _logger = NullLogger.Instance;
 
         internal StreamReaderBuilder(
-            IInputStream stream
+            IInputStream stream,
+            ILogger logger
         )
         {
             _stream = stream;
+            _logger = logger;
         }
 
-        IStreamReaderBuilder<TKey> IStreamReaderBuilder.WithKey<TKey>(IDeserializer<TKey> keyDeserializer) =>
+        IStreamReaderBuilder IStreamReaderBuilder.WithLogger(ILogger logger)
+        {
+            _logger = logger;
+            return this;
+        }
+
+        IStreamReader IStreamReaderBuilder.Build() =>
+            new StreamReader(
+                _stream,
+                _logger
+            )
+        ;
+
+        IStreamReaderBuilder<TKey> IStreamReaderBuilder.WithKey<TKey>(
+            IDeserializer<TKey> keyDeserializer
+        ) =>
             new StreamReaderValueBuilder<TKey>(
                 _stream,
-                keyDeserializer
+                keyDeserializer,
+                _logger
             )
         ;
     }
@@ -29,19 +48,24 @@ namespace Kafka.Client.IO.Stream
         IStreamReaderBuilder<TKey>
     {
         protected readonly IDeserializer<TKey> _keyDeserializer;
+
         internal StreamReaderValueBuilder(
             IInputStream stream,
-            IDeserializer<TKey> keyDeserializer
-        ) : base(stream)
+            IDeserializer<TKey> keyDeserializer,
+            ILogger logger
+        ) : base(stream, logger)
         {
             _keyDeserializer = keyDeserializer;
         }
 
-        IStreamReaderBuilder<TKey, TValue> IStreamReaderBuilder<TKey>.WithValue<TValue>(IDeserializer<TValue> valueDeserializer) =>
+        IStreamReaderBuilder<TKey, TValue> IStreamReaderBuilder<TKey>.WithValue<TValue>(
+            IDeserializer<TValue> valueDeserializer
+        ) =>
             new StreamReaderBuilder<TKey, TValue>(
                 _stream,
                 _keyDeserializer,
-                valueDeserializer
+                valueDeserializer,
+                _logger
             )
         ;
     }
@@ -51,19 +75,15 @@ namespace Kafka.Client.IO.Stream
         IStreamReaderBuilder<TKey, TValue>
     {
         private readonly IDeserializer<TValue> _valueDeserializer;
-        private ILogger _logger = NullLogger.Instance;
+
         internal StreamReaderBuilder(
             IInputStream stream,
             IDeserializer<TKey> keyDeserializer,
-            IDeserializer<TValue> valueDeserializer
-        ) : base(stream, keyDeserializer)
+            IDeserializer<TValue> valueDeserializer,
+            ILogger logger
+        ) : base(stream, keyDeserializer, logger)
         {
             _valueDeserializer = valueDeserializer;
-        }
-        IStreamReaderBuilder<TKey, TValue> IStreamReaderBuilder<TKey, TValue>.WithLogger(ILogger logger)
-        {
-            _logger = logger;
-            return this;
         }
 
         IStreamReader<TKey, TValue> IStreamReaderBuilder<TKey, TValue>.Build() =>

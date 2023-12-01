@@ -75,7 +75,9 @@ namespace Kafka.Client.IO.Stream
 
         IStreamWriterBuilder IOutputStream.CreateWriter() =>
             new StreamWriterBuilder(
-                this
+                this,
+                DefaultPartitioner.Instance,
+                _logger
             )
         ;
 

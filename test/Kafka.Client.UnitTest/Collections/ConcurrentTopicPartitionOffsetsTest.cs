@@ -24,7 +24,7 @@ namespace Kafka.Client.UnitTest.Collections
                 .ToArray()
             ;
 
-            var topicPartitionOffsets = new TopicPartitionDictionary<Offset>();
+            var topicPartitionOffsets = new TopicPartitionMap<Offset>();
 
             for (int i = 0; i < topicPartitionOffsets.Count; i++)
             {

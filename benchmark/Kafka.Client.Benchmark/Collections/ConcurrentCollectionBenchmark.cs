@@ -27,7 +27,7 @@ namespace Kafka.Client.Benchmark.Buffering
         private readonly List<TopicPartition> _topics = [];
         private readonly SortedList<TopicPartition, object> _sortedList = [];
         private readonly ConcurrentDictionary<TopicPartition, object> _concurrentDictionary = new(TopicPartitionCompare.Equality);
-        private readonly TopicPartitionDictionary<object> _spinningDictionary = [];
+        private readonly TopicPartitionMap<object> _spinningDictionary = [];
 
         private readonly object _object = new();
 
@@ -131,7 +131,7 @@ namespace Kafka.Client.Benchmark.Buffering
         ) where TKey : notnull => concurrentDictionary[key] = value;
 
         private static void UpsertSpinningTopicPartitionDictionary<TValue>(
-            in TopicPartitionDictionary<TValue> spinningTopicPartitionDictionary,
+            in TopicPartitionMap<TValue> spinningTopicPartitionDictionary,
             in TopicPartition key,
             in TValue value
         ) => spinningTopicPartitionDictionary.Upsert(key, value);

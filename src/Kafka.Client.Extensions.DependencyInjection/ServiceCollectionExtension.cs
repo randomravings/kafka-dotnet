@@ -59,9 +59,9 @@ namespace Kafka.Client.Extensions.DependencyInjection
                 ;
                 return stream
                     .CreateWriter()
+                    .WithLogger(logger)
                     .WithKey(keySerializer)
                     .WithValue(valueSerializer)
-                    .WithLogger(logger)
                     .Build()
                 ;
             });
@@ -86,9 +86,9 @@ namespace Kafka.Client.Extensions.DependencyInjection
                 ;
                 return stream
                     .CreateReader()
+                    .WithLogger(logger)
                     .WithKey(keyDeserializer)
                     .WithValue(valueDeserializer)
-                    .WithLogger(logger)
                     .Build()
                 ;
             });
