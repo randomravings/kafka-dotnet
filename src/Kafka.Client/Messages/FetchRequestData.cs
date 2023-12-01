@@ -1,10 +1,10 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ForgottenTopic = Kafka.Client.Messages.FetchRequestData.ForgottenTopic;
-using FetchPartition = Kafka.Client.Messages.FetchRequestData.FetchTopic.FetchPartition;
 using ReplicaState = Kafka.Client.Messages.FetchRequestData.ReplicaState;
 using FetchTopic = Kafka.Client.Messages.FetchRequestData.FetchTopic;
+using ForgottenTopic = Kafka.Client.Messages.FetchRequestData.ForgottenTopic;
+using FetchPartition = Kafka.Client.Messages.FetchRequestData.FetchTopic.FetchPartition;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -22,7 +22,7 @@ namespace Kafka.Client.Messages {
     /// <param name="RackIdField">Rack ID of the consumer making this request</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record FetchRequestData (
+    internal sealed record FetchRequestData (
         string? ClusterIdField,
         int ReplicaIdField,
         ReplicaState ReplicaStateField,
@@ -38,7 +38,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static FetchRequestData Empty { get; } = new(
+        internal static FetchRequestData Empty { get; } = new(
             default(string?),
             default(int),
             ReplicaState.Empty,
@@ -59,14 +59,14 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">The partitions to fetch.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record FetchTopic (
+        internal sealed record FetchTopic (
             string TopicField,
             Guid TopicIdField,
             ImmutableArray<FetchPartition> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static FetchTopic Empty { get; } = new(
+            internal static FetchTopic Empty { get; } = new(
                 "",
                 default(Guid),
                 ImmutableArray<FetchPartition>.Empty,
@@ -81,7 +81,7 @@ namespace Kafka.Client.Messages {
             /// <param name="PartitionMaxBytesField">The maximum bytes to fetch from this partition.  See KIP-74 for cases where this limit may not be honored.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record FetchPartition (
+            internal sealed record FetchPartition (
                 int PartitionField,
                 int CurrentLeaderEpochField,
                 long FetchOffsetField,
@@ -91,7 +91,7 @@ namespace Kafka.Client.Messages {
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static FetchPartition Empty { get; } = new(
+                internal static FetchPartition Empty { get; } = new(
                     default(int),
                     default(int),
                     default(long),
@@ -108,14 +108,14 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">The partitions indexes to forget.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record ForgottenTopic (
+        internal sealed record ForgottenTopic (
             string TopicField,
             Guid TopicIdField,
             ImmutableArray<int> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static ForgottenTopic Empty { get; } = new(
+            internal static ForgottenTopic Empty { get; } = new(
                 "",
                 default(Guid),
                 ImmutableArray<int>.Empty,
@@ -127,13 +127,13 @@ namespace Kafka.Client.Messages {
         /// <param name="ReplicaEpochField">The epoch of this follower, or -1 if not available.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record ReplicaState (
+        internal sealed record ReplicaState (
             int ReplicaIdField,
             long ReplicaEpochField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static ReplicaState Empty { get; } = new(
+            internal static ReplicaState Empty { get; } = new(
                 default(int),
                 default(long),
                 ImmutableArray<TaggedField>.Empty

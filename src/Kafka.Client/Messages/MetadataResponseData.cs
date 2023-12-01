@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic;
 using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic.MetadataResponsePartition;
+using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponseData.MetadataResponseBroker;
 
 namespace Kafka.Client.Messages {
@@ -15,7 +15,7 @@ namespace Kafka.Client.Messages {
     /// <param name="ClusterAuthorizedOperationsField">32-bit bitfield to represent authorized operations for this cluster.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record MetadataResponseData (
+    internal sealed record MetadataResponseData (
         int ThrottleTimeMsField,
         ImmutableArray<MetadataResponseBroker> BrokersField,
         string? ClusterIdField,
@@ -25,7 +25,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static MetadataResponseData Empty { get; } = new(
+        internal static MetadataResponseData Empty { get; } = new(
             default(int),
             ImmutableArray<MetadataResponseBroker>.Empty,
             default(string?),
@@ -41,7 +41,7 @@ namespace Kafka.Client.Messages {
         /// <param name="RackField">The rack of the broker, or null if it has not been assigned to a rack.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record MetadataResponseBroker (
+        internal sealed record MetadataResponseBroker (
             int NodeIdField,
             string HostField,
             int PortField,
@@ -49,7 +49,7 @@ namespace Kafka.Client.Messages {
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static MetadataResponseBroker Empty { get; } = new(
+            internal static MetadataResponseBroker Empty { get; } = new(
                 default(int),
                 "",
                 default(int),
@@ -66,7 +66,7 @@ namespace Kafka.Client.Messages {
         /// <param name="TopicAuthorizedOperationsField">32-bit bitfield to represent authorized operations for this topic.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record MetadataResponseTopic (
+        internal sealed record MetadataResponseTopic (
             short ErrorCodeField,
             string? NameField,
             Guid TopicIdField,
@@ -76,7 +76,7 @@ namespace Kafka.Client.Messages {
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static MetadataResponseTopic Empty { get; } = new(
+            internal static MetadataResponseTopic Empty { get; } = new(
                 default(short),
                 default(string?),
                 default(Guid),
@@ -95,7 +95,7 @@ namespace Kafka.Client.Messages {
             /// <param name="OfflineReplicasField">The set of offline replicas of this partition.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record MetadataResponsePartition (
+            internal sealed record MetadataResponsePartition (
                 short ErrorCodeField,
                 int PartitionIndexField,
                 int LeaderIdField,
@@ -106,7 +106,7 @@ namespace Kafka.Client.Messages {
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static MetadataResponsePartition Empty { get; } = new(
+                internal static MetadataResponsePartition Empty { get; } = new(
                     default(short),
                     default(int),
                     default(int),

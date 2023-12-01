@@ -1,11 +1,11 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using OffsetFetchResponseTopic = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseTopic;
-using OffsetFetchResponsePartitions = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics.OffsetFetchResponsePartitions;
 using OffsetFetchResponseTopics = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics;
 using OffsetFetchResponsePartition = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseTopic.OffsetFetchResponsePartition;
 using OffsetFetchResponseGroup = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup;
+using OffsetFetchResponsePartitions = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics.OffsetFetchResponsePartitions;
+using OffsetFetchResponseTopic = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseTopic;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -15,7 +15,7 @@ namespace Kafka.Client.Messages {
     /// <param name="GroupsField">The responses per group id.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record OffsetFetchResponseData (
+    internal sealed record OffsetFetchResponseData (
         int ThrottleTimeMsField,
         ImmutableArray<OffsetFetchResponseTopic> TopicsField,
         short ErrorCodeField,
@@ -23,7 +23,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static OffsetFetchResponseData Empty { get; } = new(
+        internal static OffsetFetchResponseData Empty { get; } = new(
             default(int),
             ImmutableArray<OffsetFetchResponseTopic>.Empty,
             default(short),
@@ -36,14 +36,14 @@ namespace Kafka.Client.Messages {
         /// <param name="ErrorCodeField">The group-level error code, or 0 if there was no error.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record OffsetFetchResponseGroup (
+        internal sealed record OffsetFetchResponseGroup (
             string GroupIdField,
             ImmutableArray<OffsetFetchResponseTopics> TopicsField,
             short ErrorCodeField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static OffsetFetchResponseGroup Empty { get; } = new(
+            internal static OffsetFetchResponseGroup Empty { get; } = new(
                 "",
                 ImmutableArray<OffsetFetchResponseTopics>.Empty,
                 default(short),
@@ -54,13 +54,13 @@ namespace Kafka.Client.Messages {
             /// <param name="PartitionsField">The responses per partition</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record OffsetFetchResponseTopics (
+            internal sealed record OffsetFetchResponseTopics (
                 string NameField,
                 ImmutableArray<OffsetFetchResponsePartitions> PartitionsField,
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static OffsetFetchResponseTopics Empty { get; } = new(
+                internal static OffsetFetchResponseTopics Empty { get; } = new(
                     "",
                     ImmutableArray<OffsetFetchResponsePartitions>.Empty,
                     ImmutableArray<TaggedField>.Empty
@@ -73,7 +73,7 @@ namespace Kafka.Client.Messages {
                 /// <param name="ErrorCodeField">The partition-level error code, or 0 if there was no error.</param>
                 /// </summary>
                 [GeneratedCode("kgen", "1.0.0.0")]
-                public sealed record OffsetFetchResponsePartitions (
+                internal sealed record OffsetFetchResponsePartitions (
                     int PartitionIndexField,
                     long CommittedOffsetField,
                     int CommittedLeaderEpochField,
@@ -82,7 +82,7 @@ namespace Kafka.Client.Messages {
                     ImmutableArray<TaggedField> TaggedFields
                 )
                 {
-                    public static OffsetFetchResponsePartitions Empty { get; } = new(
+                    internal static OffsetFetchResponsePartitions Empty { get; } = new(
                         default(int),
                         default(long),
                         default(int),
@@ -98,13 +98,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">The responses per partition</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record OffsetFetchResponseTopic (
+        internal sealed record OffsetFetchResponseTopic (
             string NameField,
             ImmutableArray<OffsetFetchResponsePartition> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static OffsetFetchResponseTopic Empty { get; } = new(
+            internal static OffsetFetchResponseTopic Empty { get; } = new(
                 "",
                 ImmutableArray<OffsetFetchResponsePartition>.Empty,
                 ImmutableArray<TaggedField>.Empty
@@ -117,7 +117,7 @@ namespace Kafka.Client.Messages {
             /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record OffsetFetchResponsePartition (
+            internal sealed record OffsetFetchResponsePartition (
                 int PartitionIndexField,
                 long CommittedOffsetField,
                 int CommittedLeaderEpochField,
@@ -126,7 +126,7 @@ namespace Kafka.Client.Messages {
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static OffsetFetchResponsePartition Empty { get; } = new(
+                internal static OffsetFetchResponsePartition Empty { get; } = new(
                     default(int),
                     default(long),
                     default(int),

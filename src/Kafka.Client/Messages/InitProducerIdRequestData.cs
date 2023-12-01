@@ -10,7 +10,7 @@ namespace Kafka.Client.Messages {
     /// <param name="ProducerEpochField">The producer's current epoch. This will be checked against the producer epoch on the broker, and the request will return an error if they do not match.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record InitProducerIdRequestData (
+    internal sealed record InitProducerIdRequestData (
         string? TransactionalIdField,
         int TransactionTimeoutMsField,
         long ProducerIdField,
@@ -18,7 +18,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static InitProducerIdRequestData Empty { get; } = new(
+        internal static InitProducerIdRequestData Empty { get; } = new(
             default(string?),
             default(int),
             default(long),

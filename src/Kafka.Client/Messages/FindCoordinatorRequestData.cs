@@ -9,14 +9,14 @@ namespace Kafka.Client.Messages {
     /// <param name="CoordinatorKeysField">The coordinator keys.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record FindCoordinatorRequestData (
+    internal sealed record FindCoordinatorRequestData (
         string KeyField,
         sbyte KeyTypeField,
         ImmutableArray<string> CoordinatorKeysField,
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static FindCoordinatorRequestData Empty { get; } = new(
+        internal static FindCoordinatorRequestData Empty { get; } = new(
             "",
             default(sbyte),
             ImmutableArray<string>.Empty,

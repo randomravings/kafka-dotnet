@@ -9,10 +9,10 @@ using MemberIdentity = Kafka.Client.Messages.LeaveGroupRequestData.MemberIdentit
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class LeaveGroupRequestEncoder : 
+    internal class LeaveGroupRequestEncoder : 
         RequestEncoder<RequestHeaderData, LeaveGroupRequestData>
     {
-        public LeaveGroupRequestEncoder() :
+        internal LeaveGroupRequestEncoder() :
             base(
                 ApiKey.LeaveGroup,
                 new(0, 5),

@@ -1,44 +1,40 @@
-﻿using Kafka.Client.Config;
+﻿using Kafka.Client.Collections;
+using Kafka.Client.Config;
+using Kafka.Client.Messages;
+using Kafka.Client.Model.Internal;
 using Kafka.Common.Model;
-using Kafka.Common.Model.Comparison;
 using Kafka.Common.Net;
 using Kafka.Common.Net.Transport;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
-using System.Globalization;
-using System.Net;
-using System.Net.Sockets;
 using System.Security.Cryptography;
 
 namespace Kafka.Client.Net
 {
-    internal sealed class ConnectionManager :
-        IConnectionManager<IClientConnection>
+    internal sealed class Cluster(
+        ImmutableArray<BootstrapServer> bootstrapServers,
+        KafkaClientConfig config,
+        ILogger logger
+    ) :
+        ICluster<IClientConnection>,
+        IDisposable
     {
-        private readonly ImmutableArray<string> _bootstrapUrls;
-        private readonly SortedList<ClusterNodeId, IClientConnection> _connections = new(ClusterNodeIdCompare.Instance);
-        private readonly KafkaClientConfig _config;
-        private readonly ILogger _logger;
+        private readonly ImmutableArray<BootstrapServer> _bootstrapServers = bootstrapServers;
+        private readonly ClusterNodeDictionary<IClientConnection> _connections = [];
+        private readonly KafkaClientConfig _config = config;
+        private readonly ILogger _logger = logger;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
 
         private ClusterNodeId _controllerNodeId = ClusterNodeId.Empty;
         private bool _closed;
 
-        public ConnectionManager(
-            KafkaClientConfig config,
-            ILogger logger
-        )
-        {
-            _bootstrapUrls = config.Client.BootstrapServers.Split(',', StringSplitOptions.RemoveEmptyEntries).ToImmutableArray();
-            _config = config;
-            _logger = logger;
-        }
-
-        async Task<IClientConnection> IConnectionManager<IClientConnection>.Connection(
+        public async Task<IClientConnection> Connection(
             ClusterNodeId nodeId,
             CancellationToken cancellationToken
         )
         {
+            if (_connections.Get(nodeId, out var connection))
+                return connection;
             await _semaphore.WaitAsync(
                 cancellationToken
             ).ConfigureAwait(false);
@@ -46,7 +42,9 @@ namespace Kafka.Client.Net
             {
                 if (_closed)
                     throw new InvalidOperationException("Connection pool closed");
-                return await Connection(
+                if (_connections.Get(nodeId, out connection))
+                    return connection;
+                return await GetConnection(
                     nodeId,
                     cancellationToken
                 ).ConfigureAwait(false);
@@ -57,10 +55,12 @@ namespace Kafka.Client.Net
             }
         }
 
-        async Task<IClientConnection> IConnectionManager<IClientConnection>.Controller(
+        public async Task<IClientConnection> Controller(
             CancellationToken cancellationToken
         )
         {
+            if (_controllerNodeId != ClusterNodeId.Empty && _connections.Get(_controllerNodeId, out var connection))
+                return connection;
             await _semaphore.WaitAsync(
                 cancellationToken
             ).ConfigureAwait(false);
@@ -68,7 +68,9 @@ namespace Kafka.Client.Net
             {
                 if (_closed)
                     throw new InvalidOperationException("Connection pool closed");
-                return await Controller(
+                if (_connections.Get(_controllerNodeId, out connection))
+                    return connection;
+                return await GetController(
                     cancellationToken
                 ).ConfigureAwait(false);
             }
@@ -78,7 +80,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        async Task IConnectionManager<IClientConnection>.CloseAll(
+        public async Task CloseAll(
             CancellationToken cancellationToken
         )
         {
@@ -90,8 +92,8 @@ namespace Kafka.Client.Net
                 if (_closed)
                     return;
                 _closed = true;
-                foreach (var connection in _connections.Values)
-                    await connection.Close(
+                foreach (var connection in _connections.CopyItems())
+                    await connection.Value.Close(
                         cancellationToken
                     ).ConfigureAwait(false);
             }
@@ -101,32 +103,32 @@ namespace Kafka.Client.Net
             }
         }
 
-        void IDisposable.Dispose()
+        public void Dispose()
         {
-            foreach (var connection in _connections.Values)
-                connection.Dispose();
+            foreach (var connection in _connections.CopyItems())
+                connection.Value.Dispose();
             _semaphore.Dispose();
         }
 
-        private async Task<IClientConnection> Connection(
+        private async Task<IClientConnection> GetConnection(
             ClusterNodeId nodeId,
             CancellationToken cancellationToken
         )
         {
-            if (_connections.TryGetValue(nodeId, out var protocol))
-                return protocol;
+            if (_connections.Get(nodeId, out var connection))
+                return connection;
             return await InitConnection(
                 nodeId,
                 cancellationToken
             ).ConfigureAwait(false);
         }
 
-        private async Task<IClientConnection> Controller(
+        private async Task<IClientConnection> GetController(
             CancellationToken cancellationToken
         )
         {
-            if (_connections.TryGetValue(_controllerNodeId, out var protocol))
-                return protocol;
+            if (_connections.Get(_controllerNodeId, out var connection))
+                return connection;
             return await InitController(
                 cancellationToken
             ).ConfigureAwait(false);
@@ -137,37 +139,41 @@ namespace Kafka.Client.Net
             CancellationToken cancellationToken
         )
         {
-            if (_connections.TryGetValue(clusterNodeId, out var protocol))
-                return protocol;
+            if (_connections.Get(clusterNodeId, out var connection))
+                return connection;
 
-            protocol = await Controller(cancellationToken)
+            connection = await Controller(cancellationToken)
                 .ConfigureAwait(false)
             ;
 
-            var metadataResponse = await protocol.Metadata(cancellationToken)
+            var metadataResponse = await connection.Metadata(cancellationToken)
                 .ConfigureAwait(false)
             ;
 
             var node = metadataResponse
                 .BrokersField
                 .FirstOrDefault(
-                    r => r.NodeIdField == clusterNodeId.Value
-                ) ??
-                throw new KeyNotFoundException($"Unknown node Id: {clusterNodeId.Value}")
+                    r => r.NodeIdField == clusterNodeId.Value,
+                    MetadataResponseData.MetadataResponseBroker.Empty
+                )
             ;
+            if (node.NodeIdField == ClusterNodeId.Empty)
+                throw new KeyNotFoundException($"Unknown node Id: {clusterNodeId.Value}");
 
             var transport = CreateTransport(
                 node.HostField,
                 node.PortField
             );
-            protocol = CreateProtocol(
-                transport
+            connection = new ClientConnection(
+                transport,
+                _config,
+                _logger
             );
-            await protocol.Open(
+            await connection.Open(
                 cancellationToken
             ).ConfigureAwait(false);
-            _connections.Add(clusterNodeId, protocol);
-            return protocol;
+            _connections.Add(clusterNodeId, connection);
+            return connection;
         }
 
         private async Task<IClientConnection> InitController(
@@ -175,14 +181,14 @@ namespace Kafka.Client.Net
         )
         {
             // Sample a connection from existing links for bootstraps
-            var protocol = _connections.Count switch
+            var connection = _connections.Count switch
             {
                 0 => await RandomizeBootstrapConnection(cancellationToken).ConfigureAwait(false),
                 _ => RandomizeExistingConnection(),
             };
 
             // Determine controller node.
-            var metadataResponse = await protocol
+            var metadataResponse = await connection
                 .Metadata(cancellationToken)
                 .ConfigureAwait(false)
             ;
@@ -190,7 +196,7 @@ namespace Kafka.Client.Net
             _controllerNodeId = metadataResponse.ControllerIdField;
 
             // Controller is already present.
-            if (_connections.TryGetValue(_controllerNodeId, out var controller))
+            if (_connections.Get(_controllerNodeId, out var controller))
                 return controller;
 
             var controllerNode = metadataResponse
@@ -205,10 +211,12 @@ namespace Kafka.Client.Net
                 controllerNode.HostField,
                 controllerNode.PortField
             );
-            controller = CreateProtocol(
-                transport
+            controller = new ClientConnection(
+                transport,
+                _config,
+                _logger
             );
-            await protocol.Open(
+            await connection.Open(
                 cancellationToken
             ).ConfigureAwait(false);
             _connections.Add(_controllerNodeId, controller);
@@ -225,37 +233,29 @@ namespace Kafka.Client.Net
             CancellationToken cancellationToken
         )
         {
-            var randomIndex = _bootstrapUrls.Length switch
+            var randomIndex = _bootstrapServers.Length switch
             {
                 0 => -1,
                 1 => 0,
                 var l => RandomNumberGenerator.GetInt32(0, l - 1)
             };
-            var randomUrl = _bootstrapUrls[randomIndex].Split(':', StringSplitOptions.RemoveEmptyEntries);
-            var host = randomUrl[0];
-            var port = int.Parse(randomUrl[1], CultureInfo.InvariantCulture);
+            (var host, var port) = _bootstrapServers[randomIndex];
 
-            // Do we have connection defined by host:port?
-            var protocol = _connections.Values.FirstOrDefault(p =>
-                p.Transport.Host == host &&
-                p.Transport.Port == port
-            );
-            if (protocol != null)
-                return protocol;
-
-            var randomTransport = CreateTransport(
+            var transport = CreateTransport(
                 host,
                 port
             );
 
-            protocol = CreateProtocol(
-                randomTransport
+            var connection = (IClientConnection)new ClientConnection(
+                transport,
+                _config,
+                _logger
             );
-            await protocol.Open(
+            await connection.Open(
                 cancellationToken
             ).ConfigureAwait(false);
             // Determine controller node.
-            var metadataResponse = await protocol
+            var metadataResponse = await connection
                 .Metadata(cancellationToken)
                 .ConfigureAwait(false)
             ;
@@ -270,7 +270,7 @@ namespace Kafka.Client.Net
             var nodeId = new ClusterNodeId(node.NodeIdField);
 
             // If existing node then close and replace.
-            if (_connections.TryGetValue(nodeId, out var existing))
+            if (_connections.Get(nodeId, out var existing))
             {
                 await existing.Close(
                     cancellationToken
@@ -279,44 +279,26 @@ namespace Kafka.Client.Net
                 _connections.Remove(nodeId);
             }
 
-            _connections.Add(nodeId, protocol);
-            return protocol;
+            _connections.Add(nodeId, connection);
+            return connection;
         }
-
-        private IClientConnection CreateProtocol(
-            ITransport transport
-        ) =>
-            new ClientConnection(
-                transport,
-                _config,
-                _logger
-            )
-        ;
-
-        private static ImmutableArray<DnsEndPoint> Parse(string bootStrapServer) =>
-            bootStrapServer
-                .Split(',')
-                .Select(r => r.Split(':'))
-                .Select(r => new DnsEndPoint(
-                    r[0],
-                    int.Parse(r[1],
-                        NumberStyles.None,
-                        CultureInfo.InvariantCulture
-                    ),
-                    AddressFamily.InterNetwork
-                ))
-                .ToImmutableArray()
-        ;
 
         private ITransport CreateTransport(
             string host,
             int port
         ) =>
-            new SaslPlaintextTransport(
-                host,
-                port,
-                _logger
-            )
+            _config.Client.SecurityProtocol switch
+            {
+                SecurityProtocol.Plaintext => new SaslPlaintextTransport(
+                    host,
+                    port,
+                    _logger
+                ),
+                _ => throw new NotImplementedException(
+                    $"Implementation does not support security protocol: {_config.Client.SecurityProtocol}"
+                )
+            }
+
         ;
     }
 }

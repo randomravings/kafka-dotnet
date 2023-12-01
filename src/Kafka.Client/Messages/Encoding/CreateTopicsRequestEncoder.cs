@@ -4,17 +4,17 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic.CreatableReplicaAssignment;
 using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic;
+using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic.CreatableReplicaAssignment;
 using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic.CreateableTopicConfig;
 
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class CreateTopicsRequestEncoder : 
+    internal class CreateTopicsRequestEncoder : 
         RequestEncoder<RequestHeaderData, CreateTopicsRequestData>
     {
-        public CreateTopicsRequestEncoder() :
+        internal CreateTopicsRequestEncoder() :
             base(
                 ApiKey.CreateTopics,
                 new(0, 7),

@@ -8,13 +8,13 @@ namespace Kafka.Client.Messages {
     /// <param name="ClientSoftwareVersionField">The version of the client.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record ApiVersionsRequestData (
+    internal sealed record ApiVersionsRequestData (
         string ClientSoftwareNameField,
         string ClientSoftwareVersionField,
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static ApiVersionsRequestData Empty { get; } = new(
+        internal static ApiVersionsRequestData Empty { get; } = new(
             "",
             "",
             ImmutableArray<TaggedField>.Empty

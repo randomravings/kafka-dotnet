@@ -8,10 +8,10 @@ using System.Collections.Immutable;
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class EndTxnRequestEncoder : 
+    internal class EndTxnRequestEncoder : 
         RequestEncoder<RequestHeaderData, EndTxnRequestData>
     {
-        public EndTxnRequestEncoder() :
+        internal EndTxnRequestEncoder() :
             base(
                 ApiKey.EndTxn,
                 new(0, 3),

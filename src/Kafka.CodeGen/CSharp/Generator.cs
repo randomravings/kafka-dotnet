@@ -9,7 +9,6 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using System.Data;
 using System.IO.Abstractions;
-using System.Text;
 
 namespace Kafka.CodeGen.CSharp
 {
@@ -20,9 +19,9 @@ namespace Kafka.CodeGen.CSharp
         private const string TAG_BUFFER = "TaggedFields";
 
         public static void WriteModel(
-            IDirectoryInfo directoryInfo,
-            MessageDefinition messageDefinition,
-            string messageNamespace
+            in IDirectoryInfo directoryInfo,
+            in MessageDefinition messageDefinition,
+            in string messageNamespace
         )
         {
             TestValidVersion(messageDefinition.ValidVersions);
@@ -56,10 +55,10 @@ namespace Kafka.CodeGen.CSharp
         }
 
         public static void WriteEncoder(
-            IDirectoryInfo directoryInfo,
-            MessageDefinition messageDefinition,
-            string messageNamespace,
-            string messageSerdeNamespace
+            in IDirectoryInfo directoryInfo,
+            in MessageDefinition messageDefinition,
+            in string messageNamespace,
+            in string messageSerdeNamespace
         )
         {
             TestValidVersion(messageDefinition.ValidVersions);
@@ -124,10 +123,10 @@ namespace Kafka.CodeGen.CSharp
         }
 
         public static void WriteDecoder(
-            IDirectoryInfo directoryInfo,
-            MessageDefinition messageDefinition,
-            string messageNamespace,
-            string messageSerdeNamespace
+            in IDirectoryInfo directoryInfo,
+            in MessageDefinition messageDefinition,
+            in string messageNamespace,
+            in string messageSerdeNamespace
         )
         {
             TestValidVersion(messageDefinition.ValidVersions);
@@ -191,9 +190,9 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteHeaderEncoder(
-            TextWriter writer,
-            MessageDefinition messageDefinition,
-            string indent
+            in StreamWriter writer,
+            in MessageDefinition messageDefinition,
+            in string indent
         )
         {
             var messageName = GetMessageName(messageDefinition);
@@ -203,7 +202,7 @@ namespace Kafka.CodeGen.CSharp
                 indent
             );
             writer.Write(indent);
-            writer.Write("public static class ");
+            writer.Write("internal static class ");
             writer.Write(className);
             writer.WriteLine();
             writer.Write(indent);
@@ -216,7 +215,7 @@ namespace Kafka.CodeGen.CSharp
                     messageName,
                     version,
                     messageDefinition.FlexibleVersions.Includes(version),
-                    "public static",
+                    "internal static",
                     $"{indent}    "
                 );
             WriteStructEncoders(
@@ -232,9 +231,9 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteRequestEncoder(
-            TextWriter writer,
-            MessageDefinition messageDefinition,
-            string indent
+            in StreamWriter writer,
+            in MessageDefinition messageDefinition,
+            in string indent
         )
         {
             var messageName = GetMessageName(messageDefinition);
@@ -244,7 +243,7 @@ namespace Kafka.CodeGen.CSharp
                 indent
             );
             writer.Write(indent);
-            writer.Write("public class ");
+            writer.Write("internal class ");
             writer.Write(className);
             writer.Write(" : ");
             writer.WriteLine();
@@ -290,17 +289,17 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteConstructor(
-            TextWriter writer,
-            MessageDefinition messageDefinition,
-            bool isEncoder,
-            string indent
+            in StreamWriter writer,
+            in MessageDefinition messageDefinition,
+            in bool isEncoder,
+            in string indent
         )
         {
             var messageName = GetMessageName(messageDefinition);
             var className = isEncoder ? GetEncoderName(messageDefinition) : GetDecoderName(messageDefinition);
             var readWrite = isEncoder ? "Write" : "Read";
             var encodeDecode = isEncoder ? "Encoder" : "Decoder";
-            writer.WriteLine($"{indent}public {className}() :");
+            writer.WriteLine($"{indent}internal {className}() :");
             writer.WriteLine($"{indent}    base(");
             writer.WriteLine($"{indent}        {nameof(ApiKey)}.{messageDefinition.ApiKey},");
             writer.WriteLine($"{indent}        new({messageDefinition.ValidVersions.Min.Value}, {messageDefinition.ValidVersions.Max.Value}),");
@@ -312,10 +311,10 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteMethodOverrides(
-            TextWriter writer,
-            MessageDefinition messageDefinition,
-            bool isEncoder,
-            string indent
+            in StreamWriter writer,
+            in MessageDefinition messageDefinition,
+            in bool isEncoder,
+            in string indent
         )
         {
             var messageName = GetMessageName(messageDefinition);
@@ -361,9 +360,9 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteResponseEncoder(
-            TextWriter writer,
-            MessageDefinition messageDefinition,
-            string indent
+            in StreamWriter writer,
+            in MessageDefinition messageDefinition,
+            in string indent
         )
         {
             var messageName = GetMessageName(messageDefinition);
@@ -373,7 +372,7 @@ namespace Kafka.CodeGen.CSharp
                 indent
             );
             writer.Write(indent);
-            writer.Write("public class ");
+            writer.Write("internal class ");
             writer.Write(className);
             writer.Write(" : ");
             writer.WriteLine();
@@ -412,9 +411,9 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteHeaderDecoder(
-            TextWriter writer,
-            MessageDefinition messageDefinition,
-            string indent
+            in StreamWriter writer,
+            in MessageDefinition messageDefinition,
+            in string indent
         )
         {
             var messageName = GetMessageName(messageDefinition);
@@ -424,7 +423,7 @@ namespace Kafka.CodeGen.CSharp
                 indent
             );
             writer.Write(indent);
-            writer.Write("public static class ");
+            writer.Write("internal static class ");
             writer.Write(className);
             writer.WriteLine();
             writer.Write(indent);
@@ -437,7 +436,7 @@ namespace Kafka.CodeGen.CSharp
                     messageName,
                     version,
                     messageDefinition.FlexibleVersions.Includes(version),
-                    "public static",
+                    "internal static",
                     $"{indent}    "
                 );
             WriteStructDecoders(
@@ -453,9 +452,9 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteRequestDecoder(
-            TextWriter writer,
-            MessageDefinition messageDefinition,
-            string indent
+            in StreamWriter writer,
+            in MessageDefinition messageDefinition,
+            in string indent
         )
         {
             var messageName = GetMessageName(messageDefinition);
@@ -465,7 +464,7 @@ namespace Kafka.CodeGen.CSharp
                 indent
             );
             writer.Write(indent);
-            writer.Write("public class ");
+            writer.Write("internal class ");
             writer.Write(className);
             writer.Write(" : ");
             writer.WriteLine();
@@ -511,9 +510,9 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteResponseDecoder(
-            TextWriter writer,
-            MessageDefinition messageDefinition,
-            string indent
+            in StreamWriter writer,
+            in MessageDefinition messageDefinition,
+            in string indent
         )
         {
             var messageName = GetMessageName(messageDefinition);
@@ -523,7 +522,7 @@ namespace Kafka.CodeGen.CSharp
                 indent
             );
             writer.Write(indent);
-            writer.Write("public class ");
+            writer.Write("internal class ");
             writer.Write(className);
             writer.Write(" : ");
             writer.WriteLine();
@@ -569,11 +568,11 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteStructEncoders(
-            TextWriter writer,
-            ImmutableSortedDictionary<string, StructDefinition> structDefinitions,
-            VersionRange versions,
-            VersionRange flexibleVersions,
-            string indent
+            in StreamWriter writer,
+            in ImmutableSortedDictionary<string, StructDefinition> structDefinitions,
+            in VersionRange versions,
+            in VersionRange flexibleVersions,
+            in string indent
         )
         {
             foreach (var structDefinition in structDefinitions)
@@ -587,11 +586,11 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteStructDecoders(
-            TextWriter writer,
-            ImmutableSortedDictionary<string, StructDefinition> structDefinitions,
-            VersionRange versions,
-            VersionRange flexibleVersions,
-            string indent
+            in StreamWriter writer,
+            in ImmutableSortedDictionary<string, StructDefinition> structDefinitions,
+            in VersionRange versions,
+            in VersionRange flexibleVersions,
+            in string indent
         )
         {
             foreach (var structDefinition in structDefinitions)
@@ -605,11 +604,11 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteStructEncoder(
-            TextWriter writer,
-            StructDefinition structDefinition,
-            VersionRange versions,
-            VersionRange flexibleVersions,
-            string indent
+            in StreamWriter writer,
+            in StructDefinition structDefinition,
+            in VersionRange versions,
+            in VersionRange flexibleVersions,
+            in string indent
         )
         {
             var messageName = GetMessageName(structDefinition);
@@ -648,11 +647,11 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteStructDecoder(
-            TextWriter writer,
-            StructDefinition structDefinition,
-            VersionRange versions,
-            VersionRange flexibleVersions,
-            string indent
+            in StreamWriter writer,
+            in StructDefinition structDefinition,
+            in VersionRange versions,
+            in VersionRange flexibleVersions,
+            in string indent
         )
         {
             var messageName = GetMessageName(structDefinition);
@@ -692,8 +691,8 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteCodeGenAttribute(
-            TextWriter writer,
-            string indent
+            in StreamWriter writer,
+            in string indent
         )
         {
             var assemblyName = typeof(Generator).Assembly.GetName();
@@ -709,13 +708,13 @@ namespace Kafka.CodeGen.CSharp
         }
 
         public static void WriteEncodeMethod(
-            TextWriter writer,
-            ImmutableArray<Field> fields,
-            string messageName,
-            short version,
-            bool flexible,
-            string methodKeywords,
-            string indent
+            in StreamWriter writer,
+            in ImmutableArray<Field> fields,
+            in string messageName,
+            in short version,
+            in bool flexible,
+            in string methodKeywords,
+            in string indent
         )
         {
             writer.Write(indent);
@@ -741,13 +740,13 @@ namespace Kafka.CodeGen.CSharp
         }
 
         public static void WriteDecodeMethod(
-            TextWriter writer,
-            ImmutableArray<Field> fields,
-            string messageName,
-            short version,
-            bool flexible,
-            string methodKeywords,
-            string indent
+            in StreamWriter writer,
+            in ImmutableArray<Field> fields,
+            in string messageName,
+            in short version,
+            in bool flexible,
+            in string methodKeywords,
+            in string indent
         )
         {
             writer.Write(indent);
@@ -772,10 +771,10 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteUsings(
-            TextWriter writer,
-            string messageNamespace,
-            IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
-            IEnumerable<string> namespaces
+            in StreamWriter writer,
+            in string messageNamespace,
+            in IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
+            in IEnumerable<string> namespaces
         )
         {
             foreach (var ns in namespaces.Append("System.CodeDom.Compiler").Order())
@@ -786,16 +785,16 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteMessageRecord(
-            TextWriter writer,
-            MessageDefinition message,
-            string indent
+            in StreamWriter writer,
+            in MessageDefinition message,
+            in string indent
         )
         {
             var messageName = GetMessageName(message);
             var assemblyName = typeof(Generator).Assembly.GetName();
             WriteSummary(writer, indent, message);
             writer.WriteLine($"{indent}[GeneratedCode(\"{assemblyName.Name}\", \"{assemblyName.Version}\")]");
-            writer.WriteLine($"{indent}public sealed record {GetMessageName(message)} (");
+            writer.WriteLine($"{indent}internal sealed record {GetMessageName(message)} (");
             WriteFields(
                 writer,
                 message.Fields,
@@ -829,16 +828,16 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteStructRecord(
-            TextWriter writer,
-            StructDefinition structDefinition,
-            string indent
+            in StreamWriter writer,
+            in StructDefinition structDefinition,
+            in string indent
         )
         {
             var messageName = GetMessageName(structDefinition);
             var assemblyName = typeof(Generator).Assembly.GetName();
             WriteSummary(writer, indent, structDefinition);
             writer.WriteLine($"{indent}[GeneratedCode(\"{assemblyName.Name}\", \"{assemblyName.Version}\")]");
-            writer.WriteLine($"{indent}public sealed record {GetMessageName(structDefinition)} (");
+            writer.WriteLine($"{indent}internal sealed record {GetMessageName(structDefinition)} (");
             WriteFields(
                 writer,
                 structDefinition.Fields,
@@ -863,13 +862,13 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteDefaultEmptyValue(
-            TextWriter writer,
-            string name,
-            ImmutableArray<Field> fields,
-            string indent
+            in StreamWriter writer,
+            in string name,
+            in ImmutableArray<Field> fields,
+            in string indent
         )
         {
-            writer.WriteLine($"{indent}public static {name} Empty {{ get; }} = new(");
+            writer.WriteLine($"{indent}internal static {name} Empty {{ get; }} = new(");
             var value = DefaultValue(fields.First());
             writer.Write($"{indent}    {value}");
             foreach (var field in fields.Skip(1))
@@ -884,9 +883,9 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteFields(
-            TextWriter writer,
-            IEnumerable<Field> fields,
-            string indent
+            in StreamWriter writer,
+            in IEnumerable<Field> fields,
+            in string indent
         )
         {
             WriteFieldProperty(writer, indent, fields.First());
@@ -899,151 +898,10 @@ namespace Kafka.CodeGen.CSharp
             writer.WriteLine($"{indent}ImmutableArray<{nameof(TaggedField)}> {TAG_BUFFER}");
         }
 
-        private static void WriteItems<TItem>(
-            TextWriter writer,
-            IEnumerable<TItem> items,
-            Func<TItem, string> stringify,
-            string separator,
-            bool newline
-        )
-        {
-            var enumerator = items.GetEnumerator();
-            if (!enumerator.MoveNext())
-                return;
-            var value = stringify(enumerator.Current);
-            writer.Write(value);
-            while (enumerator.MoveNext())
-            {
-                writer.Write(separator);
-                if (newline)
-                    writer.WriteLine();
-                value = stringify(enumerator.Current);
-                writer.Write(value);
-            }
-        }
-
-        private static void WriteApiDetails(
-            TextWriter writer,
-            string messageName,
-            ApiKey apiKey,
-            VersionRange versions,
-            VersionRange flexibleVersions,
-            string indent
-        )
-        {
-            writer.WriteLine($"{indent}private static readonly {nameof(ApiKey)} ApiKey = {nameof(ApiKey)}.{apiKey};");
-            writer.WriteLine($"{indent}private static readonly {nameof(VersionRange)} ApiVersions = new ({versions.Min.Value}, {versions.Max.Value});");
-            writer.WriteLine($"{indent}private static readonly {nameof(VersionRange)} FlexibleVersions = new ({flexibleVersions.Min.Value}, {flexibleVersions.Max.Value});");
-        }
-
-        //private static void WriteMessageSerde(
-        //    TextWriter writer,
-        //    MessageDefinition messageDefinition,
-        //    VersionRange versions,
-        //    VersionRange flexibleVersions,
-        //    string indent
-        //)
-        //{
-        //    var serdeModifier = "public";
-        //    var messageName = GetMessageName(messageDefinition);
-        //    if (messageDefinition is ApiRequestDefinition || messageDefinition is ApiResponseDefinition || messageDefinition is RequestHeaderDefinition)
-        //    {
-        //        var header = messageDefinition is ApiRequestDefinition ? "RequestHeader" : "ResponseHeader";
-        //        var encoder = $"{(messageDefinition is ApiRequestDefinition ? typeof(EncodeDelegate<>) : typeof(EncodeDelegate<>)).Name.Split('`')[0]}<{messageDefinition.Name}Data>";
-        //        var decoder = $"{(messageDefinition is ApiRequestDefinition ? typeof(DecodeDelegate<>) : typeof(EncodeDelegate<>)).Name.Split('`')[0]}<{messageDefinition.Name}Data>";
-        //        serdeModifier = "private";
-        //        writer.WriteLine($"        private static readonly {nameof(ApiKey)} ApiKey = {nameof(ApiKey)}.{messageDefinition.ApiKey};");
-        //        writer.WriteLine($"        private static readonly {nameof(VersionRange)} ApiVersions = new ({messageDefinition.ValidVersions.Min.Value}, {messageDefinition.ValidVersions.Max.Value});");
-        //        writer.WriteLine($"        private static readonly {nameof(VersionRange)} FlexibleVersions = new ({messageDefinition.FlexibleVersions.Min.Value}, {messageDefinition.FlexibleVersions.Max.Value});");
-        //        writer.WriteLine($"        private static readonly {ZipGenerics(typeof(ImmutableArray<>), ZipGenerics(typeof(EncodeDelegate<>), messageName))} Encoders = ImmutableArray.Create<EncodeDelegate<{messageName}>>(");
-        //        WriteItems(
-        //            writer,
-        //            messageDefinition.ValidVersions.Enumerate(),
-        //            v => $"            WriteV{v}",
-        //            ",",
-        //            true
-        //        );
-        //        writer.WriteLine();
-        //        writer.WriteLine($"        );");
-        //        writer.WriteLine($"        private static readonly {ZipGenerics(typeof(ImmutableArray<>), ZipGenerics(typeof(DecodeDelegate<>), messageName))} Decoders = ImmutableArray.Create<DecodeDelegate<{messageName}>>(");
-        //        WriteItems(
-        //            writer,
-        //            messageDefinition.ValidVersions.Enumerate(),
-        //            v => $"            ReadV{v}",
-        //            ",",
-        //            true
-        //        );
-        //        writer.WriteLine();
-        //        writer.WriteLine($"        );");
-        //    }
-        //    if (messageDefinition is RequestHeaderDefinition headerMessage)
-        //    {
-        //        serdeModifier = "private";
-        //        writer.WriteLine($"        private static readonly {ZipGenerics(typeof(ImmutableArray<>), ZipGenerics(typeof(EncodeDelegate<>), messageName))} UntaggedEncoders = ImmutableArray.Create<EncodeDelegate<{messageName}>>(");
-        //        WriteItems(
-        //            writer,
-        //            messageDefinition.ValidVersions.Enumerate(),
-        //            v => $"            WriteUntaggedV{v}",
-        //            ",",
-        //            true
-        //        );
-        //        writer.WriteLine();
-        //        writer.WriteLine($"        );");
-        //        writer.WriteLine($"        public static readonly {ZipGenerics(typeof(ImmutableArray<>), ZipGenerics(typeof(DecodeDelegate<>), messageName))} UntaggedDecoders = ImmutableArray.Create<DecodeDelegate<{messageName}>>(");
-        //        WriteItems(
-        //            writer,
-        //            messageDefinition.ValidVersions.Enumerate(),
-        //            v => $"            ReadUntaggedV{v}",
-        //            ",",
-        //            true
-        //        );
-        //        writer.WriteLine();
-        //        writer.WriteLine($"        );");
-        //    }
-        //    foreach (var version in versions.Enumerate())
-        //    {
-        //        var flexible = flexibleVersions.Includes(version);
-        //        var variableList = new List<string>();
-        //        writer.WriteLine($"{indent}{serdeModifier} static int WriteV{version}(byte[] buffer, int index, {messageName} message)");
-        //        writer.WriteLine($"{indent}{{");
-        //        EncodeUntaggedFields(writer, indent, messageDefinition.Fields, flexible, version, "message");
-        //        EncodeTaggedFields(writer, indent, "message", messageDefinition, version);
-        //        writer.WriteLine($"{indent}    return index;");
-        //        writer.WriteLine($"{indent}}}");
-        //        writer.WriteLine($"{indent}{serdeModifier} static  {ZipGenerics(typeof(DecodeResult<>), messageName)} ReadV{version}(byte[] buffer, int index)");
-        //        writer.WriteLine($"{indent}{{");
-        //        DecodeFieldDeclare(writer, $"{indent}    ", messageDefinition);
-        //        DecodeFields(writer, $"{indent}    ", messageDefinition.Fields, flexible, version);
-        //        DecodeTaggedFields(writer, indent, messageDefinition.Fields, flexible, version);
-        //        DecodeReturnValue(writer, $"{indent}    ", messageDefinition);
-        //        writer.WriteLine($"{indent}}}");
-
-
-        //        if (messageDefinition is RequestHeaderDefinition)
-        //        {
-        //            writer.WriteLine($"{indent}{serdeModifier} static int WriteUntaggedV{version}(byte[] buffer, int index, {GetMessageName(messageDefinition)} message)");
-        //            writer.WriteLine($"{indent}{{");
-        //            foreach (var field in messageDefinition.Fields.Where(f => f.Properties.Versions.Includes(version)))
-        //                EncodeField(writer, $"{indent}    ", flexible, field, version, $"message.{FieldPropertyNamify(field)}");
-        //            writer.WriteLine($"{indent}    return index;");
-        //            writer.WriteLine($"{indent}}}");
-        //            variableList.Clear();
-        //            writer.WriteLine($"{indent}{serdeModifier} static {ZipGenerics(typeof(DecodeResult<>), messageName)} ReadUntaggedV{version}(byte[] buffer, int index)");
-        //            writer.WriteLine($"{indent}{{");
-        //            DecodeFieldDeclare(writer, $"{indent}    ", messageDefinition);
-        //            DecodeFields(writer, $"{indent}    ", messageDefinition.Fields, flexible, version);
-        //            DecodeReturnValue(writer, $"{indent}    ", messageDefinition);
-        //            writer.WriteLine($"{indent}}}");
-        //        }
-        //    }
-        //    foreach (var @struct in messageDefinition.Structs.Values)
-        //        WriteMessageRecordExtension(writer, @struct, versions, flexibleVersions, indent);
-        //}
-
         private static void DecodeFieldDeclare(
-            TextWriter writer,
-            ImmutableArray<Field> fields,
-            string indent
+            in StreamWriter writer,
+            in ImmutableArray<Field> fields,
+            in string indent
         )
         {
             foreach (var field in fields)
@@ -1061,11 +919,11 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void DecodeFields(
-            TextWriter writer,
-            ImmutableArray<Field> fields,
-            bool flexible,
-            short version,
-            string indent
+            in StreamWriter writer,
+            in ImmutableArray<Field> fields,
+            in bool flexible,
+            in short version,
+            in string indent
         )
         {
             var untaggedFields = GetUntaggedFields(fields, version);
@@ -1076,7 +934,11 @@ namespace Kafka.CodeGen.CSharp
             }
         }
 
-        private static void DecodeReturnValue(TextWriter writer, ImmutableArray<Field> fields, string indent)
+        private static void DecodeReturnValue(
+            in StreamWriter writer,
+            in ImmutableArray<Field> fields,
+            in string indent
+        )
         {
             writer.WriteLine($"{indent}return new(index, new(");
             foreach (var field in fields)
@@ -1089,12 +951,12 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void EncodeUntaggedFields(
-            TextWriter writer,
-            string indent,
-            IEnumerable<Field> fields,
-            bool flexible,
-            short version,
-            string referenceName
+            in StreamWriter writer,
+            in string indent,
+            in IEnumerable<Field> fields,
+            in bool flexible,
+            in short version,
+            in string referenceName
         )
         {
             var untaggedFields = GetUntaggedFields(fields, version);
@@ -1105,19 +967,26 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void EncodeTaggedFields(
-            TextWriter writer,
-            IEnumerable<Field> fields,
-            short version,
-            bool flexible,
-            string referenceName,
-            string indent
+            in StreamWriter writer,
+            in IEnumerable<Field> fields,
+            in short version,
+            in bool flexible,
+            in string referenceName,
+            in string indent
         )
         {
             if (!flexible)
                 return;
             var taggedFields = GetKnownTaggedFields(fields, version);
-            var requiredTaggedFieldsCount = taggedFields.Where(r => !IsNullable(r, version)).Count();
-            var optionalTaggedFields = taggedFields.Where(r => IsNullable(r, version)).ToImmutableArray();
+            var requiredTaggedFieldsCount = 0;
+            foreach(var taggedField in taggedFields)
+                if(!IsNullable(taggedField, version))
+                    requiredTaggedFieldsCount++;
+            var optionalTaggedFieldsBuilder = ImmutableArray.CreateBuilder<Field>();
+            foreach (var taggedField in taggedFields)
+                if (IsNullable(taggedField, version))
+                    optionalTaggedFieldsBuilder.Add(taggedField);
+            var optionalTaggedFields = optionalTaggedFieldsBuilder.ToImmutable();
             var startTag = -1;
             if (taggedFields.Any())
                 startTag = taggedFields.Max(r => r.Properties.Tag);
@@ -1151,11 +1020,11 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void DecodeTaggedFields(
-            TextWriter writer,
-            IEnumerable<Field> fields,
-            short version,
-            bool flexible,
-            string indent
+            in StreamWriter writer,
+            in IEnumerable<Field> fields,
+            in short version,
+            in bool flexible,
+            in string indent
         )
         {
             if (!flexible)
@@ -1179,10 +1048,10 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void DecodeTaggedKnown(
-            TextWriter writer,
-            string indent,
-            IEnumerable<Field> taggedFields,
-            short version
+            in StreamWriter writer,
+            in string indent,
+            in IEnumerable<Field> taggedFields,
+            in short version
         )
         {
             writer.WriteLine($"{indent}switch (tag)");
@@ -1201,8 +1070,8 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void DecodeTaggedUnknown(
-            TextWriter writer,
-            string indent
+            in StreamWriter writer,
+            in string indent
         )
         {
             writer.WriteLine($"{indent}(index, var bytes) = {nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadCompactBytes)}(buffer, index);");
@@ -1210,44 +1079,59 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static ImmutableArray<Field> GetKnownTaggedFields(
-            IEnumerable<Field> fields,
-            short version
-        ) =>
-            fields
-                .Where(f => f.Properties.Versions.Includes(version) &&
-                            f.Properties.TaggedVersions.Includes(version))
-                .ToImmutableArray()
-            ;
+            in IEnumerable<Field> fields,
+            in short version
+        )
+        {
+            var knownTaggedFieldsBuilder = ImmutableArray.CreateBuilder<Field>();
+            foreach (var field in fields)
+                if (field.Properties.Versions.Includes(version) &&
+                    field.Properties.TaggedVersions.Includes(version))
+                    knownTaggedFieldsBuilder.Add(field);
+            return knownTaggedFieldsBuilder.ToImmutable();
+        }
+
 
         private static ImmutableArray<Field> GetUntaggedFields(
-            IEnumerable<Field> fields,
-            short version
-        ) =>
-            fields
-                .Where(f => f.Properties.Versions.Includes(version) &&
-                            !f.Properties.TaggedVersions.Includes(version))
-                .ToImmutableArray()
-            ;
+            in IEnumerable<Field> fields,
+            in short version
+        )
+        {
+            var utaggedFieldsBuilder = ImmutableArray.CreateBuilder<Field>();
+            foreach (var field in fields)
+                if (field.Properties.Versions.Includes(version) &&
+                    !field.Properties.TaggedVersions.Includes(version))
+                    utaggedFieldsBuilder.Add(field);
+            return utaggedFieldsBuilder.ToImmutable();
+        }
+            
 
         private static bool IsFlexible(
-            MessageDefinition messageDefinition,
-            short version
+            in MessageDefinition messageDefinition,
+            in short version
         ) =>
             messageDefinition.FlexibleVersions.Includes(version)
         ;
 
-        private static bool IsNullable(Field field) =>
-            field.Properties.Ignorable && field.Properties.NullableVersions.Some()
+        private static bool IsNullable(
+            in Field field
+        ) =>
+            field.Properties.Ignorable &&
+            field.Properties.NullableVersions.Some()
         ;
 
-        private static bool IsNullable(Field field, short version) =>
-            field.Properties.Ignorable && field.Properties.NullableVersions.Includes(version)
+        private static bool IsNullable(
+            in Field field,
+            in short version
+        ) =>
+            field.Properties.Ignorable &&
+            field.Properties.NullableVersions.Includes(version)
         ;
 
         private static void WriteSummary(
-            TextWriter writer,
-            string indent,
-            MessageDefinition message
+            in StreamWriter writer,
+            in string indent,
+            in MessageDefinition message
         )
         {
             writer.WriteLine($"{indent}/// <summary>");
@@ -1256,20 +1140,20 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void WriteSummary(
-            TextWriter writer,
-            string indent,
-            StructDefinition @struct
+            in StreamWriter writer,
+            in string indent,
+            in StructDefinition structDefinition
         )
         {
             writer.WriteLine($"{indent}/// <summary>");
-            WriteFieldDocumentations(writer, indent, @struct.Fields);
+            WriteFieldDocumentations(writer, indent, structDefinition.Fields);
             writer.WriteLine($"{indent}/// </summary>");
         }
 
         private static void WriteFieldDocumentations(
-            TextWriter writer,
-            string indent,
-            IEnumerable<Field> fields
+            in StreamWriter writer,
+            in string indent,
+            in IEnumerable<Field> fields
         )
         {
             foreach (var field in fields)
@@ -1285,7 +1169,7 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static bool TestValidVersion(
-            VersionRange version
+            in VersionRange version
         ) =>
             TestValidVersion(
                 version,
@@ -1294,17 +1178,17 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static bool TestValidVersion(
-            VersionRange version,
-            VersionRange limit
+            in VersionRange version,
+            in VersionRange limit
         ) =>
             version.Min >= limit.Min &&
             version.Max <= limit.Max
         ;
 
         private static void WriteFieldProperty(
-            TextWriter writer,
-            string indent,
-            Field field
+            in StreamWriter writer,
+            in string indent,
+            in Field field
         )
         {
             writer.Write(indent);
@@ -1314,7 +1198,7 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static string QualifyType(
-            FieldType fieldType
+            in FieldType fieldType
         ) =>
             fieldType switch
             {
@@ -1326,12 +1210,12 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static void EncodeField(
-            TextWriter writer,
-            string indent,
-            bool flexible,
-            Field field,
-            short version,
-            string dereference
+            in StreamWriter writer,
+            in string indent,
+            in bool flexible,
+            in Field field,
+            in short version,
+            in string dereference
         )
         {
             EncodeIfNullThrow(
@@ -1364,11 +1248,11 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void EncodeIfNullThrow(
-            TextWriter writer,
-            string indent,
-            Field field,
-            short version,
-            string dereference
+            in StreamWriter writer,
+            in string indent,
+            in Field field,
+            in short version,
+            in string dereference
         )
         {
             // If no field version is nullable -> defer to developer to pay attention to compiler warnings.
@@ -1382,23 +1266,23 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void EncodeStructField(
-            TextWriter writer,
-            StructFieldType fieldType,
-            short version,
-            string dereference
+            in StreamWriter writer,
+            in StructFieldType fieldType,
+            in short version,
+            in string dereference
         )
         {
             writer.WriteLine($"{GetEncoderName(fieldType)}.WriteV{version}(buffer, index, {dereference});");
         }
 
         private static void EncodeRecordsField(
-            TextWriter writer,
-            string indent,
-            bool flexible,
-            FieldProperties fieldProperties,
-            RecordsFieldType fieldType,
-            short version,
-            string dereference
+            in StreamWriter writer,
+            in string indent,
+            in bool flexible,
+            in FieldProperties fieldProperties,
+            in RecordsFieldType fieldType,
+            in short version,
+            in string dereference
         )
         {
             if (flexible)
@@ -1408,13 +1292,13 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void EncodeScalarField(
-            TextWriter writer,
-            string indent,
-            bool flexible,
-            FieldProperties fieldProperties,
-            ScalarFieldType fieldType,
-            short version,
-            string dereference
+            in StreamWriter writer,
+            in string indent,
+            in bool flexible,
+            in FieldProperties fieldProperties,
+            in ScalarFieldType fieldType,
+            in short version,
+            in string dereference
         )
         {
             var scalarWrite = ScalarFieldToEncode(fieldType, fieldProperties.NullableVersions.Includes(version), flexible);
@@ -1422,13 +1306,13 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void EncodeArrayField(
-            TextWriter writer,
-            string indent,
-            bool flexible,
-            FieldProperties fieldProperties,
-            ArrayFieldType fieldType,
-            short version,
-            string dereference
+            in StreamWriter writer,
+            in string indent,
+            in bool flexible,
+            in FieldProperties fieldProperties,
+            in ArrayFieldType fieldType,
+            in short version,
+            in string dereference
         )
         {
             var typeArg = QualifyType(fieldType.ItemType);
@@ -1455,9 +1339,9 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static string ScalarFieldToEncode(
-            ScalarFieldType field,
-            bool nullable,
-            bool flexible
+            in ScalarFieldType field,
+            in bool nullable,
+            in bool flexible
         ) =>
             (field.Name, nullable, flexible) switch
             {
@@ -1486,9 +1370,9 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static string ScalarFieldToDecode(
-            ScalarFieldType field,
-            bool nullable,
-            bool flexible
+            in ScalarFieldType field,
+            in bool nullable,
+            in bool flexible
         ) =>
             (field.Name, nullable, flexible) switch
             {
@@ -1517,12 +1401,12 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static void DecodeField(
-            TextWriter writer,
-            string indent,
-            bool flexible,
-            Field field,
-            short version,
-            string reference
+            in StreamWriter writer,
+            in string indent,
+            in bool flexible,
+            in Field field,
+            in short version,
+            in string reference
         )
         {
             //var flexible = flexibleMessage && field.Properties.FlexibleVersions.Includes(version);
@@ -1538,13 +1422,13 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void DecodeFieldStatement(
-            TextWriter writer,
-            string indent,
-            bool flexible,
-            bool nullable,
-            Field field,
-            short version,
-            string dereference
+            in StreamWriter writer,
+            in string indent,
+            in bool flexible,
+            in bool nullable,
+            in Field field,
+            in short version,
+            in string dereference
         )
         {
             switch (field.Type)
@@ -1567,14 +1451,14 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void DecodeArrayField(
-            TextWriter writer,
-            string indent,
-            string fieldName,
-            bool flexible,
-            FieldProperties fieldProperties,
-            ArrayFieldType fieldType,
-            short version,
-            string dereference
+            in StreamWriter writer,
+            in string indent,
+            in string fieldName,
+            in bool flexible,
+            in FieldProperties fieldProperties,
+            in ArrayFieldType fieldType,
+            in short version,
+            in string dereference
         )
         {
             var typeArg = QualifyType(fieldType.ItemType);
@@ -1610,22 +1494,22 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void DecodeStructField(
-            TextWriter writer,
-            StructFieldType fieldType,
-            short version
+            in StreamWriter writer,
+            in StructFieldType fieldType,
+            in short version
         ) =>
             writer.WriteLine($"{GetDecoderName(fieldType)}.ReadV{version}(buffer, index);")
         ;
 
         private static void DecodeRecordsField(
-            TextWriter writer,
-            string indent,
-            string fieldName,
-            bool flexible,
-            bool nullable,
-            RecordsFieldType fieldType,
-            short version,
-            string dereference
+            in StreamWriter writer,
+            in string indent,
+            in string fieldName,
+            in bool flexible,
+            in bool nullable,
+            in RecordsFieldType fieldType,
+            in short version,
+            in string dereference
         )
         {
             if (flexible)
@@ -1642,11 +1526,11 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void DecodeScalarField(
-            TextWriter writer,
-            bool flexible,
-            bool nullable,
-            ScalarFieldType fieldType,
-            short version
+            in StreamWriter writer,
+            in bool flexible,
+            in bool nullable,
+            in ScalarFieldType fieldType,
+            in short version
         )
         {
             var scalarRead = ScalarFieldToDecode(fieldType, nullable, flexible);
@@ -1654,7 +1538,7 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static string DefaultValue(
-            Field field
+            in Field field
         ) =>
             (field.Type, field.Properties.NullableVersions.Some()) switch
             {
@@ -1667,7 +1551,7 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static string DefaultRecords(
-            bool nullable
+            in bool nullable
         ) =>
             nullable switch
             {
@@ -1677,8 +1561,8 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static string DefaultScalar(
-            ScalarFieldType fieldType,
-            bool nullable
+            in ScalarFieldType fieldType,
+            in bool nullable
         ) =>
             (fieldType.Name, nullable) switch
             {
@@ -1689,8 +1573,8 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static string DefaultStruct(
-            StructFieldType fieldType,
-            bool nullable
+            in StructFieldType fieldType,
+            in bool nullable
         ) =>
             nullable switch
             {
@@ -1700,8 +1584,8 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static string DefaultArray(
-            ArrayFieldType fieldType,
-            bool nullable
+            in ArrayFieldType fieldType,
+            in bool nullable
         ) =>
             (fieldType.ItemType, nullable) switch
             {
@@ -1716,7 +1600,7 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static IReadOnlyDictionary<string, QualifiedStruct> CreateTypeLookup(
-            MessageDefinition message
+            in MessageDefinition message
         )
         {
             var names = new Dictionary<string, QualifiedStruct>();
@@ -1725,9 +1609,9 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static void AddTypeLookup(
-            Dictionary<string, QualifiedStruct> names,
-            string fullName,
-            IImmutableDictionary<string, StructDefinition> structs
+            in Dictionary<string, QualifiedStruct> names,
+            in string fullName,
+            in IImmutableDictionary<string, StructDefinition> structs
         )
         {
             foreach (var kv in structs)
@@ -1747,8 +1631,8 @@ namespace Kafka.CodeGen.CSharp
         );
 
         private static UsingsFlags GetUsings(
-            MessageDefinition message,
-            IReadOnlyDictionary<string, QualifiedStruct> structs
+            in MessageDefinition message,
+            in IReadOnlyDictionary<string, QualifiedStruct> structs
         ) =>
             AggregateUsings(
                 message.ValidVersions,
@@ -1758,26 +1642,27 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static UsingsFlags AggregateUsings(
-            VersionRange versions,
-            IEnumerable<Field> fields,
-            IReadOnlyDictionary<string, QualifiedStruct> structs
-        ) =>
-            fields.Aggregate(
-                UsingsFlags.None,
-                (s, f) => s | OrUsing(
+            in VersionRange versions,
+            in IEnumerable<Field> fields,
+            in IReadOnlyDictionary<string, QualifiedStruct> structs
+        )
+        {
+            var flags = UsingsFlags.None;
+            foreach (var field in fields)
+                flags |= OrUsing(
                     versions,
-                    f.Type,
-                    versions.Intersect(f.Properties.Versions) != versions,
+                    field.Type,
+                    versions.Intersect(field.Properties.Versions) != versions,
                     structs
-                )
-            )
-        ;
+                );
+            return flags;
+        }
 
         private static UsingsFlags OrUsing(
-            VersionRange versions,
-            FieldType field,
-            bool nullabeOrDefault,
-            IReadOnlyDictionary<string, QualifiedStruct> structs
+            in VersionRange versions,
+            in FieldType field,
+            in bool nullabeOrDefault,
+            in IReadOnlyDictionary<string, QualifiedStruct> structs
         ) =>
             (field, nullabeOrDefault) switch
             {
@@ -1804,7 +1689,7 @@ namespace Kafka.CodeGen.CSharp
         ;
 
         private static UsingsFlags DetectByteArray(
-            ScalarFieldType field
+            in ScalarFieldType field
         ) =>
             field switch
             {
@@ -1823,7 +1708,7 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static string FieldTypify(
-            Field field
+            in Field field
         )
         {
             var type = QualifyType(field.Type);
@@ -1833,19 +1718,19 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static string FieldPropertyNamify(
-            Field field
+            in Field field
         ) =>
             $"{char.ToUpper(field.Name[0])}{field.Name[1..]}Field"
         ;
 
         private static string FieldVariableNamify(
-            Field field
+            in Field field
         ) =>
             $"{char.ToLower(field.Name[0])}{field.Name[1..]}Field"
         ;
 
         private static string ZipGenerics(
-            Type genericType,
+            in Type genericType,
             params string[] genericArguments
         )
         {
@@ -1854,14 +1739,14 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static string GetGenericBaseName(
-            Type genericType
+            in Type genericType
         ) =>
             genericType.GetGenericTypeDefinition().Name.Split('`', StringSplitOptions.RemoveEmptyEntries)[0]
         ;
 
-        private static TextWriter CreateWriter(
-            IDirectoryInfo directoryInfo,
-            string fileName
+        private static StreamWriter CreateWriter(
+            in IDirectoryInfo directoryInfo,
+            in string fileName
         )
         {
             var fileSystem = directoryInfo.FileSystem;
@@ -1878,39 +1763,57 @@ namespace Kafka.CodeGen.CSharp
             );
         }
 
-        private static string GetMessageName(StructFieldType structFieldType) =>
+        private static string GetMessageName(
+            in StructFieldType structFieldType
+        ) =>
             $"{structFieldType.Name}"
         ;
 
-        private static string GetMessageName(MessageDefinition messageDefinition) =>
+        private static string GetMessageName(
+            in MessageDefinition messageDefinition
+        ) =>
             $"{messageDefinition.Name}Data"
         ;
 
-        private static string GetMessageName(StructDefinition structDefinition) =>
+        private static string GetMessageName(
+            in StructDefinition structDefinition
+        ) =>
             $"{structDefinition.Name}"
         ;
 
-        private static string GetEncoderName(MessageDefinition messageDefinition) =>
+        private static string GetEncoderName(
+            in MessageDefinition messageDefinition
+        ) =>
             $"{messageDefinition.Name}Encoder"
         ;
 
-        private static string GetEncoderName(StructDefinition structDefinition) =>
+        private static string GetEncoderName(
+            in StructDefinition structDefinition
+        ) =>
             $"{structDefinition.Name}Encoder"
         ;
 
-        private static string GetEncoderName(StructFieldType structFieldType) =>
+        private static string GetEncoderName(
+            in StructFieldType structFieldType
+        ) =>
             $"{structFieldType.Name}Encoder"
         ;
 
-        private static string GetDecoderName(MessageDefinition messageDefinition) =>
+        private static string GetDecoderName(
+            in MessageDefinition messageDefinition
+        ) =>
             $"{messageDefinition.Name}Decoder"
         ;
 
-        private static string GetDecoderName(StructDefinition structDefinition) =>
+        private static string GetDecoderName(
+            in StructDefinition structDefinition
+        ) =>
             $"{structDefinition.Name}Decoder"
         ;
 
-        private static string GetDecoderName(StructFieldType structFieldType) =>
+        private static string GetDecoderName(
+            in StructFieldType structFieldType
+        ) =>
             $"{structFieldType.Name}Decoder"
         ;
     }

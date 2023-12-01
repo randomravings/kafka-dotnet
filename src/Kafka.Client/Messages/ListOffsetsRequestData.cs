@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition;
 using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic;
+using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -11,14 +11,14 @@ namespace Kafka.Client.Messages {
     /// <param name="TopicsField">Each topic in the request.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record ListOffsetsRequestData (
+    internal sealed record ListOffsetsRequestData (
         int ReplicaIdField,
         sbyte IsolationLevelField,
         ImmutableArray<ListOffsetsTopic> TopicsField,
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static ListOffsetsRequestData Empty { get; } = new(
+        internal static ListOffsetsRequestData Empty { get; } = new(
             default(int),
             default(sbyte),
             ImmutableArray<ListOffsetsTopic>.Empty,
@@ -29,13 +29,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">Each partition in the request.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record ListOffsetsTopic (
+        internal sealed record ListOffsetsTopic (
             string NameField,
             ImmutableArray<ListOffsetsPartition> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static ListOffsetsTopic Empty { get; } = new(
+            internal static ListOffsetsTopic Empty { get; } = new(
                 "",
                 ImmutableArray<ListOffsetsPartition>.Empty,
                 ImmutableArray<TaggedField>.Empty
@@ -47,7 +47,7 @@ namespace Kafka.Client.Messages {
             /// <param name="MaxNumOffsetsField">The maximum number of offsets to report.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record ListOffsetsPartition (
+            internal sealed record ListOffsetsPartition (
                 int PartitionIndexField,
                 int CurrentLeaderEpochField,
                 long TimestampField,
@@ -55,7 +55,7 @@ namespace Kafka.Client.Messages {
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static ListOffsetsPartition Empty { get; } = new(
+                internal static ListOffsetsPartition Empty { get; } = new(
                     default(int),
                     default(int),
                     default(long),

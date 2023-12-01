@@ -4,12 +4,12 @@ using System.Collections.Immutable;
 namespace Kafka.Client.IO.Stream
 {
     public sealed record FetchResult(
-        IReadOnlyList<ConsumerRecord> Records,
+        IReadOnlyList<InputRecord> Records,
         TaskCompletionSource Callback
     )
     {
         public static FetchResult Empty { get; } = new(
-            ImmutableList<ConsumerRecord>.Empty,
+            ImmutableList<InputRecord>.Empty,
             EmptyTaskCompletionSource()
         );
         private static TaskCompletionSource EmptyTaskCompletionSource()

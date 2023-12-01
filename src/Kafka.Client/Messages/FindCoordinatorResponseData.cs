@@ -14,7 +14,7 @@ namespace Kafka.Client.Messages {
     /// <param name="CoordinatorsField">Each coordinator result in the response</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record FindCoordinatorResponseData (
+    internal sealed record FindCoordinatorResponseData (
         int ThrottleTimeMsField,
         short ErrorCodeField,
         string? ErrorMessageField,
@@ -25,7 +25,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static FindCoordinatorResponseData Empty { get; } = new(
+        internal static FindCoordinatorResponseData Empty { get; } = new(
             default(int),
             default(short),
             default(string?),
@@ -44,7 +44,7 @@ namespace Kafka.Client.Messages {
         /// <param name="ErrorMessageField">The error message, or null if there was no error.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record Coordinator (
+        internal sealed record Coordinator (
             string KeyField,
             int NodeIdField,
             string HostField,
@@ -54,7 +54,7 @@ namespace Kafka.Client.Messages {
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static Coordinator Empty { get; } = new(
+            internal static Coordinator Empty { get; } = new(
                 "",
                 default(int),
                 "",

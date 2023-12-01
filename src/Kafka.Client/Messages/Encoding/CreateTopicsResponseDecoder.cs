@@ -10,10 +10,10 @@ using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponseData.Crea
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class CreateTopicsResponseDecoder : 
+    internal class CreateTopicsResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, CreateTopicsResponseData>
     {
-        public CreateTopicsResponseDecoder() :
+        internal CreateTopicsResponseDecoder() :
             base(
                 ApiKey.CreateTopics,
                 new(0, 7),

@@ -2,12 +2,10 @@
 using Kafka.Cli.Client;
 using Kafka.Cli.Options;
 using Kafka.Cli.Text;
-using Kafka.Client;
 using Kafka.Client.Config;
 using Kafka.Client.IO;
+using Kafka.Common.Model;
 using Kafka.Common.Serialization;
-using Microsoft.Extensions.Logging;
-using System.Threading;
 
 namespace Kafka.Cli.Cmd
 {
@@ -47,17 +45,19 @@ namespace Kafka.Cli.Cmd
                 config
             );
 
-            using var outputStream = client
+            var outputStream = client
                 .CreateOutputStream()
                 .Build()
             ;
 
-            using var writer = outputStream
-                .CreateWriter(opts.Topic)
+            var writer = outputStream
+                .CreateWriter()
                 .WithKey(StringSerializer.Instance)
                 .WithValue(StringSerializer.Instance)
                 .Build()
             ;
+
+            var topic = new TopicName(opts.Topic);
 
             Console.WriteLine("Empty new line will terminate session.");
             var transaction = default(ITransaction);
@@ -80,7 +80,7 @@ namespace Kafka.Cli.Cmd
                             else
                             {
                                 batching = true;
-                                Console.WriteLine("Batching in progress");
+                                Console.WriteLine("Batching started");
                             }
                             continue;
                         case "/eb":
@@ -90,7 +90,9 @@ namespace Kafka.Cli.Cmd
                             }
                             else
                             {
+                                Console.WriteLine("Batching completed");
                                 await HandleBatch(
+                                    topic,
                                     writer,
                                     batch,
                                     cancellationToken
@@ -148,7 +150,7 @@ namespace Kafka.Cli.Cmd
                             }
                             else
                             {
-                                var result = await writer.Write(split[0], split[1], cancellationToken).ConfigureAwait(false);
+                                var result = await writer.Write(topic, split[0], split[1], cancellationToken).ConfigureAwait(false);
                                 Console.WriteLine(Formatter.Print(result.TopicPartitionOffset));
                             }
                             continue;
@@ -165,6 +167,7 @@ namespace Kafka.Cli.Cmd
 
             if (batch.Count > 0)
                 await HandleBatch(
+                    topic,
                     writer,
                     batch,
                     cts.Token
@@ -178,6 +181,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async ValueTask HandleBatch(
+            TopicName topic,
             IStreamWriter<string, string> writer,
             List<KeyValuePair<string, string>> batch,
             CancellationToken cancellationToken
@@ -188,6 +192,7 @@ namespace Kafka.Cli.Cmd
                 var tasks = batch
                     .Select(r =>
                         writer.Write(
+                            topic,
                             r.Key,
                             r.Value,
                             cancellationToken

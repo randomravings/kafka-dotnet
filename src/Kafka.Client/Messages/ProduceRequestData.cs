@@ -13,7 +13,7 @@ namespace Kafka.Client.Messages {
     /// <param name="TopicDataField">Each topic to produce to.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record ProduceRequestData (
+    internal sealed record ProduceRequestData (
         string? TransactionalIdField,
         short AcksField,
         int TimeoutMsField,
@@ -21,7 +21,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static ProduceRequestData Empty { get; } = new(
+        internal static ProduceRequestData Empty { get; } = new(
             default(string?),
             default(short),
             default(int),
@@ -33,13 +33,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionDataField">Each partition to produce to.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record TopicProduceData (
+        internal sealed record TopicProduceData (
             string NameField,
             ImmutableArray<PartitionProduceData> PartitionDataField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static TopicProduceData Empty { get; } = new(
+            internal static TopicProduceData Empty { get; } = new(
                 "",
                 ImmutableArray<PartitionProduceData>.Empty,
                 ImmutableArray<TaggedField>.Empty
@@ -49,13 +49,13 @@ namespace Kafka.Client.Messages {
             /// <param name="RecordsField">The record data to be produced.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record PartitionProduceData (
+            internal sealed record PartitionProduceData (
                 int IndexField,
                 ImmutableArray<IRecords>? RecordsField,
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static PartitionProduceData Empty { get; } = new(
+                internal static PartitionProduceData Empty { get; } = new(
                     default(int),
                     default(ImmutableArray<IRecords>?),
                     ImmutableArray<TaggedField>.Empty

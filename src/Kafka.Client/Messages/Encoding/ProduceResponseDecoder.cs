@@ -4,19 +4,19 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using PartitionProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse;
+using LeaderIdAndEpoch = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.LeaderIdAndEpoch;
 using NodeEndpoint = Kafka.Client.Messages.ProduceResponseData.NodeEndpoint;
 using TopicProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse;
 using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
-using LeaderIdAndEpoch = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.LeaderIdAndEpoch;
+using PartitionProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse;
 
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class ProduceResponseDecoder : 
+    internal class ProduceResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, ProduceResponseData>
     {
-        public ProduceResponseDecoder() :
+        internal ProduceResponseDecoder() :
             base(
                 ApiKey.Produce,
                 new(0, 10),

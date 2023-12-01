@@ -9,7 +9,7 @@ namespace Kafka.Common.Model.Comparison
         public static IComparer<ClusterId> Instance { get; } = new ClusterIdCompare();
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int IComparer<ClusterId>.Compare(ClusterId x, ClusterId y) =>
-            string.CompareOrdinal(x.Value, y.Value)
+            Math.Sign(string.CompareOrdinal(x.Value, y.Value))
         ;
     }
 }

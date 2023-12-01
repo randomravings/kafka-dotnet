@@ -4,16 +4,16 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition;
 using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic;
+using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition;
 
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class ListOffsetsRequestEncoder : 
+    internal class ListOffsetsRequestEncoder : 
         RequestEncoder<RequestHeaderData, ListOffsetsRequestData>
     {
-        public ListOffsetsRequestEncoder() :
+        internal ListOffsetsRequestEncoder() :
             base(
                 ApiKey.ListOffsets,
                 new(0, 8),

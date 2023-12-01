@@ -5,8 +5,12 @@ namespace Kafka.Client
 {
     public interface IKafkaClientBuilder
     {
-        IKafkaClientBuilder WithConfig(KafkaClientConfig config);
-        IKafkaClientBuilder WithLogger(ILogger<IKafkaClient> logger);
+        IKafkaClientBuilder WithConfig(
+            KafkaClientConfig config
+        );
+        IKafkaClientBuilder WithLogger(
+            ILogger<IKafkaClient> logger
+        );
         IKafkaClient Build();
     }
 }

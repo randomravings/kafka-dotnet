@@ -2,13 +2,13 @@ using Kafka.Common.Model;
 using Kafka.Common.Records;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
-using NodeEndpoint = Kafka.Client.Messages.FetchResponseData.NodeEndpoint;
-using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
 using AbortedTransaction = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.AbortedTransaction;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
+using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
+using NodeEndpoint = Kafka.Client.Messages.FetchResponseData.NodeEndpoint;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
+using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -19,7 +19,7 @@ namespace Kafka.Client.Messages {
     /// <param name="NodeEndpointsField">Endpoints for all current-leaders enumerated in PartitionData, with errors NOT_LEADER_OR_FOLLOWER & FENCED_LEADER_EPOCH.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record FetchResponseData (
+    internal sealed record FetchResponseData (
         int ThrottleTimeMsField,
         short ErrorCodeField,
         int SessionIdField,
@@ -28,7 +28,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static FetchResponseData Empty { get; } = new(
+        internal static FetchResponseData Empty { get; } = new(
             default(int),
             default(short),
             default(int),
@@ -42,14 +42,14 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">The topic partitions.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record FetchableTopicResponse (
+        internal sealed record FetchableTopicResponse (
             string TopicField,
             Guid TopicIdField,
             ImmutableArray<PartitionData> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static FetchableTopicResponse Empty { get; } = new(
+            internal static FetchableTopicResponse Empty { get; } = new(
                 "",
                 default(Guid),
                 ImmutableArray<PartitionData>.Empty,
@@ -69,7 +69,7 @@ namespace Kafka.Client.Messages {
             /// <param name="RecordsField">The record data.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record PartitionData (
+            internal sealed record PartitionData (
                 int PartitionIndexField,
                 short ErrorCodeField,
                 long HighWatermarkField,
@@ -84,7 +84,7 @@ namespace Kafka.Client.Messages {
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static PartitionData Empty { get; } = new(
+                internal static PartitionData Empty { get; } = new(
                     default(int),
                     default(short),
                     default(long),
@@ -103,13 +103,13 @@ namespace Kafka.Client.Messages {
                 /// <param name="FirstOffsetField">The first offset in the aborted transaction.</param>
                 /// </summary>
                 [GeneratedCode("kgen", "1.0.0.0")]
-                public sealed record AbortedTransaction (
+                internal sealed record AbortedTransaction (
                     long ProducerIdField,
                     long FirstOffsetField,
                     ImmutableArray<TaggedField> TaggedFields
                 )
                 {
-                    public static AbortedTransaction Empty { get; } = new(
+                    internal static AbortedTransaction Empty { get; } = new(
                         default(long),
                         default(long),
                         ImmutableArray<TaggedField>.Empty
@@ -120,13 +120,13 @@ namespace Kafka.Client.Messages {
                 /// <param name="EndOffsetField"></param>
                 /// </summary>
                 [GeneratedCode("kgen", "1.0.0.0")]
-                public sealed record EpochEndOffset (
+                internal sealed record EpochEndOffset (
                     int EpochField,
                     long EndOffsetField,
                     ImmutableArray<TaggedField> TaggedFields
                 )
                 {
-                    public static EpochEndOffset Empty { get; } = new(
+                    internal static EpochEndOffset Empty { get; } = new(
                         default(int),
                         default(long),
                         ImmutableArray<TaggedField>.Empty
@@ -137,13 +137,13 @@ namespace Kafka.Client.Messages {
                 /// <param name="LeaderEpochField">The latest known leader epoch</param>
                 /// </summary>
                 [GeneratedCode("kgen", "1.0.0.0")]
-                public sealed record LeaderIdAndEpoch (
+                internal sealed record LeaderIdAndEpoch (
                     int LeaderIdField,
                     int LeaderEpochField,
                     ImmutableArray<TaggedField> TaggedFields
                 )
                 {
-                    public static LeaderIdAndEpoch Empty { get; } = new(
+                    internal static LeaderIdAndEpoch Empty { get; } = new(
                         default(int),
                         default(int),
                         ImmutableArray<TaggedField>.Empty
@@ -154,13 +154,13 @@ namespace Kafka.Client.Messages {
                 /// <param name="EpochField"></param>
                 /// </summary>
                 [GeneratedCode("kgen", "1.0.0.0")]
-                public sealed record SnapshotId (
+                internal sealed record SnapshotId (
                     long EndOffsetField,
                     int EpochField,
                     ImmutableArray<TaggedField> TaggedFields
                 )
                 {
-                    public static SnapshotId Empty { get; } = new(
+                    internal static SnapshotId Empty { get; } = new(
                         default(long),
                         default(int),
                         ImmutableArray<TaggedField>.Empty
@@ -175,7 +175,7 @@ namespace Kafka.Client.Messages {
         /// <param name="RackField">The rack of the node, or null if it has not been assigned to a rack.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record NodeEndpoint (
+        internal sealed record NodeEndpoint (
             int NodeIdField,
             string HostField,
             int PortField,
@@ -183,7 +183,7 @@ namespace Kafka.Client.Messages {
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static NodeEndpoint Empty { get; } = new(
+            internal static NodeEndpoint Empty { get; } = new(
                 default(int),
                 "",
                 default(int),

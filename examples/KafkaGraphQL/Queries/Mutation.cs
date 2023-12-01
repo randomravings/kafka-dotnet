@@ -2,7 +2,9 @@
 using Kafka.Client.IO;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
+using KafkaGraphQL.InputTypes;
 using KafkaGraphQL.Model;
+using KafkaGraphQL.Types;
 
 namespace KafkaGraphQL.Queries
 {
@@ -11,6 +13,7 @@ namespace KafkaGraphQL.Queries
         [GraphQLDescription("Creates one or more topics.")]
         public async ValueTask<CreateTopicsResult> CreateTopic(
 
+            [GraphQLNonNullType]
             [GraphQLDescription("Create topic definitions.")]
             CreateTopicDefinition definition,
 
@@ -36,6 +39,7 @@ namespace KafkaGraphQL.Queries
         public async ValueTask<DeleteTopicsResult> DeleteTopic(
 
             [GraphQLType<StringType>]
+            [GraphQLNonNullType]
             [GraphQLDescription("List of topics to get, omit for all topics.")]
             TopicName topicName,
 
@@ -54,6 +58,12 @@ namespace KafkaGraphQL.Queries
 
         [GraphQLDescription("Writes a set of records to a topic.")]
         public async ValueTask<IQueryable<ProduceResult>> WriteToTopic(
+
+            [GraphQLType<StringType>]
+            [GraphQLNonNullType]
+            TopicName topic,
+
+            [GraphQLType<ListType<RecordInputType>>]
             IEnumerable<Record> records,
 
             [Service]
@@ -65,6 +75,7 @@ namespace KafkaGraphQL.Queries
             var tasks = records
                 .Select(r =>
                     streamWriter.Write(
+                        topic,
                         r.Key,
                         r.Value,
                         cancellationToken
@@ -72,6 +83,7 @@ namespace KafkaGraphQL.Queries
                 )
                 .ToArray()
             ;
+            await Task.Yield();
             var results = await Task.WhenAll(tasks);
             return results.AsQueryable();
         }

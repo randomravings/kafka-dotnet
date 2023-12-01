@@ -13,7 +13,7 @@ namespace Kafka.Client.Messages {
     /// <param name="V3AndBelowTopicsField">The partitions to add to the transaction.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record AddPartitionsToTxnRequestData (
+    internal sealed record AddPartitionsToTxnRequestData (
         ImmutableArray<AddPartitionsToTxnTransaction> TransactionsField,
         string V3AndBelowTransactionalIdField,
         long V3AndBelowProducerIdField,
@@ -22,7 +22,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static AddPartitionsToTxnRequestData Empty { get; } = new(
+        internal static AddPartitionsToTxnRequestData Empty { get; } = new(
             ImmutableArray<AddPartitionsToTxnTransaction>.Empty,
             "",
             default(long),
@@ -35,13 +35,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">The partition indexes to add to the transaction</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record AddPartitionsToTxnTopic (
+        internal sealed record AddPartitionsToTxnTopic (
             string NameField,
             ImmutableArray<int> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static AddPartitionsToTxnTopic Empty { get; } = new(
+            internal static AddPartitionsToTxnTopic Empty { get; } = new(
                 "",
                 ImmutableArray<int>.Empty,
                 ImmutableArray<TaggedField>.Empty
@@ -55,7 +55,7 @@ namespace Kafka.Client.Messages {
         /// <param name="TopicsField">The partitions to add to the transaction.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record AddPartitionsToTxnTransaction (
+        internal sealed record AddPartitionsToTxnTransaction (
             string TransactionalIdField,
             long ProducerIdField,
             short ProducerEpochField,
@@ -64,7 +64,7 @@ namespace Kafka.Client.Messages {
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static AddPartitionsToTxnTransaction Empty { get; } = new(
+            internal static AddPartitionsToTxnTransaction Empty { get; } = new(
                 "",
                 default(long),
                 default(short),

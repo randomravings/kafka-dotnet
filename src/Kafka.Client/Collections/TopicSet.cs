@@ -1,20 +1,24 @@
 ﻿using Kafka.Common.Model;
 using System.Collections;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Kafka.Client.Collections
 {
     internal sealed class TopicSet(
-        int initialCapacity
+        int initialTopicCapacity
     ) :
         IReadOnlyCollection<Topic>
     {
         private SpinLock _lock;
-        private Topic[] _ids = new Topic[initialCapacity];
-        private Topic[] _names = new Topic[initialCapacity];
+        private Topic[] _names = new Topic[initialTopicCapacity];
+        private Topic[] _ids = new Topic[initialTopicCapacity];
         private int _count;
 
         int IReadOnlyCollection<Topic>.Count => _count;
+
+        public int Count => _count;
 
         IEnumerator<Topic> IEnumerable<Topic>.GetEnumerator()
         {
@@ -28,25 +32,64 @@ namespace Kafka.Client.Collections
             return items.AsEnumerable().GetEnumerator();
         }
 
-        public TopicSet()
-            : this(16) { }
+        internal TopicSet()
+            : this(8) { }
 
         /// <summary>
         /// Checks if the key is present in the collection.
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public bool Contains(in Topic key)
+        public bool Get(
+            in Topic key,
+            [MaybeNullWhen(false)] out Topic value
+        )
         {
             var lockTaken = false;
             try
             {
                 _lock.TryEnter(ref lockTaken);
 
-                var (idIndex, nameIndex) = IndexOf(
-                    key
-                );
-                return idIndex >= 0 || nameIndex >= 0;
+                value = default;
+                var (topicId, topicName) = key;
+                var index = -1;
+                if (!topicId.IsEmpty && GetTopic(topicId, out index))
+                {
+                    value = _ids[index];
+                    return true;
+                }
+                if (GetTopic(topicName, out index))
+                {
+                    value = _names[index];
+                    return true;
+                }
+                return false;
+            }
+            finally
+            {
+                if (lockTaken)
+                    _lock.Exit(false);
+            }
+        }
+
+        /// <summary>
+        /// Checks if the key is present in the collection.
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        public bool Contains(
+            in Topic key
+        )
+        {
+            var lockTaken = false;
+            try
+            {
+                var (topicId, topicName) = key;
+                if (!topicId.IsEmpty && GetTopic(topicId, out _))
+                    return true;
+                if (GetTopic(topicName, out _))
+                    return true;
+                return false;
             }
             finally
             {
@@ -62,25 +105,26 @@ namespace Kafka.Client.Collections
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public bool Add(in Topic key)
+        public bool Add(
+            in Topic key
+        )
         {
             var lockTaken = false;
             try
             {
                 _lock.TryEnter(ref lockTaken);
 
-                var (idIndex, nameIndex) = IndexOf(
-                    key
-                );
-                if (idIndex < 0 || nameIndex >= 0)
-                {
-                    Insert(ref _ids, key, ~idIndex, _count);
-                    Insert(ref _names, key, ~nameIndex, _count);
-                    _count++;
+                var (topicId, topicName) = key;
+                var idIndex = -1;
+                var nameIndex = -1;
+                if (!topicId.IsEmpty && GetTopic(topicId, out idIndex))
+                    return false;
+                if (GetTopic(topicName, out nameIndex))
                     return true;
-                }
-
-                return false;
+                _count++;
+                Insert(ref _ids, key, ~idIndex, _count);
+                Insert(ref _names, key, ~nameIndex, _count);
+                return true;
             }
             finally
             {
@@ -94,20 +138,34 @@ namespace Kafka.Client.Collections
         /// </summary>
         /// <param name="key"></param>
         /// <returns></returns>
-        public bool Remove(in Topic key)
+        public bool Remove(
+            in Topic key,
+            [MaybeNullWhen(false)] out Topic value
+        )
         {
             var lockTaken = false;
             try
             {
                 _lock.TryEnter(ref lockTaken);
 
-                var (idIndex, nameIndex) = IndexOf(
-                    key
-                );
-                if (idIndex >= 0 || nameIndex >= 0)
+                var idIndex = -1;
+                var nameIndex = -1;
+                value = default;
+                var (topicId, topicName) = key;
+                var index = -1;
+                if (!topicId.IsEmpty && GetTopic(topicId, out idIndex))
                 {
-                    _ = Remove(_ids, idIndex, _count);
-                    _ = Remove(_names, nameIndex, _count);
+                    value = _ids[index];
+                    Remove(_ids, idIndex, _count);
+                    if (GetTopic(value.TopicName, out nameIndex))
+                        Remove(_names, nameIndex, _count);
+                    _count--;
+                    return true;
+                }
+                if (GetTopic(topicName, out nameIndex))
+                {
+                    value = _names[index];
+                    Remove(_names, nameIndex, _count);
                     _count--;
                     return true;
                 }
@@ -138,15 +196,21 @@ namespace Kafka.Client.Collections
             }
         }
 
-        public ImmutableArray<Topic> CopyItems()
+        public ImmutableArray<Topic> CopyItems(
+            in bool sortById = false
+        )
         {
             var lockTaken = false;
             try
             {
                 _lock.TryEnter(ref lockTaken);
                 var builder = ImmutableArray.CreateBuilder<Topic>(_count);
-                for (int i = 0; i < _count; i++)
-                    builder.Add(_names[i]);
+                if (sortById)
+                    for (int i = 0; i < _count; i++)
+                        builder.Add(_ids[i]);
+                else
+                    for (int i = 0; i < _count; i++)
+                        builder.Add(_names[i]);
                 return builder.ToImmutable();
             }
             finally
@@ -156,70 +220,67 @@ namespace Kafka.Client.Collections
             }
         }
 
-        private Indices IndexOf(
-            in Topic key
+        private bool GetTopic(
+            in TopicId topicId,
+            out int index
         )
         {
-            var idIndex = 0;
-            var idLeftOffset = 0;
-            var idRightOffset = _count;
-            var nameIndex = 0;
-            var nameLeftOffset = 0;
-            var nameRightOffset = _count;
-            while (idLeftOffset < idRightOffset)
+            index = Compare.IndexOf(
+                _ids,
+                topicId,
+                _count,
+                CompareTopicId
+            );
+            if (index >= 0)
             {
-                idIndex = idLeftOffset + ((idRightOffset - idLeftOffset) / 2);
-                nameIndex = nameLeftOffset + ((nameRightOffset - nameLeftOffset) / 2);
-                var idValue = _ids[idIndex];
-                var idCompare = Compare.TopicById(key, idValue);
-                var nameValue = _names[nameIndex];
-                var nameCompare = Compare.TopicByName(key, nameValue);
-                switch ((idCompare, nameCompare))
-                {
-                    case (0, _):
-                        return new(idIndex, nameIndex);
-                    case (_, 0):
-                        return new(idIndex, nameIndex);
-                    case (1, 1):
-                        idIndex++;
-                        nameIndex++;
-                        idLeftOffset = idIndex;
-                        nameLeftOffset = nameIndex;
-                        break;
-                    case (1, -1):
-                        idIndex++;
-                        idLeftOffset = idIndex;
-                        nameRightOffset = nameIndex;
-                        break;
-                    case (-1, 1):
-                        nameIndex++;
-                        idRightOffset = idIndex;
-                        nameLeftOffset = nameIndex;
-                        break;
-                    case (-1, -1):
-                        idRightOffset = idIndex;
-                        nameRightOffset = nameIndex;
-                        break;
-                }
+                var entry = _ids[index];
+                return true;
             }
-            return new(~idIndex, ~nameIndex);
+            else
+            {
+                index = -1;
+                return false;
+            }
         }
 
-        private static void Insert(
-            ref Topic[] array,
-            in Topic topicPartition,
+        private bool GetTopic(
+            in TopicName topicName,
+            out int index
+        )
+        {
+            index = Compare.IndexOf(
+                _names,
+                topicName,
+                _count,
+                CompareTopicName
+            );
+            if (index >= 0)
+            {
+                var entry = _names[index];
+                return true;
+            }
+            else
+            {
+                index = -1;
+                return false;
+            }
+        }
+
+        private static void Insert<TItem>(
+            ref TItem[] array,
+            in TItem topicPartition,
             in int index,
             in int size
         )
         {
-            if (index >= array.Length)
+            if (size >= array.Length)
                 Array.Resize(ref array, array.Length * 2);
             Array.Copy(array, index, array, index + 1, size - index);
             array[index] = topicPartition;
         }
 
-        private static Topic Remove(
-            in Topic[] array,
+        private static TItem Remove<TItem>(
+            in TItem[] array,
             in int index,
             in int size
         )
@@ -229,9 +290,14 @@ namespace Kafka.Client.Collections
             return item;
         }
 
-        private readonly record struct Indices(
-            int IdIndex,
-            int NameIndex
-        );
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int CompareTopicId(in Topic item, in TopicId key) =>
+            item.TopicId.Value.CompareTo(key.Value)
+        ;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static int CompareTopicName(in Topic item, in TopicName key) =>
+            Math.Sign(string.CompareOrdinal(item.TopicName.Value, key.Value))
+        ;
     }
 }

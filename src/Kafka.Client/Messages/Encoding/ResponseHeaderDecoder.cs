@@ -8,9 +8,9 @@ using System.Collections.Immutable;
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public static class ResponseHeaderDecoder
+    internal static class ResponseHeaderDecoder
     {
-        public static DecodeResult<ResponseHeaderData> ReadV0(byte[] buffer, int index)
+        internal static DecodeResult<ResponseHeaderData> ReadV0(byte[] buffer, int index)
         {
             var correlationIdField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
@@ -20,7 +20,7 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        public static DecodeResult<ResponseHeaderData> ReadV1(byte[] buffer, int index)
+        internal static DecodeResult<ResponseHeaderData> ReadV1(byte[] buffer, int index)
         {
             var correlationIdField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;

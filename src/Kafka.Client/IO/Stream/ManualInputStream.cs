@@ -12,7 +12,7 @@ namespace Kafka.Client.IO.Stream
         IManualInputStream
     {
         public ManualInputStream(
-            IConnectionManager<IClientConnection> connectionManager,
+            ICluster<IClientConnection> connectionManager,
             InputStreamConfig config,
             ILogger logger
         ) : base(connectionManager, config, logger)
@@ -106,7 +106,7 @@ namespace Kafka.Client.IO.Stream
             throw new NotImplementedException();
         }
 
-        protected override ValueTask<TopicPartitionDictionary<LeaderAndOffset>> GetTopicPartitionOffsets(CancellationToken cancellationToken)
+        protected override ValueTask<TopicPartitionMap<LeaderAndOffset>> GetTopicPartitionOffsets(CancellationToken cancellationToken)
         {
             throw new NotImplementedException();
         }

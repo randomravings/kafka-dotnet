@@ -1,4 +1,4 @@
-﻿using Kafka.Client.Model;
+﻿using Kafka.Client.Model.Internal;
 using Kafka.Common.Encoding;
 using Kafka.Common.Model;
 using Kafka.Common.Records;

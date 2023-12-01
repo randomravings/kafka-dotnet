@@ -2,8 +2,7 @@
 
 namespace Kafka.Common.Net
 {
-    public interface IConnectionManager<TConnection> :
-        IDisposable
+    public interface ICluster<TConnection>
         where TConnection : IConnection
     {
         Task<TConnection> Controller(

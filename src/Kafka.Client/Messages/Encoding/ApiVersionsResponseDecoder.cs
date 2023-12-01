@@ -11,10 +11,10 @@ using FinalizedFeatureKey = Kafka.Client.Messages.ApiVersionsResponseData.Finali
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class ApiVersionsResponseDecoder : 
+    internal class ApiVersionsResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, ApiVersionsResponseData>
     {
-        public ApiVersionsResponseDecoder() :
+        internal ApiVersionsResponseDecoder() :
             base(
                 ApiKey.ApiVersions,
                 new(0, 3),

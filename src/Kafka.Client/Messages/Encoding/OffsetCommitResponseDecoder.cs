@@ -10,10 +10,10 @@ using OffsetCommitResponseTopic = Kafka.Client.Messages.OffsetCommitResponseData
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class OffsetCommitResponseDecoder : 
+    internal class OffsetCommitResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, OffsetCommitResponseData>
     {
-        public OffsetCommitResponseDecoder() :
+        internal OffsetCommitResponseDecoder() :
             base(
                 ApiKey.OffsetCommit,
                 new(0, 9),

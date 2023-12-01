@@ -6,43 +6,30 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client.IO.Stream
 {
-    internal sealed class StreamWriter<TKey, TValue> :
-        IStreamWriter<TKey, TValue>
+    internal sealed class StreamWriter<TKey, TValue>(
+        IOutputStream stream,
+        ISerializer<TKey> keySerializer,
+        ISerializer<TValue> valueSerializer,
+        IPartitioner partitioner,
+        ILogger logger
+    ) :
+        IStreamWriter<TKey, TValue>,
+        IDisposable
     {
-        private readonly IOutputStream _stream;
-        private readonly TopicName _topic;
-        private readonly ISerializer<TKey> _keySerializer;
-        private readonly ISerializer<TValue> _valueSerializer;
-        private readonly IPartitioner _partitioner;
-        private readonly ILogger _logger;
-
-        private ProducerTopicMetadata _topicMetadata = ProducerTopicMetadata.Empty;
-
-        public StreamWriter(
-            TopicName topic,
-            IOutputStream stream,
-            ISerializer<TKey> keySerializer,
-            ISerializer<TValue> valueSerializer,
-            IPartitioner partitioner,
-            ILogger logger
-        )
-        {
-            _topic = topic;
-            _stream = stream;
-            _keySerializer = keySerializer;
-            _valueSerializer = valueSerializer;
-            _partitioner = partitioner;
-            _logger = logger;
-        }
-
-        TopicName IStreamWriter<TKey, TValue>.Topic => _topic;
+        private readonly IOutputStream _stream = stream;
+        private readonly ISerializer<TKey> _keySerializer = keySerializer;
+        private readonly ISerializer<TValue> _valueSerializer = valueSerializer;
+        private readonly IPartitioner _partitioner = partitioner;
+        private readonly ILogger _logger = logger;
 
         async Task<ProduceResult> IStreamWriter<TKey, TValue>.Write(
+            TopicName topic,
             TKey? key,
             TValue? value,
             CancellationToken cancellationToken
         ) =>
             await Write(
+                topic,
                 key,
                 value,
                 Timestamp.None,
@@ -52,12 +39,14 @@ namespace Kafka.Client.IO.Stream
         ;
 
         async Task<ProduceResult> IStreamWriter<TKey, TValue>.Write(
+            TopicName topic,
             TKey? key,
             TValue? value,
             IReadOnlyList<RecordHeader> headers,
             CancellationToken cancellationToken
         ) =>
             await Write(
+                topic,
                 key,
                 value,
                 Timestamp.None,
@@ -67,12 +56,14 @@ namespace Kafka.Client.IO.Stream
         ;
 
         async Task<ProduceResult> IStreamWriter<TKey, TValue>.Write(
+            TopicName topic,
             TKey? key,
             TValue? value,
             Timestamp timestamp,
             CancellationToken cancellationToken
         ) =>
             await Write(
+                topic,
                 key,
                 value,
                 timestamp,
@@ -82,6 +73,7 @@ namespace Kafka.Client.IO.Stream
         ;
 
         async Task<ProduceResult> IStreamWriter<TKey, TValue>.Write(
+            TopicName topic,
             TKey? key,
             TValue? value,
             Timestamp timestamp,
@@ -89,6 +81,7 @@ namespace Kafka.Client.IO.Stream
             CancellationToken cancellationToken
         ) =>
             await Write(
+                topic,
                 key,
                 value,
                 timestamp,
@@ -98,27 +91,7 @@ namespace Kafka.Client.IO.Stream
         ;
 
         private async Task<ProduceResult> Write(
-            TKey? key,
-            TValue? value,
-            Timestamp timestamp,
-            IReadOnlyList<RecordHeader> headers,
-            CancellationToken cancellationToken
-        )
-        {
-            var record = await CreateRecord(
-                key,
-                value,
-                timestamp,
-                headers,
-                cancellationToken
-            ).ConfigureAwait(false);
-            return await _stream.Write(
-                record,
-                cancellationToken
-            ).ConfigureAwait(false);
-        }
-
-        private async Task<ProduceRecord> CreateRecord(
+            TopicName topic,
             TKey? key,
             TValue? value,
             Timestamp timestamp,
@@ -128,37 +101,32 @@ namespace Kafka.Client.IO.Stream
         {
             var keyBytes = _keySerializer.Write(key);
             var valueBytes = _valueSerializer.Write(value);
-            var topicMetadata = await GetTopicMetadata(
-                cancellationToken
-            ).ConfigureAwait(false);
-            var partition = await _partitioner.SelectPartition(
-                _topic,
+
+            var topicMetadata = await _stream.MetadataForTopic(
+                    topic, cancellationToken
+                ).ConfigureAwait(false);
+
+            var partition = _partitioner.SelectPartition(
                 topicMetadata.PartitionMetadata.Length,
-                keyBytes,
-                cancellationToken
-            ).ConfigureAwait(false);
+                keyBytes
+            );
+
             if (timestamp == Timestamp.None)
                 timestamp = Timestamp.Now();
-            return new(
-                new(_topic, partition),
+
+            var outputRecord = new OutputRecord(
+                new(topic, partition),
                 timestamp,
                 keyBytes,
                 valueBytes,
                 headers,
                 Attributes.None
             );
-        }
 
-        async Task<ProducerTopicMetadata> GetTopicMetadata(
-            CancellationToken cancellationToken
-        )
-        {
-            if (_topicMetadata.ExpireTime > DateTimeOffset.UtcNow)
-                return _topicMetadata;
-            _topicMetadata = await _stream.MetadataForTopic(
-                _topic, cancellationToken
+            return await _stream.Write(
+                outputRecord,
+                cancellationToken
             ).ConfigureAwait(false);
-            return _topicMetadata;
         }
 
         void IDisposable.Dispose() { }

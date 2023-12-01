@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic.CreatableReplicaAssignment;
 using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic;
+using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic.CreatableReplicaAssignment;
 using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic.CreateableTopicConfig;
 
 namespace Kafka.Client.Messages {
@@ -12,14 +12,14 @@ namespace Kafka.Client.Messages {
     /// <param name="ValidateOnlyField">If true, check that the topics can be created as specified, but don't create anything.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record CreateTopicsRequestData (
+    internal sealed record CreateTopicsRequestData (
         ImmutableArray<CreatableTopic> TopicsField,
         int TimeoutMsField,
         bool ValidateOnlyField,
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static CreateTopicsRequestData Empty { get; } = new(
+        internal static CreateTopicsRequestData Empty { get; } = new(
             ImmutableArray<CreatableTopic>.Empty,
             default(int),
             default(bool),
@@ -33,7 +33,7 @@ namespace Kafka.Client.Messages {
         /// <param name="ConfigsField">The custom topic configurations to set.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record CreatableTopic (
+        internal sealed record CreatableTopic (
             string NameField,
             int NumPartitionsField,
             short ReplicationFactorField,
@@ -42,7 +42,7 @@ namespace Kafka.Client.Messages {
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static CreatableTopic Empty { get; } = new(
+            internal static CreatableTopic Empty { get; } = new(
                 "",
                 default(int),
                 default(short),
@@ -55,13 +55,13 @@ namespace Kafka.Client.Messages {
             /// <param name="BrokerIdsField">The brokers to place the partition on.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record CreatableReplicaAssignment (
+            internal sealed record CreatableReplicaAssignment (
                 int PartitionIndexField,
                 ImmutableArray<int> BrokerIdsField,
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static CreatableReplicaAssignment Empty { get; } = new(
+                internal static CreatableReplicaAssignment Empty { get; } = new(
                     default(int),
                     ImmutableArray<int>.Empty,
                     ImmutableArray<TaggedField>.Empty
@@ -72,13 +72,13 @@ namespace Kafka.Client.Messages {
             /// <param name="ValueField">The configuration value.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record CreateableTopicConfig (
+            internal sealed record CreateableTopicConfig (
                 string NameField,
                 string? ValueField,
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static CreateableTopicConfig Empty { get; } = new(
+                internal static CreateableTopicConfig Empty { get; } = new(
                     "",
                     default(string?),
                     ImmutableArray<TaggedField>.Empty

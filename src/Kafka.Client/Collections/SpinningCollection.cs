@@ -139,17 +139,17 @@ namespace Kafka.Client.Collections
             while (l < r)
             {
                 i = l + ((r - l) / 2);
-                var c = comparer(key, _items[i]);
+                var c = comparer(_items[i], key);
                 switch (c)
                 {
                     case 0:
                         return i;
                     case 1:
-                        i++;
-                        l = i;
+                        r = i;
                         break;
                     default:
-                        r = i;
+                        i++;
+                        l = i;
                         break;
                 }
             }

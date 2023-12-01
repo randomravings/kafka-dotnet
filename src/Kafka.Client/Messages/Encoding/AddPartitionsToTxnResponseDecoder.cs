@@ -4,17 +4,17 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using AddPartitionsToTxnTopicResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnTopicResult;
-using AddPartitionsToTxnPartitionResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnPartitionResult;
 using AddPartitionsToTxnResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnResult;
+using AddPartitionsToTxnPartitionResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnPartitionResult;
+using AddPartitionsToTxnTopicResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnTopicResult;
 
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class AddPartitionsToTxnResponseDecoder : 
+    internal class AddPartitionsToTxnResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, AddPartitionsToTxnResponseData>
     {
-        public AddPartitionsToTxnResponseDecoder() :
+        internal AddPartitionsToTxnResponseDecoder() :
             base(
                 ApiKey.AddPartitionsToTxn,
                 new(0, 4),

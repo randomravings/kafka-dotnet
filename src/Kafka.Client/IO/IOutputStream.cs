@@ -1,10 +1,10 @@
 ﻿using Kafka.Client.Model;
+using Kafka.Client.Model.Internal;
 using Kafka.Common.Model;
 
 namespace Kafka.Client.IO
 {
-    public interface IOutputStream :
-        IDisposable
+    public interface IOutputStream
     {
         internal Task<ProducerTopicMetadata> MetadataForTopic(
             TopicName topicName,
@@ -16,9 +16,7 @@ namespace Kafka.Client.IO
         /// </summary>
         /// <param name="topic"></param>
         /// <returns></returns>
-        IStreamWriterBuilder CreateWriter(
-            TopicName topic
-        );
+        IStreamWriterBuilder CreateWriter();
 
         /// <summary>
         /// Produce a single record.
@@ -27,7 +25,7 @@ namespace Kafka.Client.IO
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         Task<ProduceResult> Write(
-            ProduceRecord record,
+            OutputRecord record,
             CancellationToken cancellationToken
         );
 

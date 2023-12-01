@@ -9,13 +9,13 @@ namespace Kafka.Client.Messages {
     /// <param name="ResponsesField">The results for each topic we tried to delete.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record DeleteTopicsResponseData (
+    internal sealed record DeleteTopicsResponseData (
         int ThrottleTimeMsField,
         ImmutableArray<DeletableTopicResult> ResponsesField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static DeleteTopicsResponseData Empty { get; } = new(
+        internal static DeleteTopicsResponseData Empty { get; } = new(
             default(int),
             ImmutableArray<DeletableTopicResult>.Empty,
             ImmutableArray<TaggedField>.Empty
@@ -27,7 +27,7 @@ namespace Kafka.Client.Messages {
         /// <param name="ErrorMessageField">The error message, or null if there was no error.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record DeletableTopicResult (
+        internal sealed record DeletableTopicResult (
             string? NameField,
             Guid TopicIdField,
             short ErrorCodeField,
@@ -35,7 +35,7 @@ namespace Kafka.Client.Messages {
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static DeletableTopicResult Empty { get; } = new(
+            internal static DeletableTopicResult Empty { get; } = new(
                 default(string?),
                 default(Guid),
                 default(short),

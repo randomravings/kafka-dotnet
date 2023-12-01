@@ -9,21 +9,17 @@ namespace Kafka.Client.IO.Stream
         IStreamWriterBuilder
     {
         protected readonly IOutputStream _stream;
-        protected readonly TopicName _topic;
         internal StreamWriterBuilder(
-            IOutputStream stream,
-            TopicName topic
+            IOutputStream stream
         )
         {
             _stream = stream;
-            _topic = topic;
         }
         IStreamWriterBuilder<TKey> IStreamWriterBuilder.WithKey<TKey>(
             ISerializer<TKey> keySerializer
         ) =>
             new StreamWriterBuilder<TKey>(
                 _stream,
-                _topic,
                 keySerializer
             )
         ;
@@ -36,10 +32,9 @@ namespace Kafka.Client.IO.Stream
         protected readonly ISerializer<TKey> _keySerializer;
         internal StreamWriterBuilder(
             IOutputStream stream,
-            TopicName topic,
             ISerializer<TKey> keySerializer
         )
-            : base(stream, topic)
+            : base(stream)
         {
             _keySerializer = keySerializer;
         }
@@ -49,7 +44,6 @@ namespace Kafka.Client.IO.Stream
         ) =>
             new StreamWriterBuilder<TKey, TValue>(
                 _stream,
-                _topic,
                 _keySerializer,
                 valueSerialzier
             )
@@ -66,11 +60,10 @@ namespace Kafka.Client.IO.Stream
 
         internal StreamWriterBuilder(
             IOutputStream stream,
-            TopicName topic,
             ISerializer<TKey> keySerializer,
             ISerializer<TValue> valueSerializer
         )
-            : base(stream, topic, keySerializer)
+            : base(stream, keySerializer)
         {
             _valueSerializer = valueSerializer;
         }
@@ -93,7 +86,6 @@ namespace Kafka.Client.IO.Stream
 
         IStreamWriter<TKey, TValue> IStreamWriterBuilder<TKey, TValue>.Build() =>
             new StreamWriter<TKey, TValue>(
-                _topic,
                 _stream,
                 _keySerializer,
                 _valueSerializer,

@@ -10,7 +10,7 @@ namespace Kafka.Client.Messages {
     /// <param name="ClientIdField">The client ID string.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record RequestHeaderData (
+    internal sealed record RequestHeaderData (
         short RequestApiKeyField,
         short RequestApiVersionField,
         int CorrelationIdField,
@@ -18,7 +18,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestHeader (CorrelationIdField, TaggedFields)
     {
-        public static RequestHeaderData Empty { get; } = new(
+        internal static RequestHeaderData Empty { get; } = new(
             default(short),
             default(short),
             default(int),

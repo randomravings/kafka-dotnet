@@ -4,18 +4,18 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ForgottenTopic = Kafka.Client.Messages.FetchRequestData.ForgottenTopic;
-using FetchPartition = Kafka.Client.Messages.FetchRequestData.FetchTopic.FetchPartition;
 using ReplicaState = Kafka.Client.Messages.FetchRequestData.ReplicaState;
 using FetchTopic = Kafka.Client.Messages.FetchRequestData.FetchTopic;
+using ForgottenTopic = Kafka.Client.Messages.FetchRequestData.ForgottenTopic;
+using FetchPartition = Kafka.Client.Messages.FetchRequestData.FetchTopic.FetchPartition;
 
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class FetchRequestEncoder : 
+    internal class FetchRequestEncoder : 
         RequestEncoder<RequestHeaderData, FetchRequestData>
     {
-        public FetchRequestEncoder() :
+        internal FetchRequestEncoder() :
             base(
                 ApiKey.Fetch,
                 new(0, 16),

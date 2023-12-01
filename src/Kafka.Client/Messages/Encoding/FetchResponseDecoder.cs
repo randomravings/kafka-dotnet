@@ -5,21 +5,21 @@ using Kafka.Common.Protocol;
 using Kafka.Common.Records;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
-using NodeEndpoint = Kafka.Client.Messages.FetchResponseData.NodeEndpoint;
-using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
-using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
 using AbortedTransaction = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.AbortedTransaction;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
+using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
+using NodeEndpoint = Kafka.Client.Messages.FetchResponseData.NodeEndpoint;
+using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
+using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
 
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class FetchResponseDecoder : 
+    internal class FetchResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, FetchResponseData>
     {
-        public FetchResponseDecoder() :
+        internal FetchResponseDecoder() :
             base(
                 ApiKey.Fetch,
                 new(0, 16),

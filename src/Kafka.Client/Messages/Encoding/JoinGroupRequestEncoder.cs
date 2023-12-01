@@ -9,10 +9,10 @@ using JoinGroupRequestProtocol = Kafka.Client.Messages.JoinGroupRequestData.Join
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class JoinGroupRequestEncoder : 
+    internal class JoinGroupRequestEncoder : 
         RequestEncoder<RequestHeaderData, JoinGroupRequestData>
     {
-        public JoinGroupRequestEncoder() :
+        internal JoinGroupRequestEncoder() :
             base(
                 ApiKey.JoinGroup,
                 new(0, 9),

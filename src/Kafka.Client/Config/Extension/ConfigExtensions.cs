@@ -1,17 +1,19 @@
-﻿namespace Kafka.Client.Config.Extension
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Kafka.Client.Config.Extension
 {
     public static class ConfigExtensions
     {
-        public static KafkaClientConfig Copy(this KafkaClientConfig kafkaClientConfig) =>
+        public static KafkaClientConfig Copy([NotNull] this KafkaClientConfig kafkaClientConfig) =>
             CopyInstance(kafkaClientConfig)
         ;
-        public static ClientConfig Copy(this ClientConfig clientConfig) =>
+        public static ClientConfig Copy([NotNull] this ClientConfig clientConfig) =>
             CopyInstance(clientConfig)
         ;
-        public static InputStreamConfig Copy(this InputStreamConfig inputStreamConfig) =>
+        public static InputStreamConfig Copy([NotNull] this InputStreamConfig inputStreamConfig) =>
             CopyInstance(inputStreamConfig)
         ;
-        public static OutputStreamConfig Copy(this OutputStreamConfig outputStreamConfig) =>
+        public static OutputStreamConfig Copy([NotNull] this OutputStreamConfig outputStreamConfig) =>
             CopyInstance(outputStreamConfig)
         ;
         private static T CopyInstance<T>(T instance)

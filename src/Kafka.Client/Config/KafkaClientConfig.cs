@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -24,7 +25,7 @@ namespace Kafka.Client.Config
             )
         ;
 
-        public void Print(in TextWriter textWriter)
+        public void Print([NotNull] in TextWriter textWriter)
         {
             textWriter.WriteLine("Kakfa.Client:");
             WriteConfig(textWriter, Client);

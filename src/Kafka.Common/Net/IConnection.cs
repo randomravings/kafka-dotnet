@@ -2,12 +2,15 @@
 
 namespace Kafka.Common.Net
 {
-    public interface IConnection :
-        IDisposable
+    public interface IConnection
     {
         ClusterNodeId NodeId { get; }
-        ITransport Transport { get; }
-        Task Open(CancellationToken cancellationToken);
-        Task Close(CancellationToken cancellationToken);
+        IReadOnlyDictionary<ApiKey, ApiVersion> Apis { get; }
+        Task Open(
+            CancellationToken cancellationToken
+        );
+        Task Close(
+            CancellationToken cancellationToken
+        );
     }
 }

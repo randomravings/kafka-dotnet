@@ -5,12 +5,13 @@ using Microsoft.Extensions.Logging;
 namespace Kafka.Client.IO.Stream
 {
     internal sealed class StreamReader<TKey, TValue> :
-        IStreamReader<TKey, TValue>
+        IStreamReader<TKey, TValue>,
+        IDisposable
     {
         private readonly IDeserializer<TKey> _keyDeserializer;
         private readonly IDeserializer<TValue> _valueDeserializer;
 
-        private IEnumerator<ConsumerRecord> _enumerator = Enumerable.Empty<ConsumerRecord>().GetEnumerator();
+        private IEnumerator<InputRecord> _enumerator = Enumerable.Empty<InputRecord>().GetEnumerator();
         private readonly ManualResetEventSlim _resetEvent = new(true);
 
         private readonly ILogger _logger;
@@ -29,14 +30,14 @@ namespace Kafka.Client.IO.Stream
             _logger = logger;
         }
 
-        async ValueTask<ConsumerRecord<TKey, TValue>> IStreamReader<TKey, TValue>.Read(
+        async ValueTask<ReadRecord<TKey, TValue>> IStreamReader<TKey, TValue>.Read(
             CancellationToken cancellationToken
         ) =>
             await Read(cancellationToken)
                 .ConfigureAwait(false)
         ;
 
-        async ValueTask<ConsumerRecord<TKey, TValue>> IStreamReader<TKey, TValue>.Read(
+        async ValueTask<ReadRecord<TKey, TValue>> IStreamReader<TKey, TValue>.Read(
             TimeSpan timeout,
             CancellationToken cancellationToken
         )
@@ -52,7 +53,7 @@ namespace Kafka.Client.IO.Stream
             Task.CompletedTask
         ;
 
-        private async ValueTask<ConsumerRecord<TKey, TValue>> Read(
+        private async ValueTask<ReadRecord<TKey, TValue>> Read(
             CancellationToken cancellationToken
         )
         {
@@ -69,7 +70,7 @@ namespace Kafka.Client.IO.Stream
             );
         }
 
-        private async ValueTask<ConsumerRecord> NextRecord(
+        private async ValueTask<InputRecord> NextRecord(
             CancellationToken cancellationToken
         )
         {

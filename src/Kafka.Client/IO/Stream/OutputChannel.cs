@@ -2,6 +2,7 @@
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
+using Kafka.Client.Model.Internal;
 using Kafka.Client.Net;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
@@ -15,7 +16,7 @@ using System.Diagnostics;
 
 namespace Kafka.Client.IO.Stream
 {
-    internal sealed class ProducerChannel :
+    internal sealed class OutputChannel :
         IDisposable
     {
         private readonly ClusterNodeId _nodeId;
@@ -36,7 +37,7 @@ namespace Kafka.Client.IO.Stream
         private readonly SortedList<TopicPartition, int> _topicPartitionStates = new(TopicPartitionCompare.Instance);
         private readonly Func<ProduceBatch, CancellationToken, Task> _sendDelegate;
 
-        public ProducerChannel(
+        public OutputChannel(
             ClusterNodeId nodeId,
             long producerId,
             short producerEpoch,

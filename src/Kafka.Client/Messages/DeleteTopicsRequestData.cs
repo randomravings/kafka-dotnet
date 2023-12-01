@@ -10,14 +10,14 @@ namespace Kafka.Client.Messages {
     /// <param name="TimeoutMsField">The length of time in milliseconds to wait for the deletions to complete.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record DeleteTopicsRequestData (
+    internal sealed record DeleteTopicsRequestData (
         ImmutableArray<DeleteTopicState> TopicsField,
         ImmutableArray<string> TopicNamesField,
         int TimeoutMsField,
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static DeleteTopicsRequestData Empty { get; } = new(
+        internal static DeleteTopicsRequestData Empty { get; } = new(
             ImmutableArray<DeleteTopicState>.Empty,
             ImmutableArray<string>.Empty,
             default(int),
@@ -28,13 +28,13 @@ namespace Kafka.Client.Messages {
         /// <param name="TopicIdField">The unique topic ID</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record DeleteTopicState (
+        internal sealed record DeleteTopicState (
             string? NameField,
             Guid TopicIdField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static DeleteTopicState Empty { get; } = new(
+            internal static DeleteTopicState Empty { get; } = new(
                 default(string?),
                 default(Guid),
                 ImmutableArray<TaggedField>.Empty

@@ -3,8 +3,7 @@ using Kafka.Common.Model;
 
 namespace Kafka.Client.IO
 {
-    public interface IInputStream :
-        IDisposable
+    public interface IInputStream
     {
         IStreamReaderBuilder CreateReader();
 
@@ -13,7 +12,7 @@ namespace Kafka.Client.IO
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<IReadOnlyList<ConsumerRecord>> Read(
+        public Task<IReadOnlyList<InputRecord>> Read(
             CancellationToken cancellationToken
         );
 
@@ -23,7 +22,7 @@ namespace Kafka.Client.IO
         /// <param name="timeSpan"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public Task<IReadOnlyList<ConsumerRecord>> Read(
+        public Task<IReadOnlyList<InputRecord>> Read(
             TimeSpan timeSpan,
             CancellationToken cancellationToken
         );
@@ -44,32 +43,43 @@ namespace Kafka.Client.IO
         /// Suspends one or more topic partition from the fetch requests.
         /// </summary>
         /// <param name="partitions"></param>
-        void PausePartitions(params TopicPartition[] partitions);
+        void PausePartitions(
+            in IReadOnlyList<TopicPartition> partitions
+        );
 
         /// <summary>
         /// Reinstates one or more topic partition to be included in fetch requests.
         /// </summary>
         /// <param name="partitions"></param>
-        void ResumePartitions(params TopicPartition[] partitions);
+        void ResumePartitions(
+            in IReadOnlyList<TopicPartition> partitions
+        );
 
         /// <summary>
         /// Closes the consumer instance and frees up resources.
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task Close(CancellationToken cancellationToken);
+        Task Close(
+            CancellationToken cancellationToken
+        );
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="topicPartition"></param>
         /// <param name="offset"></param>
-        void UpdateOffsets(TopicPartition topicPartition, Offset offset);
+        void UpdateOffsets(
+            in TopicPartition topicPartition,
+            in Offset offset
+        );
 
         /// <summary>
         /// Stores the topic poartition offsets.
         /// </summary>
         /// <param name="topicPartitionOffsets"></param>
-        void UpdateOffsets(params TopicPartitionOffset[] topicPartitionOffsets);
+        void UpdateOffsets(
+            in IReadOnlyList<TopicPartitionOffset> topicPartitionOffsets
+        );
     }
 }

@@ -1,4 +1,4 @@
-﻿using Kafka.Client.Model;
+﻿using Kafka.Client.Model.Internal;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
 using System.Collections;

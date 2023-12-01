@@ -9,10 +9,10 @@ using SyncGroupRequestAssignment = Kafka.Client.Messages.SyncGroupRequestData.Sy
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class SyncGroupRequestEncoder : 
+    internal class SyncGroupRequestEncoder : 
         RequestEncoder<RequestHeaderData, SyncGroupRequestData>
     {
-        public SyncGroupRequestEncoder() :
+        internal SyncGroupRequestEncoder() :
             base(
                 ApiKey.SyncGroup,
                 new(0, 5),

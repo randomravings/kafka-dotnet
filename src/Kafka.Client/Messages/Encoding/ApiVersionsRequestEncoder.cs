@@ -8,10 +8,10 @@ using System.Collections.Immutable;
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class ApiVersionsRequestEncoder : 
+    internal class ApiVersionsRequestEncoder : 
         RequestEncoder<RequestHeaderData, ApiVersionsRequestData>
     {
-        public ApiVersionsRequestEncoder() :
+        internal ApiVersionsRequestEncoder() :
             base(
                 ApiKey.ApiVersions,
                 new(0, 3),

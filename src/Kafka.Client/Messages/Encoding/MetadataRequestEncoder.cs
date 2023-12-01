@@ -9,10 +9,10 @@ using MetadataRequestTopic = Kafka.Client.Messages.MetadataRequestData.MetadataR
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class MetadataRequestEncoder : 
+    internal class MetadataRequestEncoder : 
         RequestEncoder<RequestHeaderData, MetadataRequestData>
     {
-        public MetadataRequestEncoder() :
+        internal MetadataRequestEncoder() :
             base(
                 ApiKey.Metadata,
                 new(0, 12),

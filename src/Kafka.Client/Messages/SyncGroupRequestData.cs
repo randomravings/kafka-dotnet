@@ -14,7 +14,7 @@ namespace Kafka.Client.Messages {
     /// <param name="AssignmentsField">Each assignment.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record SyncGroupRequestData (
+    internal sealed record SyncGroupRequestData (
         string GroupIdField,
         int GenerationIdField,
         string MemberIdField,
@@ -25,7 +25,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static SyncGroupRequestData Empty { get; } = new(
+        internal static SyncGroupRequestData Empty { get; } = new(
             "",
             default(int),
             "",
@@ -40,13 +40,13 @@ namespace Kafka.Client.Messages {
         /// <param name="AssignmentField">The member assignment.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record SyncGroupRequestAssignment (
+        internal sealed record SyncGroupRequestAssignment (
             string MemberIdField,
             byte[] AssignmentField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static SyncGroupRequestAssignment Empty { get; } = new(
+            internal static SyncGroupRequestAssignment Empty { get; } = new(
                 "",
                 Array.Empty<byte>(),
                 ImmutableArray<TaggedField>.Empty

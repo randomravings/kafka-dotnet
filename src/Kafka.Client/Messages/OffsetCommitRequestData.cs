@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using OffsetCommitRequestPartition = Kafka.Client.Messages.OffsetCommitRequestData.OffsetCommitRequestTopic.OffsetCommitRequestPartition;
 using OffsetCommitRequestTopic = Kafka.Client.Messages.OffsetCommitRequestData.OffsetCommitRequestTopic;
+using OffsetCommitRequestPartition = Kafka.Client.Messages.OffsetCommitRequestData.OffsetCommitRequestTopic.OffsetCommitRequestPartition;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -14,7 +14,7 @@ namespace Kafka.Client.Messages {
     /// <param name="TopicsField">The topics to commit offsets for.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record OffsetCommitRequestData (
+    internal sealed record OffsetCommitRequestData (
         string GroupIdField,
         int GenerationIdOrMemberEpochField,
         string MemberIdField,
@@ -24,7 +24,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static OffsetCommitRequestData Empty { get; } = new(
+        internal static OffsetCommitRequestData Empty { get; } = new(
             "",
             default(int),
             "",
@@ -38,13 +38,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">Each partition to commit offsets for.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record OffsetCommitRequestTopic (
+        internal sealed record OffsetCommitRequestTopic (
             string NameField,
             ImmutableArray<OffsetCommitRequestPartition> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static OffsetCommitRequestTopic Empty { get; } = new(
+            internal static OffsetCommitRequestTopic Empty { get; } = new(
                 "",
                 ImmutableArray<OffsetCommitRequestPartition>.Empty,
                 ImmutableArray<TaggedField>.Empty
@@ -57,7 +57,7 @@ namespace Kafka.Client.Messages {
             /// <param name="CommittedMetadataField">Any associated metadata the client wants to keep.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record OffsetCommitRequestPartition (
+            internal sealed record OffsetCommitRequestPartition (
                 int PartitionIndexField,
                 long CommittedOffsetField,
                 int CommittedLeaderEpochField,
@@ -66,7 +66,7 @@ namespace Kafka.Client.Messages {
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static OffsetCommitRequestPartition Empty { get; } = new(
+                internal static OffsetCommitRequestPartition Empty { get; } = new(
                     default(int),
                     default(long),
                     default(int),

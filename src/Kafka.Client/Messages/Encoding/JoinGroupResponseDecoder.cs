@@ -9,10 +9,10 @@ using JoinGroupResponseMember = Kafka.Client.Messages.JoinGroupResponseData.Join
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class JoinGroupResponseDecoder : 
+    internal class JoinGroupResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, JoinGroupResponseData>
     {
-        public JoinGroupResponseDecoder() :
+        internal JoinGroupResponseDecoder() :
             base(
                 ApiKey.JoinGroup,
                 new(0, 9),

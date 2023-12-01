@@ -10,14 +10,14 @@ namespace Kafka.Client.Messages {
     /// <param name="MembersField">List of leaving member responses.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record LeaveGroupResponseData (
+    internal sealed record LeaveGroupResponseData (
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<MemberResponse> MembersField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static LeaveGroupResponseData Empty { get; } = new(
+        internal static LeaveGroupResponseData Empty { get; } = new(
             default(int),
             default(short),
             ImmutableArray<MemberResponse>.Empty,
@@ -29,14 +29,14 @@ namespace Kafka.Client.Messages {
         /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record MemberResponse (
+        internal sealed record MemberResponse (
             string MemberIdField,
             string? GroupInstanceIdField,
             short ErrorCodeField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static MemberResponse Empty { get; } = new(
+            internal static MemberResponse Empty { get; } = new(
                 "",
                 default(string?),
                 default(short),

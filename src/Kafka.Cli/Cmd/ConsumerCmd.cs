@@ -70,13 +70,13 @@ namespace Kafka.Cli.Cmd
             CancellationToken cancellationToken
         )
         {
-            using var stream = client
+            var stream = client
                 .CreateInputStream()
                 .AsApplication(topicNames)
                 .Build()
             ;
 
-            using var reader = stream
+            var reader = stream
                 .CreateReader()
                 .WithKey(StringDeserializer.Instance)
                 .WithValue(StringDeserializer.Instance)

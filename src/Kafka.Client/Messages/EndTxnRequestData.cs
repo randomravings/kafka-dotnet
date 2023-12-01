@@ -10,7 +10,7 @@ namespace Kafka.Client.Messages {
     /// <param name="CommittedField">True if the transaction was committed, false if it was aborted.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record EndTxnRequestData (
+    internal sealed record EndTxnRequestData (
         string TransactionalIdField,
         long ProducerIdField,
         short ProducerEpochField,
@@ -18,7 +18,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static EndTxnRequestData Empty { get; } = new(
+        internal static EndTxnRequestData Empty { get; } = new(
             "",
             default(long),
             default(short),

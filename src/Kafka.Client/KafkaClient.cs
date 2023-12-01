@@ -3,6 +3,7 @@ using Kafka.Client.IO;
 using Kafka.Client.IO.Stream;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
+using Kafka.Client.Model.Internal;
 using Kafka.Client.Net;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
@@ -13,29 +14,29 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client
 {
-    internal sealed class KafkaClient :
+    internal sealed class KafkaClient(
+        ImmutableArray<BootstrapServer> bootstrapServers,
+        KafkaClientConfig config,
+        ILogger<IKafkaClient> logger
+    ) :
         IKafkaClient,
         ITopics,
         IConsumerGroups
     {
-        private readonly KafkaClientConfig _config;
-        private readonly ILogger<IKafkaClient> _logger;
-        private readonly IConnectionManager<IClientConnection> _connections;
-
-        public KafkaClient(
-            KafkaClientConfig config,
-            ILogger<IKafkaClient> logger
-        )
-        {
-            _config = config;
-            _logger = logger;
-            _connections = new ConnectionManager(_config, _logger);
-        }
+        private readonly Net.Cluster _connections =
+            new Net.Cluster(
+                bootstrapServers,
+                config,
+                logger
+            )
+        ;
+        private readonly KafkaClientConfig _config = config;
+        private readonly ILogger<IKafkaClient> _logger = logger;
 
         ITopics IKafkaClient.Topics => this;
         IConsumerGroups IKafkaClient.ConsumerGroups => this;
 
-        async ValueTask IKafkaClient.Close(
+        async Task IKafkaClient.Close(
             CancellationToken cancellationToken
         )
         {
@@ -602,7 +603,7 @@ namespace Kafka.Client
         private async ValueTask<ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionOffset>>> FetchTopicPartitionOffsets(
             ConsumerGroup consumerGroup,
             IReadOnlySet<TopicName> topicNames,
-            IReadOnlySet<TopicPartition> filter,
+            ImmutableSortedSet<TopicPartition> filter,
             CancellationToken cancellationToken
         )
         {
@@ -632,7 +633,7 @@ namespace Kafka.Client
                 metadataResponse.TopicsField.Select(t => new OffsetFetchRequestData.OffsetFetchRequestTopic(
                     t.NameField ?? "",
                     t.PartitionsField
-                        .Where(p => !filter.Any() || filter.Contains(new TopicPartition(t.NameField, p.PartitionIndexField)))
+                        .Where(p => !filter.IsEmpty || filter.Contains(new TopicPartition(t.NameField, p.PartitionIndexField)))
                         .Select(p =>
                             p.PartitionIndexField
                         )
@@ -641,24 +642,26 @@ namespace Kafka.Client
                     )
                 )
                 .ToImmutableArray(),
-                ImmutableArray.Create(new OffsetFetchRequestData.OffsetFetchRequestGroup(
-                    consumerGroup,
-                    null,
-                    -1,
-                    metadataResponse.TopicsField.Select(t => new OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
-                        t.NameField ?? "",
-                        t.PartitionsField
-                            .Where(p => !filter.Any() || filter.Contains(new TopicPartition(t.NameField, p.PartitionIndexField)))
-                            .Select(p =>
-                                p.PartitionIndexField
+                [
+                    new OffsetFetchRequestData.OffsetFetchRequestGroup(
+                            consumerGroup,
+                            null,
+                            -1,
+                            metadataResponse.TopicsField.Select(t => new OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
+                                t.NameField ?? "",
+                                t.PartitionsField
+                                    .Where(p => !filter.IsEmpty || filter.Contains(new TopicPartition(t.NameField, p.PartitionIndexField)))
+                                    .Select(p =>
+                                        p.PartitionIndexField
+                                    )
+                                    .ToImmutableArray(),
+                                    []
+                                )
                             )
                             .ToImmutableArray(),
                             []
-                        )
-                    )
-                    .ToImmutableArray(),
-                    []
-                )),
+                        ),
+                ],
                 false,
                 []
             );

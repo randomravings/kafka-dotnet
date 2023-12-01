@@ -9,10 +9,10 @@ using MemberResponse = Kafka.Client.Messages.LeaveGroupResponseData.MemberRespon
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class LeaveGroupResponseDecoder : 
+    internal class LeaveGroupResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, LeaveGroupResponseData>
     {
-        public LeaveGroupResponseDecoder() :
+        internal LeaveGroupResponseDecoder() :
             base(
                 ApiKey.LeaveGroup,
                 new(0, 5),

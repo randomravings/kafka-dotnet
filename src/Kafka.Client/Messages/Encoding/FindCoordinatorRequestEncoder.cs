@@ -8,10 +8,10 @@ using System.Collections.Immutable;
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class FindCoordinatorRequestEncoder : 
+    internal class FindCoordinatorRequestEncoder : 
         RequestEncoder<RequestHeaderData, FindCoordinatorRequestData>
     {
-        public FindCoordinatorRequestEncoder() :
+        internal FindCoordinatorRequestEncoder() :
             base(
                 ApiKey.FindCoordinator,
                 new(0, 4),

@@ -15,7 +15,7 @@ namespace Kafka.Client.Messages {
     /// <param name="ReasonField">The reason why the member (re-)joins the group.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record JoinGroupRequestData (
+    internal sealed record JoinGroupRequestData (
         string GroupIdField,
         int SessionTimeoutMsField,
         int RebalanceTimeoutMsField,
@@ -27,7 +27,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static JoinGroupRequestData Empty { get; } = new(
+        internal static JoinGroupRequestData Empty { get; } = new(
             "",
             default(int),
             default(int),
@@ -43,13 +43,13 @@ namespace Kafka.Client.Messages {
         /// <param name="MetadataField">The protocol metadata.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record JoinGroupRequestProtocol (
+        internal sealed record JoinGroupRequestProtocol (
             string NameField,
             byte[] MetadataField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static JoinGroupRequestProtocol Empty { get; } = new(
+            internal static JoinGroupRequestProtocol Empty { get; } = new(
                 "",
                 Array.Empty<byte>(),
                 ImmutableArray<TaggedField>.Empty

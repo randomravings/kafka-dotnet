@@ -5,112 +5,148 @@ namespace Kafka.Client.Collections
 {
     internal static class Compare
     {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicPartitionById(in TopicPartition left, in TopicPartition right) =>
-            TopicById(left.Topic, right.Topic) switch
+        internal static int IndexOf<TItem, TKey>(
+            in TItem[] topicPartitions,
+            in TKey key,
+            in int limit,
+            in CompareDelegate<TItem, TKey> compare
+        )
+        {
+            var index = 0;
+            var itemOffset = 0;
+            var keyOffset = limit;
+            while (itemOffset < keyOffset)
             {
-                0 => Partition(left.Partition, right.Partition),
+                index = itemOffset + ((keyOffset - itemOffset) / 2);
+                var value = topicPartitions[index];
+                var direction = compare(value, key);
+                switch (direction)
+                {
+                    case 0:
+                        return index;
+                    case 1:
+                        keyOffset = index;
+                        break;
+                    default:
+                        index++;
+                        itemOffset = index;
+                        break;
+                }
+            }
+            return ~index;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int TopicPartitionById(in TopicPartition item, in TopicPartition key) =>
+            TopicById(item.Topic, key.Topic) switch
+            {
+                0 => Partition(item.Partition, key.Partition),
                 var c => c
             }
         ;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicPartitionById<TValue>(in TopicPartition left, in KeyValuePair<TopicPartition, TValue>  right) =>
-            TopicById(left.Topic, right.Key.Topic) switch
+        internal static int TopicPartitionById<TValue>(in KeyValuePair<TopicPartition, TValue> item, in TopicPartition key) =>
+            TopicById(item.Key.Topic, key.Topic) switch
             {
-                0 => Partition(left.Partition, right.Key.Partition),
+                0 => Partition(item.Key.Partition, key.Partition),
                 var c => c
             }
         ;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicPartitionByName(in TopicPartition left, in TopicPartition right) =>
-            TopicByName(left.Topic, right.Topic) switch
+        internal static int TopicPartitionByName(in TopicPartition item, in TopicPartition key) =>
+            TopicByName(item.Topic, key.Topic) switch
             {
-                0 => Partition(left.Partition, right.Partition),
+                0 => Partition(item.Partition, key.Partition),
                 var c => c
             }
         ;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicPartitionByName<TValue>(in TopicPartition left, in KeyValuePair<TopicPartition, TValue> right) =>
-            TopicByName(left.Topic, right.Key.Topic) switch
+        internal static int TopicPartitionByName<TValue>(in KeyValuePair<TopicPartition, TValue> item, in TopicPartition key) =>
+            TopicByName(item.Key.Topic, key.Topic) switch
             {
-                0 => Partition(left.Partition, right.Key.Partition),
+                0 => Partition(item.Key.Partition, key.Partition),
                 var c => c
             }
         ;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicById(in Topic left, in Topic right) =>
-            TopicId(left.TopicId, right.TopicId)
+        internal static int TopicById(in Topic item, in Topic key) =>
+            TopicId(item.TopicId, key.TopicId)
         ;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicById<TValue>(in Topic left, in KeyValuePair<Topic, TValue> right) =>
-            TopicId(left.TopicId, right.Key.TopicId)
-        ;
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicByName(in Topic left, in Topic right) =>
-            TopicName(left.TopicName, right.TopicName)
-        ;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicByName<TValue>(in Topic left, in  KeyValuePair<Topic, TValue> right) =>
-            TopicName(left.TopicName, right.Key.TopicName)
+        internal static int TopicById<TValue>(in KeyValuePair<Topic, TValue> item, in Topic key) =>
+            TopicId(item.Key.TopicId, key.TopicId)
         ;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicId(in TopicId left, in TopicId right) =>
-            left.Value.CompareTo(right.Value)
+        internal static int TopicByName(in Topic item, in Topic key) =>
+            TopicName(item.TopicName, key.TopicName)
         ;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicId<TValue>(in TopicId left, in  KeyValuePair<TopicId, TValue> right) =>
-            left.Value.CompareTo(right.Key.Value)
-        ;
-
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicName(in TopicName left, in TopicName right) =>
-            Math.Sign(string.CompareOrdinal(left.Value, right.Value))
-        ;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int TopicName<TValue>(in TopicName left, in KeyValuePair<TopicName, TValue> right) =>
-            Math.Sign(string.CompareOrdinal(left.Value, right.Key.Value))
+        internal static int TopicByName<TValue>(in KeyValuePair<Topic, TValue> item, in Topic key) =>
+            TopicName(item.Key.TopicName, key.TopicName)
         ;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int ClusterNodeId(in ClusterNodeId left, in ClusterNodeId right) =>
-            left.Value.CompareTo(right.Value)
+        internal static int TopicId(in TopicId item, in TopicId key) =>
+            item.Value.CompareTo(key.Value)
         ;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int ClusterNodeId<TValue>(in ClusterNodeId left, in KeyValuePair<ClusterNodeId, TValue> right) =>
-            left.Value.CompareTo(right.Key.Value)
+        internal static int TopicId<TValue>(in KeyValuePair<TopicId, TValue> item, in TopicId key) =>
+            item.Key.Value.CompareTo(key.Value)
         ;
 
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int Partition(in Partition left, in Partition right) =>
-            left.Value.CompareTo(right.Value)
+        internal static int TopicName(in TopicName item, in TopicName key) =>
+            Math.Sign(string.CompareOrdinal(item.Value, key.Value))
         ;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int Offset(in Offset left, in Offset right) =>
-            left.Value.CompareTo(right.Value)
+        internal static int TopicName<TValue>(in KeyValuePair<TopicName, TValue> item, in TopicName key) =>
+            Math.Sign(string.CompareOrdinal(item.Key.Value, key.Value))
+        ;
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int ClusterNodeId(in ClusterNodeId item, in ClusterNodeId key) =>
+            item.Value.CompareTo(key.Value)
         ;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static int Int32<TValue>(in int left, in KeyValuePair<int, TValue> right) =>
-            left.CompareTo(right.Key)
+        internal static int ClusterNodeId<TValue>(in KeyValuePair<ClusterNodeId, TValue> item, in ClusterNodeId key) =>
+            item.Key.Value.CompareTo(key.Value)
+        ;
+
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int Partition(in Partition item, in Partition key) =>
+            item.Value.CompareTo(key.Value)
+        ;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int Partition(in TopicPartition item, in Partition key) =>
+            item.Partition.Value.CompareTo(key.Value)
+        ;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int Offset(in Offset item, in Offset key) =>
+            item.Value.CompareTo(key.Value)
+        ;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static int Int32<TValue>(in KeyValuePair<int, TValue> item, in int key) =>
+            item.Key.CompareTo(key)
         ;
     }
 }

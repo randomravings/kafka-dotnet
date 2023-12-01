@@ -10,13 +10,13 @@ namespace Kafka.Client.Messages {
     /// <param name="TopicsField">Each topic that we wanted to delete records from.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record DeleteRecordsResponseData (
+    internal sealed record DeleteRecordsResponseData (
         int ThrottleTimeMsField,
         ImmutableArray<DeleteRecordsTopicResult> TopicsField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static DeleteRecordsResponseData Empty { get; } = new(
+        internal static DeleteRecordsResponseData Empty { get; } = new(
             default(int),
             ImmutableArray<DeleteRecordsTopicResult>.Empty,
             ImmutableArray<TaggedField>.Empty
@@ -26,13 +26,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">Each partition that we wanted to delete records from.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record DeleteRecordsTopicResult (
+        internal sealed record DeleteRecordsTopicResult (
             string NameField,
             ImmutableArray<DeleteRecordsPartitionResult> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static DeleteRecordsTopicResult Empty { get; } = new(
+            internal static DeleteRecordsTopicResult Empty { get; } = new(
                 "",
                 ImmutableArray<DeleteRecordsPartitionResult>.Empty,
                 ImmutableArray<TaggedField>.Empty
@@ -43,14 +43,14 @@ namespace Kafka.Client.Messages {
             /// <param name="ErrorCodeField">The deletion error code, or 0 if the deletion succeeded.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record DeleteRecordsPartitionResult (
+            internal sealed record DeleteRecordsPartitionResult (
                 int PartitionIndexField,
                 long LowWatermarkField,
                 short ErrorCodeField,
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static DeleteRecordsPartitionResult Empty { get; } = new(
+                internal static DeleteRecordsPartitionResult Empty { get; } = new(
                     default(int),
                     default(long),
                     default(short),

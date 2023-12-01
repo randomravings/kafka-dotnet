@@ -12,7 +12,7 @@ namespace Kafka.Common.Model.Comparison
         public static IEqualityComparer<TopicName> Equality => INSTANCE;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int IComparer<TopicName>.Compare(TopicName x, TopicName y) =>
-            string.CompareOrdinal(x.Value, y.Value)
+            Math.Sign(string.CompareOrdinal(x.Value, y.Value))
         ;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool IEqualityComparer<TopicName>.Equals(TopicName x, TopicName y) =>

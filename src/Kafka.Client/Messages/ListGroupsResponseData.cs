@@ -10,14 +10,14 @@ namespace Kafka.Client.Messages {
     /// <param name="GroupsField">Each group in the response.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record ListGroupsResponseData (
+    internal sealed record ListGroupsResponseData (
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<ListedGroup> GroupsField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static ListGroupsResponseData Empty { get; } = new(
+        internal static ListGroupsResponseData Empty { get; } = new(
             default(int),
             default(short),
             ImmutableArray<ListedGroup>.Empty,
@@ -29,14 +29,14 @@ namespace Kafka.Client.Messages {
         /// <param name="GroupStateField">The group state name.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record ListedGroup (
+        internal sealed record ListedGroup (
             string GroupIdField,
             string ProtocolTypeField,
             string GroupStateField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static ListedGroup Empty { get; } = new(
+            internal static ListedGroup Empty { get; } = new(
                 "",
                 "",
                 "",

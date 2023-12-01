@@ -3,6 +3,7 @@ using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
+using Kafka.Client.Model.Internal;
 using Kafka.Client.Net;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
@@ -14,25 +15,26 @@ using System.Collections.Immutable;
 namespace Kafka.Client.IO.Stream
 {
     internal sealed class OutputStream(
-        IConnectionManager<IClientConnection> connections,
+        ICluster<IClientConnection> connections,
         OutputStreamConfig producerConfig,
         ILogger logger
     ) :
-        IOutputStream
+        IOutputStream,
+        IDisposable
     {
         private readonly CancellationTokenSource _internalCts = new();
-        private readonly ClusterNodeDictionary<ProducerChannel> _brokerChannels = [];
-        private readonly TopicPartitionDictionary<ProducerChannel> _brokerChannelsByTopicPartition = new ();
-        private readonly TopicDictionary<ProducerTopicMetadata> _producerMetadata = [];
-        private readonly TopicPartitionSet _transactionMembers = new();
+        private readonly ClusterNodeDictionary<OutputChannel> _brokerChannels = [];
+        private readonly TopicPartitionMap<OutputChannel> _brokerChannelsByTopicPartition = [];
+        private readonly TopicMap<ProducerTopicMetadata> _producerMetadata = [];
+        private readonly TopicPartitionSet _transactionMembers = [];
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
         private Attributes _attributes = Attributes.None;
         private readonly string _transactionalId = producerConfig.TransactionalId ?? "";
-        private readonly int _transactionTimeoutMs;
-        private readonly bool _enableIdempotence;
+        private readonly int _transactionTimeoutMs = producerConfig.TransactionTimeoutMs;
+        private readonly bool _enableIdempotence = producerConfig.EnableIdempotence;
         private readonly OutputStreamConfig _producerConfig = producerConfig;
         private readonly ILogger _logger = logger;
-        private readonly IConnectionManager<IClientConnection> _connections = connections;
+        private readonly ICluster<IClientConnection> _connections = connections;
 
         private long _producerId = -1;
         private short _producerEpoch = -1;
@@ -58,7 +60,6 @@ namespace Kafka.Client.IO.Stream
 
         }
 
-
         private async Task<ProducerTopicMetadata> MetadataForTopic(
             TopicName topic,
             CancellationToken cancellationToken
@@ -66,23 +67,20 @@ namespace Kafka.Client.IO.Stream
         {
             if (_producerMetadata.Get(topic, out var metadata) && metadata.ExpireTime < DateTimeOffset.UtcNow)
                 return metadata;
-            _producerMetadata.Remove(topic);
+            _producerMetadata.Remove(topic, out _);
             metadata = await CreateTopicMetadata(topic, cancellationToken).ConfigureAwait(false);
             _producerMetadata.Add(topic, metadata);
             return metadata;
         }
 
-        IStreamWriterBuilder IOutputStream.CreateWriter(
-            TopicName topic
-        ) =>
+        IStreamWriterBuilder IOutputStream.CreateWriter() =>
             new StreamWriterBuilder(
-                this,
-                topic
+                this
             )
         ;
 
         async Task<ProduceResult> IOutputStream.Write(
-            ProduceRecord produceRecord,
+            OutputRecord produceRecord,
             CancellationToken cancellationToken
         )
         {
@@ -227,7 +225,7 @@ namespace Kafka.Client.IO.Stream
             finally { _semaphoreSlim.Release(); }
         }
 
-        private async Task<ProducerChannel> GetChannel(
+        private async Task<OutputChannel> GetChannel(
             TopicPartition topicPartition,
             CancellationToken cancellationToken
         )
@@ -314,7 +312,7 @@ namespace Kafka.Client.IO.Stream
             );
         }
 
-        private async Task<ProducerChannel> CreateChannel(
+        private async Task<OutputChannel> CreateChannel(
             ClusterNodeId nodeId,
             CancellationToken cancellationToken
         )
@@ -396,7 +394,7 @@ namespace Kafka.Client.IO.Stream
             var findCoordinatorRequest = new FindCoordinatorRequestData(
                 transactionalId,
                 (sbyte)CoordinatorType.TRANSACTION,
-                ImmutableArray.Create(transactionalId),
+                [transactionalId],
                 []
             );
             var findCoordinatorResponse = await protocol.FindCoordinator(

@@ -2,7 +2,7 @@
 using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
-using Kafka.Client.Model;
+using Kafka.Client.Model.Internal;
 using Kafka.Client.Net;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
@@ -14,8 +14,13 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client.IO.Stream
 {
-    internal sealed class ApplicationInputStream :
-        InputStream,
+    internal sealed class ApplicationInputStream(
+        ICluster<IClientConnection> connectionManager,
+        IReadOnlySet<TopicName> topics,
+        InputStreamConfig config,
+        ILogger logger
+    ) :
+        InputStream(connectionManager, config, logger),
         IApplicationInputStream
     {
         private const string PROTOCOL_TYPE = "consumer";
@@ -23,12 +28,12 @@ namespace Kafka.Client.IO.Stream
             ["range", "roundrobin"]
         ;
 
-        private readonly string _groupId;
-        private readonly string? _groupInstanceId;
-        private readonly bool _enableAutoCommit;
-        private readonly int _autoCommitIntervalMs;
-        private readonly IReadOnlySet<TopicName> _topics;
-        private readonly TopicPartitionDictionary<Offset> _commitedOffsets = new();
+        private readonly string _groupId = config.GroupId ?? "";
+        private readonly string? _groupInstanceId = config.GroupInstanceId;
+        private readonly bool _enableAutoCommit = config.EnableAutoCommit;
+        private readonly int _autoCommitIntervalMs = config.AutoCommitIntervalMs;
+        private readonly IReadOnlySet<TopicName> _topics = topics;
+        private readonly TopicPartitionMap<Offset> _commitedOffsets = [];
 
         private MemberInfo _memberInfo = MemberInfo.Empty;
         private Task _heartbeat = Task.CompletedTask;
@@ -38,21 +43,7 @@ namespace Kafka.Client.IO.Stream
         private CancellationTokenSource _heartbeatCts = new();
         private CancellationTokenSource _commitCts = new();
 
-        public ApplicationInputStream(
-            IConnectionManager<IClientConnection> connectionManager,
-            IReadOnlySet<TopicName> topics,
-            InputStreamConfig config,
-            ILogger logger
-        ) : base(connectionManager, config, logger)
-        {
-            _topics = topics;
-            _groupId = config.GroupId ?? "";
-            _groupInstanceId = config.GroupInstanceId;
-            _autoCommitIntervalMs = config.AutoCommitIntervalMs;
-            _enableAutoCommit = config.EnableAutoCommit;
-        }
-
-        async ValueTask IApplicationInputStream.Commit(
+        async Task IApplicationInputStream.Commit(
             CancellationToken cancellationToken
         ) =>
             await CommitDelta(
@@ -60,7 +51,7 @@ namespace Kafka.Client.IO.Stream
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask IApplicationInputStream.Commit(
+        async Task IApplicationInputStream.Commit(
             TopicPartitionOffset topicPartitionOffset,
             CancellationToken cancellationToken
         )
@@ -82,7 +73,7 @@ namespace Kafka.Client.IO.Stream
             }
         }
 
-        async ValueTask IApplicationInputStream.Commit(
+        async Task IApplicationInputStream.Commit(
             IEnumerable<TopicPartitionOffset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
@@ -132,7 +123,7 @@ namespace Kafka.Client.IO.Stream
         }
 
 
-        protected override async ValueTask<TopicPartitionDictionary<LeaderAndOffset>> GetTopicPartitionOffsets(
+        protected override async ValueTask<TopicPartitionMap<LeaderAndOffset>> GetTopicPartitionOffsets(
             CancellationToken cancellationToken
         )
         {
@@ -198,12 +189,14 @@ namespace Kafka.Client.IO.Stream
             var leaveGroupRequest = new LeaveGroupRequestData(
                 _groupId,
                 _memberInfo.MemberId,
-                ImmutableArray.Create(new LeaveGroupRequestData.MemberIdentity(
-                    _memberInfo.MemberId,
-                    _groupInstanceId,
-                    "Closing",
-                    []
-                )),
+                [
+                    new LeaveGroupRequestData.MemberIdentity(
+                            _memberInfo.MemberId,
+                            _groupInstanceId,
+                            "Closing",
+                            []
+                        ),
+                ],
                 []
             );
             var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
@@ -292,8 +285,11 @@ namespace Kafka.Client.IO.Stream
                 syncGroupResponse.AssignmentField
             );
             _assignmentList.Clear();
-            foreach (var topicPartition in synchedTopicPartitions)
-                _assignmentList.Add(topicPartition);
+            foreach (var synchedTopicPartition in synchedTopicPartitions)
+                if (topicPartitions.Get(synchedTopicPartition, out var topicPartition))
+                    _assignmentList.Add(topicPartition);
+                else
+                    _logger.LogError($"Unexpected sync member '{synchedTopicPartition.Topic.TopicName.Value}:{synchedTopicPartition.Partition.Value}'");
             _joinGroupSync.Set();
         }
 
@@ -305,7 +301,7 @@ namespace Kafka.Client.IO.Stream
             var topicMetadata = Membership.PackProtocolMetadata(
                 3,
                 topics,
-                Array.Empty<byte>()
+                []
             );
             return new(
                 _groupId,
@@ -377,11 +373,12 @@ namespace Kafka.Client.IO.Stream
         }
 
         private OffsetFetchRequestData CreateOffsetFetchRequest(
-            MemberInfo member,
-            IReadOnlySet<TopicPartition> topicPartitions
+            in MemberInfo member,
+            in TopicPartitionSet topicPartitions
         )
         {
-            var topicsToFetch = topicPartitions
+            var items = topicPartitions.CopyItems();
+            var topicsToFetch = items
                 .GroupBy(g => g.Topic)
                 .Select(
                     r => new OffsetFetchRequestData.OffsetFetchRequestTopic(
@@ -401,7 +398,7 @@ namespace Kafka.Client.IO.Stream
                         _groupId,
                         member.MemberId,
                         member.GenerationId,
-                        topicPartitions
+                        items
                             .GroupBy(g => g.Topic)
                             .Select(r =>
                                 new OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
@@ -611,21 +608,18 @@ namespace Kafka.Client.IO.Stream
         ;
 
         private static void RemoveUnassignedTopicPartitions(
-            TopicPartitionDictionary<LeaderAndOffset> topicPartitionOffsets,
-            SortedSet<TopicPartition> topicPartitions
+            in TopicPartitionMap<LeaderAndOffset> topicPartitionOffsets,
+            in TopicPartitionSet topicPartitions
         )
         {
-            var topicPartitionsToRemove = topicPartitionOffsets
-                .Select(r => r.Key)
-                .Where(k => !topicPartitions.Contains(k))
-                .ToImmutableArray()
-            ;
-            foreach (var topicPartition in topicPartitionsToRemove)
-                topicPartitionOffsets.Remove(topicPartition);
+            var items = topicPartitionOffsets.CopyKeys();
+            foreach (var topicPartition in items)
+                if (!topicPartitions.Contains(topicPartition))
+                    topicPartitionOffsets.Remove(topicPartition, out _);
         }
 
         private static void UpdateTopicPartitionOffsets(
-            TopicPartitionDictionary<LeaderAndOffset> topicPartitionOffsets,
+            TopicPartitionMap<LeaderAndOffset> topicPartitionOffsets,
             OffsetFetchResponseData offsetFetchResponse
         )
         {
@@ -638,7 +632,7 @@ namespace Kafka.Client.IO.Stream
                     foreach (var partition in topic.PartitionsField)
                     {
                         var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
-                        if(topicPartitionOffsets. Get(topicPartition, out var leaderAndOffset))
+                        if (topicPartitionOffsets.Get(topicPartition, out var leaderAndOffset))
                             topicPartitionOffsets.Set(topicPartition, leaderAndOffset with { Offset = partition.CommittedOffsetField });
                     }
                 }
@@ -659,7 +653,7 @@ namespace Kafka.Client.IO.Stream
         public IReadOnlyDictionary<TopicPartition, Offset> GetOffsetToCommit()
         {
             // TODO: Name vs Id compare
-            var offsetsToComit = new TopicPartitionDictionary<Offset>();
+            var offsetsToComit = new TopicPartitionMap<Offset>();
             foreach ((var topicPartition, var offset) in _trackedOffsets)
                 if (!_commitedOffsets.Get(topicPartition, out var otherOffset) || offset > otherOffset)
                     offsetsToComit.Add(topicPartition, offset);

@@ -2,12 +2,13 @@
 
 namespace Kafka.Client.Model
 {
-    public sealed record ProduceRecord(
+    public sealed record InputRecord(
         TopicPartition TopicPartition,
+        Offset Offset,
         Timestamp Timestamp,
         ReadOnlyMemory<byte>? Key,
         ReadOnlyMemory<byte>? Value,
         IReadOnlyList<RecordHeader> Headers,
-        Attributes Attributes
+        Error Error
     );
 }

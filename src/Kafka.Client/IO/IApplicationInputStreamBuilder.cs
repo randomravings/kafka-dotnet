@@ -5,13 +5,19 @@ namespace Kafka.Client.IO
 {
     public interface IApplicationInputStreamAssignBuilder
     {
-        IApplicationInputStreamBuilder WithTopic(TopicName topic);
-        IApplicationInputStreamBuilder WithTopics(IReadOnlySet<TopicName> topics);
+        IApplicationInputStreamBuilder WithTopic(
+            TopicName topic
+        );
+        IApplicationInputStreamBuilder WithTopics(
+            IReadOnlySet<TopicName> topics
+        );
     }
 
     public interface IApplicationInputStreamBuilder
     {
-        IApplicationInputStreamBuilder WithLogger(ILogger<IApplicationInputStream> logger);
+        IApplicationInputStreamBuilder WithLogger(
+            ILogger<IApplicationInputStream> logger
+        );
         IApplicationInputStream Build();
     }
 }

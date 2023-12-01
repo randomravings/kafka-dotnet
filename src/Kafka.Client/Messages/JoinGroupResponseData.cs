@@ -16,7 +16,7 @@ namespace Kafka.Client.Messages {
     /// <param name="MembersField"></param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record JoinGroupResponseData (
+    internal sealed record JoinGroupResponseData (
         int ThrottleTimeMsField,
         short ErrorCodeField,
         int GenerationIdField,
@@ -29,7 +29,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static JoinGroupResponseData Empty { get; } = new(
+        internal static JoinGroupResponseData Empty { get; } = new(
             default(int),
             default(short),
             default(int),
@@ -47,14 +47,14 @@ namespace Kafka.Client.Messages {
         /// <param name="MetadataField">The group member metadata.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record JoinGroupResponseMember (
+        internal sealed record JoinGroupResponseMember (
             string MemberIdField,
             string? GroupInstanceIdField,
             byte[] MetadataField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static JoinGroupResponseMember Empty { get; } = new(
+            internal static JoinGroupResponseMember Empty { get; } = new(
                 "",
                 default(string?),
                 Array.Empty<byte>(),

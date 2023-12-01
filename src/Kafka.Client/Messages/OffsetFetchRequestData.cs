@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
 using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup;
+using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
 using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestTopic;
 
 namespace Kafka.Client.Messages {
@@ -13,7 +13,7 @@ namespace Kafka.Client.Messages {
     /// <param name="RequireStableField">Whether broker should hold on returning unstable offsets but set a retriable error code for the partitions.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record OffsetFetchRequestData (
+    internal sealed record OffsetFetchRequestData (
         string GroupIdField,
         ImmutableArray<OffsetFetchRequestTopic>? TopicsField,
         ImmutableArray<OffsetFetchRequestGroup> GroupsField,
@@ -21,7 +21,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static OffsetFetchRequestData Empty { get; } = new(
+        internal static OffsetFetchRequestData Empty { get; } = new(
             "",
             default(ImmutableArray<OffsetFetchRequestTopic>?),
             ImmutableArray<OffsetFetchRequestGroup>.Empty,
@@ -35,7 +35,7 @@ namespace Kafka.Client.Messages {
         /// <param name="TopicsField">Each topic we would like to fetch offsets for, or null to fetch offsets for all topics.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record OffsetFetchRequestGroup (
+        internal sealed record OffsetFetchRequestGroup (
             string GroupIdField,
             string? MemberIdField,
             int MemberEpochField,
@@ -43,7 +43,7 @@ namespace Kafka.Client.Messages {
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static OffsetFetchRequestGroup Empty { get; } = new(
+            internal static OffsetFetchRequestGroup Empty { get; } = new(
                 "",
                 default(string?),
                 default(int),
@@ -55,13 +55,13 @@ namespace Kafka.Client.Messages {
             /// <param name="PartitionIndexesField">The partition indexes we would like to fetch offsets for.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record OffsetFetchRequestTopics (
+            internal sealed record OffsetFetchRequestTopics (
                 string NameField,
                 ImmutableArray<int> PartitionIndexesField,
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static OffsetFetchRequestTopics Empty { get; } = new(
+                internal static OffsetFetchRequestTopics Empty { get; } = new(
                     "",
                     ImmutableArray<int>.Empty,
                     ImmutableArray<TaggedField>.Empty
@@ -73,13 +73,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionIndexesField">The partition indexes we would like to fetch offsets for.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record OffsetFetchRequestTopic (
+        internal sealed record OffsetFetchRequestTopic (
             string NameField,
             ImmutableArray<int> PartitionIndexesField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static OffsetFetchRequestTopic Empty { get; } = new(
+            internal static OffsetFetchRequestTopic Empty { get; } = new(
                 "",
                 ImmutableArray<int>.Empty,
                 ImmutableArray<TaggedField>.Empty

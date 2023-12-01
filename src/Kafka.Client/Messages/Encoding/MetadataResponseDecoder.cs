@@ -4,17 +4,17 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic;
 using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic.MetadataResponsePartition;
+using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponseData.MetadataResponseBroker;
 
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class MetadataResponseDecoder : 
+    internal class MetadataResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, MetadataResponseData>
     {
-        public MetadataResponseDecoder() :
+        internal MetadataResponseDecoder() :
             base(
                 ApiKey.Metadata,
                 new(0, 12),

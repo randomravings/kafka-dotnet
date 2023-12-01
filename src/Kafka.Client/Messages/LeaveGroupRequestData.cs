@@ -10,14 +10,14 @@ namespace Kafka.Client.Messages {
     /// <param name="MembersField">List of leaving member identities.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record LeaveGroupRequestData (
+    internal sealed record LeaveGroupRequestData (
         string GroupIdField,
         string MemberIdField,
         ImmutableArray<MemberIdentity> MembersField,
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static LeaveGroupRequestData Empty { get; } = new(
+        internal static LeaveGroupRequestData Empty { get; } = new(
             "",
             "",
             ImmutableArray<MemberIdentity>.Empty,
@@ -29,14 +29,14 @@ namespace Kafka.Client.Messages {
         /// <param name="ReasonField">The reason why the member left the group.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record MemberIdentity (
+        internal sealed record MemberIdentity (
             string MemberIdField,
             string? GroupInstanceIdField,
             string? ReasonField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static MemberIdentity Empty { get; } = new(
+            internal static MemberIdentity Empty { get; } = new(
                 "",
                 default(string?),
                 default(string?),

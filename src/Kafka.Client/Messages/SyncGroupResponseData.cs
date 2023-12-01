@@ -11,7 +11,7 @@ namespace Kafka.Client.Messages {
     /// <param name="AssignmentField">The member assignment.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record SyncGroupResponseData (
+    internal sealed record SyncGroupResponseData (
         int ThrottleTimeMsField,
         short ErrorCodeField,
         string? ProtocolTypeField,
@@ -20,7 +20,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static SyncGroupResponseData Empty { get; } = new(
+        internal static SyncGroupResponseData Empty { get; } = new(
             default(int),
             default(short),
             default(string?),

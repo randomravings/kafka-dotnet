@@ -12,6 +12,16 @@
             )
         ;
 
-        public static implicit operator TopicPartition((Guid Id, TopicName Name, Partition Partition) v) => new((v.Id, v.Name), v.Partition);
+        public static implicit operator TopicPartition((
+            Guid Id,
+            TopicName Name,
+            Partition Partition
+        ) value) => new(
+            new(
+                value.Id,
+                value.Name
+            ),
+            value.Partition
+        );
     }
 }

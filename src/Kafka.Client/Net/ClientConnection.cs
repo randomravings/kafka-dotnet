@@ -9,19 +9,25 @@ using Kafka.Common.Model;
 using Kafka.Common.Net;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Net.Sockets;
 
 namespace Kafka.Client.Net
 {
-    internal sealed class ClientConnection :
-        IClientConnection
+    internal sealed class ClientConnection(
+        ITransport connection,
+        KafkaClientConfig config,
+        ILogger logger
+    ) :
+        IClientConnection,
+        IDisposable
     {
         private const string CLIENT_NAME = "kafka-dotnet";
         private const string CLIENT_VERSION = "0.1.0";
 
         private readonly SpinningDictionary<int, TaskCompletionSource<byte[]>> _pendingRequests = new(Compare.Int32);
-        private readonly System.Collections.Concurrent.BlockingCollection<SendThing> _sendQueue = [];
+        private readonly BlockingCollection<SendThing> _sendQueue = [];
 
         private CancellationTokenSource _internalCts = new();
         private Task _senderThread = Task.CompletedTask;
@@ -93,32 +99,21 @@ namespace Kafka.Client.Net
         private readonly IRequestEncoder<RequestHeaderData, FetchRequestData> _fetchRequestHandler = new FetchRequestEncoder();
         private readonly IResponseDecoder<ResponseHeaderData, FetchResponseData> _fetchResponseHandler = new FetchResponseDecoder();
 
-        private readonly string _clientId;
-        private readonly int _retries;
-        private readonly TimeSpan _retryBackOffMs;
-        private readonly ILogger _logger;
-        private readonly ITransport _connection;
+        private readonly string _clientId = config.Client.ClientId;
+        private readonly int _retries = config.Client.Retries;
+        private readonly TimeSpan _retryBackOffMs = TimeSpan.FromMilliseconds(config.Client.RetryBackoffMs);
+        private readonly ILogger _logger = logger;
+        private readonly ITransport _transport = connection;
         private int _coorelationIds;
         private ClusterNodeId _nodeId = -1;
 
-        private readonly SortedList<ApiKey, ApiVersion> _apiVersions = new();
-
-        public ClientConnection(
-            ITransport connection,
-            KafkaClientConfig config,
-            ILogger logger
-        )
-        {
-            _connection = connection;
-            _clientId = config.Client.ClientId;
-            _retries = config.Client.Retries;
-            _retryBackOffMs = TimeSpan.FromMilliseconds(config.Client.RetryBackoffMs);
-            _logger = logger;
-        }
-
-        ITransport IConnection.Transport => _connection;
+        private readonly ConcurrentDictionary<ApiKey, ApiVersion> _apiVersions = [];
 
         ClusterNodeId IConnection.NodeId => _nodeId;
+
+        IReadOnlyDictionary<ApiKey, ApiVersion> IConnection.Apis =>
+            _apiVersions
+        ;
 
         async Task IConnection.Open(CancellationToken cancellationToken) =>
             await EnsureConnection(
@@ -132,10 +127,10 @@ namespace Kafka.Client.Net
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (!_connection.IsConnected)
+                if (!_transport.IsConnected)
                     return;
                 await NetworkLoopStop(cancellationToken).ConfigureAwait(false);
-                await _connection.Close(cancellationToken).ConfigureAwait(false);
+                await _transport.Close(cancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -303,7 +298,7 @@ namespace Kafka.Client.Net
                         .Where(r => r.ErrorCodeField != 0)
                         .Select(r => Errors.Translate(r.ErrorCodeField))
                         .ToImmutableArray(),
-                _ => ImmutableArray.Create(Errors.Translate(response.ErrorCodeField))
+                _ => [Errors.Translate(response.ErrorCodeField)]
             };
             return (IsTransient(errors), errors);
         }
@@ -613,7 +608,7 @@ namespace Kafka.Client.Net
                             .Select(p => Errors.Translate(p.ErrorCodeField))
                         )
                         .ToImmutableArray(),
-                _ => ImmutableArray.Create(Errors.Translate(response.ErrorCodeField))
+                _ => [Errors.Translate(response.ErrorCodeField)]
             };
             return (IsTransient(errors), errors);
         }
@@ -623,6 +618,7 @@ namespace Kafka.Client.Net
             _internalCts.Dispose();
             _sendQueue.Dispose();
             _semaphore.Dispose();
+            _transport.Dispose();
             GC.SuppressFinalize(this);
         }
 
@@ -725,8 +721,8 @@ namespace Kafka.Client.Net
                 offset = _apiVersionRequestHandler.WriteHeader(requestBytes, offset, requestHeader);
                 offset = _apiVersionRequestHandler.WriteMessage(requestBytes, offset, API_VERSION_REQUEST);
 
-                await _connection.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
-                var responseBytes = await _connection.Receive(cancellationToken).ConfigureAwait(false);
+                await _transport.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
+                var responseBytes = await _transport.Receive(cancellationToken).ConfigureAwait(false);
 
                 (offset, var _) = _apiVersionResponseHandler.ReadHeader(responseBytes, 0);
                 (_, var apiVersionsResponse) = _apiVersionResponseHandler.ReadMessage(responseBytes, offset);
@@ -759,8 +755,8 @@ namespace Kafka.Client.Net
                 offset = _metadataRequestHandler.WriteHeader(requestBytes, offset, requestHeader);
                 offset = _metadataRequestHandler.WriteMessage(requestBytes, offset, CLUSTER_METADATA_REQUEST);
 
-                await _connection.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
-                var responseBytes = await _connection.Receive(cancellationToken).ConfigureAwait(false);
+                await _transport.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
+                var responseBytes = await _transport.Receive(cancellationToken).ConfigureAwait(false);
 
                 (offset, var _) = _metadataResponseHandler.ReadHeader(responseBytes, 0);
                 (_, var metadataResponse) = _metadataResponseHandler.ReadMessage(responseBytes, offset);
@@ -791,11 +787,11 @@ namespace Kafka.Client.Net
         )
         {
             int retires = 0;
-            while (!_connection.IsConnected)
+            while (!_transport.IsConnected)
             {
                 try
                 {
-                    await _connection.Open(cancellationToken).ConfigureAwait(false);
+                    await _transport.Open(cancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException) { }
                 catch (OpenConnectionException ex)
@@ -811,12 +807,12 @@ namespace Kafka.Client.Net
 
         private async Task EnsureConnection(CancellationToken cancellationToken)
         {
-            if (_connection.IsConnected)
+            if (_transport.IsConnected)
                 return;
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (_connection.IsConnected)
+                if (_transport.IsConnected)
                     return;
                 await NetworkLoopStop(cancellationToken).ConfigureAwait(false);
                 await OpenTransport(cancellationToken).ConfigureAwait(false);
@@ -838,7 +834,7 @@ namespace Kafka.Client.Net
                 try
                 {
                     var sendThing = _sendQueue.Take(cancellationToken);
-                    await _connection.Send(
+                    await _transport.Send(
                         sendThing.Data,
                         cancellationToken
                     ).ConfigureAwait(false);
@@ -862,7 +858,7 @@ namespace Kafka.Client.Net
             {
                 try
                 {
-                    var data = await _connection.Receive(cancellationToken).ConfigureAwait(false);
+                    var data = await _transport.Receive(cancellationToken).ConfigureAwait(false);
                     (_, var correlationId) = BinaryDecoder.ReadInt32(data, 0);
                     if (_pendingRequests.Remove(correlationId, out var taskCompletionSource))
                         taskCompletionSource.SetResult(data);
@@ -910,7 +906,7 @@ namespace Kafka.Client.Net
         {
             _nodeId = metadataResponse
                 .BrokersField
-                .Where(r => r.HostField == _connection.Host && r.PortField == _connection.Port)
+                .Where(r => r.HostField == _transport.Host && r.PortField == _transport.Port)
                 .Select(r => r.NodeIdField)
                 .FirstOrDefault()
             ;
@@ -920,7 +916,7 @@ namespace Kafka.Client.Net
         {
             _apiVersions.Clear();
             foreach (var apiKey in apiVersionsResponse.ApiKeysField)
-                _apiVersions.Add((ApiKey)apiKey.ApiKeyField, apiKey.MaxVersionField);
+                _apiVersions[(ApiKey)apiKey.ApiKeyField] = apiKey.MaxVersionField;
 
             SetCodecVersion(_apiVersionRequestHandler, _apiVersions);
             SetCodecVersion(_apiVersionResponseHandler, _apiVersions);

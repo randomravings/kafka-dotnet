@@ -1,4 +1,4 @@
-﻿namespace Kafka.Client.Model
+﻿namespace Kafka.Client.Model.Internal
 {
     internal enum BatchCollectReason
     {

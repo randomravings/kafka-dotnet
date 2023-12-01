@@ -10,10 +10,10 @@ using AddPartitionsToTxnTopic = Kafka.Client.Messages.AddPartitionsToTxnRequestD
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class AddPartitionsToTxnRequestEncoder : 
+    internal class AddPartitionsToTxnRequestEncoder : 
         RequestEncoder<RequestHeaderData, AddPartitionsToTxnRequestData>
     {
-        public AddPartitionsToTxnRequestEncoder() :
+        internal AddPartitionsToTxnRequestEncoder() :
             base(
                 ApiKey.AddPartitionsToTxn,
                 new(0, 4),

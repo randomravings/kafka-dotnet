@@ -10,10 +10,10 @@ using DeleteRecordsPartition = Kafka.Client.Messages.DeleteRecordsRequestData.De
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class DeleteRecordsRequestEncoder : 
+    internal class DeleteRecordsRequestEncoder : 
         RequestEncoder<RequestHeaderData, DeleteRecordsRequestData>
     {
-        public DeleteRecordsRequestEncoder() :
+        internal DeleteRecordsRequestEncoder() :
             base(
                 ApiKey.DeleteRecords,
                 new(0, 2),

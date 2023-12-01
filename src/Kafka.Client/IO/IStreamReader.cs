@@ -2,13 +2,12 @@
 
 namespace Kafka.Client.IO
 {
-    public interface IStreamReader<TKey, TValue> :
-        IDisposable
+    public interface IStreamReader<TKey, TValue>
     {
-        ValueTask<ConsumerRecord<TKey, TValue>> Read(
+        ValueTask<ReadRecord<TKey, TValue>> Read(
             CancellationToken cancellationToken
         );
-        ValueTask<ConsumerRecord<TKey, TValue>> Read(
+        ValueTask<ReadRecord<TKey, TValue>> Read(
             TimeSpan timeout,
             CancellationToken cancellationToken
         );

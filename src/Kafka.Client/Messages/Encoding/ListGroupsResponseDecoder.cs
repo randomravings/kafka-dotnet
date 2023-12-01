@@ -9,10 +9,10 @@ using ListedGroup = Kafka.Client.Messages.ListGroupsResponseData.ListedGroup;
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class ListGroupsResponseDecoder : 
+    internal class ListGroupsResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, ListGroupsResponseData>
     {
-        public ListGroupsResponseDecoder() :
+        internal ListGroupsResponseDecoder() :
             base(
                 ApiKey.ListGroups,
                 new(0, 4),

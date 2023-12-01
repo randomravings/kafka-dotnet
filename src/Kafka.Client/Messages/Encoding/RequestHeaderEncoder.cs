@@ -8,16 +8,16 @@ using System.Collections.Immutable;
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public static class RequestHeaderEncoder
+    internal static class RequestHeaderEncoder
     {
-        public static int WriteV0(byte[] buffer, int index, RequestHeaderData message)
+        internal static int WriteV0(byte[] buffer, int index, RequestHeaderData message)
         {
             index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiKeyField);
             index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiVersionField);
             index = BinaryEncoder.WriteInt32(buffer, index, message.CorrelationIdField);
             return index;
         }
-        public static int WriteV1(byte[] buffer, int index, RequestHeaderData message)
+        internal static int WriteV1(byte[] buffer, int index, RequestHeaderData message)
         {
             index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiKeyField);
             index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiVersionField);
@@ -25,7 +25,7 @@ namespace Kafka.Client.Messages.Encoding
             index = BinaryEncoder.WriteNullableString(buffer, index, message.ClientIdField);
             return index;
         }
-        public static int WriteV2(byte[] buffer, int index, RequestHeaderData message)
+        internal static int WriteV2(byte[] buffer, int index, RequestHeaderData message)
         {
             index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiKeyField);
             index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiVersionField);

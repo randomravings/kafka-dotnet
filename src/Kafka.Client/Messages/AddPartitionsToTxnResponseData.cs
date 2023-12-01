@@ -1,9 +1,9 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using AddPartitionsToTxnTopicResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnTopicResult;
-using AddPartitionsToTxnPartitionResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnPartitionResult;
 using AddPartitionsToTxnResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnResult;
+using AddPartitionsToTxnPartitionResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnPartitionResult;
+using AddPartitionsToTxnTopicResult = Kafka.Client.Messages.AddPartitionsToTxnResponseData.AddPartitionsToTxnTopicResult;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -13,7 +13,7 @@ namespace Kafka.Client.Messages {
     /// <param name="ResultsByTopicV3AndBelowField">The results for each topic.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record AddPartitionsToTxnResponseData (
+    internal sealed record AddPartitionsToTxnResponseData (
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<AddPartitionsToTxnResult> ResultsByTransactionField,
@@ -21,7 +21,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static AddPartitionsToTxnResponseData Empty { get; } = new(
+        internal static AddPartitionsToTxnResponseData Empty { get; } = new(
             default(int),
             default(short),
             ImmutableArray<AddPartitionsToTxnResult>.Empty,
@@ -33,13 +33,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionErrorCodeField">The response error code.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record AddPartitionsToTxnPartitionResult (
+        internal sealed record AddPartitionsToTxnPartitionResult (
             int PartitionIndexField,
             short PartitionErrorCodeField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static AddPartitionsToTxnPartitionResult Empty { get; } = new(
+            internal static AddPartitionsToTxnPartitionResult Empty { get; } = new(
                 default(int),
                 default(short),
                 ImmutableArray<TaggedField>.Empty
@@ -50,13 +50,13 @@ namespace Kafka.Client.Messages {
         /// <param name="TopicResultsField">The results for each topic.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record AddPartitionsToTxnResult (
+        internal sealed record AddPartitionsToTxnResult (
             string TransactionalIdField,
             ImmutableArray<AddPartitionsToTxnTopicResult> TopicResultsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static AddPartitionsToTxnResult Empty { get; } = new(
+            internal static AddPartitionsToTxnResult Empty { get; } = new(
                 "",
                 ImmutableArray<AddPartitionsToTxnTopicResult>.Empty,
                 ImmutableArray<TaggedField>.Empty
@@ -67,13 +67,13 @@ namespace Kafka.Client.Messages {
         /// <param name="ResultsByPartitionField">The results for each partition</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record AddPartitionsToTxnTopicResult (
+        internal sealed record AddPartitionsToTxnTopicResult (
             string NameField,
             ImmutableArray<AddPartitionsToTxnPartitionResult> ResultsByPartitionField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static AddPartitionsToTxnTopicResult Empty { get; } = new(
+            internal static AddPartitionsToTxnTopicResult Empty { get; } = new(
                 "",
                 ImmutableArray<AddPartitionsToTxnPartitionResult>.Empty,
                 ImmutableArray<TaggedField>.Empty

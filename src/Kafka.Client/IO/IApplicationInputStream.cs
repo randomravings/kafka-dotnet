@@ -1,21 +1,20 @@
-﻿using Kafka.Client.Model;
-using Kafka.Common.Model;
+﻿using Kafka.Common.Model;
 
 namespace Kafka.Client.IO
 {
     public interface IApplicationInputStream :
         IInputStream
     {
-        ValueTask Commit(
+        Task Commit(
             CancellationToken cancellationToken
         );
 
-        ValueTask Commit(
+        Task Commit(
             TopicPartitionOffset topicPartitionOffset,
             CancellationToken cancellationToken
         );
 
-        ValueTask Commit(
+        Task Commit(
             IEnumerable<TopicPartitionOffset> topicPartitionOffsets,
             CancellationToken cancellationToken
         );

@@ -10,13 +10,13 @@ namespace Kafka.Client.Messages {
     /// <param name="TopicsField">Results for each topic we tried to create.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record CreateTopicsResponseData (
+    internal sealed record CreateTopicsResponseData (
         int ThrottleTimeMsField,
         ImmutableArray<CreatableTopicResult> TopicsField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static CreateTopicsResponseData Empty { get; } = new(
+        internal static CreateTopicsResponseData Empty { get; } = new(
             default(int),
             ImmutableArray<CreatableTopicResult>.Empty,
             ImmutableArray<TaggedField>.Empty
@@ -32,7 +32,7 @@ namespace Kafka.Client.Messages {
         /// <param name="ConfigsField">Configuration of the topic.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record CreatableTopicResult (
+        internal sealed record CreatableTopicResult (
             string NameField,
             Guid TopicIdField,
             short ErrorCodeField,
@@ -44,7 +44,7 @@ namespace Kafka.Client.Messages {
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static CreatableTopicResult Empty { get; } = new(
+            internal static CreatableTopicResult Empty { get; } = new(
                 "",
                 default(Guid),
                 default(short),
@@ -63,7 +63,7 @@ namespace Kafka.Client.Messages {
             /// <param name="IsSensitiveField">True if this configuration is sensitive.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record CreatableTopicConfigs (
+            internal sealed record CreatableTopicConfigs (
                 string NameField,
                 string? ValueField,
                 bool ReadOnlyField,
@@ -72,7 +72,7 @@ namespace Kafka.Client.Messages {
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static CreatableTopicConfigs Empty { get; } = new(
+                internal static CreatableTopicConfigs Empty { get; } = new(
                     "",
                     default(string?),
                     default(bool),

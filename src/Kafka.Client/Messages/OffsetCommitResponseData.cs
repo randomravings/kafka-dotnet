@@ -10,13 +10,13 @@ namespace Kafka.Client.Messages {
     /// <param name="TopicsField">The responses for each topic.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record OffsetCommitResponseData (
+    internal sealed record OffsetCommitResponseData (
         int ThrottleTimeMsField,
         ImmutableArray<OffsetCommitResponseTopic> TopicsField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static OffsetCommitResponseData Empty { get; } = new(
+        internal static OffsetCommitResponseData Empty { get; } = new(
             default(int),
             ImmutableArray<OffsetCommitResponseTopic>.Empty,
             ImmutableArray<TaggedField>.Empty
@@ -26,13 +26,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">The responses for each partition in the topic.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record OffsetCommitResponseTopic (
+        internal sealed record OffsetCommitResponseTopic (
             string NameField,
             ImmutableArray<OffsetCommitResponsePartition> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static OffsetCommitResponseTopic Empty { get; } = new(
+            internal static OffsetCommitResponseTopic Empty { get; } = new(
                 "",
                 ImmutableArray<OffsetCommitResponsePartition>.Empty,
                 ImmutableArray<TaggedField>.Empty
@@ -42,13 +42,13 @@ namespace Kafka.Client.Messages {
             /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record OffsetCommitResponsePartition (
+            internal sealed record OffsetCommitResponsePartition (
                 int PartitionIndexField,
                 short ErrorCodeField,
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static OffsetCommitResponsePartition Empty { get; } = new(
+                internal static OffsetCommitResponsePartition Empty { get; } = new(
                     default(int),
                     default(short),
                     ImmutableArray<TaggedField>.Empty

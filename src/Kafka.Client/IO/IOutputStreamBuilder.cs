@@ -4,7 +4,9 @@ namespace Kafka.Client.IO
 {
     public interface IOutputStreamBuilder
     {
-        IOutputStreamBuilder WithLogger(ILogger<IOutputStream> logger);
+        IOutputStreamBuilder WithLogger(
+            ILogger<IOutputStream> logger
+        );
         IOutputStream Build();
     }
 }

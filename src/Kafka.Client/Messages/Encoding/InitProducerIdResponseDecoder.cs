@@ -8,10 +8,10 @@ using System.Collections.Immutable;
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class InitProducerIdResponseDecoder : 
+    internal class InitProducerIdResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, InitProducerIdResponseData>
     {
-        public InitProducerIdResponseDecoder() :
+        internal InitProducerIdResponseDecoder() :
             base(
                 ApiKey.InitProducerId,
                 new(0, 4),

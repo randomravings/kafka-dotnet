@@ -15,11 +15,12 @@ using System.Diagnostics;
 namespace Kafka.Client.IO.Stream
 {
     internal abstract class InputStream :
-        IInputStream
+        IInputStream,
+        IDisposable
     {
         private static readonly TimeSpan WAIT_INDEFINITELY = TimeSpan.FromMilliseconds(-1);
 
-        private readonly List<ConsumerChannel> _channels = [];
+        private readonly List<InputChannel> _channels = [];
         private readonly List<Task> _channelTasks = [];
         private readonly ConcurrentQueue<FetchResult> _recordQueue = new();
         private readonly ManualResetEventSlim _resetEvent = new(false);
@@ -28,9 +29,9 @@ namespace Kafka.Client.IO.Stream
         private long _stateAltered = 1;
         private bool _disposed;
 
-        protected readonly SortedSet<TopicPartition> _assignmentList = new(TopicPartitionCompare.Instance);
-        protected readonly IConnectionManager<IClientConnection> _connectionManager;
-        protected readonly TopicPartitionDictionary<Offset> _trackedOffsets = [];
+        protected readonly TopicPartitionSet _assignmentList = [];
+        protected readonly ICluster<IClientConnection> _connectionManager;
+        protected readonly TopicPartitionMap<Offset> _trackedOffsets = [];
         protected readonly TopicPartitionSet _pausedTopicPartitions = [];
         protected readonly InputStreamConfig _config;
         protected readonly ILogger _logger;
@@ -41,7 +42,7 @@ namespace Kafka.Client.IO.Stream
         protected readonly SemaphoreSlim _semaphore = new(1, 1);
 
         protected InputStream(
-            IConnectionManager<IClientConnection> connectionManager,
+            ICluster<IClientConnection> connectionManager,
             InputStreamConfig config,
             ILogger logger
         )
@@ -70,23 +71,31 @@ namespace Kafka.Client.IO.Stream
             _pausedTopicPartitions.CopyItems().ToImmutableSortedSet(TopicPartitionCompare.Instance)
         ;
 
-        void IInputStream.PausePartitions(params TopicPartition[] partitions)
+        void IInputStream.PausePartitions(
+            in IReadOnlyList<TopicPartition> partitions
+        )
         {
             foreach (var topicPartition in partitions)
                 _pausedTopicPartitions.Add(topicPartition);
         }
 
-        void IInputStream.ResumePartitions(params TopicPartition[] partitions)
+        void IInputStream.ResumePartitions(
+            in IReadOnlyList<TopicPartition> partitions
+        )
         {
             foreach (var topicPartition in partitions)
-                _pausedTopicPartitions.Remove(topicPartition);
+                _pausedTopicPartitions.Remove(topicPartition, out _);
         }
 
-        void IInputStream.UpdateOffsets(TopicPartition topicPartition, Offset offset) =>
+        void IInputStream.UpdateOffsets(
+            in TopicPartition topicPartition,
+            in Offset offset
+         ) =>
             _trackedOffsets.Set(topicPartition, offset)
         ;
 
-        void IInputStream.UpdateOffsets(params TopicPartitionOffset[] topicPartitionOffsets)
+        void IInputStream.UpdateOffsets(
+            in IReadOnlyList<TopicPartitionOffset> topicPartitionOffsets)
         {
             foreach (var (topicPartition, offset) in topicPartitionOffsets)
                 _trackedOffsets.Set(topicPartition, offset);
@@ -103,7 +112,7 @@ namespace Kafka.Client.IO.Stream
             GC.SuppressFinalize(this);
         }
 
-        async Task<IReadOnlyList<ConsumerRecord>> IInputStream.Read(
+        async Task<IReadOnlyList<InputRecord>> IInputStream.Read(
             TimeSpan timeout,
             CancellationToken cancellationToken
         ) =>
@@ -113,7 +122,7 @@ namespace Kafka.Client.IO.Stream
             ).ConfigureAwait(false)
         ;
 
-        async Task<IReadOnlyList<ConsumerRecord>> IInputStream.Read(
+        async Task<IReadOnlyList<InputRecord>> IInputStream.Read(
             CancellationToken cancellationToken
         ) =>
             await Read(
@@ -122,7 +131,7 @@ namespace Kafka.Client.IO.Stream
             ).ConfigureAwait(false)
         ;
 
-        private async Task<IReadOnlyList<ConsumerRecord>> Read(
+        private async Task<IReadOnlyList<InputRecord>> Read(
             TimeSpan timeout,
             CancellationToken cancellationToken
         )
@@ -162,7 +171,7 @@ namespace Kafka.Client.IO.Stream
 
                 // Timeout.
                 if (!signalled)
-                    return ImmutableArray<ConsumerRecord>.Empty;
+                    return ImmutableArray<InputRecord>.Empty;
             }
         }
 
@@ -282,18 +291,18 @@ namespace Kafka.Client.IO.Stream
             }
         }
 
-        private static ClusterNodeDictionary<TopicPartitionDictionary<Offset>> GetTopicPartitionAssignments(
-            TopicPartitionDictionary<LeaderAndOffset> topicPartitionDetails
+        private static ClusterNodeDictionary<TopicPartitionMap<Offset>> GetTopicPartitionAssignments(
+            TopicPartitionMap<LeaderAndOffset> topicPartitionDetails
         )
         {
             var items = topicPartitionDetails.CopyItems();
             var brokerGrouping = items
                 .GroupBy(k => k.Value.LeaderId)
             ;
-            var topicPartitionAssignments = new ClusterNodeDictionary<TopicPartitionDictionary<Offset>>();
+            var topicPartitionAssignments = new ClusterNodeDictionary<TopicPartitionMap<Offset>>();
             foreach (var broker in brokerGrouping)
             {
-                var topicPartitionOffsets = new TopicPartitionDictionary<Offset>();
+                var topicPartitionOffsets = new TopicPartitionMap<Offset>();
                 foreach (var (topicPartition, leaderAndOffset) in broker)
                     topicPartitionOffsets.Add(topicPartition, leaderAndOffset.Offset);
                 topicPartitionAssignments.Add(broker.Key, topicPartitionOffsets);
@@ -303,7 +312,7 @@ namespace Kafka.Client.IO.Stream
 
         private async Task CreateChannel(
             ClusterNodeId nodeId,
-            TopicPartitionDictionary<Offset> topicPartitionOffsets,
+            TopicPartitionMap<Offset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
         {
@@ -324,7 +333,7 @@ namespace Kafka.Client.IO.Stream
                     offset
                 );
 
-            var channel = new ConsumerChannel(
+            var channel = new InputChannel(
                 _config,
                 _logger
             );
@@ -385,7 +394,7 @@ namespace Kafka.Client.IO.Stream
 
         private async Task EnsureOffsets(
             IClientConnection connection,
-            TopicPartitionDictionary<Offset> topicPartitionOffsets,
+            TopicPartitionMap<Offset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
         {
@@ -418,7 +427,7 @@ namespace Kafka.Client.IO.Stream
         }
 
         private static void UpdateTopicPartitionOffsets(
-            TopicPartitionDictionary<Offset> topicPartitionOffsets,
+            TopicPartitionMap<Offset> topicPartitionOffsets,
             ListOffsetsResponseData offsetListResponse
         )
         {
@@ -430,7 +439,7 @@ namespace Kafka.Client.IO.Stream
                         topic.NameField,
                         partition.PartitionIndexField
                     );
-                    topicPartitionOffsets[topicPartition] = partition.OffsetField;
+                    topicPartitionOffsets.Set(topicPartition, partition.OffsetField);
                 }
             }
         }
@@ -477,14 +486,15 @@ namespace Kafka.Client.IO.Stream
             return topicPartitions;
         }
 
-        protected static async ValueTask<TopicPartitionDictionary<LeaderAndOffset>> GetTopicPartitionLeaders(
+        protected static async ValueTask<TopicPartitionMap<LeaderAndOffset>> GetTopicPartitionLeaders(
             IClientConnection connection,
-            IReadOnlySet<TopicPartition> topicPartitions,
+            TopicPartitionSet topicPartitions,
             CancellationToken cancellationToken
         )
         {
+            var items = topicPartitions.CopyItems();
             var metadataRequest = new MetadataRequestData(
-                topicPartitions
+                items
                 .GroupBy(g => g.Topic.TopicName)
                 .Select(t => new MetadataRequestData.MetadataRequestTopic(
                     Guid.Empty,
@@ -501,7 +511,7 @@ namespace Kafka.Client.IO.Stream
                 cancellationToken
             ).ConfigureAwait(false);
 
-            var topicPartitionLeaders = new TopicPartitionDictionary<LeaderAndOffset>();
+            var topicPartitionLeaders = new TopicPartitionMap<LeaderAndOffset>();
             foreach (var topic in metadataResponse.TopicsField)
                 foreach (var partition in topic.PartitionsField)
                     topicPartitionLeaders.Add(
@@ -522,7 +532,7 @@ namespace Kafka.Client.IO.Stream
             return topicPartitionLeaders;
         }
 
-        protected abstract ValueTask<TopicPartitionDictionary<LeaderAndOffset>> GetTopicPartitionOffsets(
+        protected abstract ValueTask<TopicPartitionMap<LeaderAndOffset>> GetTopicPartitionOffsets(
             CancellationToken cancellationToken
         );
     }

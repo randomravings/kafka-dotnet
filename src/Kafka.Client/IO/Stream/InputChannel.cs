@@ -2,6 +2,7 @@
 using Kafka.Client.Config;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
+using Kafka.Client.Model.Internal;
 using Kafka.Client.Net;
 using Kafka.Common.Model;
 using Kafka.Common.Protocol;
@@ -11,7 +12,7 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client.IO.Stream
 {
-    internal sealed class ConsumerChannel(
+    internal sealed class InputChannel(
         InputStreamConfig config,
         ILogger logger
     )
@@ -26,7 +27,7 @@ namespace Kafka.Client.IO.Stream
 
         public async Task Run(
             IClientConnection connection,
-            TopicPartitionDictionary<Offset> topicPartitionOffsets,
+            TopicPartitionMap<Offset> topicPartitionOffsets,
             ConcurrentQueue<FetchResult> queue,
             ManualResetEventSlim resetEvent,
             CancellationToken cancellationToken
@@ -70,13 +71,13 @@ namespace Kafka.Client.IO.Stream
             catch (OperationCanceledException) { }
         }
 
-        private static (int offsetsProcessed, ImmutableArray<ConsumerRecord> Records) ProcessFetchResponse(
+        private static FetchResponseProcessResult ProcessFetchResponse(
             in FetchResponseData fetchResponse,
-            in TopicPartitionDictionary<Offset> watermarks
+            in TopicPartitionMap<Offset> watermarks
         )
         {
             var totalOffsetsProcessed = 0;
-            var recordsBuilder = ImmutableArray.CreateBuilder<ConsumerRecord>();
+            var recordsBuilder = ImmutableArray.CreateBuilder<InputRecord>();
             for (int i = 0; i < fetchResponse.ResponsesField.Length; i++)
             {
                 var topicResponse = fetchResponse.ResponsesField[i];
@@ -95,8 +96,8 @@ namespace Kafka.Client.IO.Stream
         private static int ProcessTopicResponse(
             in Topic topic,
             in FetchResponseData.FetchableTopicResponse topicResponse,
-            in ImmutableArray<ConsumerRecord>.Builder recordsBuilder,
-            in TopicPartitionDictionary<Offset> watermarks
+            in ImmutableArray<InputRecord>.Builder recordsBuilder,
+            in TopicPartitionMap<Offset> watermarks
         )
         {
             var offsetsProcessed = 0;
@@ -108,7 +109,7 @@ namespace Kafka.Client.IO.Stream
                 {
                     var watermark = watermarks[topicPartition];
                     var error = Errors.Translate(partition.ErrorCodeField);
-                    var errorRecord = new ConsumerRecord(
+                    var errorRecord = new InputRecord(
                         topicPartition,
                         watermark,
                         Timestamp.None,
@@ -134,8 +135,8 @@ namespace Kafka.Client.IO.Stream
         private static int ProcessPartitionResponse(
             in TopicPartition topicPartition,
             in FetchResponseData.FetchableTopicResponse.PartitionData partition,
-            in ImmutableArray<ConsumerRecord>.Builder recordsBuilder,
-            in TopicPartitionDictionary<Offset> watermarks
+            in ImmutableArray<InputRecord>.Builder recordsBuilder,
+            in TopicPartitionMap<Offset> watermarks
         )
         {
             // Skip empty records.
@@ -173,7 +174,7 @@ namespace Kafka.Client.IO.Stream
                         Timestamp.Created(timestampMs)
                     ;
 
-                    var rawConsumerRecord = new ConsumerRecord(
+                    var rawConsumerRecord = new InputRecord(
                         TopicPartition: topicPartition,
                         Offset: offset,
                         Timestamp: timestamp,
@@ -193,7 +194,7 @@ namespace Kafka.Client.IO.Stream
         }
 
         private FetchRequestData CreateFetchRequest(
-            in TopicPartitionDictionary<Offset> topicPartitionOffsets
+            in TopicPartitionMap<Offset> topicPartitionOffsets
         )
         {
             var items = topicPartitionOffsets.CopyItems();

@@ -9,10 +9,10 @@ using DeleteTopicState = Kafka.Client.Messages.DeleteTopicsRequestData.DeleteTop
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class DeleteTopicsRequestEncoder : 
+    internal class DeleteTopicsRequestEncoder : 
         RequestEncoder<RequestHeaderData, DeleteTopicsRequestData>
     {
-        public DeleteTopicsRequestEncoder() :
+        internal DeleteTopicsRequestEncoder() :
             base(
                 ApiKey.DeleteTopics,
                 new(0, 6),

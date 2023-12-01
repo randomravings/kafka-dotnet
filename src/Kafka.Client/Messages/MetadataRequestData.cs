@@ -11,7 +11,7 @@ namespace Kafka.Client.Messages {
     /// <param name="IncludeTopicAuthorizedOperationsField">Whether to include topic authorized operations.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record MetadataRequestData (
+    internal sealed record MetadataRequestData (
         ImmutableArray<MetadataRequestTopic>? TopicsField,
         bool AllowAutoTopicCreationField,
         bool IncludeClusterAuthorizedOperationsField,
@@ -19,7 +19,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static MetadataRequestData Empty { get; } = new(
+        internal static MetadataRequestData Empty { get; } = new(
             default(ImmutableArray<MetadataRequestTopic>?),
             default(bool),
             default(bool),
@@ -31,13 +31,13 @@ namespace Kafka.Client.Messages {
         /// <param name="NameField">The topic name.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record MetadataRequestTopic (
+        internal sealed record MetadataRequestTopic (
             Guid TopicIdField,
             string? NameField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static MetadataRequestTopic Empty { get; } = new(
+            internal static MetadataRequestTopic Empty { get; } = new(
                 default(Guid),
                 default(string?),
                 ImmutableArray<TaggedField>.Empty

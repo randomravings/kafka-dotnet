@@ -11,10 +11,10 @@ using PartitionProduceData = Kafka.Client.Messages.ProduceRequestData.TopicProdu
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class ProduceRequestEncoder : 
+    internal class ProduceRequestEncoder : 
         RequestEncoder<RequestHeaderData, ProduceRequestData>
     {
-        public ProduceRequestEncoder() :
+        internal ProduceRequestEncoder() :
             base(
                 ApiKey.Produce,
                 new(0, 10),

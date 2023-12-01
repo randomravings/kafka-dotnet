@@ -16,7 +16,7 @@ namespace Kafka.Client.Messages {
     /// <param name="ZkMigrationReadyField">Set by a KRaft controller if the required configurations for ZK migration are present</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record ApiVersionsResponseData (
+    internal sealed record ApiVersionsResponseData (
         short ErrorCodeField,
         ImmutableArray<ApiVersion> ApiKeysField,
         int ThrottleTimeMsField,
@@ -27,7 +27,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static ApiVersionsResponseData Empty { get; } = new(
+        internal static ApiVersionsResponseData Empty { get; } = new(
             default(short),
             ImmutableArray<ApiVersion>.Empty,
             default(int),
@@ -43,14 +43,14 @@ namespace Kafka.Client.Messages {
         /// <param name="MaxVersionField">The maximum supported version, inclusive.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record ApiVersion (
+        internal sealed record ApiVersion (
             short ApiKeyField,
             short MinVersionField,
             short MaxVersionField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static ApiVersion Empty { get; } = new(
+            internal static ApiVersion Empty { get; } = new(
                 default(short),
                 default(short),
                 default(short),
@@ -63,14 +63,14 @@ namespace Kafka.Client.Messages {
         /// <param name="MinVersionLevelField">The cluster-wide finalized min version level for the feature.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record FinalizedFeatureKey (
+        internal sealed record FinalizedFeatureKey (
             string NameField,
             short MaxVersionLevelField,
             short MinVersionLevelField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static FinalizedFeatureKey Empty { get; } = new(
+            internal static FinalizedFeatureKey Empty { get; } = new(
                 "",
                 default(short),
                 default(short),
@@ -83,14 +83,14 @@ namespace Kafka.Client.Messages {
         /// <param name="MaxVersionField">The maximum supported version for the feature.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record SupportedFeatureKey (
+        internal sealed record SupportedFeatureKey (
             string NameField,
             short MinVersionField,
             short MaxVersionField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static SupportedFeatureKey Empty { get; } = new(
+            internal static SupportedFeatureKey Empty { get; } = new(
                 "",
                 default(short),
                 default(short),

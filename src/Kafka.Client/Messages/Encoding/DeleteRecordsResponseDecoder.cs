@@ -10,10 +10,10 @@ using DeleteRecordsTopicResult = Kafka.Client.Messages.DeleteRecordsResponseData
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class DeleteRecordsResponseDecoder : 
+    internal class DeleteRecordsResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, DeleteRecordsResponseData>
     {
-        public DeleteRecordsResponseDecoder() :
+        internal DeleteRecordsResponseDecoder() :
             base(
                 ApiKey.DeleteRecords,
                 new(0, 2),

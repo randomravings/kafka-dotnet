@@ -4,6 +4,9 @@ namespace Kafka.Client.IO
 {
     public interface IPartitioner
     {
-        ValueTask<Partition> SelectPartition(TopicName topic, int partitionCount, ReadOnlyMemory<byte>? keyBytes, CancellationToken cancellationToken);
+        Partition SelectPartition(
+            in int partitionCount,
+            in ReadOnlyMemory<byte>? keyBytes
+        );
     }
 }

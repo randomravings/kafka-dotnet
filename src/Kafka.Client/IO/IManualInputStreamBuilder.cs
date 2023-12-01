@@ -4,7 +4,9 @@ namespace Kafka.Client.IO
 {
     public interface IManualInputStreamBuilder
     {
-        IManualInputStreamBuilder WithLogger(ILogger<IManualInputStream> logger);
+        IManualInputStreamBuilder WithLogger(
+            ILogger<IManualInputStream> logger
+        );
         IManualInputStream Build();
     }
 }

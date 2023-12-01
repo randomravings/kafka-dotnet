@@ -9,10 +9,10 @@ using Coordinator = Kafka.Client.Messages.FindCoordinatorResponseData.Coordinato
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class FindCoordinatorResponseDecoder : 
+    internal class FindCoordinatorResponseDecoder : 
         ResponseDecoder<ResponseHeaderData, FindCoordinatorResponseData>
     {
-        public FindCoordinatorResponseDecoder() :
+        internal FindCoordinatorResponseDecoder() :
             base(
                 ApiKey.FindCoordinator,
                 new(0, 4),

@@ -4,16 +4,16 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using OffsetCommitRequestPartition = Kafka.Client.Messages.OffsetCommitRequestData.OffsetCommitRequestTopic.OffsetCommitRequestPartition;
 using OffsetCommitRequestTopic = Kafka.Client.Messages.OffsetCommitRequestData.OffsetCommitRequestTopic;
+using OffsetCommitRequestPartition = Kafka.Client.Messages.OffsetCommitRequestData.OffsetCommitRequestTopic.OffsetCommitRequestPartition;
 
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    public class OffsetCommitRequestEncoder : 
+    internal class OffsetCommitRequestEncoder : 
         RequestEncoder<RequestHeaderData, OffsetCommitRequestData>
     {
-        public OffsetCommitRequestEncoder() :
+        internal OffsetCommitRequestEncoder() :
             base(
                 ApiKey.OffsetCommit,
                 new(0, 9),

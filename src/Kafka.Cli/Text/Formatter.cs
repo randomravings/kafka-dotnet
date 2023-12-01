@@ -5,7 +5,7 @@ namespace Kafka.Cli.Text
 {
     public static class Formatter
     {
-        public static string Print<TKey, TValue>(in ConsumerRecord<TKey, TValue> value) =>
+        public static string Print<TKey, TValue>(in ReadRecord<TKey, TValue> value) =>
             $"{Print(value.Record.TopicPartition)}:{Print(value.Record.Offset)}:{Print(value.Key)}:{Print(value.Value)}"
         ;
         public static string Print(in Error value) =>

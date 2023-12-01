@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ListOffsetsPartitionResponse = Kafka.Client.Messages.ListOffsetsResponseData.ListOffsetsTopicResponse.ListOffsetsPartitionResponse;
 using ListOffsetsTopicResponse = Kafka.Client.Messages.ListOffsetsResponseData.ListOffsetsTopicResponse;
+using ListOffsetsPartitionResponse = Kafka.Client.Messages.ListOffsetsResponseData.ListOffsetsTopicResponse.ListOffsetsPartitionResponse;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -10,13 +10,13 @@ namespace Kafka.Client.Messages {
     /// <param name="TopicsField">Each topic in the response.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record ListOffsetsResponseData (
+    internal sealed record ListOffsetsResponseData (
         int ThrottleTimeMsField,
         ImmutableArray<ListOffsetsTopicResponse> TopicsField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static ListOffsetsResponseData Empty { get; } = new(
+        internal static ListOffsetsResponseData Empty { get; } = new(
             default(int),
             ImmutableArray<ListOffsetsTopicResponse>.Empty,
             ImmutableArray<TaggedField>.Empty
@@ -26,13 +26,13 @@ namespace Kafka.Client.Messages {
         /// <param name="PartitionsField">Each partition in the response.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
-        public sealed record ListOffsetsTopicResponse (
+        internal sealed record ListOffsetsTopicResponse (
             string NameField,
             ImmutableArray<ListOffsetsPartitionResponse> PartitionsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
-            public static ListOffsetsTopicResponse Empty { get; } = new(
+            internal static ListOffsetsTopicResponse Empty { get; } = new(
                 "",
                 ImmutableArray<ListOffsetsPartitionResponse>.Empty,
                 ImmutableArray<TaggedField>.Empty
@@ -46,7 +46,7 @@ namespace Kafka.Client.Messages {
             /// <param name="LeaderEpochField"></param>
             /// </summary>
             [GeneratedCode("kgen", "1.0.0.0")]
-            public sealed record ListOffsetsPartitionResponse (
+            internal sealed record ListOffsetsPartitionResponse (
                 int PartitionIndexField,
                 short ErrorCodeField,
                 ImmutableArray<long> OldStyleOffsetsField,
@@ -56,7 +56,7 @@ namespace Kafka.Client.Messages {
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
-                public static ListOffsetsPartitionResponse Empty { get; } = new(
+                internal static ListOffsetsPartitionResponse Empty { get; } = new(
                     default(int),
                     default(short),
                     ImmutableArray<long>.Empty,

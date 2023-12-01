@@ -29,7 +29,9 @@ namespace Kafka.Client
         /// Creates a new input stream to cluster for writing records.
         /// </summary>
         /// <returns></returns>
-        IInputStreamBuilder CreateInputStream(Action<InputStreamConfig> configure);
+        IInputStreamBuilder CreateInputStream(
+            Action<InputStreamConfig> configure
+        );
 
         /// <summary>
         /// Creates a new output stream from cluster for reading records.
@@ -41,13 +43,15 @@ namespace Kafka.Client
         /// Creates a new output stream from cluster for reading records.
         /// </summary>
         /// <returns></returns>
-        IOutputStreamBuilder CreateOutputStream(Action<OutputStreamConfig> configure);
+        IOutputStreamBuilder CreateOutputStream(
+            Action<OutputStreamConfig> configure
+        );
 
         /// <summary>
         /// Perform graceful shut down of client and free up resources.
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        ValueTask Close(CancellationToken cancellationToken);
+        Task Close(CancellationToken cancellationToken);
     }
 }

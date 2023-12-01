@@ -49,19 +49,19 @@ builder.Services
     .AddTypeConverter<string, Topic>(
         t => new(Guid.Empty, new TopicName(t))
     )
+    .AddTypeConverter<Topic, string>(
+        t => t.TopicName.Value ?? ""
+    )
     .AddTypeConverter<TopicName, string>(
         t => t.Value ?? ""
+    )
+    .AddTypeConverter<string, TopicName>(
+        t => new(t)
     )
     .AddTypeConverter<TopicId, Guid>(
         t => t.Value
     )
     .AddTypeConverter<Guid, TopicId>(
-        t => new(t)
-    )
-    .AddTypeConverter<Topic, string>(
-        t => t.TopicName.Value ?? ""
-    )
-    .AddTypeConverter<string, TopicName>(
         t => new(t)
     )
     .AddTypeConverter<Partition, int>(

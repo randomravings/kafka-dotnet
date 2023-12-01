@@ -58,7 +58,7 @@ namespace Kafka.Client.Extensions.DependencyInjection
                     .Build()
                 ;
                 return stream
-                    .CreateWriter(topic)
+                    .CreateWriter()
                     .WithKey(keySerializer)
                     .WithValue(valueSerializer)
                     .WithLogger(logger)

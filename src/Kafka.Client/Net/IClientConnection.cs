@@ -4,7 +4,8 @@ using Kafka.Common.Net;
 namespace Kafka.Client.Net
 {
     internal interface IClientConnection :
-        IConnection
+        IConnection,
+        IDisposable
     {
         Task<ApiVersionsResponseData> ApiVersions(
             CancellationToken cancellationToken

@@ -10,7 +10,7 @@ namespace Kafka.Client.Messages {
     /// <param name="GroupInstanceIdField">The unique identifier of the consumer instance provided by end user.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record HeartbeatRequestData (
+    internal sealed record HeartbeatRequestData (
         string GroupIdField,
         int GenerationIdField,
         string MemberIdField,
@@ -18,7 +18,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : RequestMessage (TaggedFields)
     {
-        public static HeartbeatRequestData Empty { get; } = new(
+        internal static HeartbeatRequestData Empty { get; } = new(
             "",
             default(int),
             "",

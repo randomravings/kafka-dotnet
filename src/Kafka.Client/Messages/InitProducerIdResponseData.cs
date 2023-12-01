@@ -10,7 +10,7 @@ namespace Kafka.Client.Messages {
     /// <param name="ProducerEpochField">The current epoch associated with the producer id.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record InitProducerIdResponseData (
+    internal sealed record InitProducerIdResponseData (
         int ThrottleTimeMsField,
         short ErrorCodeField,
         long ProducerIdField,
@@ -18,7 +18,7 @@ namespace Kafka.Client.Messages {
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static InitProducerIdResponseData Empty { get; } = new(
+        internal static InitProducerIdResponseData Empty { get; } = new(
             default(int),
             default(short),
             default(long),

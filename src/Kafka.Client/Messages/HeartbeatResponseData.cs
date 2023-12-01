@@ -8,13 +8,13 @@ namespace Kafka.Client.Messages {
     /// <param name="ErrorCodeField">The error code, or 0 if there was no error.</param>
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
-    public sealed record HeartbeatResponseData (
+    internal sealed record HeartbeatResponseData (
         int ThrottleTimeMsField,
         short ErrorCodeField,
         ImmutableArray<TaggedField> TaggedFields
     ) : ResponseMessage (TaggedFields)
     {
-        public static HeartbeatResponseData Empty { get; } = new(
+        internal static HeartbeatResponseData Empty { get; } = new(
             default(int),
             default(short),
             ImmutableArray<TaggedField>.Empty
