@@ -3,7 +3,7 @@ using Kafka.Client.Model.Internal;
 using Kafka.Common.Model;
 using System.Collections.Immutable;
 
-namespace Kafka.Client.UnitTest.Producer
+namespace Kafka.Client.L0.Test.Producer
 {
     /// <summary>
     /// The V2 Records:

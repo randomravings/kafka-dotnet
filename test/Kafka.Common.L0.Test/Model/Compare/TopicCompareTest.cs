@@ -1,7 +1,7 @@
 ﻿using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
 
-namespace Kafka.Common.UnitTest.Model.Compare
+namespace Kafka.Common.L0.Test.Model.Compare
 {
     [TestFixture]
     public class TopicCompareTest

@@ -1,6 +1,6 @@
 ﻿using Kafka.Common.Hashing;
 
-namespace Kafka.Common.UnitTest.Hashing
+namespace Kafka.Common.L0.Test.Hashing
 {
     [TestFixture]
     public class Murmur2Test

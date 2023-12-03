@@ -2,7 +2,7 @@
 using Kafka.Client.IO.Stream;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Kafka.Client.UnitTest.Producer
+namespace Kafka.Client.L0.Test.Producer
 {
     [TestFixture]
     public class BufferPoolTest

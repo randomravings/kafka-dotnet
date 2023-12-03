@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>Kafka.Client.UnitTest</_Parameter1>
+      <_Parameter1>Kafka.Client.L0.Test</_Parameter1>
     </AssemblyAttribute>
     <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
       <_Parameter1>Kafka.Client.Benchmark</_Parameter1>

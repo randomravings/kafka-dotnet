@@ -1,7 +1,7 @@
 ﻿using Kafka.Client.Collections;
 using Kafka.Common.Model;
 
-namespace Kafka.Client.UnitTest.Collections
+namespace Kafka.Client.L0.Test.Collections
 {
     public class TopicPartitionMapTest
     {

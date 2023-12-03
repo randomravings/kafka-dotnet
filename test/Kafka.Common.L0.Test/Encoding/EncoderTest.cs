@@ -3,7 +3,7 @@ using System;
 using System.Collections.Immutable;
 using System.Drawing;
 
-namespace Kafka.Common.UnitTest.Encoding
+namespace Kafka.Common.L0.Test.Encoding
 {
     [TestFixture]
     public class EncoderTest
