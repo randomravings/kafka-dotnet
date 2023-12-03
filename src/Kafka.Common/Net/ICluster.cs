@@ -3,14 +3,14 @@
 namespace Kafka.Common.Net
 {
     public interface ICluster<TConnection>
-        where TConnection : IConnection
+        where TConnection : INode
     {
         Task<TConnection> Controller(
             CancellationToken cancellationToken
         );
 
         Task<TConnection> Connection(
-            ClusterNodeId nodeId,
+            NodeId nodeId,
             CancellationToken cancellationToken
         );
 

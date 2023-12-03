@@ -12,19 +12,20 @@ namespace Kafka.Common.Model.Comparison
         public static IEqualityComparer<TopicPartition> Equality => INSTANCE;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int IComparer<TopicPartition>.Compare(TopicPartition x, TopicPartition y) =>
-            TopicCompare.Instance.Compare(x.Topic, y.Topic) switch
+            Math.Sign(string.CompareOrdinal(x.Topic.TopicName.Value, y.Topic.TopicName.Value)) switch
             {
                 0 => x.Partition.Value.CompareTo(y.Partition.Value),
-                int v => v
+                var v => v
             }
         ;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         bool IEqualityComparer<TopicPartition>.Equals(TopicPartition x, TopicPartition y) =>
-            TopicCompare.Equality.Equals(x.Topic, y.Topic) && x.Partition == y.Partition
+            string.CompareOrdinal(x.Topic.TopicName.Value, y.Topic.TopicName.Value) == 0
+            && x.Partition == y.Partition
         ;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int IEqualityComparer<TopicPartition>.GetHashCode(TopicPartition obj) =>
-            HashCode.Combine(TopicCompare.Equality.GetHashCode(obj.Topic), obj.Partition.Value)
+            HashCode.Combine(obj.Topic.TopicName.Value, obj.Partition.Value)
         ;
     }
 }

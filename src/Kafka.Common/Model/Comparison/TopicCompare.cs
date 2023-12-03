@@ -13,15 +13,15 @@ namespace Kafka.Common.Model.Comparison
         public static IEqualityComparer<Topic> Equality => INSTANCE;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         int IComparer<Topic>.Compare(Topic x, Topic y) =>
-            TopicNameCompare.Instance.Compare(x.TopicName, y.TopicName)
+            Math.Sign(string.CompareOrdinal(x.TopicName.Value, y.TopicName.Value))
         ;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(Topic x, Topic y) =>
-            TopicNameCompare.Equality.Equals(x.TopicName, y.TopicName)
+            string.CompareOrdinal(x.TopicName.Value, y.TopicName.Value) == 0
         ;
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public int GetHashCode([DisallowNull] Topic obj) =>
-            TopicNameCompare.Equality.GetHashCode(obj.TopicName)
+            HashCode.Combine(obj.TopicName.Value)
         ;
     }
 }

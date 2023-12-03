@@ -30,7 +30,7 @@ namespace Kafka.Client.IO.Stream
         private bool _disposed;
 
         protected readonly TopicPartitionSet _assignmentList = [];
-        protected readonly ICluster<IClientConnection> _connectionManager;
+        protected readonly ICluster<INodeLink> _connectionManager;
         protected readonly TopicPartitionMap<Offset> _trackedOffsets = [];
         protected readonly TopicPartitionSet _pausedTopicPartitions = [];
         protected readonly InputStreamConfig _config;
@@ -42,7 +42,7 @@ namespace Kafka.Client.IO.Stream
         protected readonly SemaphoreSlim _semaphore = new(1, 1);
 
         protected InputStream(
-            ICluster<IClientConnection> connectionManager,
+            ICluster<INodeLink> connectionManager,
             InputStreamConfig config,
             ILogger logger
         )
@@ -206,7 +206,7 @@ namespace Kafka.Client.IO.Stream
             }
         }
 
-        protected async ValueTask<IClientConnection> GetCoordinator(
+        protected async ValueTask<INodeLink> GetCoordinator(
             CancellationToken cancellationToken
         )
         {
@@ -292,7 +292,7 @@ namespace Kafka.Client.IO.Stream
             }
         }
 
-        private static ClusterNodeDictionary<TopicPartitionMap<Offset>> GetTopicPartitionAssignments(
+        private static SortedList<NodeId, TopicPartitionMap<Offset>> GetTopicPartitionAssignments(
             TopicPartitionMap<LeaderAndOffset> topicPartitionDetails
         )
         {
@@ -300,7 +300,7 @@ namespace Kafka.Client.IO.Stream
             var brokerGrouping = items
                 .GroupBy(k => k.Value.LeaderId)
             ;
-            var topicPartitionAssignments = new ClusterNodeDictionary<TopicPartitionMap<Offset>>();
+            var topicPartitionAssignments = new SortedList<NodeId, TopicPartitionMap<Offset>>(NodeIdCompare.Instance);
             foreach (var broker in brokerGrouping)
             {
                 var topicPartitionOffsets = new TopicPartitionMap<Offset>();
@@ -312,7 +312,7 @@ namespace Kafka.Client.IO.Stream
         }
 
         private async Task CreateChannel(
-            ClusterNodeId nodeId,
+            NodeId nodeId,
             TopicPartitionMap<Offset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
@@ -394,7 +394,7 @@ namespace Kafka.Client.IO.Stream
         }
 
         private async Task EnsureOffsets(
-            IClientConnection connection,
+            INodeLink connection,
             TopicPartitionMap<Offset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
@@ -446,12 +446,12 @@ namespace Kafka.Client.IO.Stream
         }
 
         protected readonly record struct LeaderAndOffset(
-            ClusterNodeId LeaderId,
+            NodeId LeaderId,
             Offset Offset
         );
 
         protected static async ValueTask<TopicPartitionSet> GetTopicPartitions(
-            IClientConnection connection,
+            INodeLink connection,
             IReadOnlySet<TopicName> topics,
             CancellationToken cancellationToken
         )
@@ -488,7 +488,7 @@ namespace Kafka.Client.IO.Stream
         }
 
         protected static async ValueTask<TopicPartitionMap<LeaderAndOffset>> GetTopicPartitionLeaders(
-            IClientConnection connection,
+            INodeLink connection,
             TopicPartitionSet topicPartitions,
             CancellationToken cancellationToken
         )

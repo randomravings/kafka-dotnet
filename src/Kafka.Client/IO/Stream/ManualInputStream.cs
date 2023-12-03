@@ -12,7 +12,7 @@ namespace Kafka.Client.IO.Stream
         IManualInputStream
     {
         public ManualInputStream(
-            ICluster<IClientConnection> connectionManager,
+            ICluster<INodeLink> connectionManager,
             InputStreamConfig config,
             ILogger logger
         ) : base(connectionManager, config, logger)

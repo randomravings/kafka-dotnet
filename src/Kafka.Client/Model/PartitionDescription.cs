@@ -5,11 +5,11 @@ namespace Kafka.Client.Model
 {
     public sealed record PartitionDescription(
         Partition PartitionIndex,
-        ClusterNodeId LeaderId,
+        NodeId LeaderId,
         Epoch LeaderEpoch,
-        ImmutableArray<ClusterNodeId> ReplicaNodes,
-        ImmutableArray<ClusterNodeId> IsrNodes,
-        ImmutableArray<ClusterNodeId> OfflineReplicas,
+        ImmutableArray<NodeId> ReplicaNodes,
+        ImmutableArray<NodeId> IsrNodes,
+        ImmutableArray<NodeId> OfflineReplicas,
         Error Error
     );
 }

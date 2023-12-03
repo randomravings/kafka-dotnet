@@ -2,34 +2,23 @@
 using System.Collections;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Kafka.Client.Collections
 {
     internal sealed class TopicPartitionMap<TValue>(
-        int initialTopicCapacity,
-        int initialPartitionCapacity
+        int initialTopicCapacity
     ) :
         IReadOnlyDictionary<TopicPartition, TValue>
     {
-        private readonly int _initialPartitionCapacity = initialPartitionCapacity;
-
-        private SpinLock _lock;
-        private KeyValuePair<TopicId, int>[] _ids = new KeyValuePair<TopicId, int>[initialTopicCapacity];
-        private KeyValuePair<TopicName, int>[] _names = new KeyValuePair<TopicName, int>[initialTopicCapacity];
-        private PartitionValues[] _values = new PartitionValues[initialTopicCapacity];
-        private int _topicCount;
+        private readonly object _guard = new ();
+        private KeyValuePair<TopicPartition, MapValue<TopicPartition, TValue>>[] _ids =
+            new KeyValuePair<TopicPartition, MapValue<TopicPartition, TValue>>[initialTopicCapacity];
+        private MapValue<TopicPartition, TValue>[] _values =
+            new MapValue<TopicPartition, TValue>[initialTopicCapacity];
         private int _count;
 
-        private sealed class PartitionValues
-        {
-            public static PartitionValues Empty { get; } = new();
-            public int Length;
-            public KeyValuePair<TopicPartition, TValue>[] Items = [];
-        };
-
         internal TopicPartitionMap()
-            : this(8, 16) { }
+            : this(8) { }
 
         IEnumerable<TopicPartition> IReadOnlyDictionary<TopicPartition, TValue>.Keys
         {
@@ -104,39 +93,28 @@ namespace Kafka.Client.Collections
             [MaybeNullWhen(false)] out TValue value
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
-
-                value = default;
-                var ((topicId, topicName), partition) = key;
-                var valuesIndex = -1;
-                var values = PartitionValues.Empty;
-                if (!topicId.IsEmpty && GetTopic(topicId, out _, out valuesIndex))
+                if (LookupId(key, out var idIndex))
                 {
-                    values = _values[valuesIndex];
-                    if (GetPartition(values, partition, out var partitionIndex, out _))
-                    {
-                        value = values.Items[partitionIndex].Value;
-                        return true;
-                    }
+                    value = _ids[idIndex].Value.Value;
+                    return true;
                 }
-                if (GetTopic(topicName, out _, out valuesIndex))
+                else if (LookupName(key, out var valuesIndex))
                 {
-                    values = _values[valuesIndex];
-                    if (GetPartition(values, partition, out var partitionIndex, out _))
-                    {
-                        value = values.Items[partitionIndex].Value;
-                        return true;
-                    }
+                    value = _values[valuesIndex].Value;
+                    return true;
                 }
-                return false;
+                else
+                {
+                    value = default;    
+                    return false;
+                }
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -145,40 +123,27 @@ namespace Kafka.Client.Collections
             TValue value
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
-
-                var ((topicId, topicName), partition) = key;
-                var valuesIndex = -1;
-                var values = PartitionValues.Empty;
-                if (!topicId.IsEmpty && GetTopic(topicId, out _, out valuesIndex))
+                if (LookupId(key, out var idIndex))
                 {
-                    values = _values[valuesIndex];
-                    if (GetPartition(values, partition, out var partitionIndex, out _))
-                    {
-                        var (tp, _) = values.Items[partitionIndex];
-                        values.Items[partitionIndex] = new(tp, value);
-                        return true;
-                    }
+                    _ids[idIndex].Value.Value = value;
+                    return true;
                 }
-                if (GetTopic(topicName, out _, out valuesIndex))
+                else if (LookupName(key, out var valuesIndex))
                 {
-                    values = _values[valuesIndex];
-                    if (GetPartition(values, partition, out var partitionIndex, out _))
-                    {
-                        var (tp, _) = values.Items[partitionIndex];
-                        values.Items[partitionIndex] = new(tp, value);
-                        return true;
-                    }
+                    _values[valuesIndex].Value = value;
+                    return true;
                 }
-                return false;
+                else
+                {
+                    return false;
+                }
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -191,30 +156,20 @@ namespace Kafka.Client.Collections
             in TopicPartition key
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                var ((topicId, topicName), partition) = key;
-                var valuesIndex = -1;
-                var values = PartitionValues.Empty;
-                if (!topicId.IsEmpty && GetTopic(topicId, out _, out valuesIndex))
-                {
-                    values = _values[valuesIndex];
-                    if (GetPartition(values, partition, out var _, out _))
-                        return true;
-                }
-                if (GetTopic(topicName, out _, out valuesIndex))
-                {
-                    values = _values[valuesIndex];
-                    if (GetPartition(values, partition, out var _, out _))
-                        return true;
-                }
-                return false;
+
+                if (LookupId(key, out _))
+                    return true;
+                else if (LookupName(key, out _))
+                    return true;
+                else
+                    return false;
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -230,58 +185,24 @@ namespace Kafka.Client.Collections
             in TValue value
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
 
-                var ((topicId, topicName), partition) = key;
-                var values = PartitionValues.Empty;
-                var idIndex = -1;
-                var nameIndex = -1;
-                var valuesIndex = -1;
-                var partitionIndex = -1;
-                if (GetTopic(topicName, out nameIndex, out valuesIndex))
-                {
-                    values = _values[valuesIndex];
-                    if (GetPartition(values, partition, out partitionIndex, out _))
-                        return false;
-                    values.Length++;
-                    Insert(ref values.Items, new(key, value), ~partitionIndex, values.Length);
-                }
-                else
-                {
-                    valuesIndex = _topicCount;
-                    values = new PartitionValues
-                    {
-                        Length = 1,
-                        Items = new KeyValuePair<TopicPartition, TValue>[_initialPartitionCapacity]
-                    };
-                    values.Items[0] = new(key, value);
-                    if (topicId.IsEmpty)
-                    {
-                        _topicCount++;
-                        var nameEntry = new KeyValuePair<TopicName, int>(topicName, valuesIndex);
-                        Insert(ref _names, nameEntry, ~nameIndex, _topicCount);
-                    }
-                    else
-                    {
-                        _ = GetTopic(topicId, out idIndex, out _);
-                        _topicCount++;
-                        var nameEntry = new KeyValuePair<TopicName, int>(topicName, valuesIndex);
-                        var idEntry = new KeyValuePair<TopicId, int>(topicId, valuesIndex);
-                        Insert(ref _ids, idEntry, ~idIndex, _topicCount);
-                        Insert(ref _names, nameEntry, ~nameIndex, _topicCount);
-                    }
-                    Insert(ref _values, values, valuesIndex, _topicCount);
-                }
+                if (LookupId(key, out var idIndex))
+                    return false;
+                if (LookupName(key, out var valuesIndex))
+                    return false;
                 _count++;
+                var entry = new MapValue<TopicPartition, TValue>(key, value);
+                ArrayOperations.Insert(ref _values, entry, ~valuesIndex, _count);
+                if (!key.Topic.TopicId.IsEmpty)
+                    ArrayOperations.Insert(ref _ids, new(key, entry), ~idIndex, _count);
                 return true;
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -298,62 +219,30 @@ namespace Kafka.Client.Collections
             in TValue value
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
 
-                var ((topicId, topicName), partition) = key;
-                var values = PartitionValues.Empty;
-                var idIndex = -1;
-                var nameIndex = -1;
-                var valuesIndex = -1;
-                var partitionIndex = -1;
-                if (GetTopic(topicName, out nameIndex, out valuesIndex))
+                if (LookupId(key, out var idIndex))
                 {
-                    values = _values[valuesIndex];
-                    if (GetPartition(values, partition, out partitionIndex, out _))
-                    {
-                        var (tp, _) = _values[valuesIndex].Items[partitionIndex];
-                        _values[valuesIndex].Items[partitionIndex] = new(tp, value);
-                    }
-                    else
-                    {
-                        values.Length++;
-                        Insert(ref values.Items, new(key, value), ~partitionIndex, values.Length);
-                    }
+                    _ids[idIndex].Value.Value = value;
+                }
+                else if (LookupName(key, out var valuesIndex))
+                {
+                    _values[valuesIndex].Value = value;
                 }
                 else
                 {
-                    valuesIndex = _topicCount;
-                    values = new PartitionValues
-                    {
-                        Length = 1,
-                        Items = new KeyValuePair<TopicPartition, TValue>[_initialPartitionCapacity]
-                    };
-                    values.Items[0] = new(key, value);
-                    if (topicId.IsEmpty)
-                    {
-                        _topicCount++;
-                        var nameEntry = new KeyValuePair<TopicName, int>(topicName, valuesIndex);
-                        Insert(ref _names, nameEntry, ~nameIndex, _topicCount);
-                    }
-                    else
-                    {
-                        _ = GetTopic(topicId, out idIndex, out _);
-                        _topicCount++;
-                        var nameEntry = new KeyValuePair<TopicName, int>(topicName, valuesIndex);
-                        var idEntry = new KeyValuePair<TopicId, int>(topicId, valuesIndex);
-                        Insert(ref _ids, idEntry, ~idIndex, _topicCount);
-                        Insert(ref _names, nameEntry, ~nameIndex, _topicCount);
-                    }
-                    Insert(ref _values, values, valuesIndex, _topicCount);
+                    _count++;
+                    var entry = new MapValue<TopicPartition, TValue>(key, value);
+                    ArrayOperations.Insert(ref _values, entry, ~valuesIndex, _count);
+                    if (!key.Topic.TopicId.IsEmpty)
+                        ArrayOperations.Insert(ref _ids, new(key, entry), ~idIndex, _count);
                 }
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -367,66 +256,39 @@ namespace Kafka.Client.Collections
             [MaybeNullWhen(false)] out TValue value
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
 
                 value = default;
-                var ((topicId, topicName), partition) = key;
-                var values = PartitionValues.Empty;
-                var idIndex = -1;
-                var nameIndex = -1;
-                var valuesIndex = -1;
-                var partitionIndex = -1;
-                if (!topicId.IsEmpty && GetTopic(topicId, out idIndex, out valuesIndex))
+                if (LookupId(key, out var idIndex))
                 {
-                    values = _values[valuesIndex];
-                    if (!GetPartition(values, partition, out partitionIndex, out value))
-                        return false;
-                    if (values.Length > 1)
-                    {
-                        Remove(in values.Items, valuesIndex, values.Length);
-                        values.Length--;
-                        return true;
-                    }
-                    else
-                    {
-                        Remove(in _values, valuesIndex, _count);
-                        Remove(in _ids, idIndex, _topicCount);
-                        if (GetTopic(topicName, out nameIndex, out _))
-                            Remove(in _names, nameIndex, _topicCount);
-                        _topicCount--;
-                        _count--;
-                    }
+                    var entry = _ids[idIndex];
+                    value = entry.Value.Value;
+                    ArrayOperations.Remove(_ids, idIndex, _count);
+                    if(LookupName(entry.Value.Key, out var valuesIndex))
+                        ArrayOperations.Remove(_values, idIndex, _count);
+                    _count--;
+                    return true;
                 }
-                if (!topicName.IsEmpty || GetTopic(topicName, out nameIndex, out valuesIndex))
+                else if (LookupName(key, out var valuesIndex))
                 {
-                    values = _values[valuesIndex];
-                    if (!GetPartition(values, partition, out partitionIndex, out value))
-                        return false;
-                    if (values.Length > 1)
-                    {
-                        Remove(in values.Items, valuesIndex, values.Length);
-                        values.Length--;
-                        return true;
-                    }
-                    else
-                    {
-                        Remove(in _values, valuesIndex, _count);
-                        Remove(in _names, nameIndex, _topicCount);
-                        if (GetTopic(topicId, out idIndex, out _))
-                            Remove(in _ids, idIndex, _topicCount);
-                        _topicCount--;
-                        _count--;
-                    }
+                    var entry = _values[valuesIndex];
+                    value = entry.Value;
+                    ArrayOperations.Remove(_values, valuesIndex, _count);
+                    if (LookupId(entry.Key, out idIndex))
+                        ArrayOperations.Remove(_ids, idIndex, _count);
+                    _count--;
+                    return true;
                 }
-                return false;
+                else
+                {
+                    return false;
+                }
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -435,20 +297,17 @@ namespace Kafka.Client.Collections
         /// </summary>
         public void Clear()
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
                 Array.Clear(_ids);
-                Array.Clear(_names);
                 Array.Clear(_values);
-                _topicCount = 0;
+                Array.Clear(_values);
                 _count = 0;
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -456,25 +315,21 @@ namespace Kafka.Client.Collections
             in bool sortById = false
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
                 var builder = ImmutableArray.CreateBuilder<TopicPartition>(_count);
                 if (sortById)
-                    for (int i = 0; i < _topicCount; i++)
-                        for (int j = 0; j < _values[_ids[i].Value].Length; j++)
-                            builder.Add(_values[_ids[i].Value].Items[j].Key);
+                    for (int i = 0; i < _count; i++)
+                        builder.Add(_ids[i].Value.Key);
                 else
-                    for (int i = 0; i < _topicCount; i++)
-                        for (int j = 0; j < _values[_names[i].Value].Length; j++)
-                            builder.Add(_values[_names[i].Value].Items[j].Key);
+                    for (int i = 0; i < _count; i++)
+                        builder.Add(_values[i].Key);
                 return builder.ToImmutable();
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -482,165 +337,74 @@ namespace Kafka.Client.Collections
             in bool sortById = false
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
                 var builder = ImmutableArray.CreateBuilder<TValue>(_count);
                 if (sortById)
-                    for (int i = 0; i < _topicCount; i++)
-                        for (int j = 0; j < _values[_ids[i].Value].Length; j++)
-                            builder.Add(_values[_ids[i].Value].Items[j].Value);
+                    for (int i = 0; i < _count; i++)
+                        builder.Add(_ids[i].Value.Value);
                 else
-                    for (int i = 0; i < _topicCount; i++)
-                        for (int j = 0; j < _values[_names[i].Value].Length; j++)
-                            builder.Add(_values[_names[i].Value].Items[j].Value);
+                    for (int i = 0; i < _count; i++)
+                        builder.Add(_values[i].Value);
                 return builder.ToImmutable();
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
         public ImmutableArray<KeyValuePair<TopicPartition, TValue>> CopyItems(
             in bool sortById = false
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
                 var builder = ImmutableArray.CreateBuilder<KeyValuePair<TopicPartition, TValue>>(_count);
                 if (sortById)
-                    for (int i = 0; i < _topicCount; i++)
-                        for (int j = 0; j < _values[_ids[i].Value].Length; j++)
-                            builder.Add(_values[_ids[i].Value].Items[j]);
+                    for (int i = 0; i < _count; i++)
+                        builder.Add(new(_ids[i].Value.Key, _ids[i].Value.Value));
                 else
-                    for (int i = 0; i < _topicCount; i++)
-                        for (int j = 0; j < _values[_names[i].Value].Length; j++)
-                            builder.Add(_values[_names[i].Value].Items[j]);
+                    for (int i = 0; i < _count; i++)
+                        builder.Add(new(_values[i].Key, _values[i].Value));
                 return builder.ToImmutable();
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
-        private bool GetTopic(
-            in TopicId topicId,
-            out int index,
-            out int valuesIndex
+        private bool LookupId(
+            in TopicPartition key,
+            out int idIndex
         )
         {
-            index = Compare.IndexOf(
+            idIndex = -1;
+            if (key.Topic.TopicId.IsEmpty)
+                return false;
+            idIndex = ArrayOperations.BinaryIndexOf(
                 _ids,
-                topicId,
-                _topicCount,
-                CompareTopicId
+                key,
+                _count,
+                Compare.CompareTopicId
             );
-            if (index >= 0)
-            {
-                var entry = _ids[index];
-                valuesIndex = entry.Value;
-                return true;
-            }
-            else
-            {
-                valuesIndex = -1;
-                return false;
-            }
+            return idIndex >= 0;
         }
 
-        private bool GetTopic(
-            in TopicName topicName,
-            out int index,
+        private bool LookupName(
+            in TopicPartition topicName,
             out int valuesIndex
         )
         {
-            index = Compare.IndexOf(
-                _names,
+            valuesIndex = ArrayOperations.BinaryIndexOf(
+                _values,
                 topicName,
-                _topicCount,
-                CompareTopicName
+                _count,
+                Compare.CompareTopicName
             );
-            if (index >= 0)
-            {
-                var entry = _names[index];
-                valuesIndex = entry.Value;
-                return true;
-            }
-            else
-            {
-                valuesIndex = -1;
-                return false;
-            }
+            return valuesIndex >= 0;
         }
-
-        private static bool GetPartition(
-            in PartitionValues values,
-            in Partition key,
-            out int index,
-            [MaybeNullWhen(false)] out TValue value
-        )
-        {
-            index = Compare.IndexOf(
-                values.Items,
-                key,
-                values.Length,
-                ComparePartitionValue
-            );
-            if (index >= 0)
-            {
-                value = values.Items[index].Value;
-                return true;
-            }
-            else
-            {
-                value = default;
-                return false;
-            }
-        }
-
-        private static void Insert<TItem>(
-            ref TItem[] array,
-            in TItem topicPartition,
-            in int index,
-            in int size
-        )
-        {
-            if (size >= array.Length)
-                Array.Resize(ref array, array.Length * 2);
-            Array.Copy(array, index, array, index + 1, size - index);
-            array[index] = topicPartition;
-        }
-
-        private static TItem Remove<TItem>(
-            in TItem[] array,
-            in int index,
-            in int size
-        )
-        {
-            var item = array[index];
-            Array.Copy(array, index + 1, array, index, size - index);
-            return item;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int CompareTopicId(in KeyValuePair<TopicId, int> item, in TopicId key) =>
-            item.Key.Value.CompareTo(key.Value)
-        ;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int CompareTopicName(in KeyValuePair<TopicName, int> item, in TopicName key) =>
-            Math.Sign(string.CompareOrdinal(item.Key.Value, key.Value))
-        ;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int ComparePartitionValue(in KeyValuePair<TopicPartition, TValue> item, in Partition key) =>
-            item.Key.Partition.Value.CompareTo(key.Value)
-        ;
     }
 }

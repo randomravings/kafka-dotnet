@@ -7,15 +7,17 @@ using Kafka.Client.Model.Internal;
 using Kafka.Client.Net;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
 using Kafka.Common.Net;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
+using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Kafka.Client.IO.Stream
 {
     internal sealed class OutputStream(
-        ICluster<IClientConnection> connections,
+        ICluster<INodeLink> connections,
         OutputStreamConfig producerConfig,
         ILogger logger
     ) :
@@ -23,7 +25,7 @@ namespace Kafka.Client.IO.Stream
         IDisposable
     {
         private readonly CancellationTokenSource _internalCts = new();
-        private readonly ClusterNodeDictionary<OutputChannel> _brokerChannels = [];
+        private readonly ConcurrentDictionary<NodeId, OutputChannel> _brokerChannels = [];
         private readonly TopicPartitionMap<OutputChannel> _brokerChannelsByTopicPartition = [];
         private readonly TopicMap<ProducerTopicMetadata> _producerMetadata = [];
         private readonly TopicPartitionSet _transactionMembers = [];
@@ -34,11 +36,11 @@ namespace Kafka.Client.IO.Stream
         private readonly bool _enableIdempotence = producerConfig.EnableIdempotence;
         private readonly OutputStreamConfig _producerConfig = producerConfig;
         private readonly ILogger _logger = logger;
-        private readonly ICluster<IClientConnection> _connections = connections;
+        private readonly ICluster<INodeLink> _connections = connections;
 
         private long _producerId = -1;
         private short _producerEpoch = -1;
-        private IClientConnection? _coordinator;
+        private INodeLink? _coordinator;
 
         async Task<ProducerTopicMetadata> IOutputStream.MetadataForTopic(
             TopicName topic,
@@ -123,7 +125,7 @@ namespace Kafka.Client.IO.Stream
             finally { _semaphoreSlim.Release(); }
         }
 
-        private async Task<IClientConnection> GetCoordinator(
+        private async Task<INodeLink> GetCoordinator(
             CancellationToken cancellationToken
         )
         {
@@ -246,13 +248,13 @@ namespace Kafka.Client.IO.Stream
                 ).ConfigureAwait(false);
                 var nodeId = metadata.PartitionMetadata[topicPartition.Partition].LeaderId;
 
-                if (!_brokerChannels.Get(nodeId, out channel))
+                if (!_brokerChannels.TryGetValue(nodeId, out channel))
                 {
                     channel = await CreateChannel(
                         nodeId,
                         cancellationToken
                     ).ConfigureAwait(false);
-                    _brokerChannels.Add(nodeId, channel);
+                    _brokerChannels.TryAdd(nodeId, channel);
                 }
 
                 _brokerChannelsByTopicPartition.Add(topicPartition, channel);
@@ -315,7 +317,7 @@ namespace Kafka.Client.IO.Stream
         }
 
         private async Task<OutputChannel> CreateChannel(
-            ClusterNodeId nodeId,
+            NodeId nodeId,
             CancellationToken cancellationToken
         )
         {
@@ -333,7 +335,7 @@ namespace Kafka.Client.IO.Stream
         }
 
         private static async Task<(long ProducerId, short ProducerEpoch)> GetProducerInstance(
-            IClientConnection protocol,
+            INodeLink protocol,
             string? transactionalId,
             int transactionTimeoutMs,
             long producerId,
@@ -358,7 +360,7 @@ namespace Kafka.Client.IO.Stream
             );
         }
 
-        private async Task<IClientConnection> CreateController(
+        private async Task<INodeLink> CreateController(
             CancellationToken cancellationToken
         )
         {
@@ -387,8 +389,8 @@ namespace Kafka.Client.IO.Stream
             return coordinator;
         }
 
-        private async Task<IClientConnection> FindCoordinator(
-            IClientConnection protocol,
+        private async Task<INodeLink> FindCoordinator(
+            INodeLink protocol,
             string transactionalId,
             CancellationToken cancellationToken
         )

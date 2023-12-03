@@ -15,7 +15,7 @@ using System.Collections.Immutable;
 namespace Kafka.Client.IO.Stream
 {
     internal sealed class ApplicationInputStream(
-        ICluster<IClientConnection> connectionManager,
+        ICluster<INodeLink> connectionManager,
         IReadOnlySet<TopicName> topics,
         InputStreamConfig config,
         ILogger logger

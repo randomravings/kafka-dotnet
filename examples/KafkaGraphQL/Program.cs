@@ -76,10 +76,10 @@ builder.Services
     .AddTypeConverter<long, Offset>(
         t => new(t)
     )
-    .AddTypeConverter<ClusterNodeId, int>(
+    .AddTypeConverter<NodeId, int>(
         t => t.Value
     )
-    .AddTypeConverter<int, ClusterNodeId>(
+    .AddTypeConverter<int, NodeId>(
         t => new(t)
     )
     .AddTypeConverter<Epoch, int>(
@@ -94,12 +94,12 @@ builder.Services
     .AddTypeConverter<DateTimeOffset, Timestamp>(
         t => Timestamp.Created(t)
     )
-    .AddTypeConverter<List<ReplicaAssignment>, IReadOnlyDictionary<Partition, IReadOnlySet<ClusterNodeId>>>(
+    .AddTypeConverter<List<ReplicaAssignment>, IReadOnlyDictionary<Partition, IReadOnlySet<NodeId>>>(
         t => t.ToImmutableSortedDictionary(
             k => new Partition(k.Partition),
-            v => (IReadOnlySet<ClusterNodeId>)v.ReplicaAssigments
-                .Select(r => new ClusterNodeId(r))
-                .ToImmutableSortedSet(ClusterNodeIdCompare.Instance)
+            v => (IReadOnlySet<NodeId>)v.ReplicaAssigments
+                .Select(r => new NodeId(r))
+                .ToImmutableSortedSet(NodeIdCompare.Instance)
         )
     )
     .AddTypeConverter<List<ConfigItem>, IReadOnlyDictionary<string, string?>>(

@@ -7,7 +7,7 @@ namespace Kafka.Client.Model
         string Name,
         int NumPartitions,
         short ReplicationFactor,
-        IReadOnlyDictionary<Partition, IReadOnlySet<ClusterNodeId>> ReplicasAssignments,
+        IReadOnlyDictionary<Partition, IReadOnlySet<NodeId>> ReplicasAssignments,
         IReadOnlyDictionary<string, string?> Configs
     )
     {
@@ -15,7 +15,7 @@ namespace Kafka.Client.Model
             "",
             -1,
             -1,
-            ImmutableSortedDictionary<Partition, IReadOnlySet<ClusterNodeId>>.Empty,
+            ImmutableSortedDictionary<Partition, IReadOnlySet<NodeId>>.Empty,
             ImmutableSortedDictionary<string, string?>.Empty
         );
     };

@@ -3,8 +3,8 @@ using Kafka.Common.Net;
 
 namespace Kafka.Client.Net
 {
-    internal interface IClientConnection :
-        IConnection,
+    internal interface INodeLink :
+        INode,
         IDisposable
     {
         Task<ApiVersionsResponseData> ApiVersions(

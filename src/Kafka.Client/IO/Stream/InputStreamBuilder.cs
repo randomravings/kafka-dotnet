@@ -14,12 +14,12 @@ namespace Kafka.Client.IO.Stream
         IManualInputStreamBuilder
     {
         private readonly SortedSet<TopicName> _topics = new(TopicNameCompare.Instance);
-        private readonly ICluster<IClientConnection> _connections;
+        private readonly ICluster<INodeLink> _connections;
         private readonly InputStreamConfig _config;
         private ILogger _logger = NullLogger.Instance;
 
         public InputStreamBuilder(
-            ICluster<IClientConnection> connections,
+            ICluster<INodeLink> connections,
             InputStreamConfig config,
             ILogger logger
         )

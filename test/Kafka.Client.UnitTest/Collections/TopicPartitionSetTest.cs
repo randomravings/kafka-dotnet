@@ -23,6 +23,17 @@ namespace Kafka.Client.UnitTest.Collections
                 .ToArray()
             ;
 
+            var expectedNameOrder = topicPartitions
+                .OrderBy(r => r.Topic.TopicName.Value)
+                .ThenBy(r => r.Partition.Value)
+                .ToArray()
+            ;
+            var expectedIdOrder = topicPartitions
+                .OrderBy(r => r.Topic.TopicId.Value)
+                .ThenBy(r => r.Partition.Value)
+                .ToArray()
+            ;
+
             var topicPartitionSet = new TopicPartitionSet();
             for (int i = 0; i < topicPartitions.Length; i++)
             {
@@ -34,20 +45,8 @@ namespace Kafka.Client.UnitTest.Collections
                     Assert.That(count, Is.EqualTo(i + 1));
                 });
             }
-
-            var expectedNameOrder = topicPartitionSet
-                .OrderBy(r => r.Topic.TopicName.Value)
-                .ThenBy(r => r.Partition.Value)
-                .ToArray()
-            ;
             var itemsByName = topicPartitionSet.CopyItems();
             CollectionAssert.AreEqual(expectedNameOrder, itemsByName);
-
-            var expectedIdOrder = topicPartitionSet
-                .OrderBy(r => r.Topic.TopicId.Value)
-                .ThenBy(r => r.Partition.Value)
-                .ToArray()
-            ;
             var itemsById = topicPartitionSet.CopyItems(true);
             CollectionAssert.AreEqual(expectedIdOrder, itemsById);
         }

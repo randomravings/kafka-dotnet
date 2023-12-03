@@ -2,7 +2,6 @@
 using System.Collections;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Kafka.Client.Collections
 {
@@ -11,9 +10,11 @@ namespace Kafka.Client.Collections
     ) :
         IReadOnlyCollection<Topic>
     {
-        private SpinLock _lock;
-        private Topic[] _names = new Topic[initialTopicCapacity];
-        private Topic[] _ids = new Topic[initialTopicCapacity];
+        private readonly object _guard = new();
+        private Topic[] _names =
+            new Topic[initialTopicCapacity];
+        private Topic[] _ids =
+            new Topic[initialTopicCapacity];
         private int _count;
 
         int IReadOnlyCollection<Topic>.Count => _count;
@@ -45,30 +46,29 @@ namespace Kafka.Client.Collections
             [MaybeNullWhen(false)] out Topic value
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
-
-                value = default;
-                var (topicId, topicName) = key;
                 var index = -1;
-                if (!topicId.IsEmpty && GetTopic(topicId, out index))
+                if (LookupId(key, out index))
                 {
                     value = _ids[index];
                     return true;
                 }
-                if (GetTopic(topicName, out index))
+                else if (LookupName(key, out index))
                 {
                     value = _names[index];
                     return true;
                 }
-                return false;
+                else
+                {
+                    value = default;
+                    return false;
+                }
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -81,20 +81,19 @@ namespace Kafka.Client.Collections
             in Topic key
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                var (topicId, topicName) = key;
-                if (!topicId.IsEmpty && GetTopic(topicId, out _))
+                if (LookupId(key, out _))
                     return true;
-                if (GetTopic(topicName, out _))
+                else if (LookupName(key, out _))
                     return true;
-                return false;
+                else
+                    return false;
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -109,27 +108,25 @@ namespace Kafka.Client.Collections
             in Topic key
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
-
-                var (topicId, topicName) = key;
                 var idIndex = -1;
                 var nameIndex = -1;
-                if (!topicId.IsEmpty && GetTopic(topicId, out idIndex))
+                if (LookupId(key, out idIndex))
                     return false;
-                if (GetTopic(topicName, out nameIndex))
-                    return true;
+                if (LookupName(key, out nameIndex))
+                    return false;
                 _count++;
-                Insert(ref _ids, key, ~idIndex, _count);
-                Insert(ref _names, key, ~nameIndex, _count);
+                if (!key.TopicId.IsEmpty)
+                    ArrayOperations.Insert(ref _ids, key, ~idIndex, _count);
+                if (!key.TopicName.IsEmpty)
+                    ArrayOperations.Insert(ref _names, key, ~nameIndex, _count);
                 return true;
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -143,38 +140,34 @@ namespace Kafka.Client.Collections
             [MaybeNullWhen(false)] out Topic value
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
-
                 var idIndex = -1;
                 var nameIndex = -1;
-                value = default;
-                var (topicId, topicName) = key;
-                var index = -1;
-                if (!topicId.IsEmpty && GetTopic(topicId, out idIndex))
+                value = Topic.Empty;
+                if (!LookupId(key, out idIndex) & !LookupName(key, out nameIndex))
                 {
-                    value = _ids[index];
-                    Remove(_ids, idIndex, _count);
-                    if (GetTopic(value.TopicName, out nameIndex))
-                        Remove(_names, nameIndex, _count);
-                    _count--;
+                    return false;
+                }
+                else
+                {
+                    if (idIndex >= 0)
+                    {
+                        value = _ids[idIndex];
+                        ArrayOperations.Remove(_ids, idIndex, _count);
+                    }
+                    if (nameIndex >= 0)
+                    {
+                        value = _ids[idIndex];
+                        ArrayOperations.Remove(_names, nameIndex, _count);
+                    }
                     return true;
                 }
-                if (GetTopic(topicName, out nameIndex))
-                {
-                    value = _names[index];
-                    Remove(_names, nameIndex, _count);
-                    _count--;
-                    return true;
-                }
-                return false;
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -183,16 +176,16 @@ namespace Kafka.Client.Collections
         /// </summary>
         public void Clear()
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
+                Array.Clear(_ids);
+                Array.Clear(_names);
                 _count = 0;
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
@@ -200,10 +193,9 @@ namespace Kafka.Client.Collections
             in bool sortById = false
         )
         {
-            var lockTaken = false;
+            Monitor.Enter(_guard);
             try
             {
-                _lock.TryEnter(ref lockTaken);
                 var builder = ImmutableArray.CreateBuilder<Topic>(_count);
                 if (sortById)
                     for (int i = 0; i < _count; i++)
@@ -215,89 +207,39 @@ namespace Kafka.Client.Collections
             }
             finally
             {
-                if (lockTaken)
-                    _lock.Exit(false);
+                Monitor.Exit(_guard);
             }
         }
 
-        private bool GetTopic(
-            in TopicId topicId,
+        private bool LookupId(
+            in Topic key,
             out int index
         )
         {
-            index = Compare.IndexOf(
+            index = 1;
+            if (key.TopicId.IsEmpty)
+                return false;
+            index = ArrayOperations.BinaryIndexOf(
                 _ids,
-                topicId,
+                key,
                 _count,
-                CompareTopicId
+                Compare.CompareId
             );
-            if (index >= 0)
-            {
-                var entry = _ids[index];
-                return true;
-            }
-            else
-            {
-                index = -1;
-                return false;
-            }
+            return index >= 0;
         }
 
-        private bool GetTopic(
-            in TopicName topicName,
+        private bool LookupName(
+            in Topic key,
             out int index
         )
         {
-            index = Compare.IndexOf(
+            index = ArrayOperations.BinaryIndexOf(
                 _names,
-                topicName,
+                key,
                 _count,
-                CompareTopicName
+                Compare.CompareName
             );
-            if (index >= 0)
-            {
-                var entry = _names[index];
-                return true;
-            }
-            else
-            {
-                index = -1;
-                return false;
-            }
+            return index >= 0;
         }
-
-        private static void Insert<TItem>(
-            ref TItem[] array,
-            in TItem topicPartition,
-            in int index,
-            in int size
-        )
-        {
-            if (size >= array.Length)
-                Array.Resize(ref array, array.Length * 2);
-            Array.Copy(array, index, array, index + 1, size - index);
-            array[index] = topicPartition;
-        }
-
-        private static TItem Remove<TItem>(
-            in TItem[] array,
-            in int index,
-            in int size
-        )
-        {
-            var item = array[index];
-            Array.Copy(array, index + 1, array, index, size - index);
-            return item;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int CompareTopicId(in Topic item, in TopicId key) =>
-            item.TopicId.Value.CompareTo(key.Value)
-        ;
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int CompareTopicName(in Topic item, in TopicName key) =>
-            Math.Sign(string.CompareOrdinal(item.TopicName.Value, key.Value))
-        ;
     }
 }

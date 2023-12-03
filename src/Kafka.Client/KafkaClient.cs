@@ -322,13 +322,13 @@ namespace Kafka.Client
                             p.LeaderIdField,
                             p.LeaderEpochField,
                             p.ReplicaNodesField
-                                .Select(i => new ClusterNodeId(i))
+                                .Select(i => new NodeId(i))
                                 .ToImmutableArray(),
                             p.IsrNodesField
-                                .Select(i => new ClusterNodeId(i))
+                                .Select(i => new NodeId(i))
                                 .ToImmutableArray(),
                             p.OfflineReplicasField
-                                .Select(i => new ClusterNodeId(i))
+                                .Select(i => new NodeId(i))
                                 .ToImmutableArray(),
                             p.ErrorCodeField == 0 ?
                                 Errors.Known.NONE :

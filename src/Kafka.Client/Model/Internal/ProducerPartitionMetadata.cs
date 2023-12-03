@@ -4,7 +4,7 @@ namespace Kafka.Client.Model.Internal
 {
     internal sealed record ProducerPartitionMetadata(
         Partition Partition,
-        ClusterNodeId LeaderId,
+        NodeId LeaderId,
         string Host,
         int Port
     );

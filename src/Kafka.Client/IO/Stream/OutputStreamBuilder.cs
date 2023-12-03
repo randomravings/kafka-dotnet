@@ -6,13 +6,13 @@ using Microsoft.Extensions.Logging;
 namespace Kafka.Client.IO.Stream
 {
     internal class OutputStreamBuilder(
-        ICluster<IClientConnection> connections,
+        ICluster<INodeLink> connections,
         OutputStreamConfig config,
         ILogger logger
     ) :
         IOutputStreamBuilder
     {
-        private readonly ICluster<IClientConnection> _connections = connections;
+        private readonly ICluster<INodeLink> _connections = connections;
         private readonly OutputStreamConfig _config = config;
         private ILogger _logger = logger;
 

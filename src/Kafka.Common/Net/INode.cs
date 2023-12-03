@@ -2,9 +2,9 @@
 
 namespace Kafka.Common.Net
 {
-    public interface IConnection
+    public interface INode
     {
-        ClusterNodeId NodeId { get; }
+        NodeId NodeId { get; }
         IReadOnlyDictionary<ApiKey, ApiVersion> Apis { get; }
         Task Open(
             CancellationToken cancellationToken

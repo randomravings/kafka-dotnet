@@ -15,18 +15,18 @@ using System.Net.Sockets;
 
 namespace Kafka.Client.Net
 {
-    internal sealed class ClientConnection(
+    internal sealed class NodeLink(
         ITransport connection,
         KafkaClientConfig config,
         ILogger logger
     ) :
-        IClientConnection,
+        INodeLink,
         IDisposable
     {
         private const string CLIENT_NAME = "kafka-dotnet";
         private const string CLIENT_VERSION = "0.1.0";
 
-        private readonly SpinningDictionary<int, TaskCompletionSource<byte[]>> _pendingRequests = new(Compare.Int32);
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]>> _pendingRequests = new();
         private readonly BlockingCollection<SendThing> _sendQueue = [];
 
         private CancellationTokenSource _internalCts = new();
@@ -105,24 +105,24 @@ namespace Kafka.Client.Net
         private readonly ILogger _logger = logger;
         private readonly ITransport _transport = connection;
         private int _coorelationIds;
-        private ClusterNodeId _nodeId = -1;
+        private NodeId _nodeId = -1;
 
         private readonly ConcurrentDictionary<ApiKey, ApiVersion> _apiVersions = [];
 
-        ClusterNodeId IConnection.NodeId => _nodeId;
+        NodeId INode.NodeId => _nodeId;
 
-        IReadOnlyDictionary<ApiKey, ApiVersion> IConnection.Apis =>
+        IReadOnlyDictionary<ApiKey, ApiVersion> INode.Apis =>
             _apiVersions
         ;
 
-        async Task IConnection.Open(CancellationToken cancellationToken) =>
+        async Task INode.Open(CancellationToken cancellationToken) =>
             await EnsureConnection(
                 cancellationToken
             )
             .ConfigureAwait(false)
         ;
 
-        async Task IConnection.Close(CancellationToken cancellationToken)
+        async Task INode.Close(CancellationToken cancellationToken)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -138,7 +138,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        async Task<ApiVersionsResponseData> IClientConnection.ApiVersions(
+        async Task<ApiVersionsResponseData> INodeLink.ApiVersions(
             CancellationToken cancellationToken
         ) =>
             await ApiVersions(
@@ -168,7 +168,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<MetadataResponseData> IClientConnection.Metadata(
+        async Task<MetadataResponseData> INodeLink.Metadata(
             CancellationToken cancellationToken
         ) =>
             await Metadata(
@@ -177,7 +177,7 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        async Task<MetadataResponseData> IClientConnection.Metadata(
+        async Task<MetadataResponseData> INodeLink.Metadata(
             MetadataRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -223,7 +223,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<CreateTopicsResponseData> IClientConnection.CreateTopics(
+        async Task<CreateTopicsResponseData> INodeLink.CreateTopics(
             CreateTopicsRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -249,7 +249,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<DeleteTopicsResponseData> IClientConnection.DeleteTopics(
+        async Task<DeleteTopicsResponseData> INodeLink.DeleteTopics(
             DeleteTopicsRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -276,7 +276,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<FindCoordinatorResponseData> IClientConnection.FindCoordinator(
+        async Task<FindCoordinatorResponseData> INodeLink.FindCoordinator(
             FindCoordinatorRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -303,7 +303,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<OffsetFetchResponseData> IClientConnection.OffsetFetch(
+        async Task<OffsetFetchResponseData> INodeLink.OffsetFetch(
             OffsetFetchRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -326,7 +326,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<ListOffsetsResponseData> IClientConnection.ListOffsets(
+        async Task<ListOffsetsResponseData> INodeLink.ListOffsets(
             ListOffsetsRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -354,7 +354,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<InitProducerIdResponseData> IClientConnection.InitProducerId(
+        async Task<InitProducerIdResponseData> INodeLink.InitProducerId(
             InitProducerIdRequestData request,
             CancellationToken cancellationToken
         ) => await Execute(
@@ -374,7 +374,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<ProduceResponseData> IClientConnection.Produce(
+        async Task<ProduceResponseData> INodeLink.Produce(
             ProduceRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -400,7 +400,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task IClientConnection.ProduceNoAck(
+        async Task INodeLink.ProduceNoAck(
             ProduceRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -411,7 +411,7 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        async Task<AddPartitionsToTxnResponseData> IClientConnection.AddPartitionsToTxn(
+        async Task<AddPartitionsToTxnResponseData> INodeLink.AddPartitionsToTxn(
             AddPartitionsToTxnRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -439,7 +439,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<EndTxnResponseData> IClientConnection.EndTxn(
+        async Task<EndTxnResponseData> INodeLink.EndTxn(
             EndTxnRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -462,7 +462,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<HeartbeatResponseData> IClientConnection.Heartbeat(
+        async Task<HeartbeatResponseData> INodeLink.Heartbeat(
             HeartbeatRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -485,7 +485,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<JoinGroupResponseData> IClientConnection.JoinGroup(
+        async Task<JoinGroupResponseData> INodeLink.JoinGroup(
             JoinGroupRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -508,7 +508,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<SyncGroupResponseData> IClientConnection.SyncGroup(
+        async Task<SyncGroupResponseData> INodeLink.SyncGroup(
             SyncGroupRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -531,7 +531,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<LeaveGroupResponseData> IClientConnection.LeaveGroup(
+        async Task<LeaveGroupResponseData> INodeLink.LeaveGroup(
             LeaveGroupRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -554,7 +554,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<OffsetCommitResponseData> IClientConnection.OffsetCommit(
+        async Task<OffsetCommitResponseData> INodeLink.OffsetCommit(
             OffsetCommitRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -582,7 +582,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<FetchResponseData> IClientConnection.Fetch(
+        async Task<FetchResponseData> INodeLink.Fetch(
             FetchRequestData request,
             CancellationToken cancellationToken
         ) =>
@@ -651,7 +651,11 @@ namespace Kafka.Client.Net
                     taskCompletionSource
                 );
                 _sendQueue.Add(sendThing, cancellationToken);
-                var responseBytes = await taskCompletionSource.Task.ConfigureAwait(false);
+                var responseBytes = await taskCompletionSource
+                    .Task
+                    .WaitAsync(cancellationToken)
+                    .ConfigureAwait(false)
+                ;
                 (offset, var _) = responseDecoder.ReadHeader(responseBytes, 0);
                 (_, var response) = responseDecoder.ReadMessage(responseBytes, offset);
                 var (retriable, errors) = errorDelegate(response);
@@ -698,7 +702,11 @@ namespace Kafka.Client.Net
                     taskCompletionSource
                 );
                 _sendQueue.Add(sendThing, cancellationToken);
-                _ = await taskCompletionSource.Task.ConfigureAwait(false);
+                _ = await taskCompletionSource
+                    .Task
+                    .WaitAsync(cancellationToken)
+                    .ConfigureAwait(false)
+                ;
                 if (tries++ <= _retries)
                     cancellationToken.WaitHandle.WaitOne(_retryBackOffMs);
                 else
@@ -839,7 +847,7 @@ namespace Kafka.Client.Net
                         cancellationToken
                     ).ConfigureAwait(false);
                     if (!sendThing.OneWay)
-                        _pendingRequests.Add(sendThing.CorrelationId, sendThing.TaskCompletionSource);
+                        _pendingRequests.TryAdd(sendThing.CorrelationId, sendThing.TaskCompletionSource);
                     else
                         sendThing.TaskCompletionSource.SetResult([]);
                 }
@@ -984,6 +992,7 @@ namespace Kafka.Client.Net
         {
             cancellationToken.ThrowIfCancellationRequested();
             _internalCts = new();
+            await Task.Yield();
             _senderThread = Task.Run(async () =>
                 await SendLoop(_internalCts.Token).ConfigureAwait(false),
                 CancellationToken.None
@@ -993,7 +1002,6 @@ namespace Kafka.Client.Net
                 await ReceiveLoop(_internalCts.Token).ConfigureAwait(false),
                 CancellationToken.None
             );
-            await Task.Yield();
         }
 
         private static void SetCodecVersion(

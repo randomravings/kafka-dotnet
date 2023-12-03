@@ -19,7 +19,7 @@ namespace Kafka.Client.IO.Stream
     internal sealed class OutputChannel :
         IDisposable
     {
-        private readonly ClusterNodeId _nodeId;
+        private readonly NodeId _nodeId;
         private readonly int _maxRequestSize;
         private readonly long _lingerMs;
         private readonly Task _recordsBuilderTask;
@@ -33,15 +33,15 @@ namespace Kafka.Client.IO.Stream
         private readonly short _acks;
         private readonly string? _transactionalId;
         private readonly ILogger _logger;
-        private readonly IClientConnection _protocol;
+        private readonly INodeLink _protocol;
         private readonly SortedList<TopicPartition, int> _topicPartitionStates = new(TopicPartitionCompare.Instance);
         private readonly Func<ProduceBatch, CancellationToken, Task> _sendDelegate;
 
         public OutputChannel(
-            ClusterNodeId nodeId,
+            NodeId nodeId,
             long producerId,
             short producerEpoch,
-            IClientConnection protocol,
+            INodeLink protocol,
             OutputStreamConfig producerConfig,
             ILogger logger
         )

@@ -105,7 +105,7 @@ namespace Kafka.Cli.Cmd
                     opts.Topic,
                     opts.PartitionCount,
                     opts.ReplicationFactor,
-                    ImmutableDictionary<Partition, IReadOnlySet<ClusterNodeId>>.Empty,
+                    ImmutableDictionary<Partition, IReadOnlySet<NodeId>>.Empty,
                     ImmutableDictionary<string, string?>.Empty
                 );
                 var result = await client.Topics.Create(

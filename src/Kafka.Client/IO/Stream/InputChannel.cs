@@ -26,7 +26,7 @@ namespace Kafka.Client.IO.Stream
         private readonly ILogger _logger = logger;
 
         public async Task Run(
-            IClientConnection connection,
+            INodeLink connection,
             TopicPartitionMap<Offset> topicPartitionOffsets,
             ConcurrentQueue<FetchResult> queue,
             ManualResetEventSlim resetEvent,
