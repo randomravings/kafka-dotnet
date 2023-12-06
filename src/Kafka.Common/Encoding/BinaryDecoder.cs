@@ -277,7 +277,7 @@ namespace Kafka.Common.Encoding
                 (i, version) = ReadInt16(buffer, i);
                 (i, var typeFlagsValue) = ReadInt16(buffer, i);
                 typeFlags = (ControlType)typeFlagsValue;
-                key = buffer.AsMemory(index, keyLength);
+                key = buffer.AsMemory(i, keyLength);
             }
             (i, var valueLength) = ReadVarInt32(buffer, i);
             if (valueLength >= 0)
@@ -323,7 +323,7 @@ namespace Kafka.Common.Encoding
             (i, var keyLength) = ReadVarInt32(buffer, i);
             if (keyLength >= 0)
             {
-                key = buffer.AsMemory(index, keyLength);
+                key = buffer.AsMemory(i, keyLength);
                 i += keyLength;
             }
             (i, var valueLength) = ReadVarInt32(buffer, i);

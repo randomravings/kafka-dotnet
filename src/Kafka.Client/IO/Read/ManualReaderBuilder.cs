@@ -44,14 +44,6 @@ namespace Kafka.Client.IO.Read
             return this;
         }
 
-        IManualReader IManualReaderBuilder.Build() =>
-            new ManualReader(
-                _stream,
-                _topicPartitions,
-                _logger
-            )
-        ;
-
         IManualReaderBuilder<TKey> IManualReaderBuilder.WithKey<TKey>(
             IDeserializer<TKey> keyDeserializer
         ) =>

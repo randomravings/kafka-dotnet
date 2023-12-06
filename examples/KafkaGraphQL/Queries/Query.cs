@@ -1,4 +1,5 @@
-﻿using Kafka.Client;
+﻿using GreenDonut;
+using Kafka.Client;
 using Kafka.Client.IO;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
@@ -35,7 +36,12 @@ namespace KafkaGraphQL.Queries
         }
 
         [GraphQLDescription("Gets a list of topic and partition descriptions.")]
-        public async ValueTask<IQueryable<Record>> ReadFromTopic(
+        public async ValueTask<IQueryable<Record>> ReadFromTopics(
+
+            [GraphQLType<ListType<StringType>>]
+            [GraphQLDescription("List of topics to get, omit for all topics.")]
+            TopicName[] topicNames,
+
             [Service]
             IApplicationReader<string, string> streamReader,
             int maxCount,
@@ -44,11 +50,22 @@ namespace KafkaGraphQL.Queries
             CancellationToken cancellationToken
         )
         {
-            var results = new List<KeyValuePair<string, string>>();
+            var results = new List<Record>();
+            if (topicNames.Length == 0)
+                return results.AsQueryable();
+            if (await streamReader.SetTopics(topicNames))
+            {
+                var result = await streamReader.Read(
+                    cancellationToken
+                );
+                if (result == null)
+                    return results.AsQueryable();
+                results.Add(ToRecord(result));
+            }
             var timeout = DateTimeOffset.UtcNow.AddMilliseconds(timeoutMs);
             try
             {
-                while (true)
+                while (results.Count < maxCount)
                 {
                     var waitTime = timeout - DateTimeOffset.UtcNow;
                     if (waitTime <= TimeSpan.Zero)
@@ -59,13 +76,22 @@ namespace KafkaGraphQL.Queries
                     );
                     if (result == null)
                         break;
-                    results.Add(new(result.Key, result.Value));
-                    if (results.Count >= maxCount)
-                        break;
+                    results.Add(ToRecord(result));
                 }
             }
             catch (OperationCanceledException) { }
-            return results.Select(r => new Record { Key = r.Key, Value = r.Value }).AsQueryable();
+            return results.AsQueryable();
         }
+        private static Record ToRecord(ReadRecord<string, string> readRecord) =>
+            new()
+            {
+                TopicId = readRecord.TopicPartition.Topic.TopicId,
+                TopicName = readRecord.TopicPartition.Topic.TopicName,
+                Partition = readRecord.TopicPartition.Partition,
+                Offset = readRecord.Offset,
+                Key = readRecord.Key,
+                Value = readRecord.Value
+            }
+        ;
     }
 }

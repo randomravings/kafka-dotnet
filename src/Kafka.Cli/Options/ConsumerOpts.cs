@@ -5,7 +5,7 @@ namespace Kafka.Cli.Options
     public sealed class ConsumerOpts
         : Opts
     {
-        [Option("topic", Required = true)]
+        [Option("topics", Required = true)]
         public IEnumerable<string> Topics { get; set; } = Array.Empty<string>();
         [Option("group-id", SetName = "group-assign")]
         public string GroupId { get; set; } = "";

@@ -44,7 +44,6 @@ namespace Kafka.Client.Extensions.DependencyInjection
 
         public static IServiceCollection AddKafkaStreamWriter<TKey, TValue>(
             this IServiceCollection collection,
-            string topic,
             ISerializer<TKey> keySerializer,
             ISerializer<TValue> valueSerializer
         )
@@ -70,7 +69,6 @@ namespace Kafka.Client.Extensions.DependencyInjection
 
         public static IServiceCollection AddKafkaStreamReader<TKey, TValue>(
             this IServiceCollection collection,
-            string topic,
             IDeserializer<TKey> keyDeserializer,
             IDeserializer<TValue> valueDeserializer
         )
@@ -86,7 +84,6 @@ namespace Kafka.Client.Extensions.DependencyInjection
                 ;
                 return stream
                     .CreateReader()
-                    .WithTopic(topic)
                     .WithLogger(logger)
                     .WithKey(keyDeserializer)
                     .WithValue(valueDeserializer)
@@ -110,22 +107,22 @@ namespace Kafka.Client.Extensions.DependencyInjection
                     ApplyProperty(config, property, item.Value);
             }
 
-            var clientSection = section.GetSection("Client");
+            var clientSection = section.GetSection(nameof(KafkaClientConfig.Client));
             foreach (var item in clientSection.GetChildren())
             {
                 if (properties.TryGetValue(item.Key, out var property))
                     ApplyProperty(config.Client, property, item.Value);
             }
 
-            var producerSection = section.GetSection("WriteStream");
-            foreach (var item in producerSection.GetChildren())
+            var writeStreamSection = section.GetSection(nameof(KafkaClientConfig.WriteStream));
+            foreach (var item in writeStreamSection.GetChildren())
             {
                 if (properties.TryGetValue(item.Key, out var property))
                     ApplyProperty(config.WriteStream, property, item.Value);
             }
 
-            var consumerSection = section.GetSection("ReadStream");
-            foreach (var item in consumerSection.GetChildren())
+            var readStreamSection = section.GetSection(nameof(KafkaClientConfig.ReadStream));
+            foreach (var item in readStreamSection.GetChildren())
             {
                 if (properties.TryGetValue(item.Key, out var property))
                     ApplyProperty(config.ReadStream, property, item.Value);

@@ -49,5 +49,5 @@ The produce command only accepts comma separated key value pairs eg. "some_key,s
 Consuming from a topic:
 
 ```bash
-./kafka-cli.exe consumer --bootstrap-server localhost:9092 --topic test --group-id test-cg
+./kafka-cli.exe consumer --bootstrap-server localhost:9092 --topics test --group-id test-cg
 ```

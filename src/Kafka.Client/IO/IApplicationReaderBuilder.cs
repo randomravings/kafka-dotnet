@@ -26,7 +26,6 @@ namespace Kafka.Client.IO
         /// <returns></returns>
         IApplicationReaderBuilder WithTopics(IEnumerable<TopicName> topics);
         IApplicationReaderBuilder WithLogger(ILogger logger);
-        IApplicationReader Build();
         IApplicationReaderBuilder<TKey> WithKey<TKey>(
             IDeserializer<TKey> keyDeserializer
         );

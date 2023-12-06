@@ -1,43 +1,17 @@
-﻿using Kafka.Client.Model;
-using Kafka.Common.Model;
+﻿using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
+using System.Collections.Immutable;
 
 namespace Kafka.Client.IO.Read
 {
-    internal class ApplicationReader :
-        Reader,
-        IApplicationReader,
-        IDisposable
-    {
-        private protected readonly IApplicationReadStream _applicationStream;
-        private protected readonly IReadOnlySet<TopicName> _topics;
-
-        internal ApplicationReader(
-            IApplicationReadStream stream,
-            IReadOnlySet<TopicName> topics,
-            ILogger logger
-        ) : base(stream, logger)
-        {
-            _applicationStream = stream;
-            _topics = topics;
-        }
-
-        protected override async ValueTask Initialize(CancellationToken cancellationToken)
-        {
-            await _applicationStream.AddReader(_topics, cancellationToken).ConfigureAwait(false);
-            _initialized = true;
-        }
-    }
-
-
-
     internal class ApplicationReader<TKey, TValue> :
-        ApplicationReader,
+        Reader<TKey, TValue>,
         IApplicationReader<TKey, TValue>
     {
-        private readonly IDeserializer<TKey> _keyDeserializer;
-        private readonly IDeserializer<TValue> _valueDeserializer;
+        private protected readonly IApplicationReadStream _applicationStream;
+        private protected readonly ISet<TopicName> _topics = new SortedSet<TopicName>(TopicNameCompare.Instance);
 
         internal ApplicationReader(
             IApplicationReadStream stream,
@@ -45,35 +19,49 @@ namespace Kafka.Client.IO.Read
             IDeserializer<TKey> keyDeserializer,
             IDeserializer<TValue> valueDeserializer,
             ILogger logger
-        ) : base(stream, topics, logger)
+        ) : base(stream, keyDeserializer, valueDeserializer, logger)
         {
-            _keyDeserializer = keyDeserializer;
-            _valueDeserializer = valueDeserializer;
+            _applicationStream = stream;
+            foreach (var topic in topics)
+                _topics.Add(topic);
         }
 
-        async ValueTask<ReadRecord<TKey, TValue>> IReader<TKey, TValue>.Read(
-            CancellationToken cancellationToken
-        ) =>
-            await Read(_keyDeserializer, _valueDeserializer, cancellationToken)
-                .ConfigureAwait(false)
-        ;
-
-        async ValueTask<ReadRecord<TKey, TValue>> IReader<TKey, TValue>.Read(
-            TimeSpan timeout,
-            CancellationToken cancellationToken
-        )
+        ValueTask<bool> IApplicationReader<TKey, TValue>.SetTopics(IEnumerable<TopicName> topics)
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(
+            if (_topics.SetEquals(topics))
+                return ValueTask.FromResult(false);
+            _topics.Clear();
+            foreach (var topic in topics)
+                _topics.Add(topic);
+            _initialized = false;
+            return ValueTask.FromResult(true);
+        }
+
+        ValueTask<bool> IApplicationReader<TKey, TValue>.AddTopics(IEnumerable<TopicName> topics)
+        {
+            var added = false;
+            foreach (var topic in topics)
+                added |= _topics.Add(topic);
+            _initialized = !added;
+            return ValueTask.FromResult(true);
+        }
+
+        ValueTask<bool> IApplicationReader<TKey, TValue>.RemoveTopics(IEnumerable<TopicName> topics)
+        {
+            var removed = false;
+            foreach (var topic in topics)
+                removed |= _topics.Remove(topic);
+            _initialized = !removed;
+            return ValueTask.FromResult(true);
+        }
+
+        protected override async ValueTask Initialize(CancellationToken cancellationToken)
+        {
+            await _applicationStream.AddReader(
+                _topics.ToImmutableSortedSet(TopicNameCompare.Instance),
                 cancellationToken
-            );
-            cts.CancelAfter(timeout);
-            return await Read(_keyDeserializer, _valueDeserializer, cts.Token)
-                .ConfigureAwait(false)
-            ;
+            ).ConfigureAwait(false);
+            _initialized = true;
         }
-
-        Task IReader<TKey, TValue>.Close(CancellationToken cancellationToken) =>
-            Task.CompletedTask
-        ;
     }
 }

@@ -2,8 +2,8 @@
 
 namespace Kafka.Client.IO
 {
-    public interface IManualReader :
-        IReader
+    public interface IManualReader<TKey, TValue> :
+        IReader<TKey, TValue>
     {
         ValueTask Assign(
             TopicPartition topicPartition
@@ -50,10 +50,5 @@ namespace Kafka.Client.IO
         ValueTask SeekEnd(
             IReadOnlyList<TopicPartition> topicPartitions
         );
-    }
-
-    public interface IManualReader<TKey, TValue> :
-        IReader<TKey, TValue>
-    {
     }
 }

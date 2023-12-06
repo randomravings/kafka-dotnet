@@ -348,36 +348,22 @@ namespace Kafka.Client.IO.Read
         {
             if (topicPartitionTimestamps.Length == 0)
                 return ListOffsetsRequestData.Empty;
-            var listOffsetsTopicsBuilder = ImmutableArray.CreateBuilder<ListOffsetsRequestData.ListOffsetsTopic>();
-            var listOffsetsPartitionsBuilder = ImmutableArray.CreateBuilder<ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition>();
-            var index = 0;
-            var length = topicPartitionTimestamps.Length;
-            var currentTopic = topicPartitionTimestamps[0].Key.Topic;
-            while (index < length)
-            {
-                (var (topic, partition), var timestamp) = topicPartitionTimestamps[index];
-                var listOffsetsPartition = new ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition(
-                    partition,
-                    -1,
-                    timestamp,
-                    1,
-                    []
-                );
-                listOffsetsPartitionsBuilder.Add(listOffsetsPartition);
-                index++;
-                if (currentTopic != topic || index == length)
-                {
-                    var partitions = listOffsetsPartitionsBuilder.DrainToImmutable();
-                    var fetchTopic = new ListOffsetsRequestData.ListOffsetsTopic(
-                        currentTopic.TopicName,
-                        partitions,
+            var listOffsetsTopics = topicPartitionTimestamps
+                .GroupBy(g => g.Key.Topic.TopicName)
+                .Select(t => new ListOffsetsRequestData.ListOffsetsTopic(
+                    t.Key,
+                    t.Select(p => new ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition(
+                        p.Key.Partition.Value,
+                        -1,
+                        p.Value,
+                        1,
                         []
-                    );
-                    listOffsetsTopicsBuilder.Add(fetchTopic);
-                    currentTopic = topic;
-                }
-            }
-            var listOffsetsTopics = listOffsetsTopicsBuilder.ToImmutable();
+                    ))
+                    .ToImmutableArray(),
+                    []
+                ))
+                .ToImmutableArray()
+            ;
             return new ListOffsetsRequestData(
                 -1,
                 (sbyte)isolationLevel,

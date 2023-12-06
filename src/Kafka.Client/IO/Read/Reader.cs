@@ -5,35 +5,39 @@ using Microsoft.Extensions.Logging;
 
 namespace Kafka.Client.IO.Read
 {
-    internal abstract class Reader :
-        IReader,
+    internal abstract class Reader<TKey, TValue> :
+        IReader<TKey, TValue>,
         IDisposable
     {
-        private protected readonly IReadStream _stream;
+        private readonly IReadStream _stream;
+        private readonly IDeserializer<TKey> _keyDeserializer;
+        private readonly IDeserializer<TValue> _valueDeserializer;
         private protected readonly ILogger _logger;
-        private protected bool _initialized;
-
-
         private ReadRecordsEnumerator _enumerator = ReadRecordsEnumerator.Empty;
         private bool _disposed;
+        private protected bool _initialized;
 
         internal Reader(
             IReadStream stream,
+            IDeserializer<TKey> keyDeserializer,
+            IDeserializer<TValue> valueDeserializer,
             ILogger logger
         )
         {
             _stream = stream;
             _logger = logger;
+            _keyDeserializer = keyDeserializer;
+            _valueDeserializer = valueDeserializer;
         }
 
-        async ValueTask<ReadRecord> IReader.Read(
+        async ValueTask<ReadRecord<TKey, TValue>> IReader<TKey, TValue>.Read(
             CancellationToken cancellationToken
         ) =>
             await Read(cancellationToken)
-                .ConfigureAwait(false)
-        ;
+            .ConfigureAwait(false)
+            ;
 
-        async ValueTask<ReadRecord> IReader.Read(
+        async ValueTask<ReadRecord<TKey, TValue>> IReader<TKey, TValue>.Read(
             TimeSpan timeout,
             CancellationToken cancellationToken
         )
@@ -47,24 +51,11 @@ namespace Kafka.Client.IO.Read
             ;
         }
 
-        Task IReader.Close(
+        Task IReader<TKey, TValue>.Close(
             CancellationToken cancellationToken
         ) => Task.CompletedTask;
 
-        private async ValueTask<ReadRecord> Read(
-            CancellationToken cancellationToken
-        )
-        {
-            var record = await NextRecord(
-                cancellationToken
-            ).ConfigureAwait(false);
-            _stream.UpdateOffsets(record.TopicPartition, record.Offset + 1);
-            return record;
-        }
-
-        protected async ValueTask<ReadRecord<TKey, TValue>> Read<TKey, TValue>(
-            IDeserializer<TKey> keyDeserializer,
-            IDeserializer<TValue> valueDeserializer,
+        private async ValueTask<ReadRecord<TKey, TValue>> Read(
             CancellationToken cancellationToken
         )
         {
@@ -73,8 +64,8 @@ namespace Kafka.Client.IO.Read
             ).ConfigureAwait(false);
             if (record.Error.Code != 0)
                 throw new ApiException(record.Error);
-            var key = keyDeserializer.Read(record.Key);
-            var value = valueDeserializer.Read(record.Value);
+            var key = _keyDeserializer.Read(record.Key);
+            var value = _valueDeserializer.Read(record.Value);
             _stream.UpdateOffsets(record.TopicPartition, record.Offset + 1);
             return new(
                 record.TopicPartition,
@@ -86,11 +77,11 @@ namespace Kafka.Client.IO.Read
             );
         }
 
-        protected async ValueTask<ReadRecord> NextRecord(
+        private async ValueTask<ReadRecord> NextRecord(
             CancellationToken cancellationToken
         )
         {
-            if(!_initialized)
+            if (!_initialized)
                 await Initialize(
                     cancellationToken
                 ).ConfigureAwait(false);
@@ -121,53 +112,6 @@ namespace Kafka.Client.IO.Read
         {
             Dispose(disposing: true);
             GC.SuppressFinalize(this);
-        }
-    }
-
-
-
-    internal abstract class Reader<TKey, TValue> :
-        Reader,
-        IReader<TKey, TValue>
-    {
-        private readonly IDeserializer<TKey> _keyDeserializer;
-        private readonly IDeserializer<TValue> _valueDeserializer;
-
-        internal Reader(
-            IReadStream stream,
-            IDeserializer<TKey> keyDeserializer,
-            IDeserializer<TValue> valueDeserializer,
-            ILogger logger
-        ) : base(stream, logger)
-        {
-            _keyDeserializer = keyDeserializer;
-            _valueDeserializer = valueDeserializer;
-        }
-
-        async ValueTask<ReadRecord<TKey, TValue>> IReader<TKey, TValue>.Read(
-            CancellationToken cancellationToken
-        ) =>
-            await Read(_keyDeserializer, _valueDeserializer, cancellationToken)
-                .ConfigureAwait(false)
-        ;
-
-        async ValueTask<ReadRecord<TKey, TValue>> IReader<TKey, TValue>.Read(
-            TimeSpan timeout,
-            CancellationToken cancellationToken
-        )
-        {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(
-                cancellationToken
-            );
-            cts.CancelAfter(timeout);
-            return await Read(_keyDeserializer, _valueDeserializer, cts.Token)
-                .ConfigureAwait(false)
-            ;
-        }
-
-        Task IReader<TKey, TValue>.Close(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -61,14 +61,6 @@ namespace Kafka.Client.IO.Read
             return this;
         }
 
-        IApplicationReader IApplicationReaderBuilder.Build() =>
-            new ApplicationReader(
-                _stream,
-                _topics,
-                _logger
-            )
-        ;
-
         IApplicationReaderBuilder<TKey> IApplicationReaderBuilder.WithKey<TKey>(
             IDeserializer<TKey> keyDeserializer
         ) =>

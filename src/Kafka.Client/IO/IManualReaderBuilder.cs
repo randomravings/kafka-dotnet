@@ -8,7 +8,6 @@ namespace Kafka.Client.IO
     {
         IManualReaderBuilder WithTopicPartitions(params TopicPartition[] topicPartitions);
         IManualReaderBuilder WithLogger(ILogger logger);
-        IManualReader Build();
         IManualReaderBuilder<TKey> WithKey<TKey>(
             IDeserializer<TKey> keyDeserializer
         );

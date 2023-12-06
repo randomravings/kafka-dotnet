@@ -142,7 +142,7 @@ namespace Kafka.Client.IO.Read
             );
 
             var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
-            var topicPartitions = await GetTopicPartitionLeaders(
+             var topicPartitions = await GetTopicPartitionLeaders(
                 coordinator,
                 _assignments,
                 cancellationToken
