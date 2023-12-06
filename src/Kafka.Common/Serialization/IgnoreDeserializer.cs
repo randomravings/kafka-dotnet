@@ -2,14 +2,20 @@
 
 namespace Kafka.Common.Serialization
 {
-    public sealed class IgnoreDeserializer :
-        IDeserializer<Ignore>
+    public static class IgnoreSerde
     {
-        private static readonly OptionalValue<Ignore> RESULT = new(false, Ignore.Value);
-        private IgnoreDeserializer() { }
-        public static IgnoreDeserializer Instance { get; } = new();
-        OptionalValue<Ignore> IDeserializer<Ignore>.Read(in ReadOnlyMemory<byte>? buffer) =>
-            RESULT
+        public static IDeserializer<Ignore> Deserializer =>
+            IgnoreDeserializer.Instance
         ;
+
+        private sealed class IgnoreDeserializer :
+            IDeserializer<Ignore>
+        {
+            private IgnoreDeserializer() { }
+            public static IgnoreDeserializer Instance { get; } = new();
+            Ignore IDeserializer<Ignore>.Read(in ReadOnlyMemory<byte>? buffer) =>
+                Ignore.Value
+            ;
+        }
     }
 }

@@ -10,10 +10,10 @@ namespace Kafka.Client.Config.Extension
         public static ClientConfig Copy([NotNull] this ClientConfig clientConfig) =>
             CopyInstance(clientConfig)
         ;
-        public static InputStreamConfig Copy([NotNull] this InputStreamConfig inputStreamConfig) =>
+        public static ReadStreamConfig Copy([NotNull] this ReadStreamConfig inputStreamConfig) =>
             CopyInstance(inputStreamConfig)
         ;
-        public static OutputStreamConfig Copy([NotNull] this OutputStreamConfig outputStreamConfig) =>
+        public static WriteStreamConfig Copy([NotNull] this WriteStreamConfig outputStreamConfig) =>
             CopyInstance(outputStreamConfig)
         ;
         private static T CopyInstance<T>(T instance)

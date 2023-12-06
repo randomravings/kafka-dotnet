@@ -6,6 +6,7 @@ using Kafka.Client.Config;
 using Kafka.Client.IO;
 using Kafka.Common.Model;
 using Kafka.Common.Serialization;
+using Kafka.Common.Serialization.Nullable;
 
 namespace Kafka.Cli.Cmd
 {
@@ -52,8 +53,8 @@ namespace Kafka.Cli.Cmd
 
             var writer = outputStream
                 .CreateWriter()
-                .WithKey(StringSerializer.Instance)
-                .WithValue(StringSerializer.Instance)
+                .WithKey(StringSerde.Serializer)
+                .WithValue(StringSerde.Serializer)
                 .Build()
             ;
 
@@ -228,7 +229,7 @@ namespace Kafka.Cli.Cmd
                     ClientId = "kafka-cli.net",
                     BootstrapServers = opts.BootstrapServer
                 },
-                Producer = new()
+                WriteStream = new()
                 {
                     LingerMs = opts.LingerMs,
                     MaxInFlightRequestsPerConnection = opts.MaxInFlightRequestsPerConnection,

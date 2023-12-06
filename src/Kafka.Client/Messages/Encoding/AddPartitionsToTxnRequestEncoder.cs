@@ -4,8 +4,9 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using AddPartitionsToTxnTransaction = Kafka.Client.Messages.AddPartitionsToTxnRequestData.AddPartitionsToTxnTransaction;
+using System.Diagnostics.CodeAnalysis;
 using AddPartitionsToTxnTopic = Kafka.Client.Messages.AddPartitionsToTxnRequestData.AddPartitionsToTxnTopic;
+using AddPartitionsToTxnTransaction = Kafka.Client.Messages.AddPartitionsToTxnRequestData.AddPartitionsToTxnTransaction;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -22,14 +23,14 @@ namespace Kafka.Client.Messages.Encoding
                 WriteV0
             )
         { }
-        protected override EncodeDelegate<RequestHeaderData> GetHeaderEncoder(short apiVersion)
+        protected override EncodeValue<RequestHeaderData> GetHeaderEncoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return RequestHeaderEncoder.WriteV2;
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeDelegate<AddPartitionsToTxnRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<AddPartitionsToTxnRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
@@ -40,170 +41,185 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0(byte[] buffer, int index, AddPartitionsToTxnRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.V3AndBelowTransactionalIdField);
-            index = BinaryEncoder.WriteInt64(buffer, index, message.V3AndBelowProducerIdField);
-            index = BinaryEncoder.WriteInt16(buffer, index, message.V3AndBelowProducerEpochField);
-            index = BinaryEncoder.WriteArray<AddPartitionsToTxnTopic>(buffer, index, message.V3AndBelowTopicsField, AddPartitionsToTxnTopicEncoder.WriteV0);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.V3AndBelowTransactionalIdField);
+            i = BinaryEncoder.WriteInt64(buffer, i, message.V3AndBelowProducerIdField);
+            i = BinaryEncoder.WriteInt16(buffer, i, message.V3AndBelowProducerEpochField);
+            i = BinaryEncoder.WriteArray<AddPartitionsToTxnTopic>(buffer, i, message.V3AndBelowTopicsField, AddPartitionsToTxnTopicEncoder.WriteV0);
+            return i;
         }
-        private static int WriteV1(byte[] buffer, int index, AddPartitionsToTxnRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.V3AndBelowTransactionalIdField);
-            index = BinaryEncoder.WriteInt64(buffer, index, message.V3AndBelowProducerIdField);
-            index = BinaryEncoder.WriteInt16(buffer, index, message.V3AndBelowProducerEpochField);
-            index = BinaryEncoder.WriteArray<AddPartitionsToTxnTopic>(buffer, index, message.V3AndBelowTopicsField, AddPartitionsToTxnTopicEncoder.WriteV1);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.V3AndBelowTransactionalIdField);
+            i = BinaryEncoder.WriteInt64(buffer, i, message.V3AndBelowProducerIdField);
+            i = BinaryEncoder.WriteInt16(buffer, i, message.V3AndBelowProducerEpochField);
+            i = BinaryEncoder.WriteArray<AddPartitionsToTxnTopic>(buffer, i, message.V3AndBelowTopicsField, AddPartitionsToTxnTopicEncoder.WriteV1);
+            return i;
         }
-        private static int WriteV2(byte[] buffer, int index, AddPartitionsToTxnRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.V3AndBelowTransactionalIdField);
-            index = BinaryEncoder.WriteInt64(buffer, index, message.V3AndBelowProducerIdField);
-            index = BinaryEncoder.WriteInt16(buffer, index, message.V3AndBelowProducerEpochField);
-            index = BinaryEncoder.WriteArray<AddPartitionsToTxnTopic>(buffer, index, message.V3AndBelowTopicsField, AddPartitionsToTxnTopicEncoder.WriteV2);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.V3AndBelowTransactionalIdField);
+            i = BinaryEncoder.WriteInt64(buffer, i, message.V3AndBelowProducerIdField);
+            i = BinaryEncoder.WriteInt16(buffer, i, message.V3AndBelowProducerEpochField);
+            i = BinaryEncoder.WriteArray<AddPartitionsToTxnTopic>(buffer, i, message.V3AndBelowTopicsField, AddPartitionsToTxnTopicEncoder.WriteV2);
+            return i;
         }
-        private static int WriteV3(byte[] buffer, int index, AddPartitionsToTxnRequestData message)
+        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnRequestData message)
         {
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.V3AndBelowTransactionalIdField);
-            index = BinaryEncoder.WriteInt64(buffer, index, message.V3AndBelowProducerIdField);
-            index = BinaryEncoder.WriteInt16(buffer, index, message.V3AndBelowProducerEpochField);
-            index = BinaryEncoder.WriteCompactArray<AddPartitionsToTxnTopic>(buffer, index, message.V3AndBelowTopicsField, AddPartitionsToTxnTopicEncoder.WriteV3);
+            var i = index;
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.V3AndBelowTransactionalIdField);
+            i = BinaryEncoder.WriteInt64(buffer, i, message.V3AndBelowProducerIdField);
+            i = BinaryEncoder.WriteInt16(buffer, i, message.V3AndBelowProducerEpochField);
+            i = BinaryEncoder.WriteCompactArray<AddPartitionsToTxnTopic>(buffer, i, message.V3AndBelowTopicsField, AddPartitionsToTxnTopicEncoder.WriteV3);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV4(byte[] buffer, int index, AddPartitionsToTxnRequestData message)
+        private static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<AddPartitionsToTxnTransaction>(buffer, index, message.TransactionsField, AddPartitionsToTxnTransactionEncoder.WriteV4);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<AddPartitionsToTxnTransaction>(buffer, i, message.TransactionsField, AddPartitionsToTxnTransactionEncoder.WriteV4);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class AddPartitionsToTxnTopicEncoder
         {
-            public static int WriteV0(byte[] buffer, int index, AddPartitionsToTxnTopic message)
+            public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteArray<int>(buffer, index, message.PartitionsField, BinaryEncoder.WriteInt32);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteArray<int>(buffer, i, message.PartitionsField, BinaryEncoder.WriteInt32);
+                return i;
             }
-            public static int WriteV1(byte[] buffer, int index, AddPartitionsToTxnTopic message)
+            public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteArray<int>(buffer, index, message.PartitionsField, BinaryEncoder.WriteInt32);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteArray<int>(buffer, i, message.PartitionsField, BinaryEncoder.WriteInt32);
+                return i;
             }
-            public static int WriteV2(byte[] buffer, int index, AddPartitionsToTxnTopic message)
+            public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteArray<int>(buffer, index, message.PartitionsField, BinaryEncoder.WriteInt32);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteArray<int>(buffer, i, message.PartitionsField, BinaryEncoder.WriteInt32);
+                return i;
             }
-            public static int WriteV3(byte[] buffer, int index, AddPartitionsToTxnTopic message)
+            public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTopic message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, BinaryEncoder.WriteInt32);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteCompactArray<int>(buffer, i, message.PartitionsField, BinaryEncoder.WriteInt32);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV4(byte[] buffer, int index, AddPartitionsToTxnTopic message)
+            public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTopic message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteCompactArray<int>(buffer, index, message.PartitionsField, BinaryEncoder.WriteInt32);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteCompactArray<int>(buffer, i, message.PartitionsField, BinaryEncoder.WriteInt32);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class AddPartitionsToTxnTransactionEncoder
         {
-            public static int WriteV0(byte[] buffer, int index, AddPartitionsToTxnTransaction message)
+            public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTransaction message)
             {
-                return index;
+                var i = index;
+                return i;
             }
-            public static int WriteV1(byte[] buffer, int index, AddPartitionsToTxnTransaction message)
+            public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTransaction message)
             {
-                return index;
+                var i = index;
+                return i;
             }
-            public static int WriteV2(byte[] buffer, int index, AddPartitionsToTxnTransaction message)
+            public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTransaction message)
             {
-                return index;
+                var i = index;
+                return i;
             }
-            public static int WriteV3(byte[] buffer, int index, AddPartitionsToTxnTransaction message)
+            public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTransaction message)
             {
+                var i = index;
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV4(byte[] buffer, int index, AddPartitionsToTxnTransaction message)
+            public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in AddPartitionsToTxnTransaction message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.TransactionalIdField);
-                index = BinaryEncoder.WriteInt64(buffer, index, message.ProducerIdField);
-                index = BinaryEncoder.WriteInt16(buffer, index, message.ProducerEpochField);
-                index = BinaryEncoder.WriteBoolean(buffer, index, message.VerifyOnlyField);
-                index = BinaryEncoder.WriteCompactArray<AddPartitionsToTxnTopic>(buffer, index, message.TopicsField, AddPartitionsToTxnTopicEncoder.WriteV4);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.TransactionalIdField);
+                i = BinaryEncoder.WriteInt64(buffer, i, message.ProducerIdField);
+                i = BinaryEncoder.WriteInt16(buffer, i, message.ProducerEpochField);
+                i = BinaryEncoder.WriteBoolean(buffer, i, message.VerifyOnlyField);
+                i = BinaryEncoder.WriteCompactArray<AddPartitionsToTxnTopic>(buffer, i, message.TopicsField, AddPartitionsToTxnTopicEncoder.WriteV4);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
         }
     }

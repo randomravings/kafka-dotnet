@@ -12,6 +12,7 @@ namespace Kafka.Common.Net.Transport
         private readonly DnsEndPoint _endPoint;
         private readonly Socket _socket;
         private readonly ILogger _logger;
+        private bool _disposed;
 
         protected TcpTransport(
             string host,
@@ -27,13 +28,13 @@ namespace Kafka.Common.Net.Transport
             _logger = logger;
         }
 
-        string ITransport.Host => _endPoint.Host;
+        public string Host => _endPoint.Host;
 
-        int ITransport.Port => _endPoint.Port;
+        public int Port => _endPoint.Port;
 
-        bool ITransport.IsConnected => _socket.Connected;
+        public bool IsConnected => _socket.Connected;
 
-        async ValueTask ITransport.Open(
+        public async ValueTask Open(
             CancellationToken cancellationToken
         )
         {
@@ -47,7 +48,7 @@ namespace Kafka.Common.Net.Transport
             }
         }
 
-        ValueTask ITransport.Close(
+        public ValueTask Close(
             CancellationToken cancellationToken
         )
         {
@@ -63,30 +64,24 @@ namespace Kafka.Common.Net.Transport
             }
         }
 
-        async ValueTask ITransport.Send(
-            ReadOnlyMemory<byte> requestBytes,
+        public async ValueTask Send(
+            ReadOnlyMemory<byte> data,
             CancellationToken cancellationToken
         )
         {
             var lenBytes = new byte[4];
-            _ = BinaryEncoder.WriteInt32(lenBytes, 0, requestBytes.Length);
+            _ = BinaryEncoder.WriteInt32(lenBytes, 0, data.Length);
             await _socket.SendAsync(
                 lenBytes,
                 cancellationToken
             ).ConfigureAwait(false);
             await _socket.SendAsync(
-                requestBytes,
+                data,
                 cancellationToken
             ).ConfigureAwait(false);
         }
 
-        void IDisposable.Dispose()
-        {
-            _socket.Dispose();
-            GC.SuppressFinalize(this);
-        }
-
-        async ValueTask<byte[]> ITransport.Receive(
+        public async ValueTask<byte[]> Receive(
             CancellationToken cancellationToken
         )
         {
@@ -118,6 +113,24 @@ namespace Kafka.Common.Net.Transport
                 offset += bytesReceived;
             }
             return true;
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _socket.Dispose();
+                }
+                _disposed = true;
+            }
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

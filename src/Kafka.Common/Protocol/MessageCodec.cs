@@ -6,39 +6,33 @@ namespace Kafka.Common.Protocol
     public abstract class MessageCodec :
         IMessageCodec
     {
-        protected readonly ApiKey _apiKey;
-        protected readonly VersionRange _versions;
-        protected readonly VersionRange _flexibleVersions;
-        protected ApiVersion _apiVersion;
-        protected bool _flexible;
-
-        public MessageCodec(
+        protected MessageCodec(
             ApiKey apiKey,
             VersionRange versions,
             VersionRange flexibleVersions
         )
         {
-            _apiKey = apiKey;
-            _versions = versions;
-            _flexibleVersions = flexibleVersions;
-            _apiVersion = _versions.Constrain(0);
-            _flexible = _flexibleVersions.Includes(_apiVersion);
+            ApiKey = apiKey;
+            Versions = versions;
+            FlexibleVersions = flexibleVersions;
+            ApiVersion = Versions.Constrain(0);
+            Flexible = FlexibleVersions.Includes(ApiVersion);
         }
 
-        ApiKey IMessageCodec.ApiKey => _apiKey;
-        VersionRange IMessageCodec.Versions => _versions;
-        VersionRange IMessageCodec.FlexibleVersions => _flexibleVersions;
-        ApiVersion IMessageCodec.ApiVersion => _apiVersion;
-        bool IMessageCodec.Flexible => _flexible;
+        public ApiKey ApiKey { get; private set; }
 
-        void IMessageCodec.SetApiVersion(ApiVersion apiVersion)
+        public VersionRange Versions { get; private set; }
+        public VersionRange FlexibleVersions { get; private set; }
+        public ApiVersion ApiVersion { get; private set; }
+        public bool Flexible { get; private set; }
+
+        public void SetApiVersion(ApiVersion apiVersion)
         {
-            apiVersion = _versions.Constrain(apiVersion);
-            _apiVersion = apiVersion;
-            _flexible = _flexibleVersions.Includes(_apiVersion);
-            SetApiVersion(_apiVersion);
+            ApiVersion = Versions.Constrain(apiVersion);
+            Flexible = FlexibleVersions.Includes(apiVersion);
+            NewApiVersion(ApiVersion);
         }
 
-        protected abstract void SetApiVersion(short apiVersion);
+        protected abstract void NewApiVersion(short apiVersion);
     }
 }

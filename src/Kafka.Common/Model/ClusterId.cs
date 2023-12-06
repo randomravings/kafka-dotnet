@@ -39,5 +39,7 @@
                 _ => false,
             }
         ;
+        public static ClusterId FromString(string value) => new(value);
+        public int CompareTo(ClusterId other) => string.CompareOrdinal(Value, other.Value);
     }
 }

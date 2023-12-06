@@ -23,11 +23,11 @@ namespace Kafka.Common.L0.Test.Model.Compare
         [TestCase(["de43c2af-4125-4415-8ddd-8eb37ef19d91", null, 0, "de43c2af-4125-4415-8ddd-8eb37ef19d91", null, 1], ExpectedResult = -1)]
         public int CompareTest(string? idA, string? nameA, int partitionA, string? idB, string? nameB, int partitionB)
         {
-            var topicIdA = (TopicId)idA;
+            var topicIdA = idA == null ? Guid.Empty : Guid.Parse(idA);
             var topicNameA = (TopicName)nameA;
             var a = new TopicPartition((topicIdA, topicNameA), partitionA);
 
-            var topicIdB = (TopicId)idB;
+            var topicIdB = idB == null ? Guid.Empty : Guid.Parse(idB);
             var topicNameB = (TopicName)nameB;
             var b = new TopicPartition((topicIdB, topicNameB), partitionB);
 
@@ -48,11 +48,11 @@ namespace Kafka.Common.L0.Test.Model.Compare
         [TestCase(["de43c2af-4125-4415-8ddd-8eb37ef19d91", null, 0, "de43c2af-4125-4415-8ddd-8eb37ef19d91", null, 1], ExpectedResult = false)]
         public bool EqualityTest(string? idA, string? nameA, int partitionA, string? idB, string? nameB, int partitionB)
         {
-            var topicIdA = (TopicId)idA;
+            var topicIdA = idA == null ? Guid.Empty : Guid.Parse(idA);
             var topicNameA = (TopicName)nameA;
             var a = new TopicPartition((topicIdA, topicNameA), partitionA);
 
-            var topicIdB = (TopicId)idB;
+            var topicIdB = idB == null ? Guid.Empty : Guid.Parse(idB);
             var topicNameB = (TopicName)nameB;
             var b = new TopicPartition((topicIdB, topicNameB), partitionB);
 
@@ -73,11 +73,11 @@ namespace Kafka.Common.L0.Test.Model.Compare
         [TestCase(["de43c2af-4125-4415-8ddd-8eb37ef19d91", null, 0, "de43c2af-4125-4415-8ddd-8eb37ef19d91", null, 1], ExpectedResult = false)]
         public bool HashCodeTest(string? idA, string? nameA, int partitionA, string? idB, string? nameB, int partitionB)
         {
-            var topicIdA = (TopicId)idA;
+            var topicIdA = idA == null ? Guid.Empty : Guid.Parse(idA);
             var topicNameA = (TopicName)nameA;
             var a = new TopicPartition((topicIdA, topicNameA), partitionA);
 
-            var topicIdB = (TopicId)idB;
+            var topicIdB = idB == null ? Guid.Empty : Guid.Parse(idB);
             var topicNameB = (TopicName)nameB;
             var b = new TopicPartition((topicIdB, topicNameB), partitionB);
 

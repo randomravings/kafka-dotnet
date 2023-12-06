@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using DeleteTopicState = Kafka.Client.Messages.DeleteTopicsRequestData.DeleteTopicState;
 
 namespace Kafka.Client.Messages.Encoding
@@ -21,14 +22,14 @@ namespace Kafka.Client.Messages.Encoding
                 WriteV0
             )
         { }
-        protected override EncodeDelegate<RequestHeaderData> GetHeaderEncoder(short apiVersion)
+        protected override EncodeValue<RequestHeaderData> GetHeaderEncoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return RequestHeaderEncoder.WriteV2;
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeDelegate<DeleteTopicsRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<DeleteTopicsRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
@@ -41,146 +42,160 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0(byte[] buffer, int index, DeleteTopicsRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteArray<string>(buffer, index, message.TopicNamesField, BinaryEncoder.WriteCompactString);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<string>(buffer, i, message.TopicNamesField, BinaryEncoder.WriteCompactString);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            return i;
         }
-        private static int WriteV1(byte[] buffer, int index, DeleteTopicsRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteArray<string>(buffer, index, message.TopicNamesField, BinaryEncoder.WriteCompactString);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<string>(buffer, i, message.TopicNamesField, BinaryEncoder.WriteCompactString);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            return i;
         }
-        private static int WriteV2(byte[] buffer, int index, DeleteTopicsRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteArray<string>(buffer, index, message.TopicNamesField, BinaryEncoder.WriteCompactString);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<string>(buffer, i, message.TopicNamesField, BinaryEncoder.WriteCompactString);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            return i;
         }
-        private static int WriteV3(byte[] buffer, int index, DeleteTopicsRequestData message)
+        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteArray<string>(buffer, index, message.TopicNamesField, BinaryEncoder.WriteCompactString);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<string>(buffer, i, message.TopicNamesField, BinaryEncoder.WriteCompactString);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            return i;
         }
-        private static int WriteV4(byte[] buffer, int index, DeleteTopicsRequestData message)
+        private static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<string>(buffer, index, message.TopicNamesField, BinaryEncoder.WriteCompactString);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<string>(buffer, i, message.TopicNamesField, BinaryEncoder.WriteCompactString);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV5(byte[] buffer, int index, DeleteTopicsRequestData message)
+        private static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<string>(buffer, index, message.TopicNamesField, BinaryEncoder.WriteCompactString);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<string>(buffer, i, message.TopicNamesField, BinaryEncoder.WriteCompactString);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV6(byte[] buffer, int index, DeleteTopicsRequestData message)
+        private static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<DeleteTopicState>(buffer, index, message.TopicsField, DeleteTopicStateEncoder.WriteV6);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<DeleteTopicState>(buffer, i, message.TopicsField, DeleteTopicStateEncoder.WriteV6);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class DeleteTopicStateEncoder
         {
-            public static int WriteV0(byte[] buffer, int index, DeleteTopicState message)
+            public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicState message)
             {
-                return index;
+                var i = index;
+                return i;
             }
-            public static int WriteV1(byte[] buffer, int index, DeleteTopicState message)
+            public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicState message)
             {
-                return index;
+                var i = index;
+                return i;
             }
-            public static int WriteV2(byte[] buffer, int index, DeleteTopicState message)
+            public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicState message)
             {
-                return index;
+                var i = index;
+                return i;
             }
-            public static int WriteV3(byte[] buffer, int index, DeleteTopicState message)
+            public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicState message)
             {
-                return index;
+                var i = index;
+                return i;
             }
-            public static int WriteV4(byte[] buffer, int index, DeleteTopicState message)
+            public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicState message)
             {
+                var i = index;
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV5(byte[] buffer, int index, DeleteTopicState message)
+            public static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicState message)
             {
+                var i = index;
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV6(byte[] buffer, int index, DeleteTopicState message)
+            public static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in DeleteTopicState message)
             {
-                index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteUuid(buffer, index, message.TopicIdField);
+                var i = index;
+                i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteUuid(buffer, i, message.TopicIdField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
         }
     }

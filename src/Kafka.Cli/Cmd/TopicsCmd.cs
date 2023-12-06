@@ -5,7 +5,6 @@ using Kafka.Cli.Text;
 using Kafka.Client.Config;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
 namespace Kafka.Cli.Cmd
@@ -132,7 +131,7 @@ namespace Kafka.Cli.Cmd
             {
                 if (topic.Error.Code == 0)
                 {
-                    Console.WriteLine($"  Topic Id:   {topic.TopicId.Value})");
+                    Console.WriteLine($"  Topic Id:   {topic.TopicId.Value}");
                     Console.WriteLine($"  Topic Name: {topic.TopicName.Value}");
                     Console.WriteLine($"    Partitions:         {topic.NumPartitions}");
                     Console.WriteLine($"    Replication Factor: {topic.ReplicationFactor}");

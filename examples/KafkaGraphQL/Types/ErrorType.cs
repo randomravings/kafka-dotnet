@@ -1,9 +1,9 @@
 ﻿namespace KafkaGraphQL.Types
 {
     public class ErrorType :
-        ObjectType<Kafka.Common.Model.Error>
+        ObjectType<Kafka.Common.Model.ApiError>
     {
-        protected override void Configure(IObjectTypeDescriptor<Kafka.Common.Model.Error> descriptor)
+        protected override void Configure(IObjectTypeDescriptor<Kafka.Common.Model.ApiError> descriptor)
         {
             base.Configure(descriptor);
             descriptor.BindFieldsExplicitly();

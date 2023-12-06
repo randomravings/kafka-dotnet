@@ -1,5 +1,6 @@
 ﻿using Kafka.Common.Encoding;
 using Kafka.Common.Model;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Kafka.Common.Protocol
 {
@@ -9,43 +10,43 @@ namespace Kafka.Common.Protocol
         where THeader : notnull, ResponseHeader
         where TMessage : notnull, ResponseMessage
     {
-        private EncodeDelegate<THeader> _headerEncoder;
-        private EncodeDelegate<TMessage> _messageEncoder;
+        private EncodeValue<THeader> _headerEncoder;
+        private EncodeValue<TMessage> _messageEncoder;
 
-        public ResponseEncoder(
+        protected ResponseEncoder(
             ApiKey apiKey,
             VersionRange apiVersions,
             VersionRange flexibleVersions,
-            EncodeDelegate<THeader> headerEncoder,
-            EncodeDelegate<TMessage> messageEncoder
+            EncodeValue<THeader> headerEncoder,
+            EncodeValue<TMessage> messageEncoder
         ) : base(apiKey, apiVersions, flexibleVersions)
         {
             _headerEncoder = headerEncoder;
             _messageEncoder = messageEncoder;
         }
 
-        int IResponseEncoder<THeader, TMessage>.WriteHeader(
-            byte[] buffer,
-            int offset,
-            THeader header
+        public int WriteHeader(
+            [NotNull] in byte[] buffer,
+            in int index,
+            [NotNull] in THeader header
         ) =>
-            _headerEncoder(buffer, offset, header)
+            _headerEncoder(buffer, index, header)
         ;
 
-        int IResponseEncoder<THeader, TMessage>.WriteMessage(
-            byte[] buffer,
-            int offset,
-            TMessage message
+        public int WriteMessage(
+            [NotNull] in byte[] buffer,
+            in int index,
+            [NotNull] in TMessage message
         ) =>
-            _messageEncoder(buffer, offset, message)
+            _messageEncoder(buffer, index, message)
         ;
 
-        protected override void SetApiVersion(short apiVersion)
+        protected override void NewApiVersion(short apiVersion)
         {
             _headerEncoder = GetHeaderEncoder(apiVersion);
             _messageEncoder = GetMessageEncoder(apiVersion);
         }
-        protected abstract EncodeDelegate<THeader> GetHeaderEncoder(short apiVersion);
-        protected abstract EncodeDelegate<TMessage> GetMessageEncoder(short apiVersion);
+        protected abstract EncodeValue<THeader> GetHeaderEncoder(short apiVersion);
+        protected abstract EncodeValue<TMessage> GetMessageEncoder(short apiVersion);
     }
 }

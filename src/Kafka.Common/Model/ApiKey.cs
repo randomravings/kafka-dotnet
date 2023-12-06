@@ -3,7 +3,7 @@ namespace Kafka.Common.Model
     ///<summary>
     /// The following are the numeric codes that the ApiKey in the request can take for each of the below request types.
     ///<summary>
-    public enum ApiKey : short
+    public enum ApiKey : int
     {
         None = -1,
         Produce = 0,
@@ -58,10 +58,13 @@ namespace Kafka.Common.Model
         AlterClientQuotas = 49,
         DescribeUserScramCredentials = 50,
         AlterUserScramCredentials = 51,
+        DescribeQuorum = 55,
         AlterPartition = 56,
         UpdateFeatures = 57,
+        Envelope = 58,
         DescribeCluster = 60,
         DescribeProducers = 61,
+        UnregisterBroker = 64,
         DescribeTransactions = 65,
         ListTransactions = 66,
         AllocateProducerIds = 67,

@@ -8,7 +8,7 @@ namespace Kafka.Client.Collections
     internal sealed class TopicPartitionSet(
         int initialCapacity
     ) :
-        IReadOnlyCollection<TopicPartition>
+        IReadOnlySet<TopicPartition>
     {
         private readonly object _guard = new();
         private TopicPartition[] _names =
@@ -16,6 +16,10 @@ namespace Kafka.Client.Collections
         private TopicPartition[] _ids =
             new TopicPartition[initialCapacity];
         private int _count;
+
+        internal TopicPartitionSet()
+            : this(8) { }
+
 
         int IReadOnlyCollection<TopicPartition>.Count => _count;
 
@@ -33,8 +37,39 @@ namespace Kafka.Client.Collections
             return items.AsEnumerable().GetEnumerator();
         }
 
-        internal TopicPartitionSet()
-            : this(8) { }
+        bool IReadOnlySet<TopicPartition>.Contains(TopicPartition item) =>
+            Contains(item)
+        ;
+
+        bool IReadOnlySet<TopicPartition>.IsProperSubsetOf(IEnumerable<TopicPartition> other)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IReadOnlySet<TopicPartition>.IsProperSupersetOf(IEnumerable<TopicPartition> other)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IReadOnlySet<TopicPartition>.IsSubsetOf(IEnumerable<TopicPartition> other)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IReadOnlySet<TopicPartition>.IsSupersetOf(IEnumerable<TopicPartition> other)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IReadOnlySet<TopicPartition>.Overlaps(IEnumerable<TopicPartition> other)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool IReadOnlySet<TopicPartition>.SetEquals(IEnumerable<TopicPartition> other)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Checks if the key is present in the collection.

@@ -14,9 +14,10 @@ namespace Kafka.Client.Config
         };
         public ClientConfig Client { get; set; } = new();
 
-        public OutputStreamConfig Producer { get; set; } = new();
+        public WriteStreamConfig WriteStream { get; set; } = new();
 
-        public InputStreamConfig Consumer { get; set; } = new();
+        public ReadStreamConfig ReadStream
+        { get; set; } = new();
 
         public override string ToString() =>
             JsonSerializer.Serialize(
@@ -30,11 +31,11 @@ namespace Kafka.Client.Config
             textWriter.WriteLine("Kakfa.Client:");
             WriteConfig(textWriter, Client);
             textWriter.WriteLine();
-            textWriter.WriteLine("Kakfa.Producer:");
-            WriteConfig(textWriter, Producer);
+            textWriter.WriteLine("Kakfa.WriteStream:");
+            WriteConfig(textWriter, WriteStream);
             textWriter.WriteLine();
-            textWriter.WriteLine("Kakfa.Consumer:");
-            WriteConfig(textWriter, Consumer);
+            textWriter.WriteLine("Kakfa.ReadStream:");
+            WriteConfig(textWriter, ReadStream);
             textWriter.WriteLine();
         }
 

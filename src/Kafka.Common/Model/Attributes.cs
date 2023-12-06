@@ -1,7 +1,7 @@
 ﻿namespace Kafka.Common.Model
 {
     [Flags]
-    public enum Attributes : short
+    public enum Attributes : int
     {
         /// <summary>
         /// Default value.
@@ -43,14 +43,6 @@
         /// Mask to be used for bitwise compare to determine compression used.
         /// </summary>
         CompressionType = Gzip | Snappy | LZ4 | ZSTD,
-        /// <summary>
-        /// Value for no compression.
-        /// </summary>
-        NoCompression = None,
-        /// <summary>
-        /// Value for Created Time.
-        /// </summary>
-        CreateTime = None,
         /// <summary>
         /// Value for Log Append Time.
         /// </summary>

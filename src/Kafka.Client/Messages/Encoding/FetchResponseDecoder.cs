@@ -5,13 +5,14 @@ using Kafka.Common.Protocol;
 using Kafka.Common.Records;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using AbortedTransaction = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.AbortedTransaction;
-using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
+using System.Diagnostics.CodeAnalysis;
 using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
-using NodeEndpoint = Kafka.Client.Messages.FetchResponseData.NodeEndpoint;
 using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
+using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
 using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
+using AbortedTransaction = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.AbortedTransaction;
+using NodeEndpoint = Kafka.Client.Messages.FetchResponseData.NodeEndpoint;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -28,14 +29,14 @@ namespace Kafka.Client.Messages.Encoding
                 ReadV0
             )
         { }
-        protected override DecodeDelegate<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
+        protected override DecodeValue<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return ResponseHeaderDecoder.ReadV1;
             else
                 return ResponseHeaderDecoder.ReadV0;
         }
-        protected override DecodeDelegate<FetchResponseData> GetMessageDecoder(short apiVersion) =>
+        protected override DecodeValue<FetchResponseData> GetMessageDecoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => ReadV0,
@@ -58,20 +59,21 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static DecodeResult<FetchResponseData> ReadV0(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV0([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV0);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV0);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -80,21 +82,22 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV1(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV1([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV1);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV1);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -103,21 +106,22 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV2(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV2([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV2);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV2);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -126,21 +130,22 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV3(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV3([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV3);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV3);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -149,21 +154,22 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV4(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV4([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV4);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV4);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -172,21 +178,22 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV5(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV5([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV5);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV5);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -195,21 +202,22 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV6(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV6([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV6);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV6);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -218,23 +226,24 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV7(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV7([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV7);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV7);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -243,23 +252,24 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV8(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV8([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV8);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV8);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -268,23 +278,24 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV9(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV9([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV9);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV9);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -293,23 +304,24 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV10(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV10([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV10);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV10);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -318,23 +330,24 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV11(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV11([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV11);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV11);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -343,35 +356,36 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV12(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV12([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV12);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV12);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -380,35 +394,36 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV13(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV13([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV13);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV13);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -417,35 +432,36 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV14(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV14([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV14);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV14);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -454,35 +470,36 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV15(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV15([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV15);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV15);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -491,47 +508,48 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FetchResponseData> ReadV16(byte[] buffer, int index)
+        private static DecodeResult<FetchResponseData> ReadV16([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var sessionIdField = default(int);
             var responsesField = ImmutableArray<FetchableTopicResponse>.Empty;
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, sessionIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, index, FetchableTopicResponseDecoder.ReadV16);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, sessionIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<FetchableTopicResponse>(buffer, i, FetchableTopicResponseDecoder.ReadV16);
             if (_responsesField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Responses'");
             else
                 responsesField = _responsesField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
                     switch (tag)
                     {
                         case 0:
-                            (index, var _nodeEndpointsField_) = BinaryDecoder.ReadCompactArray<NodeEndpoint>(buffer, index, NodeEndpointDecoder.ReadV16);
+                            (i, var _nodeEndpointsField_) = BinaryDecoder.ReadCompactArray<NodeEndpoint>(buffer, i, NodeEndpointDecoder.ReadV16);
                             if (_nodeEndpointsField_ == null)
                                 throw new NullReferenceException("Null not allowed for 'NodeEndpoints'");
                             else
                                 nodeEndpointsField = _nodeEndpointsField_.Value;
                             break;
                         default:
-                            (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                            (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                             taggedFieldsBuilder.Add(new(tag, bytes));
                             break;
                     }
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 sessionIdField,
@@ -543,383 +561,400 @@ namespace Kafka.Client.Messages.Encoding
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class FetchableTopicResponseDecoder
         {
-            public static DecodeResult<FetchableTopicResponse> ReadV0(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV0([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV0);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV0);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV1(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV1([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV1);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV1);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV2(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV2([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV2);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV2);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV3(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV3([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV3);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV3);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV4(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV4([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV4);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV4);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV5(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV5([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV5);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV5);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV6(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV6([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV6);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV6);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV7(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV7([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV7);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV7);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV8(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV8([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV8);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV8);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV9(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV9([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV9);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV9);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV10(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV10([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV10);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV10);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV11(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV11([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV11);
+                (i, topicField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV11);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV12(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV12([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV12);
+                (i, topicField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV12);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV13(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV13([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicIdField) = BinaryDecoder.ReadUuid(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV13);
+                (i, topicIdField) = BinaryDecoder.ReadUuid(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV13);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV14(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV14([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicIdField) = BinaryDecoder.ReadUuid(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV14);
+                (i, topicIdField) = BinaryDecoder.ReadUuid(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV14);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV15(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV15([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicIdField) = BinaryDecoder.ReadUuid(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV15);
+                (i, topicIdField) = BinaryDecoder.ReadUuid(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV15);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<FetchableTopicResponse> ReadV16(byte[] buffer, int index)
+            public static DecodeResult<FetchableTopicResponse> ReadV16([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var topicField = "";
                 var topicIdField = default(Guid);
                 var partitionsField = ImmutableArray<PartitionData>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, topicIdField) = BinaryDecoder.ReadUuid(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, index, PartitionDataDecoder.ReadV16);
+                (i, topicIdField) = BinaryDecoder.ReadUuid(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<PartitionData>(buffer, i, PartitionDataDecoder.ReadV16);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     topicField,
                     topicIdField,
                     partitionsField,
@@ -929,8 +964,9 @@ namespace Kafka.Client.Messages.Encoding
             [GeneratedCodeAttribute("kgen", "1.0.0.0")]
             private static class PartitionDataDecoder
             {
-                public static DecodeResult<PartitionData> ReadV0(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV0([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -943,11 +979,11 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -962,8 +998,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV1(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV1([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -976,11 +1013,11 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -995,8 +1032,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV2(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV2([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1009,11 +1047,11 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1028,8 +1066,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV3(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV3([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1042,11 +1081,11 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1061,8 +1100,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV4(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV4([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1075,13 +1115,13 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV4);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV4);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1096,8 +1136,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV5(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV5([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1110,14 +1151,14 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV5);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV5);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1132,8 +1173,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV6(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV6([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1146,14 +1188,14 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV6);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV6);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1168,8 +1210,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV7(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV7([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1182,14 +1225,14 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV7);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV7);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1204,8 +1247,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV8(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV8([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1218,14 +1262,14 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV8);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV8);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1240,8 +1284,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV9(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV9([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1254,14 +1299,14 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV9);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV9);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1276,8 +1321,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV10(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV10([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1290,14 +1336,14 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV10);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV10);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1312,8 +1358,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV11(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV11([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1326,15 +1373,15 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV11);
-                    (index, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadRecords(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV11);
+                    (i, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadRecords(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1349,8 +1396,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV12(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV12([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1363,41 +1411,41 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV12);
-                    (index, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, index);
-                    (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV12);
+                    (i, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, i);
+                    (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
                         var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                         while (taggedFieldsCount > 0)
                         {
-                            (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
+                            (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
                             switch (tag)
                             {
                                 case 0:
-                                    (index, divergingEpochField) = EpochEndOffsetDecoder.ReadV12(buffer, index);
+                                    (i, divergingEpochField) = EpochEndOffsetDecoder.ReadV12(buffer, i);
                                     break;
                                 case 1:
-                                    (index, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV12(buffer, index);
+                                    (i, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV12(buffer, i);
                                     break;
                                 case 2:
-                                    (index, snapshotIdField) = SnapshotIdDecoder.ReadV12(buffer, index);
+                                    (i, snapshotIdField) = SnapshotIdDecoder.ReadV12(buffer, i);
                                     break;
                                 default:
-                                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                     taggedFieldsBuilder.Add(new(tag, bytes));
                                     break;
                             }
                             taggedFieldsCount--;
                         }
                     }
-                    return new(index, new(
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1412,8 +1460,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV13(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV13([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1426,41 +1475,41 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV13);
-                    (index, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, index);
-                    (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV13);
+                    (i, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, i);
+                    (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
                         var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                         while (taggedFieldsCount > 0)
                         {
-                            (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
+                            (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
                             switch (tag)
                             {
                                 case 0:
-                                    (index, divergingEpochField) = EpochEndOffsetDecoder.ReadV13(buffer, index);
+                                    (i, divergingEpochField) = EpochEndOffsetDecoder.ReadV13(buffer, i);
                                     break;
                                 case 1:
-                                    (index, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV13(buffer, index);
+                                    (i, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV13(buffer, i);
                                     break;
                                 case 2:
-                                    (index, snapshotIdField) = SnapshotIdDecoder.ReadV13(buffer, index);
+                                    (i, snapshotIdField) = SnapshotIdDecoder.ReadV13(buffer, i);
                                     break;
                                 default:
-                                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                     taggedFieldsBuilder.Add(new(tag, bytes));
                                     break;
                             }
                             taggedFieldsCount--;
                         }
                     }
-                    return new(index, new(
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1475,8 +1524,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV14(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV14([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1489,41 +1539,41 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV14);
-                    (index, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, index);
-                    (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV14);
+                    (i, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, i);
+                    (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
                         var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                         while (taggedFieldsCount > 0)
                         {
-                            (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
+                            (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
                             switch (tag)
                             {
                                 case 0:
-                                    (index, divergingEpochField) = EpochEndOffsetDecoder.ReadV14(buffer, index);
+                                    (i, divergingEpochField) = EpochEndOffsetDecoder.ReadV14(buffer, i);
                                     break;
                                 case 1:
-                                    (index, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV14(buffer, index);
+                                    (i, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV14(buffer, i);
                                     break;
                                 case 2:
-                                    (index, snapshotIdField) = SnapshotIdDecoder.ReadV14(buffer, index);
+                                    (i, snapshotIdField) = SnapshotIdDecoder.ReadV14(buffer, i);
                                     break;
                                 default:
-                                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                     taggedFieldsBuilder.Add(new(tag, bytes));
                                     break;
                             }
                             taggedFieldsCount--;
                         }
                     }
-                    return new(index, new(
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1538,8 +1588,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV15(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV15([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1552,41 +1603,41 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV15);
-                    (index, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, index);
-                    (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV15);
+                    (i, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, i);
+                    (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
                         var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                         while (taggedFieldsCount > 0)
                         {
-                            (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
+                            (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
                             switch (tag)
                             {
                                 case 0:
-                                    (index, divergingEpochField) = EpochEndOffsetDecoder.ReadV15(buffer, index);
+                                    (i, divergingEpochField) = EpochEndOffsetDecoder.ReadV15(buffer, i);
                                     break;
                                 case 1:
-                                    (index, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV15(buffer, index);
+                                    (i, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV15(buffer, i);
                                     break;
                                 case 2:
-                                    (index, snapshotIdField) = SnapshotIdDecoder.ReadV15(buffer, index);
+                                    (i, snapshotIdField) = SnapshotIdDecoder.ReadV15(buffer, i);
                                     break;
                                 default:
-                                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                     taggedFieldsBuilder.Add(new(tag, bytes));
                                     break;
                             }
                             taggedFieldsCount--;
                         }
                     }
-                    return new(index, new(
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1601,8 +1652,9 @@ namespace Kafka.Client.Messages.Encoding
                         taggedFields
                     ));
                 }
-                public static DecodeResult<PartitionData> ReadV16(byte[] buffer, int index)
+                public static DecodeResult<PartitionData> ReadV16([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var highWatermarkField = default(long);
@@ -1615,41 +1667,41 @@ namespace Kafka.Client.Messages.Encoding
                     var preferredReadReplicaField = default(int);
                     var recordsField = default(ImmutableArray<IRecords>?);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, index, AbortedTransactionDecoder.ReadV16);
-                    (index, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, index);
-                    (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, highWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, lastStableOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, abortedTransactionsField) = BinaryDecoder.ReadCompactArray<AbortedTransaction>(buffer, i, AbortedTransactionDecoder.ReadV16);
+                    (i, preferredReadReplicaField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, recordsField) = BinaryDecoder.ReadCompactRecords(buffer, i);
+                    (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
                         var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                         while (taggedFieldsCount > 0)
                         {
-                            (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
+                            (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
                             switch (tag)
                             {
                                 case 0:
-                                    (index, divergingEpochField) = EpochEndOffsetDecoder.ReadV16(buffer, index);
+                                    (i, divergingEpochField) = EpochEndOffsetDecoder.ReadV16(buffer, i);
                                     break;
                                 case 1:
-                                    (index, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV16(buffer, index);
+                                    (i, currentLeaderField) = LeaderIdAndEpochDecoder.ReadV16(buffer, i);
                                     break;
                                 case 2:
-                                    (index, snapshotIdField) = SnapshotIdDecoder.ReadV16(buffer, index);
+                                    (i, snapshotIdField) = SnapshotIdDecoder.ReadV16(buffer, i);
                                     break;
                                 default:
-                                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                     taggedFieldsBuilder.Add(new(tag, bytes));
                                     break;
                             }
                             taggedFieldsCount--;
                         }
                     }
-                    return new(index, new(
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         highWatermarkField,
@@ -1667,274 +1719,291 @@ namespace Kafka.Client.Messages.Encoding
                 [GeneratedCodeAttribute("kgen", "1.0.0.0")]
                 private static class AbortedTransactionDecoder
                 {
-                    public static DecodeResult<AbortedTransaction> ReadV0(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV0([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV1(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV1([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV2(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV2([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV3(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV3([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV4(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV4([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        return new(index, new(
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV5(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV5([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        return new(index, new(
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV6(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV6([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        return new(index, new(
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV7(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV7([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        return new(index, new(
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV8(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV8([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        return new(index, new(
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV9(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV9([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        return new(index, new(
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV10(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV10([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        return new(index, new(
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV11(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV11([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        return new(index, new(
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV12(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV12([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV13(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV13([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV14(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV14([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV15(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV15([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<AbortedTransaction> ReadV16(byte[] buffer, int index)
+                    public static DecodeResult<AbortedTransaction> ReadV16([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var producerIdField = default(long);
                         var firstOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, producerIdField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, producerIdField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, firstOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             producerIdField,
                             firstOffsetField,
                             taggedFields
@@ -1944,258 +2013,275 @@ namespace Kafka.Client.Messages.Encoding
                 [GeneratedCodeAttribute("kgen", "1.0.0.0")]
                 private static class EpochEndOffsetDecoder
                 {
-                    public static DecodeResult<EpochEndOffset> ReadV0(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV0([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV1(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV1([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV2(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV2([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV3(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV3([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV4(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV4([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV5(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV5([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV6(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV6([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV7(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV7([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV8(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV8([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV9(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV9([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV10(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV10([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV11(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV11([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV12(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV12([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV13(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV13([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV14(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV14([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV15(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV15([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<EpochEndOffset> ReadV16(byte[] buffer, int index)
+                    public static DecodeResult<EpochEndOffset> ReadV16([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var epochField = default(int);
                         var endOffsetField = default(long);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             epochField,
                             endOffsetField,
                             taggedFields
@@ -2205,258 +2291,275 @@ namespace Kafka.Client.Messages.Encoding
                 [GeneratedCodeAttribute("kgen", "1.0.0.0")]
                 private static class LeaderIdAndEpochDecoder
                 {
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV0(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV0([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV1(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV1([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV2(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV2([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV3(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV3([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV4(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV4([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV5(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV5([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV6(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV6([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV7(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV7([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV8(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV8([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV9(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV9([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV10(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV10([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV11(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV11([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV12(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV12([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, leaderIdField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV13(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV13([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, leaderIdField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV14(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV14([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, leaderIdField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV15(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV15([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, leaderIdField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<LeaderIdAndEpoch> ReadV16(byte[] buffer, int index)
+                    public static DecodeResult<LeaderIdAndEpoch> ReadV16([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var leaderIdField = default(int);
                         var leaderEpochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, leaderIdField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             leaderIdField,
                             leaderEpochField,
                             taggedFields
@@ -2466,282 +2569,299 @@ namespace Kafka.Client.Messages.Encoding
                 [GeneratedCodeAttribute("kgen", "1.0.0.0")]
                 private static class SnapshotIdDecoder
                 {
-                    public static DecodeResult<SnapshotId> ReadV0(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV0([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV1(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV1([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV2(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV2([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV3(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV3([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV4(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV4([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV5(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV5([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV6(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV6([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV7(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV7([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV8(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV8([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV9(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV9([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV10(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV10([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV11(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV11([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        return new(index, new(
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV12(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV12([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV13(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV13([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV14(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV14([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV15(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV15([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
                         ));
                     }
-                    public static DecodeResult<SnapshotId> ReadV16(byte[] buffer, int index)
+                    public static DecodeResult<SnapshotId> ReadV16([NotNull] in byte[] buffer, in int index)
                     {
+                        var i = index;
                         var endOffsetField = default(long);
                         var epochField = default(int);
                         var taggedFields = ImmutableArray<TaggedField>.Empty;
-                        (index, endOffsetField) = BinaryDecoder.ReadInt64(buffer, index);
-                        (index, epochField) = BinaryDecoder.ReadInt32(buffer, index);
-                        (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                        (i, endOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
+                        (i, epochField) = BinaryDecoder.ReadInt32(buffer, i);
+                        (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                         if (taggedFieldsCount > 0)
                         {
                             var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                             while (taggedFieldsCount > 0)
                             {
-                                (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                                (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                                (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                                (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                                 taggedFieldsBuilder.Add(new(tag, bytes));
                                 taggedFieldsCount--;
                             }
                         }
-                        return new(index, new(
+                        return new(i, new(
                             endOffsetField,
                             epochField,
                             taggedFields
@@ -2753,14 +2873,15 @@ namespace Kafka.Client.Messages.Encoding
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class NodeEndpointDecoder
         {
-            public static DecodeResult<NodeEndpoint> ReadV0(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV0([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2768,14 +2889,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV1(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV1([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2783,14 +2905,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV2(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV2([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2798,14 +2921,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV3(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV3([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2813,14 +2937,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV4(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV4([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2828,14 +2953,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV5(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV5([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2843,14 +2969,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV6(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV6([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2858,14 +2985,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV7(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV7([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2873,14 +3001,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV8(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV8([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2888,14 +3017,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV9(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV9([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2903,14 +3033,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV10(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV10([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2918,14 +3049,15 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV11(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV11([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2933,26 +3065,27 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV12(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV12([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2960,26 +3093,27 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV13(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV13([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -2987,26 +3121,27 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV14(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV14([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -3014,26 +3149,27 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV15(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV15([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,
@@ -3041,30 +3177,31 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<NodeEndpoint> ReadV16(byte[] buffer, int index)
+            public static DecodeResult<NodeEndpoint> ReadV16([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nodeIdField = default(int);
                 var hostField = "";
                 var portField = default(int);
                 var rackField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nodeIdField) = BinaryDecoder.ReadInt32(buffer, index);
-                (index, hostField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, portField) = BinaryDecoder.ReadInt32(buffer, index);
-                (index, rackField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, nodeIdField) = BinaryDecoder.ReadInt32(buffer, i);
+                (i, hostField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, portField) = BinaryDecoder.ReadInt32(buffer, i);
+                (i, rackField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     nodeIdField,
                     hostField,
                     portField,

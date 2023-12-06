@@ -6,9 +6,46 @@
     )
     {
         public static readonly Topic Empty = new(TopicId.Empty, TopicName.Empty);
-        public static implicit operator Topic(Guid id) => new(id, TopicName.Empty);
-        public static implicit operator Topic(TopicName topicName) => new(topicName.Value, topicName);
-        public static implicit operator Topic(string? topicName) => new(TopicId.Empty, topicName);
-        public static implicit operator Topic((Guid Id, string? TopicName) v) => new(v.Id, v.TopicName);
+        public static implicit operator Topic(Guid value) => new(value, TopicName.Empty);
+        public static implicit operator Topic(TopicId value) => new(value, TopicName.Empty);
+        public static implicit operator Topic(string? value) => new(TopicId.Empty, value);
+        public static implicit operator Topic(TopicName value) => new(TopicId.Empty, value);
+        public static implicit operator Topic((Guid Id, string? TopicName) value) => new(value.Id, value.TopicName);
+
+        public static Topic FromTopicId(
+            TopicId value
+        ) => new(
+            value,
+            TopicName.Empty
+        );
+
+        public static Topic FromGuid(
+            Guid value
+        ) => new(
+            value,
+            TopicName.Empty
+        );
+
+        public static Topic FromTopicName(
+            TopicName value
+        ) => new(
+            TopicId.Empty,
+            value
+        );
+
+        public static Topic FromString(
+            string? value
+        ) => new(
+            TopicId.Empty,
+            value
+        );
+
+        public static Topic FromValueTuple((
+            Guid Id,
+            TopicName Name
+        ) value) => new(
+            value.Id,
+            value.Name
+        );
     }
 }

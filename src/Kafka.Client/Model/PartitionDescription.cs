@@ -10,6 +10,6 @@ namespace Kafka.Client.Model
         ImmutableArray<NodeId> ReplicaNodes,
         ImmutableArray<NodeId> IsrNodes,
         ImmutableArray<NodeId> OfflineReplicas,
-        Error Error
+        ApiError Error
     );
 }

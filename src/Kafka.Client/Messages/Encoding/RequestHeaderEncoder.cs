@@ -4,45 +4,49 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
     internal static class RequestHeaderEncoder
     {
-        internal static int WriteV0(byte[] buffer, int index, RequestHeaderData message)
+        internal static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in RequestHeaderData message)
         {
-            index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiKeyField);
-            index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiVersionField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.CorrelationIdField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteInt16(buffer, i, message.RequestApiKeyField);
+            i = BinaryEncoder.WriteInt16(buffer, i, message.RequestApiVersionField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.CorrelationIdField);
+            return i;
         }
-        internal static int WriteV1(byte[] buffer, int index, RequestHeaderData message)
+        internal static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in RequestHeaderData message)
         {
-            index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiKeyField);
-            index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiVersionField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.CorrelationIdField);
-            index = BinaryEncoder.WriteNullableString(buffer, index, message.ClientIdField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteInt16(buffer, i, message.RequestApiKeyField);
+            i = BinaryEncoder.WriteInt16(buffer, i, message.RequestApiVersionField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.CorrelationIdField);
+            i = BinaryEncoder.WriteNullableString(buffer, i, message.ClientIdField);
+            return i;
         }
-        internal static int WriteV2(byte[] buffer, int index, RequestHeaderData message)
+        internal static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in RequestHeaderData message)
         {
-            index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiKeyField);
-            index = BinaryEncoder.WriteInt16(buffer, index, message.RequestApiVersionField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.CorrelationIdField);
-            index = BinaryEncoder.WriteNullableString(buffer, index, message.ClientIdField);
+            var i = index;
+            i = BinaryEncoder.WriteInt16(buffer, i, message.RequestApiKeyField);
+            i = BinaryEncoder.WriteInt16(buffer, i, message.RequestApiVersionField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.CorrelationIdField);
+            i = BinaryEncoder.WriteNullableString(buffer, i, message.ClientIdField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
     }
 }

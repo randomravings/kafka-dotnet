@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using MetadataRequestTopic = Kafka.Client.Messages.MetadataRequestData.MetadataRequestTopic;
 
 namespace Kafka.Client.Messages.Encoding
@@ -21,14 +22,14 @@ namespace Kafka.Client.Messages.Encoding
                 WriteV0
             )
         { }
-        protected override EncodeDelegate<RequestHeaderData> GetHeaderEncoder(short apiVersion)
+        protected override EncodeValue<RequestHeaderData> GetHeaderEncoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return RequestHeaderEncoder.WriteV2;
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeDelegate<MetadataRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<MetadataRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
@@ -47,268 +48,294 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
+            var i = index;
             if (message.TopicsField == null)
                 throw new ArgumentNullException(nameof(message.TopicsField));
-            index = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV0);
-            return index;
+            i = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV0);
+            return i;
         }
-        private static int WriteV1(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV1);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV1);
+            return i;
         }
-        private static int WriteV2(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV2);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV2);
+            return i;
         }
-        private static int WriteV3(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV3);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV3);
+            return i;
         }
-        private static int WriteV4(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV4);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV4);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.AllowAutoTopicCreationField);
+            return i;
         }
-        private static int WriteV5(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV5);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV5);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.AllowAutoTopicCreationField);
+            return i;
         }
-        private static int WriteV6(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV6);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV6);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.AllowAutoTopicCreationField);
+            return i;
         }
-        private static int WriteV7(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV7);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV7);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.AllowAutoTopicCreationField);
+            return i;
         }
-        private static int WriteV8(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV8([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV8);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.IncludeClusterAuthorizedOperationsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV8);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.AllowAutoTopicCreationField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.IncludeClusterAuthorizedOperationsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.IncludeTopicAuthorizedOperationsField);
+            return i;
         }
-        private static int WriteV9(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV9([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV9);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.IncludeClusterAuthorizedOperationsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV9);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.AllowAutoTopicCreationField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.IncludeClusterAuthorizedOperationsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.IncludeTopicAuthorizedOperationsField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV10(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV10([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV10);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.IncludeClusterAuthorizedOperationsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV10);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.AllowAutoTopicCreationField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.IncludeClusterAuthorizedOperationsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.IncludeTopicAuthorizedOperationsField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV11(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV11([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV11);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV11);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.AllowAutoTopicCreationField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.IncludeTopicAuthorizedOperationsField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV12(byte[] buffer, int index, MetadataRequestData message)
+        private static int WriteV12([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<MetadataRequestTopic>(buffer, index, message.TopicsField, MetadataRequestTopicEncoder.WriteV12);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.AllowAutoTopicCreationField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.IncludeTopicAuthorizedOperationsField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<MetadataRequestTopic>(buffer, i, message.TopicsField, MetadataRequestTopicEncoder.WriteV12);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.AllowAutoTopicCreationField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.IncludeTopicAuthorizedOperationsField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class MetadataRequestTopicEncoder
         {
-            public static int WriteV0(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                return index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                return i;
             }
-            public static int WriteV1(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                return index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                return i;
             }
-            public static int WriteV2(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                return index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                return i;
             }
-            public static int WriteV3(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                return index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                return i;
             }
-            public static int WriteV4(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                return index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                return i;
             }
-            public static int WriteV5(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                return index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                return i;
             }
-            public static int WriteV6(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                return index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                return i;
             }
-            public static int WriteV7(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                return index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                return i;
             }
-            public static int WriteV8(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV8([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                return index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                return i;
             }
-            public static int WriteV9(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV9([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
+                var i = index;
                 if (message.NameField == null)
                     throw new ArgumentNullException(nameof(message.NameField));
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV10(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV10([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
-                index = BinaryEncoder.WriteUuid(buffer, index, message.TopicIdField);
-                index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.NameField);
+                var i = index;
+                i = BinaryEncoder.WriteUuid(buffer, i, message.TopicIdField);
+                i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.NameField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV11(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV11([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
-                index = BinaryEncoder.WriteUuid(buffer, index, message.TopicIdField);
-                index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.NameField);
+                var i = index;
+                i = BinaryEncoder.WriteUuid(buffer, i, message.TopicIdField);
+                i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.NameField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV12(byte[] buffer, int index, MetadataRequestTopic message)
+            public static int WriteV12([NotNull] in byte[] buffer, in int index, [NotNull] in MetadataRequestTopic message)
             {
-                index = BinaryEncoder.WriteUuid(buffer, index, message.TopicIdField);
-                index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.NameField);
+                var i = index;
+                i = BinaryEncoder.WriteUuid(buffer, i, message.TopicIdField);
+                i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.NameField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
         }
     }

@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -20,14 +21,14 @@ namespace Kafka.Client.Messages.Encoding
                 WriteV0
             )
         { }
-        protected override EncodeDelegate<RequestHeaderData> GetHeaderEncoder(short apiVersion)
+        protected override EncodeValue<RequestHeaderData> GetHeaderEncoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return RequestHeaderEncoder.WriteV2;
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeDelegate<InitProducerIdRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<InitProducerIdRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
@@ -38,72 +39,77 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0(byte[] buffer, int index, InitProducerIdRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in InitProducerIdRequestData message)
         {
-            index = BinaryEncoder.WriteNullableString(buffer, index, message.TransactionalIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TransactionTimeoutMsField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteNullableString(buffer, i, message.TransactionalIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TransactionTimeoutMsField);
+            return i;
         }
-        private static int WriteV1(byte[] buffer, int index, InitProducerIdRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in InitProducerIdRequestData message)
         {
-            index = BinaryEncoder.WriteNullableString(buffer, index, message.TransactionalIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TransactionTimeoutMsField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteNullableString(buffer, i, message.TransactionalIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TransactionTimeoutMsField);
+            return i;
         }
-        private static int WriteV2(byte[] buffer, int index, InitProducerIdRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in InitProducerIdRequestData message)
         {
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.TransactionalIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TransactionTimeoutMsField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.TransactionalIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TransactionTimeoutMsField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV3(byte[] buffer, int index, InitProducerIdRequestData message)
+        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in InitProducerIdRequestData message)
         {
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.TransactionalIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TransactionTimeoutMsField);
-            index = BinaryEncoder.WriteInt64(buffer, index, message.ProducerIdField);
-            index = BinaryEncoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.TransactionalIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TransactionTimeoutMsField);
+            i = BinaryEncoder.WriteInt64(buffer, i, message.ProducerIdField);
+            i = BinaryEncoder.WriteInt16(buffer, i, message.ProducerEpochField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV4(byte[] buffer, int index, InitProducerIdRequestData message)
+        private static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in InitProducerIdRequestData message)
         {
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.TransactionalIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TransactionTimeoutMsField);
-            index = BinaryEncoder.WriteInt64(buffer, index, message.ProducerIdField);
-            index = BinaryEncoder.WriteInt16(buffer, index, message.ProducerEpochField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.TransactionalIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TransactionTimeoutMsField);
+            i = BinaryEncoder.WriteInt64(buffer, i, message.ProducerIdField);
+            i = BinaryEncoder.WriteInt16(buffer, i, message.ProducerEpochField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
     }
 }

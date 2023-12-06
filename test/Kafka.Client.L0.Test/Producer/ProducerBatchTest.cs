@@ -1,5 +1,6 @@
-﻿using Kafka.Client.IO.Stream;
+﻿using Kafka.Client.IO.Write;
 using Kafka.Client.Model.Internal;
+using Kafka.Common.Encoding;
 using Kafka.Common.Model;
 using System.Collections.Immutable;
 
@@ -82,10 +83,14 @@ namespace Kafka.Client.L0.Test.Producer
         [Test]
         public void TestMinSize()
         {
-            var expectedSize =
-                61 +    // Batch header size
+            var expectedRecordSize =
                 1 +     // Record compact array length
                 6       // Record Byte count
+            ;
+
+            var expectedBatchSize =
+                RecordsConstants.RecordsHeaderSize +
+                expectedRecordSize
             ;
 
             var producerBatch = CreateBatch(
@@ -117,12 +122,12 @@ namespace Kafka.Client.L0.Test.Producer
 
                 Assert.That(
                     size,
-                    Is.EqualTo(expectedSize)
+                    Is.EqualTo(expectedRecordSize)
                 );
 
                 Assert.That(
                     producerBatch.BatchSize,
-                    Is.EqualTo(expectedSize)
+                    Is.EqualTo(expectedBatchSize)
                 );
             });
         }
@@ -149,16 +154,16 @@ namespace Kafka.Client.L0.Test.Producer
                 )
             ).ToArray();
 
-            var expectedSize =
-                61 +    // Batch header size
+            var expectedRecordSize =
                 1 +     // Record compact array length
                 6       // Record Byte count
             ;
-            var expectedBatchSize = 0;
+            var expectedBatchSize =
+                topicPartitions.Length *
+                (RecordsConstants.RecordsHeaderSize + expectedRecordSize)
+            ;
             foreach (var sendCommand in topicPartitions)
             {
-                expectedBatchSize += expectedSize;
-
                 (var added, var size) = producerBatch.Add(
                     sendCommand
                 );
@@ -172,15 +177,14 @@ namespace Kafka.Client.L0.Test.Producer
 
                     Assert.That(
                         size,
-                        Is.EqualTo(expectedSize)
-                    );
-
-                    Assert.That(
-                        producerBatch.BatchSize,
-                        Is.EqualTo(expectedBatchSize)
+                        Is.EqualTo(expectedRecordSize)
                     );
                 });
             }
+            Assert.That(
+                producerBatch.BatchSize,
+                Is.EqualTo(expectedBatchSize)
+            );
         }
 
         [Test]
@@ -202,11 +206,10 @@ namespace Kafka.Client.L0.Test.Producer
                 Array.Empty<byte>()
             );
 
-            var expectedBatchSize = 0;
+            var expectedBatchSize = RecordsConstants.RecordsHeaderSize;
             for (int i = 0; i < 3; i++)
             {
                 var expectedSize =
-                    (i == 0 ? 61 : 0) + // Batch header size (only first one)
                     1 +                 // Record compact array length
                     6                   // Record Byte count
                 ;
@@ -258,19 +261,15 @@ namespace Kafka.Client.L0.Test.Producer
                              0x0C, 0x0D, 0x0E, 0x0F },
                 ("header", new byte[] { 0x00, 0xFF })
             );
-
-            var expectedBatchSize = 0;
+            var expectedRecordSize = 35;
+            var expectedBatchSize = RecordsConstants.RecordsHeaderSize;
             for (int i = 0; i < 4; i++)
             {
                 // The fourth should exceed capacity
                 var expectedAdded = i < 3;
                 // First one will include header size.
-                var expectedSize =
-                    (i == 0 ? 61 : 0) +
-                    35
-                ;
                 // Batch should increase except for fourth attempt where it should stay the same.
-                expectedBatchSize += (i < 3) ? expectedSize : 0;
+                expectedBatchSize += (i < 3) ? expectedRecordSize : 0;
 
                 (var added, var size) = producerBatch.Add(
                     sendCommand
@@ -285,7 +284,7 @@ namespace Kafka.Client.L0.Test.Producer
 
                     Assert.That(
                         size,
-                        Is.EqualTo(expectedSize)
+                        Is.EqualTo(expectedRecordSize)
                     );
 
                     Assert.That(
@@ -336,7 +335,7 @@ namespace Kafka.Client.L0.Test.Producer
             )
         ;
 
-        private static ProduceBatch CreateBatch(
+        private static WriteBatch CreateBatch(
             int size
         ) =>
             new(

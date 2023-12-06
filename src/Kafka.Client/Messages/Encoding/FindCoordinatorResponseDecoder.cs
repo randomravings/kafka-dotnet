@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using Coordinator = Kafka.Client.Messages.FindCoordinatorResponseData.Coordinator;
 
 namespace Kafka.Client.Messages.Encoding
@@ -21,14 +22,14 @@ namespace Kafka.Client.Messages.Encoding
                 ReadV0
             )
         { }
-        protected override DecodeDelegate<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
+        protected override DecodeValue<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return ResponseHeaderDecoder.ReadV1;
             else
                 return ResponseHeaderDecoder.ReadV0;
         }
-        protected override DecodeDelegate<FindCoordinatorResponseData> GetMessageDecoder(short apiVersion) =>
+        protected override DecodeValue<FindCoordinatorResponseData> GetMessageDecoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => ReadV0,
@@ -39,8 +40,9 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static DecodeResult<FindCoordinatorResponseData> ReadV0(byte[] buffer, int index)
+        private static DecodeResult<FindCoordinatorResponseData> ReadV0([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var errorMessageField = default(string?);
@@ -49,11 +51,11 @@ namespace Kafka.Client.Messages.Encoding
             var portField = default(int);
             var coordinatorsField = ImmutableArray<Coordinator>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, nodeIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, hostField) = BinaryDecoder.ReadString(buffer, index);
-            (index, portField) = BinaryDecoder.ReadInt32(buffer, index);
-            return new(index, new(
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, nodeIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, hostField) = BinaryDecoder.ReadString(buffer, i);
+            (i, portField) = BinaryDecoder.ReadInt32(buffer, i);
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 errorMessageField,
@@ -64,8 +66,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FindCoordinatorResponseData> ReadV1(byte[] buffer, int index)
+        private static DecodeResult<FindCoordinatorResponseData> ReadV1([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var errorMessageField = default(string?);
@@ -74,13 +77,13 @@ namespace Kafka.Client.Messages.Encoding
             var portField = default(int);
             var coordinatorsField = ImmutableArray<Coordinator>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, errorMessageField) = BinaryDecoder.ReadNullableString(buffer, index);
-            (index, nodeIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, hostField) = BinaryDecoder.ReadString(buffer, index);
-            (index, portField) = BinaryDecoder.ReadInt32(buffer, index);
-            return new(index, new(
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, errorMessageField) = BinaryDecoder.ReadNullableString(buffer, i);
+            (i, nodeIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, hostField) = BinaryDecoder.ReadString(buffer, i);
+            (i, portField) = BinaryDecoder.ReadInt32(buffer, i);
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 errorMessageField,
@@ -91,8 +94,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FindCoordinatorResponseData> ReadV2(byte[] buffer, int index)
+        private static DecodeResult<FindCoordinatorResponseData> ReadV2([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var errorMessageField = default(string?);
@@ -101,13 +105,13 @@ namespace Kafka.Client.Messages.Encoding
             var portField = default(int);
             var coordinatorsField = ImmutableArray<Coordinator>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, errorMessageField) = BinaryDecoder.ReadNullableString(buffer, index);
-            (index, nodeIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, hostField) = BinaryDecoder.ReadString(buffer, index);
-            (index, portField) = BinaryDecoder.ReadInt32(buffer, index);
-            return new(index, new(
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, errorMessageField) = BinaryDecoder.ReadNullableString(buffer, i);
+            (i, nodeIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, hostField) = BinaryDecoder.ReadString(buffer, i);
+            (i, portField) = BinaryDecoder.ReadInt32(buffer, i);
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 errorMessageField,
@@ -118,8 +122,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FindCoordinatorResponseData> ReadV3(byte[] buffer, int index)
+        private static DecodeResult<FindCoordinatorResponseData> ReadV3([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var errorMessageField = default(string?);
@@ -128,25 +133,25 @@ namespace Kafka.Client.Messages.Encoding
             var portField = default(int);
             var coordinatorsField = ImmutableArray<Coordinator>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, errorMessageField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-            (index, nodeIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, hostField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, portField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, errorMessageField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+            (i, nodeIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, hostField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, portField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 errorMessageField,
@@ -157,8 +162,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<FindCoordinatorResponseData> ReadV4(byte[] buffer, int index)
+        private static DecodeResult<FindCoordinatorResponseData> ReadV4([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var errorMessageField = default(string?);
@@ -167,25 +173,25 @@ namespace Kafka.Client.Messages.Encoding
             var portField = default(int);
             var coordinatorsField = ImmutableArray<Coordinator>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _coordinatorsField_) = BinaryDecoder.ReadCompactArray<Coordinator>(buffer, index, CoordinatorDecoder.ReadV4);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _coordinatorsField_) = BinaryDecoder.ReadCompactArray<Coordinator>(buffer, i, CoordinatorDecoder.ReadV4);
             if (_coordinatorsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Coordinators'");
             else
                 coordinatorsField = _coordinatorsField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 errorMessageField,
@@ -199,8 +205,9 @@ namespace Kafka.Client.Messages.Encoding
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class CoordinatorDecoder
         {
-            public static DecodeResult<Coordinator> ReadV0(byte[] buffer, int index)
+            public static DecodeResult<Coordinator> ReadV0([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var keyField = "";
                 var nodeIdField = default(int);
                 var hostField = "";
@@ -208,7 +215,7 @@ namespace Kafka.Client.Messages.Encoding
                 var errorCodeField = default(short);
                 var errorMessageField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     keyField,
                     nodeIdField,
                     hostField,
@@ -218,8 +225,9 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<Coordinator> ReadV1(byte[] buffer, int index)
+            public static DecodeResult<Coordinator> ReadV1([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var keyField = "";
                 var nodeIdField = default(int);
                 var hostField = "";
@@ -227,7 +235,7 @@ namespace Kafka.Client.Messages.Encoding
                 var errorCodeField = default(short);
                 var errorMessageField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     keyField,
                     nodeIdField,
                     hostField,
@@ -237,8 +245,9 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<Coordinator> ReadV2(byte[] buffer, int index)
+            public static DecodeResult<Coordinator> ReadV2([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var keyField = "";
                 var nodeIdField = default(int);
                 var hostField = "";
@@ -246,7 +255,7 @@ namespace Kafka.Client.Messages.Encoding
                 var errorCodeField = default(short);
                 var errorMessageField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                return new(index, new(
+                return new(i, new(
                     keyField,
                     nodeIdField,
                     hostField,
@@ -256,8 +265,9 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<Coordinator> ReadV3(byte[] buffer, int index)
+            public static DecodeResult<Coordinator> ReadV3([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var keyField = "";
                 var nodeIdField = default(int);
                 var hostField = "";
@@ -265,19 +275,19 @@ namespace Kafka.Client.Messages.Encoding
                 var errorCodeField = default(short);
                 var errorMessageField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     keyField,
                     nodeIdField,
                     hostField,
@@ -287,8 +297,9 @@ namespace Kafka.Client.Messages.Encoding
                     taggedFields
                 ));
             }
-            public static DecodeResult<Coordinator> ReadV4(byte[] buffer, int index)
+            public static DecodeResult<Coordinator> ReadV4([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var keyField = "";
                 var nodeIdField = default(int);
                 var hostField = "";
@@ -296,25 +307,25 @@ namespace Kafka.Client.Messages.Encoding
                 var errorCodeField = default(short);
                 var errorMessageField = default(string?);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, keyField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, nodeIdField) = BinaryDecoder.ReadInt32(buffer, index);
-                (index, hostField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, portField) = BinaryDecoder.ReadInt32(buffer, index);
-                (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                (index, errorMessageField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, keyField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, nodeIdField) = BinaryDecoder.ReadInt32(buffer, i);
+                (i, hostField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, portField) = BinaryDecoder.ReadInt32(buffer, i);
+                (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                (i, errorMessageField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     keyField,
                     nodeIdField,
                     hostField,

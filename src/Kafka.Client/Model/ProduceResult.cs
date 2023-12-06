@@ -5,7 +5,7 @@ namespace Kafka.Client.Model
     public sealed record ProduceResult(
         TopicPartitionOffset TopicPartitionOffset,
         Timestamp Timestamp,
-        Error Error,
+        ApiError Error,
         string RecordError
     );
 }

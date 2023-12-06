@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -20,14 +21,14 @@ namespace Kafka.Client.Messages.Encoding
                 WriteV0
             )
         { }
-        protected override EncodeDelegate<RequestHeaderData> GetHeaderEncoder(short apiVersion)
+        protected override EncodeValue<RequestHeaderData> GetHeaderEncoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return RequestHeaderEncoder.WriteV2;
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeDelegate<FindCoordinatorRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<FindCoordinatorRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
@@ -38,56 +39,61 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0(byte[] buffer, int index, FindCoordinatorRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in FindCoordinatorRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.KeyField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.KeyField);
+            return i;
         }
-        private static int WriteV1(byte[] buffer, int index, FindCoordinatorRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in FindCoordinatorRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.KeyField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.KeyTypeField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.KeyField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.KeyTypeField);
+            return i;
         }
-        private static int WriteV2(byte[] buffer, int index, FindCoordinatorRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in FindCoordinatorRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.KeyField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.KeyTypeField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.KeyField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.KeyTypeField);
+            return i;
         }
-        private static int WriteV3(byte[] buffer, int index, FindCoordinatorRequestData message)
+        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in FindCoordinatorRequestData message)
         {
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.KeyField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.KeyTypeField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.KeyField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.KeyTypeField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV4(byte[] buffer, int index, FindCoordinatorRequestData message)
+        private static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in FindCoordinatorRequestData message)
         {
-            index = BinaryEncoder.WriteInt8(buffer, index, message.KeyTypeField);
-            index = BinaryEncoder.WriteCompactArray<string>(buffer, index, message.CoordinatorKeysField, BinaryEncoder.WriteCompactString);
+            var i = index;
+            i = BinaryEncoder.WriteInt8(buffer, i, message.KeyTypeField);
+            i = BinaryEncoder.WriteCompactArray<string>(buffer, i, message.CoordinatorKeysField, BinaryEncoder.WriteCompactString);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
     }
 }

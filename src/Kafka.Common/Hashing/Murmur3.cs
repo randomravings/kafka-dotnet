@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Kafka.Common.Hashing
 {
@@ -15,7 +11,7 @@ namespace Kafka.Common.Hashing
         /// <param name="bytes"></param>
         /// <param name="seed"></param>
         /// <returns></returns>
-        public static uint Compute(byte[] key, uint seed)
+        public static uint Compute([NotNull] in byte[] key, uint seed)
         {
             var len = key.Length;
             var len4 = len - len % 4;

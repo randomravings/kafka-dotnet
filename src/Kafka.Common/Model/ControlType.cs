@@ -3,7 +3,7 @@
 namespace Kafka.Common.Model
 {
     [DefaultValue(None)]
-    public enum ControlType : short
+    public enum ControlType : int
     {
         None = -1,
         Abort = 0,

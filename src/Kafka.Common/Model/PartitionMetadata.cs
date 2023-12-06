@@ -4,7 +4,7 @@ namespace Kafka.Common.Model
 {
     public sealed record PartitionMetadata(
         TopicPartition TopicPartition,
-        Error Error,
+        ApiError Error,
         NodeId? LeaderId,
         Timestamp? LeaderEpoch,
         ImmutableArray<NodeId> ReplicaIds,

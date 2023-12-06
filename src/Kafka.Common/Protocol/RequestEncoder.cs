@@ -9,22 +9,22 @@ namespace Kafka.Common.Protocol
         where THeader : notnull, RequestHeader
         where TMessage : notnull, RequestMessage
     {
-        private EncodeDelegate<THeader> _headerEncoder;
-        private EncodeDelegate<TMessage> _messageEncoder;
+        private EncodeValue<THeader> _headerEncoder;
+        private EncodeValue<TMessage> _messageEncoder;
 
-        public RequestEncoder(
+        protected RequestEncoder(
             ApiKey apiKey,
             VersionRange apiVersions,
             VersionRange flexibleVersions,
-            EncodeDelegate<THeader> headerEncoder,
-            EncodeDelegate<TMessage> messageEncoder
+            EncodeValue<THeader> headerEncoder,
+            EncodeValue<TMessage> messageEncoder
         ) : base(apiKey, apiVersions, flexibleVersions)
         {
             _headerEncoder = headerEncoder;
             _messageEncoder = messageEncoder;
         }
 
-        int IRequestEncoder<THeader, TMessage>.WriteHeader(
+        public int WriteHeader(
             byte[] buffer,
             int offset,
             THeader header
@@ -32,7 +32,7 @@ namespace Kafka.Common.Protocol
             _headerEncoder(buffer, offset, header)
         ;
 
-        int IRequestEncoder<THeader, TMessage>.WriteMessage(
+        public int WriteMessage(
             byte[] buffer,
             int offset,
             TMessage message
@@ -40,13 +40,13 @@ namespace Kafka.Common.Protocol
             _messageEncoder(buffer, offset, message)
         ;
 
-        protected override void SetApiVersion(short apiVersion)
+        protected override void NewApiVersion(short apiVersion)
         {
             _headerEncoder = GetHeaderEncoder(apiVersion);
             _messageEncoder = GetMessageEncoder(apiVersion);
         }
 
-        protected abstract EncodeDelegate<THeader> GetHeaderEncoder(short apiVersion);
-        protected abstract EncodeDelegate<TMessage> GetMessageEncoder(short apiVersion);
+        protected abstract EncodeValue<THeader> GetHeaderEncoder(short apiVersion);
+        protected abstract EncodeValue<TMessage> GetMessageEncoder(short apiVersion);
     }
 }

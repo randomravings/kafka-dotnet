@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using JoinGroupResponseMember = Kafka.Client.Messages.JoinGroupResponseData.JoinGroupResponseMember;
 
 namespace Kafka.Client.Messages.Encoding
@@ -21,14 +22,14 @@ namespace Kafka.Client.Messages.Encoding
                 ReadV0
             )
         { }
-        protected override DecodeDelegate<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
+        protected override DecodeValue<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return ResponseHeaderDecoder.ReadV1;
             else
                 return ResponseHeaderDecoder.ReadV0;
         }
-        protected override DecodeDelegate<JoinGroupResponseData> GetMessageDecoder(short apiVersion) =>
+        protected override DecodeValue<JoinGroupResponseData> GetMessageDecoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => ReadV0,
@@ -44,8 +45,9 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static DecodeResult<JoinGroupResponseData> ReadV0(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV0([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -56,17 +58,17 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadString(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV0);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV0);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -79,8 +81,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<JoinGroupResponseData> ReadV1(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV1([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -91,17 +94,17 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadString(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV1);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV1);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -114,8 +117,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<JoinGroupResponseData> ReadV2(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV2([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -126,18 +130,18 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadString(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV2);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV2);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -150,8 +154,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<JoinGroupResponseData> ReadV3(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV3([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -162,18 +167,18 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadString(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV3);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV3);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -186,8 +191,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<JoinGroupResponseData> ReadV4(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV4([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -198,18 +204,18 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadString(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV4);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV4);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -222,8 +228,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<JoinGroupResponseData> ReadV5(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV5([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -234,18 +241,18 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadString(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV5);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV5);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -258,8 +265,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<JoinGroupResponseData> ReadV6(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV6([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -270,30 +278,30 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV6);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV6);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -306,8 +314,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<JoinGroupResponseData> ReadV7(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV7([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -318,31 +327,31 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolTypeField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV7);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolTypeField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV7);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -355,8 +364,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<JoinGroupResponseData> ReadV8(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV8([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -367,31 +377,31 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolTypeField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV8);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolTypeField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV8);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -404,8 +414,9 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
-        private static DecodeResult<JoinGroupResponseData> ReadV9(byte[] buffer, int index)
+        private static DecodeResult<JoinGroupResponseData> ReadV9([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var generationIdField = default(int);
@@ -416,32 +427,32 @@ namespace Kafka.Client.Messages.Encoding
             var memberIdField = "";
             var membersField = ImmutableArray<JoinGroupResponseMember>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, generationIdField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, protocolTypeField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-            (index, protocolNameField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-            (index, leaderField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, skipAssignmentField) = BinaryDecoder.ReadBoolean(buffer, index);
-            (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-            (index, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, index, JoinGroupResponseMemberDecoder.ReadV9);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, generationIdField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, protocolTypeField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+            (i, protocolNameField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+            (i, leaderField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, skipAssignmentField) = BinaryDecoder.ReadBoolean(buffer, i);
+            (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV9);
             if (_membersField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Members'");
             else
                 membersField = _membersField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 generationIdField,
@@ -457,203 +468,213 @@ namespace Kafka.Client.Messages.Encoding
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class JoinGroupResponseMemberDecoder
         {
-            public static DecodeResult<JoinGroupResponseMember> ReadV0(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV0([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
-                return new(index, new(
+                (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadBytes(buffer, i);
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<JoinGroupResponseMember> ReadV1(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV1([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
-                return new(index, new(
+                (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadBytes(buffer, i);
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<JoinGroupResponseMember> ReadV2(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV2([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
-                return new(index, new(
+                (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadBytes(buffer, i);
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<JoinGroupResponseMember> ReadV3(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV3([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
-                return new(index, new(
+                (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadBytes(buffer, i);
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<JoinGroupResponseMember> ReadV4(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV4([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
-                return new(index, new(
+                (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadBytes(buffer, i);
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<JoinGroupResponseMember> ReadV5(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV5([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadString(buffer, index);
-                (index, groupInstanceIdField) = BinaryDecoder.ReadNullableString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadBytes(buffer, index);
-                return new(index, new(
+                (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
+                (i, groupInstanceIdField) = BinaryDecoder.ReadNullableString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadBytes(buffer, i);
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<JoinGroupResponseMember> ReadV6(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV6([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadCompactBytes(buffer, index);
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadCompactBytes(buffer, i);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<JoinGroupResponseMember> ReadV7(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV7([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadCompactBytes(buffer, index);
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadCompactBytes(buffer, i);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<JoinGroupResponseMember> ReadV8(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV8([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadCompactBytes(buffer, index);
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadCompactBytes(buffer, i);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<JoinGroupResponseMember> ReadV9(byte[] buffer, int index)
+            public static DecodeResult<JoinGroupResponseMember> ReadV9([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var memberIdField = "";
                 var groupInstanceIdField = default(string?);
                 var metadataField = Array.Empty<byte>();
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, memberIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, index);
-                (index, metadataField) = BinaryDecoder.ReadCompactBytes(buffer, index);
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, groupInstanceIdField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
+                (i, metadataField) = BinaryDecoder.ReadCompactBytes(buffer, i);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     memberIdField,
                     groupInstanceIdField,
                     metadataField,

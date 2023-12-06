@@ -1,5 +1,5 @@
 ﻿using Kafka.Client.IO;
-using Kafka.Client.IO.Stream;
+using Kafka.Client.IO.Shared;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Kafka.Client.L0.Test.Producer

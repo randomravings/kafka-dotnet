@@ -70,8 +70,9 @@ namespace Kafka.CodeGen.CSharp
                 typeof(BinaryEncoder).Namespace ?? "",
                 "Kafka.Common.Model",
                 "Kafka.Common.Protocol",
+                "Kafka.Common.Model.Extensions",
                 "System.Collections.Immutable",
-                "Kafka.Common.Model.Extensions"
+                "System.Diagnostics.CodeAnalysis"
             };
             if (typeFlags.HasFlag(UsingsFlags.Record))
                 usings.Add("Kafka.Common.Records");
@@ -137,10 +138,11 @@ namespace Kafka.CodeGen.CSharp
             {
                 typeof(BinaryEncoder).Namespace ?? "",
                 "Kafka.Common.Model",
+                "Kafka.Common.Model.Extensions",
                 "Kafka.Common.Protocol",
                 "System.Collections.Immutable",
-                "Kafka.Common.Model.Extensions"
-            };
+                "System.Diagnostics.CodeAnalysis"
+        };
             if (typeFlags.HasFlag(UsingsFlags.Record))
                 usings.Add("Kafka.Common.Records");
 
@@ -322,7 +324,7 @@ namespace Kafka.CodeGen.CSharp
             var readWrite = isEncoder ? "Write" : "Read";
             var encodeDecode = isEncoder ? "Encoder" : "Decoder";
             var headerType = messageDefinition.MessageType == MessageType.Request ? REQUEST_HEADER_TYPE : RESPONSE_HEADER_TYPE;
-            var delegateType = isEncoder ? typeof(EncodeDelegate<>) : typeof(DecodeDelegate<>);
+            var delegateType = isEncoder ? typeof(EncodeValue<>) : typeof(DecodeValue<>);
             switch (messageDefinition.ApiKey, messageDefinition.MessageType)
             {
                 case (ApiKey.ApiVersions, MessageType.Response):
@@ -333,7 +335,7 @@ namespace Kafka.CodeGen.CSharp
                 case (_, MessageType.Request):
                     writer.WriteLine($"{indent}protected override {ZipGenerics(delegateType, headerType)} GetHeader{encodeDecode}(short apiVersion)");
                     writer.WriteLine($"{indent}{{");
-                    writer.WriteLine($"{indent}    if (_flexibleVersions.Includes(apiVersion))");
+                    writer.WriteLine($"{indent}    if (FlexibleVersions.Includes(apiVersion))");
                     writer.WriteLine($"{indent}        return {messageDefinition.MessageType}Header{encodeDecode}.{readWrite}V2;");
                     writer.WriteLine($"{indent}    else");
                     writer.WriteLine($"{indent}        return {messageDefinition.MessageType}Header{encodeDecode}.{readWrite}V1;");
@@ -342,7 +344,7 @@ namespace Kafka.CodeGen.CSharp
                 case (_, MessageType.Response):
                     writer.WriteLine($"{indent}protected override {ZipGenerics(delegateType, headerType)} GetHeader{encodeDecode}(short apiVersion)");
                     writer.WriteLine($"{indent}{{");
-                    writer.WriteLine($"{indent}    if (_flexibleVersions.Includes(apiVersion))");
+                    writer.WriteLine($"{indent}    if (FlexibleVersions.Includes(apiVersion))");
                     writer.WriteLine($"{indent}        return {messageDefinition.MessageType}Header{encodeDecode}.{readWrite}V1;");
                     writer.WriteLine($"{indent}    else");
                     writer.WriteLine($"{indent}        return {messageDefinition.MessageType}Header{encodeDecode}.{readWrite}V0;");
@@ -721,18 +723,21 @@ namespace Kafka.CodeGen.CSharp
             writer.Write(methodKeywords);
             writer.Write(" int WriteV");
             writer.Write(version);
-            writer.Write("(byte[] buffer, int index, ");
+            writer.Write("([NotNull] in byte[] buffer, in int index, [NotNull] in ");
             writer.Write(messageName);
             writer.Write(" message)");
             writer.WriteLine();
             writer.Write(indent);
             writer.Write("{");
             writer.WriteLine();
+            writer.Write(indent);
+            writer.Write("    var i = index;");
+            writer.WriteLine();
             EncodeUntaggedFields(writer, indent, fields, flexible, version, "message");
             if (flexible)
                 EncodeTaggedFields(writer, fields, version, flexible, "message", indent);
             writer.Write(indent);
-            writer.Write("    return index;");
+            writer.Write("    return i;");
             writer.WriteLine();
             writer.Write(indent);
             writer.Write("}");
@@ -755,10 +760,13 @@ namespace Kafka.CodeGen.CSharp
             writer.Write(ZipGenerics(typeof(DecodeResult<>), messageName));
             writer.Write(" ReadV");
             writer.Write(version);
-            writer.Write("(byte[] buffer, int index)");
+            writer.Write("([NotNull] in byte[] buffer, in int index)");
             writer.WriteLine();
             writer.Write(indent);
             writer.Write("{");
+            writer.WriteLine();
+            writer.Write(indent);
+            writer.Write("    var i = index;");
             writer.WriteLine();
             DecodeFieldDeclare(writer, fields, $"{indent}    ");
             DecodeFields(writer, fields, flexible, version, $"{indent}    ");
@@ -940,7 +948,7 @@ namespace Kafka.CodeGen.CSharp
             in string indent
         )
         {
-            writer.WriteLine($"{indent}return new(index, new(");
+            writer.WriteLine($"{indent}return new(i, new(");
             foreach (var field in fields)
             {
                 var variable = FieldVariableNamify(field);
@@ -999,14 +1007,14 @@ namespace Kafka.CodeGen.CSharp
                 writer.WriteLine($"{indent}        taggedFieldsCount++;");
             }
             writer.WriteLine($"{indent}    taggedFieldsCount += (uint){referenceName}.{TAG_BUFFER}.Length;");
-            writer.WriteLine($"{indent}    index = {nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteVarUInt32)}(buffer, index, taggedFieldsCount);");
+            writer.WriteLine($"{indent}    i = {nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteVarUInt32)}(buffer, i, taggedFieldsCount);");
             foreach (var taggedField in taggedFields.OrderBy(r => r.Properties.Tag))
             {
                 var propertyName = FieldPropertyNamify(taggedField);
                 if (IsNullable(taggedField))
                     writer.WriteLine($"{indent}    if({referenceName}.{propertyName} != null)");
                 writer.WriteLine($"{indent}    {{");
-                writer.WriteLine($"{indent}        index = {nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteVarInt32)}(buffer, index, {taggedField.Properties.Tag});");
+                writer.WriteLine($"{indent}        i = {nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteVarInt32)}(buffer, i, {taggedField.Properties.Tag});");
                 EncodeField(writer, $"{indent}        ", true, taggedField, version, $"{referenceName}.{propertyName}");
                 writer.WriteLine($"{indent}    }}");
             }
@@ -1014,8 +1022,8 @@ namespace Kafka.CodeGen.CSharp
             writer.WriteLine($"{indent}    {{");
             writer.WriteLine($"{indent}        if(taggedField.{nameof(TaggedField.Tag)} <= previousTagged)");
             writer.WriteLine($"{indent}            throw new {nameof(InvalidOperationException)}($\"Reserved or out of order tag: {{taggedField.{nameof(TaggedField.Tag)}}} - Reserved Range: {startTag}\");");
-            writer.WriteLine($"{indent}        index = {nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteVarInt32)}(buffer, index, taggedField.{nameof(TaggedField.Tag)});");
-            writer.WriteLine($"{indent}        index = {nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteCompactBytes)}(buffer, index, taggedField.{nameof(TaggedField.Value)});");
+            writer.WriteLine($"{indent}        i = {nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteVarInt32)}(buffer, i, taggedField.{nameof(TaggedField.Tag)});");
+            writer.WriteLine($"{indent}        i = {nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteCompactBytes)}(buffer, i, taggedField.{nameof(TaggedField.Value)});");
             writer.WriteLine($"{indent}    }}");
         }
 
@@ -1031,13 +1039,13 @@ namespace Kafka.CodeGen.CSharp
                 return;
             var taggedFields = GetKnownTaggedFields(fields, version);
 
-            writer.WriteLine($"{indent}    (index, var taggedFieldsCount) = {nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadVarUInt32)}(buffer, index);");
+            writer.WriteLine($"{indent}    (i, var taggedFieldsCount) = {nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadVarUInt32)}(buffer, i);");
             writer.WriteLine($"{indent}    if (taggedFieldsCount > 0)");
             writer.WriteLine($"{indent}    {{");
             writer.WriteLine($"{indent}        var taggedFieldsBuilder = ImmutableArray.CreateBuilder<{nameof(TaggedField)}>();");
             writer.WriteLine($"{indent}        while (taggedFieldsCount > 0)");
             writer.WriteLine($"{indent}        {{");
-            writer.WriteLine($"{indent}            (index, var tag) = {nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadVarInt32)}(buffer, index);");
+            writer.WriteLine($"{indent}            (i, var tag) = {nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadVarInt32)}(buffer, i);");
             if (taggedFields.Length > 0)
                 DecodeTaggedKnown(writer, $"{indent}            ", taggedFields, version);
             else
@@ -1074,7 +1082,7 @@ namespace Kafka.CodeGen.CSharp
             in string indent
         )
         {
-            writer.WriteLine($"{indent}(index, var bytes) = {nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadCompactBytes)}(buffer, index);");
+            writer.WriteLine($"{indent}(i, var bytes) = {nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadCompactBytes)}(buffer, i);");
             writer.WriteLine($"{indent}taggedFieldsBuilder.Add(new(tag, bytes));");
         }
 
@@ -1226,7 +1234,7 @@ namespace Kafka.CodeGen.CSharp
                 dereference
             );
             writer.Write(indent);
-            writer.Write("index = ");
+            writer.Write("i = ");
             var flexibleField = flexible && field.Properties.FlexibleVersions.Includes(version);
             switch (field.Type)
             {
@@ -1272,7 +1280,7 @@ namespace Kafka.CodeGen.CSharp
             in string dereference
         )
         {
-            writer.WriteLine($"{GetEncoderName(fieldType)}.WriteV{version}(buffer, index, {dereference});");
+            writer.WriteLine($"{GetEncoderName(fieldType)}.WriteV{version}(buffer, i, {dereference});");
         }
 
         private static void EncodeRecordsField(
@@ -1286,9 +1294,9 @@ namespace Kafka.CodeGen.CSharp
         )
         {
             if (flexible)
-                writer.WriteLine($"{nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteCompactRecords)}(buffer, index, {dereference});");
+                writer.WriteLine($"{nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteCompactRecords)}(buffer, i, {dereference});");
             else
-                writer.WriteLine($"{nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteRecords)}(buffer, index, {dereference});");
+                writer.WriteLine($"{nameof(BinaryEncoder)}.{nameof(BinaryEncoder.WriteRecords)}(buffer, i, {dereference});");
         }
 
         private static void EncodeScalarField(
@@ -1302,7 +1310,7 @@ namespace Kafka.CodeGen.CSharp
         )
         {
             var scalarWrite = ScalarFieldToEncode(fieldType, fieldProperties.NullableVersions.Includes(version), flexible);
-            writer.WriteLine($"{nameof(BinaryEncoder)}.{scalarWrite}(buffer, index, {dereference});");
+            writer.WriteLine($"{nameof(BinaryEncoder)}.{scalarWrite}(buffer, i, {dereference});");
         }
 
         private static void EncodeArrayField(
@@ -1319,7 +1327,7 @@ namespace Kafka.CodeGen.CSharp
             writer.Write($"{nameof(BinaryEncoder)}.Write");
             if (flexible)
                 writer.Write("Compact");
-            writer.Write($"Array<{typeArg}>(buffer, index, {dereference}, ");
+            writer.Write($"Array<{typeArg}>(buffer, i, {dereference}, ");
             switch (fieldType.ItemType)
             {
                 case StructFieldType s:
@@ -1412,7 +1420,7 @@ namespace Kafka.CodeGen.CSharp
             //var flexible = flexibleMessage && field.Properties.FlexibleVersions.Includes(version);
             var nullable = field.Properties.NullableVersions.Includes(version);
             writer.Write(indent);
-            writer.Write($"(index, ");
+            writer.Write($"(i, ");
             if (field.Type is ArrayFieldType && !nullable)
                 writer.Write($"var _{reference}_");
             else
@@ -1466,7 +1474,7 @@ namespace Kafka.CodeGen.CSharp
             if (flexible)
                 writer.Write("Compact");
             writer.Write($"Array");
-            writer.Write($"<{typeArg}>(buffer, index, ");
+            writer.Write($"<{typeArg}>(buffer, i, ");
             switch (fieldType.ItemType)
             {
                 case StructFieldType s:
@@ -1498,7 +1506,7 @@ namespace Kafka.CodeGen.CSharp
             in StructFieldType fieldType,
             in short version
         ) =>
-            writer.WriteLine($"{GetDecoderName(fieldType)}.ReadV{version}(buffer, index);")
+            writer.WriteLine($"{GetDecoderName(fieldType)}.ReadV{version}(buffer, i);")
         ;
 
         private static void DecodeRecordsField(
@@ -1513,9 +1521,9 @@ namespace Kafka.CodeGen.CSharp
         )
         {
             if (flexible)
-                writer.Write($"{nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadCompactRecords)}(buffer, index)");
+                writer.Write($"{nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadCompactRecords)}(buffer, i)");
             else
-                writer.Write($"{nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadRecords)}(buffer, index)");
+                writer.Write($"{nameof(BinaryDecoder)}.{nameof(BinaryDecoder.ReadRecords)}(buffer, i)");
             if (!nullable)
             {
                 writer.WriteLine($";");
@@ -1534,7 +1542,7 @@ namespace Kafka.CodeGen.CSharp
         )
         {
             var scalarRead = ScalarFieldToDecode(fieldType, nullable, flexible);
-            writer.WriteLine($"{nameof(BinaryDecoder)}.{scalarRead}(buffer, index);");
+            writer.WriteLine($"{nameof(BinaryDecoder)}.{scalarRead}(buffer, i);");
         }
 
         private static string DefaultValue(

@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using ListedGroup = Kafka.Client.Messages.ListGroupsResponseData.ListedGroup;
 
 namespace Kafka.Client.Messages.Encoding
@@ -21,14 +22,14 @@ namespace Kafka.Client.Messages.Encoding
                 ReadV0
             )
         { }
-        protected override DecodeDelegate<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
+        protected override DecodeValue<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return ResponseHeaderDecoder.ReadV1;
             else
                 return ResponseHeaderDecoder.ReadV0;
         }
-        protected override DecodeDelegate<ListGroupsResponseData> GetMessageDecoder(short apiVersion) =>
+        protected override DecodeValue<ListGroupsResponseData> GetMessageDecoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => ReadV0,
@@ -39,123 +40,128 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static DecodeResult<ListGroupsResponseData> ReadV0(byte[] buffer, int index)
+        private static DecodeResult<ListGroupsResponseData> ReadV0([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var groupsField = ImmutableArray<ListedGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, var _groupsField_) = BinaryDecoder.ReadArray<ListedGroup>(buffer, index, ListedGroupDecoder.ReadV0);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, var _groupsField_) = BinaryDecoder.ReadArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV0);
             if (_groupsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Groups'");
             else
                 groupsField = _groupsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<ListGroupsResponseData> ReadV1(byte[] buffer, int index)
+        private static DecodeResult<ListGroupsResponseData> ReadV1([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var groupsField = ImmutableArray<ListedGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, var _groupsField_) = BinaryDecoder.ReadArray<ListedGroup>(buffer, index, ListedGroupDecoder.ReadV1);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, var _groupsField_) = BinaryDecoder.ReadArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV1);
             if (_groupsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Groups'");
             else
                 groupsField = _groupsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<ListGroupsResponseData> ReadV2(byte[] buffer, int index)
+        private static DecodeResult<ListGroupsResponseData> ReadV2([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var groupsField = ImmutableArray<ListedGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, var _groupsField_) = BinaryDecoder.ReadArray<ListedGroup>(buffer, index, ListedGroupDecoder.ReadV2);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, var _groupsField_) = BinaryDecoder.ReadArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV2);
             if (_groupsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Groups'");
             else
                 groupsField = _groupsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<ListGroupsResponseData> ReadV3(byte[] buffer, int index)
+        private static DecodeResult<ListGroupsResponseData> ReadV3([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var groupsField = ImmutableArray<ListedGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, var _groupsField_) = BinaryDecoder.ReadCompactArray<ListedGroup>(buffer, index, ListedGroupDecoder.ReadV3);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, var _groupsField_) = BinaryDecoder.ReadCompactArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV3);
             if (_groupsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Groups'");
             else
                 groupsField = _groupsField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<ListGroupsResponseData> ReadV4(byte[] buffer, int index)
+        private static DecodeResult<ListGroupsResponseData> ReadV4([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var errorCodeField = default(short);
             var groupsField = ImmutableArray<ListedGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-            (index, var _groupsField_) = BinaryDecoder.ReadCompactArray<ListedGroup>(buffer, index, ListedGroupDecoder.ReadV4);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, var _groupsField_) = BinaryDecoder.ReadCompactArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV4);
             if (_groupsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Groups'");
             else
                 groupsField = _groupsField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
                 groupsField,
@@ -165,100 +171,105 @@ namespace Kafka.Client.Messages.Encoding
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class ListedGroupDecoder
         {
-            public static DecodeResult<ListedGroup> ReadV0(byte[] buffer, int index)
+            public static DecodeResult<ListedGroup> ReadV0([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, groupIdField) = BinaryDecoder.ReadString(buffer, index);
-                (index, protocolTypeField) = BinaryDecoder.ReadString(buffer, index);
-                return new(index, new(
+                (i, groupIdField) = BinaryDecoder.ReadString(buffer, i);
+                (i, protocolTypeField) = BinaryDecoder.ReadString(buffer, i);
+                return new(i, new(
                     groupIdField,
                     protocolTypeField,
                     groupStateField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<ListedGroup> ReadV1(byte[] buffer, int index)
+            public static DecodeResult<ListedGroup> ReadV1([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, groupIdField) = BinaryDecoder.ReadString(buffer, index);
-                (index, protocolTypeField) = BinaryDecoder.ReadString(buffer, index);
-                return new(index, new(
+                (i, groupIdField) = BinaryDecoder.ReadString(buffer, i);
+                (i, protocolTypeField) = BinaryDecoder.ReadString(buffer, i);
+                return new(i, new(
                     groupIdField,
                     protocolTypeField,
                     groupStateField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<ListedGroup> ReadV2(byte[] buffer, int index)
+            public static DecodeResult<ListedGroup> ReadV2([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, groupIdField) = BinaryDecoder.ReadString(buffer, index);
-                (index, protocolTypeField) = BinaryDecoder.ReadString(buffer, index);
-                return new(index, new(
+                (i, groupIdField) = BinaryDecoder.ReadString(buffer, i);
+                (i, protocolTypeField) = BinaryDecoder.ReadString(buffer, i);
+                return new(i, new(
                     groupIdField,
                     protocolTypeField,
                     groupStateField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<ListedGroup> ReadV3(byte[] buffer, int index)
+            public static DecodeResult<ListedGroup> ReadV3([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, groupIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, protocolTypeField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, groupIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, protocolTypeField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     groupIdField,
                     protocolTypeField,
                     groupStateField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<ListedGroup> ReadV4(byte[] buffer, int index)
+            public static DecodeResult<ListedGroup> ReadV4([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, groupIdField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, protocolTypeField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, groupStateField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, groupIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, protocolTypeField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, groupStateField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     groupIdField,
                     protocolTypeField,
                     groupStateField,

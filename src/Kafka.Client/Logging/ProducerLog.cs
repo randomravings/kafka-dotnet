@@ -8,9 +8,9 @@ namespace Kafka.Client.Logging
     internal static partial class ProducerLog
     {
         [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "{config}", SkipEnabledCheck = false)]
-        public static partial void ProducerConfig(this ILogger logger, OutputStreamConfig config);
+        public static partial void ProducerConfig(this ILogger logger, WriteStreamConfig config);
         [LoggerMessage(EventId = 2001, Level = LogLevel.Warning, Message = "Topic: {topic}, Error: {error}", SkipEnabledCheck = true)]
-        internal static partial void ProducePartitionError(this ILogger logger, string topic, Error error);
+        internal static partial void ProducePartitionError(this ILogger logger, string topic, ApiError error);
 
         [LoggerMessage(EventId = 2002, Level = LogLevel.Trace, Message = "Record collector queued {count} records ({reason})")]
         internal static partial void BatchCollected(this ILogger logger, int count, BatchCollectReason reason);

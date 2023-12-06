@@ -1,9 +1,9 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ReplicaState = Kafka.Client.Messages.FetchRequestData.ReplicaState;
-using FetchTopic = Kafka.Client.Messages.FetchRequestData.FetchTopic;
 using ForgottenTopic = Kafka.Client.Messages.FetchRequestData.ForgottenTopic;
+using FetchTopic = Kafka.Client.Messages.FetchRequestData.FetchTopic;
+using ReplicaState = Kafka.Client.Messages.FetchRequestData.ReplicaState;
 using FetchPartition = Kafka.Client.Messages.FetchRequestData.FetchTopic.FetchPartition;
 
 namespace Kafka.Client.Messages {

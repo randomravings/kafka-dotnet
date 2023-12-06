@@ -11,5 +11,8 @@
         public static bool operator >=(NodeId a, NodeId b) => a.Value >= b.Value;
         public static bool operator <(NodeId a, NodeId b) => a.Value < b.Value;
         public static bool operator >(NodeId a, NodeId b) => a.Value > b.Value;
+        public static NodeId FromInt32(int value) => new(value);
+        public int ToInt32() => Value;
+        public int CompareTo(NodeId other) => Value.CompareTo(other.Value);
     }
 }

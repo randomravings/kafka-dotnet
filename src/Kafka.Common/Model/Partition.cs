@@ -11,5 +11,8 @@
         public static bool operator >=(Partition a, Partition b) => a.Value >= b.Value;
         public static bool operator <(Partition a, Partition b) => a.Value < b.Value;
         public static bool operator >(Partition a, Partition b) => a.Value > b.Value;
+        public static Partition FromInt32(int value) => new(value);
+        public int ToInt32() => Value;
+        public int CompareTo(Partition other) => Value.CompareTo(other.Value);
     }
 }

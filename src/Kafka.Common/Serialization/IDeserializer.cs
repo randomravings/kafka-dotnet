@@ -1,9 +1,7 @@
-﻿using Kafka.Common.Model;
-
-namespace Kafka.Common.Serialization
+﻿namespace Kafka.Common.Serialization
 {
     public interface IDeserializer<T>
     {
-        OptionalValue<T> Read(in ReadOnlyMemory<byte>? buffer);
+        T Read(in ReadOnlyMemory<byte>? buffer);
     }
 }

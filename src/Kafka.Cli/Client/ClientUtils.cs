@@ -111,8 +111,8 @@ namespace Kafka.Cli.Client
             {
                 null => default(object),
                 Type t when t.Equals(typeof(ClientConfig)) => clientConfig.Client,
-                Type t when t.Equals(typeof(InputStreamConfig)) => clientConfig.Consumer,
-                Type t when t.Equals(typeof(OutputStreamConfig)) => clientConfig.Producer,
+                Type t when t.Equals(typeof(ReadStreamConfig)) => clientConfig.ReadStream,
+                Type t when t.Equals(typeof(WriteStreamConfig)) => clientConfig.WriteStream,
                 _ => default
             };
 
@@ -134,13 +134,13 @@ namespace Kafka.Cli.Client
             return true;
         }
 
-        private static IReadOnlyDictionary<string, PropertyInfo> MapProperties()
+        private static ImmutableSortedDictionary<string, PropertyInfo> MapProperties()
         {
             var properties = typeof(KafkaClientConfig)
                 .GetProperties()
                 .Concat(typeof(ClientConfig).GetProperties())
-                .Concat(typeof(InputStreamConfig).GetProperties())
-                .Concat(typeof(OutputStreamConfig).GetProperties())
+                .Concat(typeof(ReadStreamConfig).GetProperties())
+                .Concat(typeof(WriteStreamConfig).GetProperties())
                 .Select(r => new { Name = r.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? "", Property = r })
                 .Where(r => r.Name != "")
                 .ToImmutableSortedDictionary(

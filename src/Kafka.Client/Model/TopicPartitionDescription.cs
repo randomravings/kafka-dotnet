@@ -7,7 +7,7 @@ namespace Kafka.Client.Model
         int PartitionIndex,
         int LeaderId,
         int LeaderEpoch,
-        Error Errors,
+        ApiError Errors,
         ImmutableArray<int> ReplicaNodes,
         ImmutableArray<int> IsrNodes,
         ImmutableArray<int> OfflineReplicas

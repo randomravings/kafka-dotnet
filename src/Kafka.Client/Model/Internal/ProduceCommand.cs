@@ -1,7 +1,7 @@
 ﻿namespace Kafka.Client.Model.Internal
 {
     internal sealed record ProduceCommand(
-        OutputRecord Record,
+        WriteRecord Record,
         TaskCompletionSource<ProduceResult> Callback
     );
 }

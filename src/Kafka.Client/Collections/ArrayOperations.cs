@@ -18,7 +18,7 @@
             in TItem[] array,
             in TKey key,
             in int size,
-            in CompareDelegate<TItem, TKey> compare
+            in CompareKey<TItem, TKey> compare
         )
         {
             var i = 0;

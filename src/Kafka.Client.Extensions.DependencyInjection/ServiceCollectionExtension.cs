@@ -52,7 +52,7 @@ namespace Kafka.Client.Extensions.DependencyInjection
             collection.AddSingleton(sp =>
             {
                 var client = sp.GetRequiredService<IKafkaClient>();
-                var logger = sp.GetRequiredService<ILogger<IOutputStream>>();
+                var logger = sp.GetRequiredService<ILogger<IWriteStream>>();
                 var stream = client.CreateOutputStream()
                     .WithLogger(logger)
                     .Build()
@@ -78,14 +78,15 @@ namespace Kafka.Client.Extensions.DependencyInjection
             collection.AddSingleton(sp =>
             {
                 var client = sp.GetRequiredService<IKafkaClient>();
-                var logger = sp.GetRequiredService<ILogger<IApplicationInputStream>>();
+                var logger = sp.GetRequiredService<ILogger<IApplicationReadStream>>();
                 var stream = client.CreateInputStream()
-                    .AsApplication(topic)
                     .WithLogger(logger)
+                    .AsApplication()
                     .Build();
                 ;
                 return stream
                     .CreateReader()
+                    .WithTopic(topic)
                     .WithLogger(logger)
                     .WithKey(keyDeserializer)
                     .WithValue(valueDeserializer)
@@ -99,7 +100,7 @@ namespace Kafka.Client.Extensions.DependencyInjection
             KafkaClientConfig config,
             IConfiguration configuration,
             string configSection,
-            IReadOnlyDictionary<string, PropertyInfo> properties
+            ImmutableSortedDictionary<string, PropertyInfo> properties
         )
         {
             var section = configuration.GetSection(configSection);
@@ -116,18 +117,18 @@ namespace Kafka.Client.Extensions.DependencyInjection
                     ApplyProperty(config.Client, property, item.Value);
             }
 
-            var producerSection = section.GetSection("Producer");
+            var producerSection = section.GetSection("WriteStream");
             foreach (var item in producerSection.GetChildren())
             {
                 if (properties.TryGetValue(item.Key, out var property))
-                    ApplyProperty(config.Producer, property, item.Value);
+                    ApplyProperty(config.WriteStream, property, item.Value);
             }
 
-            var consumerSection = section.GetSection("Consumer");
+            var consumerSection = section.GetSection("ReadStream");
             foreach (var item in consumerSection.GetChildren())
             {
                 if (properties.TryGetValue(item.Key, out var property))
-                    ApplyProperty(config.Consumer, property, item.Value);
+                    ApplyProperty(config.ReadStream, property, item.Value);
             }
         }
 
@@ -153,15 +154,15 @@ namespace Kafka.Client.Extensions.DependencyInjection
             return true;
         }
 
-        private static IReadOnlyDictionary<string, PropertyInfo> MapProperties()
+        private static ImmutableSortedDictionary<string, PropertyInfo> MapProperties()
         {
             var properties = typeof(KafkaClientConfig)
                 .GetProperties()
                 .Concat(typeof(ClientConfig).GetProperties())
-                .Concat(typeof(InputStreamConfig).GetProperties())
-                .Concat(typeof(OutputStreamConfig).GetProperties())
+                .Concat(typeof(ReadStreamConfig).GetProperties())
+                .Concat(typeof(WriteStreamConfig).GetProperties())
                 .Select(r => new { Name = r.GetCustomAttribute<JsonPropertyNameAttribute>()?.Name ?? "", Property = r })
-                .Where(r => r.Name != "")
+                .Where(r => !string.IsNullOrEmpty(r.Name))
                 .ToImmutableSortedDictionary(
                     k => k.Name,
                     v => v.Property

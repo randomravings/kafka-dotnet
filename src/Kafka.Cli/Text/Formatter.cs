@@ -6,9 +6,9 @@ namespace Kafka.Cli.Text
     public static class Formatter
     {
         public static string Print<TKey, TValue>(in ReadRecord<TKey, TValue> value) =>
-            $"{Print(value.Record.TopicPartition)}:{Print(value.Record.Offset)}:{Print(value.Key)}:{Print(value.Value)}"
+            $"{Print(value.TopicPartition)}:{Print(value.Offset)}:{PrintKey(value.Key)}:{PrintValue(value.Value)}"
         ;
-        public static string Print(in Error value) =>
+        public static string Print(in ApiError value) =>
             value.Code switch
             {
                 0 => value.Label,
@@ -25,11 +25,18 @@ namespace Kafka.Cli.Text
                 string s => s
             }
         ;
-        public static string Print<T>(in OptionalValue<T> value) =>
-            value.IsNull switch
+        public static string PrintKey<TKey>(in TKey key) =>
+            key switch
             {
-                true => "(null)",
-                false => $"{value.Value}"
+                null => "(null)",
+                var k => $"{k}"
+            }
+        ;
+        public static string PrintValue<TValue>(in TValue value) =>
+            value switch
+            {
+                null => "(null)",
+                var v => $"{v}"
             }
         ;
         public static string Print(in TopicPartition value) =>

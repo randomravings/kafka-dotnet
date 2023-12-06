@@ -1,4 +1,5 @@
 ﻿using Kafka.Common.Model;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Kafka.Common.Protocol
 {
@@ -7,7 +8,7 @@ namespace Kafka.Common.Protocol
         where TResponseHeader : notnull, ResponseHeader
         where TResponseMessage : notnull, ResponseMessage
     {
-        public int WriteHeader(byte[] buffer, int offset, TResponseHeader header);
-        public int WriteMessage(byte[] buffer, int offset, TResponseMessage  header);
+        public int WriteHeader([NotNull] in byte[] buffer, in int index, [NotNull] in TResponseHeader header);
+        public int WriteMessage([NotNull] in byte[] buffer, in int index, [NotNull] in TResponseMessage message);
     }
 }

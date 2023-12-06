@@ -4,8 +4,9 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic;
+using System.Diagnostics.CodeAnalysis;
 using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic.CreatableReplicaAssignment;
+using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic;
 using CreateableTopicConfig = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic.CreateableTopicConfig;
 
 namespace Kafka.Client.Messages.Encoding
@@ -23,14 +24,14 @@ namespace Kafka.Client.Messages.Encoding
                 WriteV0
             )
         { }
-        protected override EncodeDelegate<RequestHeaderData> GetHeaderEncoder(short apiVersion)
+        protected override EncodeValue<RequestHeaderData> GetHeaderEncoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return RequestHeaderEncoder.WriteV2;
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeDelegate<CreateTopicsRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<CreateTopicsRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
@@ -44,370 +45,402 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0(byte[] buffer, int index, CreateTopicsRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in CreateTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicEncoder.WriteV0);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<CreatableTopic>(buffer, i, message.TopicsField, CreatableTopicEncoder.WriteV0);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            return i;
         }
-        private static int WriteV1(byte[] buffer, int index, CreateTopicsRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in CreateTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicEncoder.WriteV1);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<CreatableTopic>(buffer, i, message.TopicsField, CreatableTopicEncoder.WriteV1);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.ValidateOnlyField);
+            return i;
         }
-        private static int WriteV2(byte[] buffer, int index, CreateTopicsRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in CreateTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicEncoder.WriteV2);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<CreatableTopic>(buffer, i, message.TopicsField, CreatableTopicEncoder.WriteV2);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.ValidateOnlyField);
+            return i;
         }
-        private static int WriteV3(byte[] buffer, int index, CreateTopicsRequestData message)
+        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in CreateTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicEncoder.WriteV3);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<CreatableTopic>(buffer, i, message.TopicsField, CreatableTopicEncoder.WriteV3);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.ValidateOnlyField);
+            return i;
         }
-        private static int WriteV4(byte[] buffer, int index, CreateTopicsRequestData message)
+        private static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in CreateTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicEncoder.WriteV4);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteArray<CreatableTopic>(buffer, i, message.TopicsField, CreatableTopicEncoder.WriteV4);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.ValidateOnlyField);
+            return i;
         }
-        private static int WriteV5(byte[] buffer, int index, CreateTopicsRequestData message)
+        private static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in CreateTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicEncoder.WriteV5);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<CreatableTopic>(buffer, i, message.TopicsField, CreatableTopicEncoder.WriteV5);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.ValidateOnlyField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV6(byte[] buffer, int index, CreateTopicsRequestData message)
+        private static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in CreateTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicEncoder.WriteV6);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<CreatableTopic>(buffer, i, message.TopicsField, CreatableTopicEncoder.WriteV6);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.ValidateOnlyField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV7(byte[] buffer, int index, CreateTopicsRequestData message)
+        private static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in CreateTopicsRequestData message)
         {
-            index = BinaryEncoder.WriteCompactArray<CreatableTopic>(buffer, index, message.TopicsField, CreatableTopicEncoder.WriteV7);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.TimeoutMsField);
-            index = BinaryEncoder.WriteBoolean(buffer, index, message.ValidateOnlyField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<CreatableTopic>(buffer, i, message.TopicsField, CreatableTopicEncoder.WriteV7);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.TimeoutMsField);
+            i = BinaryEncoder.WriteBoolean(buffer, i, message.ValidateOnlyField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class CreatableTopicEncoder
         {
-            public static int WriteV0(byte[] buffer, int index, CreatableTopic message)
+            public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteInt32(buffer, index, message.NumPartitionsField);
-                index = BinaryEncoder.WriteInt16(buffer, index, message.ReplicationFactorField);
-                index = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, index, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV0);
-                index = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, index, message.ConfigsField, CreateableTopicConfigEncoder.WriteV0);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteInt32(buffer, i, message.NumPartitionsField);
+                i = BinaryEncoder.WriteInt16(buffer, i, message.ReplicationFactorField);
+                i = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, i, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV0);
+                i = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, i, message.ConfigsField, CreateableTopicConfigEncoder.WriteV0);
+                return i;
             }
-            public static int WriteV1(byte[] buffer, int index, CreatableTopic message)
+            public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteInt32(buffer, index, message.NumPartitionsField);
-                index = BinaryEncoder.WriteInt16(buffer, index, message.ReplicationFactorField);
-                index = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, index, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV1);
-                index = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, index, message.ConfigsField, CreateableTopicConfigEncoder.WriteV1);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteInt32(buffer, i, message.NumPartitionsField);
+                i = BinaryEncoder.WriteInt16(buffer, i, message.ReplicationFactorField);
+                i = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, i, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV1);
+                i = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, i, message.ConfigsField, CreateableTopicConfigEncoder.WriteV1);
+                return i;
             }
-            public static int WriteV2(byte[] buffer, int index, CreatableTopic message)
+            public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteInt32(buffer, index, message.NumPartitionsField);
-                index = BinaryEncoder.WriteInt16(buffer, index, message.ReplicationFactorField);
-                index = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, index, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV2);
-                index = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, index, message.ConfigsField, CreateableTopicConfigEncoder.WriteV2);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteInt32(buffer, i, message.NumPartitionsField);
+                i = BinaryEncoder.WriteInt16(buffer, i, message.ReplicationFactorField);
+                i = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, i, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV2);
+                i = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, i, message.ConfigsField, CreateableTopicConfigEncoder.WriteV2);
+                return i;
             }
-            public static int WriteV3(byte[] buffer, int index, CreatableTopic message)
+            public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteInt32(buffer, index, message.NumPartitionsField);
-                index = BinaryEncoder.WriteInt16(buffer, index, message.ReplicationFactorField);
-                index = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, index, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV3);
-                index = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, index, message.ConfigsField, CreateableTopicConfigEncoder.WriteV3);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteInt32(buffer, i, message.NumPartitionsField);
+                i = BinaryEncoder.WriteInt16(buffer, i, message.ReplicationFactorField);
+                i = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, i, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV3);
+                i = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, i, message.ConfigsField, CreateableTopicConfigEncoder.WriteV3);
+                return i;
             }
-            public static int WriteV4(byte[] buffer, int index, CreatableTopic message)
+            public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteInt32(buffer, index, message.NumPartitionsField);
-                index = BinaryEncoder.WriteInt16(buffer, index, message.ReplicationFactorField);
-                index = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, index, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV4);
-                index = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, index, message.ConfigsField, CreateableTopicConfigEncoder.WriteV4);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteInt32(buffer, i, message.NumPartitionsField);
+                i = BinaryEncoder.WriteInt16(buffer, i, message.ReplicationFactorField);
+                i = BinaryEncoder.WriteArray<CreatableReplicaAssignment>(buffer, i, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV4);
+                i = BinaryEncoder.WriteArray<CreateableTopicConfig>(buffer, i, message.ConfigsField, CreateableTopicConfigEncoder.WriteV4);
+                return i;
             }
-            public static int WriteV5(byte[] buffer, int index, CreatableTopic message)
+            public static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableTopic message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteInt32(buffer, index, message.NumPartitionsField);
-                index = BinaryEncoder.WriteInt16(buffer, index, message.ReplicationFactorField);
-                index = BinaryEncoder.WriteCompactArray<CreatableReplicaAssignment>(buffer, index, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV5);
-                index = BinaryEncoder.WriteCompactArray<CreateableTopicConfig>(buffer, index, message.ConfigsField, CreateableTopicConfigEncoder.WriteV5);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteInt32(buffer, i, message.NumPartitionsField);
+                i = BinaryEncoder.WriteInt16(buffer, i, message.ReplicationFactorField);
+                i = BinaryEncoder.WriteCompactArray<CreatableReplicaAssignment>(buffer, i, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV5);
+                i = BinaryEncoder.WriteCompactArray<CreateableTopicConfig>(buffer, i, message.ConfigsField, CreateableTopicConfigEncoder.WriteV5);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV6(byte[] buffer, int index, CreatableTopic message)
+            public static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableTopic message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteInt32(buffer, index, message.NumPartitionsField);
-                index = BinaryEncoder.WriteInt16(buffer, index, message.ReplicationFactorField);
-                index = BinaryEncoder.WriteCompactArray<CreatableReplicaAssignment>(buffer, index, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV6);
-                index = BinaryEncoder.WriteCompactArray<CreateableTopicConfig>(buffer, index, message.ConfigsField, CreateableTopicConfigEncoder.WriteV6);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteInt32(buffer, i, message.NumPartitionsField);
+                i = BinaryEncoder.WriteInt16(buffer, i, message.ReplicationFactorField);
+                i = BinaryEncoder.WriteCompactArray<CreatableReplicaAssignment>(buffer, i, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV6);
+                i = BinaryEncoder.WriteCompactArray<CreateableTopicConfig>(buffer, i, message.ConfigsField, CreateableTopicConfigEncoder.WriteV6);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV7(byte[] buffer, int index, CreatableTopic message)
+            public static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableTopic message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteInt32(buffer, index, message.NumPartitionsField);
-                index = BinaryEncoder.WriteInt16(buffer, index, message.ReplicationFactorField);
-                index = BinaryEncoder.WriteCompactArray<CreatableReplicaAssignment>(buffer, index, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV7);
-                index = BinaryEncoder.WriteCompactArray<CreateableTopicConfig>(buffer, index, message.ConfigsField, CreateableTopicConfigEncoder.WriteV7);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteInt32(buffer, i, message.NumPartitionsField);
+                i = BinaryEncoder.WriteInt16(buffer, i, message.ReplicationFactorField);
+                i = BinaryEncoder.WriteCompactArray<CreatableReplicaAssignment>(buffer, i, message.AssignmentsField, CreatableReplicaAssignmentEncoder.WriteV7);
+                i = BinaryEncoder.WriteCompactArray<CreateableTopicConfig>(buffer, i, message.ConfigsField, CreateableTopicConfigEncoder.WriteV7);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
             [GeneratedCodeAttribute("kgen", "1.0.0.0")]
             private static class CreatableReplicaAssignmentEncoder
             {
-                public static int WriteV0(byte[] buffer, int index, CreatableReplicaAssignment message)
+                public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableReplicaAssignment message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteArray<int>(buffer, index, message.BrokerIdsField, BinaryEncoder.WriteInt32);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteArray<int>(buffer, i, message.BrokerIdsField, BinaryEncoder.WriteInt32);
+                    return i;
                 }
-                public static int WriteV1(byte[] buffer, int index, CreatableReplicaAssignment message)
+                public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableReplicaAssignment message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteArray<int>(buffer, index, message.BrokerIdsField, BinaryEncoder.WriteInt32);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteArray<int>(buffer, i, message.BrokerIdsField, BinaryEncoder.WriteInt32);
+                    return i;
                 }
-                public static int WriteV2(byte[] buffer, int index, CreatableReplicaAssignment message)
+                public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableReplicaAssignment message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteArray<int>(buffer, index, message.BrokerIdsField, BinaryEncoder.WriteInt32);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteArray<int>(buffer, i, message.BrokerIdsField, BinaryEncoder.WriteInt32);
+                    return i;
                 }
-                public static int WriteV3(byte[] buffer, int index, CreatableReplicaAssignment message)
+                public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableReplicaAssignment message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteArray<int>(buffer, index, message.BrokerIdsField, BinaryEncoder.WriteInt32);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteArray<int>(buffer, i, message.BrokerIdsField, BinaryEncoder.WriteInt32);
+                    return i;
                 }
-                public static int WriteV4(byte[] buffer, int index, CreatableReplicaAssignment message)
+                public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableReplicaAssignment message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteArray<int>(buffer, index, message.BrokerIdsField, BinaryEncoder.WriteInt32);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteArray<int>(buffer, i, message.BrokerIdsField, BinaryEncoder.WriteInt32);
+                    return i;
                 }
-                public static int WriteV5(byte[] buffer, int index, CreatableReplicaAssignment message)
+                public static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableReplicaAssignment message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteCompactArray<int>(buffer, index, message.BrokerIdsField, BinaryEncoder.WriteInt32);
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteCompactArray<int>(buffer, i, message.BrokerIdsField, BinaryEncoder.WriteInt32);
                     var taggedFieldsCount = 0u;
                     var previousTagged = -1;
                     taggedFieldsCount += (uint)message.TaggedFields.Length;
-                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                     foreach(var taggedField in message.TaggedFields)
                     {
                         if(taggedField.Tag <= previousTagged)
                             throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                        i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                        i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                     }
-                    return index;
+                    return i;
                 }
-                public static int WriteV6(byte[] buffer, int index, CreatableReplicaAssignment message)
+                public static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableReplicaAssignment message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteCompactArray<int>(buffer, index, message.BrokerIdsField, BinaryEncoder.WriteInt32);
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteCompactArray<int>(buffer, i, message.BrokerIdsField, BinaryEncoder.WriteInt32);
                     var taggedFieldsCount = 0u;
                     var previousTagged = -1;
                     taggedFieldsCount += (uint)message.TaggedFields.Length;
-                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                     foreach(var taggedField in message.TaggedFields)
                     {
                         if(taggedField.Tag <= previousTagged)
                             throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                        i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                        i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                     }
-                    return index;
+                    return i;
                 }
-                public static int WriteV7(byte[] buffer, int index, CreatableReplicaAssignment message)
+                public static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in CreatableReplicaAssignment message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteCompactArray<int>(buffer, index, message.BrokerIdsField, BinaryEncoder.WriteInt32);
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteCompactArray<int>(buffer, i, message.BrokerIdsField, BinaryEncoder.WriteInt32);
                     var taggedFieldsCount = 0u;
                     var previousTagged = -1;
                     taggedFieldsCount += (uint)message.TaggedFields.Length;
-                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                     foreach(var taggedField in message.TaggedFields)
                     {
                         if(taggedField.Tag <= previousTagged)
                             throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                        i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                        i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                     }
-                    return index;
+                    return i;
                 }
             }
             [GeneratedCodeAttribute("kgen", "1.0.0.0")]
             private static class CreateableTopicConfigEncoder
             {
-                public static int WriteV0(byte[] buffer, int index, CreateableTopicConfig message)
+                public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in CreateableTopicConfig message)
                 {
-                    index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                    index = BinaryEncoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                    i = BinaryEncoder.WriteNullableString(buffer, i, message.ValueField);
+                    return i;
                 }
-                public static int WriteV1(byte[] buffer, int index, CreateableTopicConfig message)
+                public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in CreateableTopicConfig message)
                 {
-                    index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                    index = BinaryEncoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                    i = BinaryEncoder.WriteNullableString(buffer, i, message.ValueField);
+                    return i;
                 }
-                public static int WriteV2(byte[] buffer, int index, CreateableTopicConfig message)
+                public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in CreateableTopicConfig message)
                 {
-                    index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                    index = BinaryEncoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                    i = BinaryEncoder.WriteNullableString(buffer, i, message.ValueField);
+                    return i;
                 }
-                public static int WriteV3(byte[] buffer, int index, CreateableTopicConfig message)
+                public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in CreateableTopicConfig message)
                 {
-                    index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                    index = BinaryEncoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                    i = BinaryEncoder.WriteNullableString(buffer, i, message.ValueField);
+                    return i;
                 }
-                public static int WriteV4(byte[] buffer, int index, CreateableTopicConfig message)
+                public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in CreateableTopicConfig message)
                 {
-                    index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                    index = BinaryEncoder.WriteNullableString(buffer, index, message.ValueField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                    i = BinaryEncoder.WriteNullableString(buffer, i, message.ValueField);
+                    return i;
                 }
-                public static int WriteV5(byte[] buffer, int index, CreateableTopicConfig message)
+                public static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in CreateableTopicConfig message)
                 {
-                    index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                    index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.ValueField);
+                    var i = index;
+                    i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                    i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.ValueField);
                     var taggedFieldsCount = 0u;
                     var previousTagged = -1;
                     taggedFieldsCount += (uint)message.TaggedFields.Length;
-                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                     foreach(var taggedField in message.TaggedFields)
                     {
                         if(taggedField.Tag <= previousTagged)
                             throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                        i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                        i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                     }
-                    return index;
+                    return i;
                 }
-                public static int WriteV6(byte[] buffer, int index, CreateableTopicConfig message)
+                public static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in CreateableTopicConfig message)
                 {
-                    index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                    index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.ValueField);
+                    var i = index;
+                    i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                    i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.ValueField);
                     var taggedFieldsCount = 0u;
                     var previousTagged = -1;
                     taggedFieldsCount += (uint)message.TaggedFields.Length;
-                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                     foreach(var taggedField in message.TaggedFields)
                     {
                         if(taggedField.Tag <= previousTagged)
                             throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                        i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                        i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                     }
-                    return index;
+                    return i;
                 }
-                public static int WriteV7(byte[] buffer, int index, CreateableTopicConfig message)
+                public static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in CreateableTopicConfig message)
                 {
-                    index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                    index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.ValueField);
+                    var i = index;
+                    i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                    i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.ValueField);
                     var taggedFieldsCount = 0u;
                     var previousTagged = -1;
                     taggedFieldsCount += (uint)message.TaggedFields.Length;
-                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                     foreach(var taggedField in message.TaggedFields)
                     {
                         if(taggedField.Tag <= previousTagged)
                             throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                        i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                        i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                     }
-                    return index;
+                    return i;
                 }
             }
         }

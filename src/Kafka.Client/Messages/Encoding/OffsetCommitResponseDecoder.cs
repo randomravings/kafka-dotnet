@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using OffsetCommitResponsePartition = Kafka.Client.Messages.OffsetCommitResponseData.OffsetCommitResponseTopic.OffsetCommitResponsePartition;
 using OffsetCommitResponseTopic = Kafka.Client.Messages.OffsetCommitResponseData.OffsetCommitResponseTopic;
 
@@ -22,14 +23,14 @@ namespace Kafka.Client.Messages.Encoding
                 ReadV0
             )
         { }
-        protected override DecodeDelegate<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
+        protected override DecodeValue<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return ResponseHeaderDecoder.ReadV1;
             else
                 return ResponseHeaderDecoder.ReadV0;
         }
-        protected override DecodeDelegate<OffsetCommitResponseData> GetMessageDecoder(short apiVersion) =>
+        protected override DecodeValue<OffsetCommitResponseData> GetMessageDecoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => ReadV0,
@@ -45,192 +46,202 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static DecodeResult<OffsetCommitResponseData> ReadV0(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV0([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV0);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV0);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<OffsetCommitResponseData> ReadV1(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV1([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV1);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV1);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<OffsetCommitResponseData> ReadV2(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV2([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV2);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV2);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<OffsetCommitResponseData> ReadV3(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV3([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV3);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV3);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<OffsetCommitResponseData> ReadV4(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV4([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV4);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV4);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<OffsetCommitResponseData> ReadV5(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV5([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV5);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV5);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<OffsetCommitResponseData> ReadV6(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV6([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV6);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV6);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<OffsetCommitResponseData> ReadV7(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV7([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV7);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV7);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<OffsetCommitResponseData> ReadV8(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV8([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadCompactArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV8);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV8);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<OffsetCommitResponseData> ReadV9(byte[] buffer, int index)
+        private static DecodeResult<OffsetCommitResponseData> ReadV9([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<OffsetCommitResponseTopic>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadCompactArray<OffsetCommitResponseTopic>(buffer, index, OffsetCommitResponseTopicDecoder.ReadV9);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<OffsetCommitResponseTopic>(buffer, i, OffsetCommitResponseTopicDecoder.ReadV9);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
@@ -239,195 +250,205 @@ namespace Kafka.Client.Messages.Encoding
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class OffsetCommitResponseTopicDecoder
         {
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV0(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV0([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV0);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV0);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV1(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV1([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV1);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV1);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV2(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV2([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV2);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV2);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV3(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV3([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV3);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV3);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV4(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV4([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV4);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV4);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV5(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV5([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV5);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV5);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV6(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV6([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV6);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV6);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV7(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV7([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV7);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV7);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV8(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV8([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadCompactArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV8);
+                (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV8);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<OffsetCommitResponseTopic> ReadV9(byte[] buffer, int index)
+            public static DecodeResult<OffsetCommitResponseTopic> ReadV9([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<OffsetCommitResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadCompactArray<OffsetCommitResponsePartition>(buffer, index, OffsetCommitResponsePartitionDecoder.ReadV9);
+                (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<OffsetCommitResponsePartition>(buffer, i, OffsetCommitResponsePartitionDecoder.ReadV9);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
@@ -436,155 +457,165 @@ namespace Kafka.Client.Messages.Encoding
             [GeneratedCodeAttribute("kgen", "1.0.0.0")]
             private static class OffsetCommitResponsePartitionDecoder
             {
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV0(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV0([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV1(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV1([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV2(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV2([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV3(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV3([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV4(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV4([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV5(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV5([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV6(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV6([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV7(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV7([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV8(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV8([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
                         var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                         while (taggedFieldsCount > 0)
                         {
-                            (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                            (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                            (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                            (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                             taggedFieldsBuilder.Add(new(tag, bytes));
                             taggedFieldsCount--;
                         }
                     }
-                    return new(index, new(
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<OffsetCommitResponsePartition> ReadV9(byte[] buffer, int index)
+                public static DecodeResult<OffsetCommitResponsePartition> ReadV9([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
                         var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                         while (taggedFieldsCount > 0)
                         {
-                            (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                            (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                            (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                            (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                             taggedFieldsBuilder.Add(new(tag, bytes));
                             taggedFieldsCount--;
                         }
                     }
-                    return new(index, new(
+                    return new(i, new(
                         partitionIndexField,
                         errorCodeField,
                         taggedFields

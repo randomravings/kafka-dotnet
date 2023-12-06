@@ -1,4 +1,4 @@
-﻿using Kafka.Common.Model;
+﻿using System.Diagnostics.CodeAnalysis;
 
 namespace Kafka.Common.Hashing
 {
@@ -80,7 +80,7 @@ namespace Kafka.Common.Hashing
         /// </summary>
         /// <param name="bytes">Span to compute from.</param>
         /// <returns></returns>
-        public static uint Update(byte[] bytes) =>
+        public static uint Update([NotNull] in byte[] bytes) =>
             Update(0, bytes, 0, bytes.Length)
         ;
 
@@ -90,7 +90,7 @@ namespace Kafka.Common.Hashing
         /// <param name="crc">Prior value.</param>
         /// <param name="bytes">Span to compute from.</param>
         /// <returns></returns>
-        public static uint Update(uint crc, byte[] bytes) =>
+        public static uint Update(uint crc, [NotNull] in byte[] bytes) =>
             Update(crc, bytes, 0, bytes.Length)
         ;
 
@@ -101,7 +101,7 @@ namespace Kafka.Common.Hashing
         /// <param name="index"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static uint Update(byte[] bytes, int index, int length) =>
+        public static uint Update([NotNull] in byte[] bytes, int index, int length) =>
             Update(0U, bytes, index, length)
         ;
 
@@ -113,7 +113,7 @@ namespace Kafka.Common.Hashing
         /// <param name="index"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static uint Update(uint crc, byte[] bytes, int index, int length)
+        public static uint Update(uint crc, [NotNull] in byte[] bytes, int index, int length)
         {
             var c = crc ^ 0xffffffffU;
             var l = index + length;
@@ -130,7 +130,7 @@ namespace Kafka.Common.Hashing
         /// <param name="index"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static uint Update(uint crc, Stream bytes, long upper)
+        public static uint Update(uint crc, [NotNull] in Stream bytes, long upper)
         {
             var c = crc ^ 0xffffffffU;
             while (bytes.Position < upper)

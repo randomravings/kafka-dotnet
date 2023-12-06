@@ -1,13 +1,12 @@
 ﻿using Kafka.Client.Config;
 using Kafka.Client.IO;
-using Kafka.Client.IO.Stream;
+using Kafka.Client.IO.Read;
+using Kafka.Client.IO.Write;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
 using Kafka.Client.Model.Internal;
-using Kafka.Client.Net;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
-using Kafka.Common.Net;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
@@ -24,7 +23,7 @@ namespace Kafka.Client
         IConsumerGroups
     {
         private readonly Net.Cluster _connections =
-            new Net.Cluster(
+            new(
                 bootstrapServers,
                 config,
                 logger
@@ -45,38 +44,38 @@ namespace Kafka.Client
             ).ConfigureAwait(false);
         }
 
-        IInputStreamBuilder IKafkaClient.CreateInputStream() =>
-            new InputStreamBuilder(
+        IReadStreamBuilder IKafkaClient.CreateInputStream() =>
+            new ReadStreamBuilder(
                 _connections,
-                _config.Consumer,
+                _config.ReadStream,
                 _logger
             )
         ;
 
-        IInputStreamBuilder IKafkaClient.CreateInputStream(Action<InputStreamConfig> configure)
+        IReadStreamBuilder IKafkaClient.CreateInputStream(Action<ReadStreamConfig> configure)
         {
-            var config = new InputStreamConfig();
+            var config = new ReadStreamConfig();
             configure(config);
-            return new InputStreamBuilder(
+            return new ReadStreamBuilder(
                 _connections,
                 config,
                 _logger
             );
         }
 
-        IOutputStreamBuilder IKafkaClient.CreateOutputStream() =>
-            new OutputStreamBuilder(
+        IWriteStreamBuilder IKafkaClient.CreateOutputStream() =>
+            new WriteStreamBuilder(
                 _connections,
-                _config.Producer,
+                _config.WriteStream,
                 _logger
             )
         ;
 
-        IOutputStreamBuilder IKafkaClient.CreateOutputStream(Action<OutputStreamConfig> configure)
+        IWriteStreamBuilder IKafkaClient.CreateOutputStream(Action<WriteStreamConfig> configure)
         {
-            var config = new OutputStreamConfig();
+            var config = new WriteStreamConfig();
             configure(config);
-            return new OutputStreamBuilder(
+            return new WriteStreamBuilder(
                 _connections,
                 config,
                 _logger
@@ -162,8 +161,8 @@ namespace Kafka.Client
                             ) :
                             ImmutableSortedDictionary<string, string?>.Empty,
                         r.ErrorCodeField == 0 ?
-                            Errors.Known.NONE :
-                            Errors.Translate(r.ErrorCodeField)
+                            ApiError.None :
+                            ApiErrors.Translate(r.ErrorCodeField)
                     )
                 )
                 .ToImmutableArray()
@@ -232,8 +231,8 @@ namespace Kafka.Client
                         r.TopicIdField,
                         r.NameField,
                         r.ErrorCodeField == 0 ?
-                            Errors.Known.NONE :
-                            Errors.Translate(r.ErrorCodeField)
+                            ApiError.None :
+                            ApiErrors.Translate(r.ErrorCodeField)
                     )
                 )
                 .ToImmutableArray()
@@ -331,16 +330,16 @@ namespace Kafka.Client
                                 .Select(i => new NodeId(i))
                                 .ToImmutableArray(),
                             p.ErrorCodeField == 0 ?
-                                Errors.Known.NONE :
-                                Errors.Translate(p.ErrorCodeField)
+                                ApiError.None :
+                                ApiErrors.Translate(p.ErrorCodeField)
                         ))
                         .ToImmutableArray(),
                     options.IncludeTopicAuthorizedOperations ?
                         t.TopicAuthorizedOperationsField :
                         0,
                     t.ErrorCodeField == 0 ?
-                        Errors.Known.NONE :
-                        Errors.Translate(t.ErrorCodeField)
+                        ApiError.None :
+                        ApiErrors.Translate(t.ErrorCodeField)
                 ))
                 .OrderBy(t => t.TopicName, TopicNameCompare.Instance)
                 .ThenBy(t => t.TopicId)
@@ -514,7 +513,7 @@ namespace Kafka.Client
             await FetchTopicPartitionOffsets(
                 consumerGroup,
                 ToReadOnlySet(topicName),
-                ImmutableSortedSet<TopicPartition>.Empty,
+                [],
                 cancellationToken
             ).ConfigureAwait(false)
         ;
@@ -527,7 +526,7 @@ namespace Kafka.Client
             await FetchTopicPartitionOffsets(
                 consumerGroup,
                 topicNames,
-                ImmutableSortedSet<TopicPartition>.Empty,
+                [],
                 cancellationToken
             ).ConfigureAwait(false)
         ;

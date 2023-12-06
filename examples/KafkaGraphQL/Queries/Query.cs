@@ -27,7 +27,7 @@ namespace KafkaGraphQL.Queries
         )
         {
             var result = await kafkaClient.Topics.Get(
-                topicNames ?? Array.Empty<TopicName>(),
+                topicNames ?? [],
                 options ?? GetTopicsOptions.Empty,
                 cancellationToken
             );
@@ -37,7 +37,7 @@ namespace KafkaGraphQL.Queries
         [GraphQLDescription("Gets a list of topic and partition descriptions.")]
         public async ValueTask<IQueryable<Record>> ReadFromTopic(
             [Service]
-            IStreamReader<string, string> streamReader,
+            IApplicationReader<string, string> streamReader,
             int maxCount,
             int timeoutMs,
 
@@ -59,7 +59,7 @@ namespace KafkaGraphQL.Queries
                     );
                     if (result == null)
                         break;
-                    results.Add(new(result.Key.Value, result.Value.Value));
+                    results.Add(new(result.Key, result.Value));
                     if (results.Count >= maxCount)
                         break;
                 }

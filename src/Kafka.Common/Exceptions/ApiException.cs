@@ -1,15 +1,12 @@
 ﻿using Kafka.Common.Model;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Kafka.Common.Exceptions
 {
-    public class ApiException : Exception
+    public class ApiException(
+        [DisallowNull] ApiError error
+    ) : Exception(error.Message)
     {
-        public ApiException(Error error) :
-            base(error.Message)
-        {
-            Error = error;
-        }
-
-        public Error Error { get; init; }
+        public ApiError Error { get; init; } = error;
     }
 }

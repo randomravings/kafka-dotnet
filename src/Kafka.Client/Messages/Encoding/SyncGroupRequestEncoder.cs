@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using SyncGroupRequestAssignment = Kafka.Client.Messages.SyncGroupRequestData.SyncGroupRequestAssignment;
 
 namespace Kafka.Client.Messages.Encoding
@@ -21,14 +22,14 @@ namespace Kafka.Client.Messages.Encoding
                 WriteV0
             )
         { }
-        protected override EncodeDelegate<RequestHeaderData> GetHeaderEncoder(short apiVersion)
+        protected override EncodeValue<RequestHeaderData> GetHeaderEncoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return RequestHeaderEncoder.WriteV2;
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeDelegate<SyncGroupRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<SyncGroupRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
@@ -40,141 +41,153 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0(byte[] buffer, int index, SyncGroupRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.GenerationIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV0);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.GenerationIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteArray<SyncGroupRequestAssignment>(buffer, i, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV0);
+            return i;
         }
-        private static int WriteV1(byte[] buffer, int index, SyncGroupRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.GenerationIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV1);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.GenerationIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteArray<SyncGroupRequestAssignment>(buffer, i, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV1);
+            return i;
         }
-        private static int WriteV2(byte[] buffer, int index, SyncGroupRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.GenerationIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV2);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.GenerationIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteArray<SyncGroupRequestAssignment>(buffer, i, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV2);
+            return i;
         }
-        private static int WriteV3(byte[] buffer, int index, SyncGroupRequestData message)
+        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.GenerationIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteNullableString(buffer, index, message.GroupInstanceIdField);
-            index = BinaryEncoder.WriteArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV3);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.GenerationIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteNullableString(buffer, i, message.GroupInstanceIdField);
+            i = BinaryEncoder.WriteArray<SyncGroupRequestAssignment>(buffer, i, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV3);
+            return i;
         }
-        private static int WriteV4(byte[] buffer, int index, SyncGroupRequestData message)
+        private static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestData message)
         {
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.GenerationIdField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
-            index = BinaryEncoder.WriteCompactArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV4);
+            var i = index;
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.GenerationIdField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.GroupInstanceIdField);
+            i = BinaryEncoder.WriteCompactArray<SyncGroupRequestAssignment>(buffer, i, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV4);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV5(byte[] buffer, int index, SyncGroupRequestData message)
+        private static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestData message)
         {
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.GenerationIdField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.ProtocolNameField);
-            index = BinaryEncoder.WriteCompactArray<SyncGroupRequestAssignment>(buffer, index, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV5);
+            var i = index;
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.GenerationIdField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.GroupInstanceIdField);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.ProtocolNameField);
+            i = BinaryEncoder.WriteCompactArray<SyncGroupRequestAssignment>(buffer, i, message.AssignmentsField, SyncGroupRequestAssignmentEncoder.WriteV5);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class SyncGroupRequestAssignmentEncoder
         {
-            public static int WriteV0(byte[] buffer, int index, SyncGroupRequestAssignment message)
+            public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestAssignment message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.AssignmentField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.AssignmentField);
+                return i;
             }
-            public static int WriteV1(byte[] buffer, int index, SyncGroupRequestAssignment message)
+            public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestAssignment message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.AssignmentField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.AssignmentField);
+                return i;
             }
-            public static int WriteV2(byte[] buffer, int index, SyncGroupRequestAssignment message)
+            public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestAssignment message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.AssignmentField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.AssignmentField);
+                return i;
             }
-            public static int WriteV3(byte[] buffer, int index, SyncGroupRequestAssignment message)
+            public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestAssignment message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.AssignmentField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.AssignmentField);
+                return i;
             }
-            public static int WriteV4(byte[] buffer, int index, SyncGroupRequestAssignment message)
+            public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestAssignment message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.MemberIdField);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, message.AssignmentField);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.MemberIdField);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, message.AssignmentField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV5(byte[] buffer, int index, SyncGroupRequestAssignment message)
+            public static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in SyncGroupRequestAssignment message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.MemberIdField);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, message.AssignmentField);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.MemberIdField);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, message.AssignmentField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
         }
     }

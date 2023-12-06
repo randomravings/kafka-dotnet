@@ -4,8 +4,9 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic;
+using System.Diagnostics.CodeAnalysis;
 using ListOffsetsPartition = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition;
+using ListOffsetsTopic = Kafka.Client.Messages.ListOffsetsRequestData.ListOffsetsTopic;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -22,14 +23,14 @@ namespace Kafka.Client.Messages.Encoding
                 WriteV0
             )
         { }
-        protected override EncodeDelegate<RequestHeaderData> GetHeaderEncoder(short apiVersion)
+        protected override EncodeValue<RequestHeaderData> GetHeaderEncoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return RequestHeaderEncoder.WriteV2;
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeDelegate<ListOffsetsRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<ListOffsetsRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
@@ -44,285 +45,312 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0(byte[] buffer, int index, ListOffsetsRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsRequestData message)
         {
-            index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
-            index = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicEncoder.WriteV0);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteInt32(buffer, i, message.ReplicaIdField);
+            i = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, i, message.TopicsField, ListOffsetsTopicEncoder.WriteV0);
+            return i;
         }
-        private static int WriteV1(byte[] buffer, int index, ListOffsetsRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsRequestData message)
         {
-            index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
-            index = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicEncoder.WriteV1);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteInt32(buffer, i, message.ReplicaIdField);
+            i = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, i, message.TopicsField, ListOffsetsTopicEncoder.WriteV1);
+            return i;
         }
-        private static int WriteV2(byte[] buffer, int index, ListOffsetsRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsRequestData message)
         {
-            index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.IsolationLevelField);
-            index = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicEncoder.WriteV2);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteInt32(buffer, i, message.ReplicaIdField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.IsolationLevelField);
+            i = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, i, message.TopicsField, ListOffsetsTopicEncoder.WriteV2);
+            return i;
         }
-        private static int WriteV3(byte[] buffer, int index, ListOffsetsRequestData message)
+        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsRequestData message)
         {
-            index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.IsolationLevelField);
-            index = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicEncoder.WriteV3);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteInt32(buffer, i, message.ReplicaIdField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.IsolationLevelField);
+            i = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, i, message.TopicsField, ListOffsetsTopicEncoder.WriteV3);
+            return i;
         }
-        private static int WriteV4(byte[] buffer, int index, ListOffsetsRequestData message)
+        private static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsRequestData message)
         {
-            index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.IsolationLevelField);
-            index = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicEncoder.WriteV4);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteInt32(buffer, i, message.ReplicaIdField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.IsolationLevelField);
+            i = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, i, message.TopicsField, ListOffsetsTopicEncoder.WriteV4);
+            return i;
         }
-        private static int WriteV5(byte[] buffer, int index, ListOffsetsRequestData message)
+        private static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsRequestData message)
         {
-            index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.IsolationLevelField);
-            index = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicEncoder.WriteV5);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteInt32(buffer, i, message.ReplicaIdField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.IsolationLevelField);
+            i = BinaryEncoder.WriteArray<ListOffsetsTopic>(buffer, i, message.TopicsField, ListOffsetsTopicEncoder.WriteV5);
+            return i;
         }
-        private static int WriteV6(byte[] buffer, int index, ListOffsetsRequestData message)
+        private static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsRequestData message)
         {
-            index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.IsolationLevelField);
-            index = BinaryEncoder.WriteCompactArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicEncoder.WriteV6);
+            var i = index;
+            i = BinaryEncoder.WriteInt32(buffer, i, message.ReplicaIdField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.IsolationLevelField);
+            i = BinaryEncoder.WriteCompactArray<ListOffsetsTopic>(buffer, i, message.TopicsField, ListOffsetsTopicEncoder.WriteV6);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV7(byte[] buffer, int index, ListOffsetsRequestData message)
+        private static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsRequestData message)
         {
-            index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.IsolationLevelField);
-            index = BinaryEncoder.WriteCompactArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicEncoder.WriteV7);
+            var i = index;
+            i = BinaryEncoder.WriteInt32(buffer, i, message.ReplicaIdField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.IsolationLevelField);
+            i = BinaryEncoder.WriteCompactArray<ListOffsetsTopic>(buffer, i, message.TopicsField, ListOffsetsTopicEncoder.WriteV7);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV8(byte[] buffer, int index, ListOffsetsRequestData message)
+        private static int WriteV8([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsRequestData message)
         {
-            index = BinaryEncoder.WriteInt32(buffer, index, message.ReplicaIdField);
-            index = BinaryEncoder.WriteInt8(buffer, index, message.IsolationLevelField);
-            index = BinaryEncoder.WriteCompactArray<ListOffsetsTopic>(buffer, index, message.TopicsField, ListOffsetsTopicEncoder.WriteV8);
+            var i = index;
+            i = BinaryEncoder.WriteInt32(buffer, i, message.ReplicaIdField);
+            i = BinaryEncoder.WriteInt8(buffer, i, message.IsolationLevelField);
+            i = BinaryEncoder.WriteCompactArray<ListOffsetsTopic>(buffer, i, message.TopicsField, ListOffsetsTopicEncoder.WriteV8);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class ListOffsetsTopicEncoder
         {
-            public static int WriteV0(byte[] buffer, int index, ListOffsetsTopic message)
+            public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV0);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, i, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV0);
+                return i;
             }
-            public static int WriteV1(byte[] buffer, int index, ListOffsetsTopic message)
+            public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV1);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, i, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV1);
+                return i;
             }
-            public static int WriteV2(byte[] buffer, int index, ListOffsetsTopic message)
+            public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV2);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, i, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV2);
+                return i;
             }
-            public static int WriteV3(byte[] buffer, int index, ListOffsetsTopic message)
+            public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV3);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, i, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV3);
+                return i;
             }
-            public static int WriteV4(byte[] buffer, int index, ListOffsetsTopic message)
+            public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV4);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, i, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV4);
+                return i;
             }
-            public static int WriteV5(byte[] buffer, int index, ListOffsetsTopic message)
+            public static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsTopic message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV5);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteArray<ListOffsetsPartition>(buffer, i, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV5);
+                return i;
             }
-            public static int WriteV6(byte[] buffer, int index, ListOffsetsTopic message)
+            public static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsTopic message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteCompactArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV6);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteCompactArray<ListOffsetsPartition>(buffer, i, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV6);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV7(byte[] buffer, int index, ListOffsetsTopic message)
+            public static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsTopic message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteCompactArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV7);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteCompactArray<ListOffsetsPartition>(buffer, i, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV7);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV8(byte[] buffer, int index, ListOffsetsTopic message)
+            public static int WriteV8([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsTopic message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteCompactArray<ListOffsetsPartition>(buffer, index, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV8);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteCompactArray<ListOffsetsPartition>(buffer, i, message.PartitionsField, ListOffsetsPartitionEncoder.WriteV8);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
             [GeneratedCodeAttribute("kgen", "1.0.0.0")]
             private static class ListOffsetsPartitionEncoder
             {
-                public static int WriteV0(byte[] buffer, int index, ListOffsetsPartition message)
+                public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsPartition message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteInt64(buffer, index, message.TimestampField);
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.MaxNumOffsetsField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteInt64(buffer, i, message.TimestampField);
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.MaxNumOffsetsField);
+                    return i;
                 }
-                public static int WriteV1(byte[] buffer, int index, ListOffsetsPartition message)
+                public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsPartition message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteInt64(buffer, index, message.TimestampField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteInt64(buffer, i, message.TimestampField);
+                    return i;
                 }
-                public static int WriteV2(byte[] buffer, int index, ListOffsetsPartition message)
+                public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsPartition message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteInt64(buffer, index, message.TimestampField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteInt64(buffer, i, message.TimestampField);
+                    return i;
                 }
-                public static int WriteV3(byte[] buffer, int index, ListOffsetsPartition message)
+                public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsPartition message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteInt64(buffer, index, message.TimestampField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteInt64(buffer, i, message.TimestampField);
+                    return i;
                 }
-                public static int WriteV4(byte[] buffer, int index, ListOffsetsPartition message)
+                public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsPartition message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
-                    index = BinaryEncoder.WriteInt64(buffer, index, message.TimestampField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.CurrentLeaderEpochField);
+                    i = BinaryEncoder.WriteInt64(buffer, i, message.TimestampField);
+                    return i;
                 }
-                public static int WriteV5(byte[] buffer, int index, ListOffsetsPartition message)
+                public static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsPartition message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
-                    index = BinaryEncoder.WriteInt64(buffer, index, message.TimestampField);
-                    return index;
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.CurrentLeaderEpochField);
+                    i = BinaryEncoder.WriteInt64(buffer, i, message.TimestampField);
+                    return i;
                 }
-                public static int WriteV6(byte[] buffer, int index, ListOffsetsPartition message)
+                public static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsPartition message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
-                    index = BinaryEncoder.WriteInt64(buffer, index, message.TimestampField);
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.CurrentLeaderEpochField);
+                    i = BinaryEncoder.WriteInt64(buffer, i, message.TimestampField);
                     var taggedFieldsCount = 0u;
                     var previousTagged = -1;
                     taggedFieldsCount += (uint)message.TaggedFields.Length;
-                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                     foreach(var taggedField in message.TaggedFields)
                     {
                         if(taggedField.Tag <= previousTagged)
                             throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                        i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                        i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                     }
-                    return index;
+                    return i;
                 }
-                public static int WriteV7(byte[] buffer, int index, ListOffsetsPartition message)
+                public static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsPartition message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
-                    index = BinaryEncoder.WriteInt64(buffer, index, message.TimestampField);
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.CurrentLeaderEpochField);
+                    i = BinaryEncoder.WriteInt64(buffer, i, message.TimestampField);
                     var taggedFieldsCount = 0u;
                     var previousTagged = -1;
                     taggedFieldsCount += (uint)message.TaggedFields.Length;
-                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                     foreach(var taggedField in message.TaggedFields)
                     {
                         if(taggedField.Tag <= previousTagged)
                             throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                        i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                        i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                     }
-                    return index;
+                    return i;
                 }
-                public static int WriteV8(byte[] buffer, int index, ListOffsetsPartition message)
+                public static int WriteV8([NotNull] in byte[] buffer, in int index, [NotNull] in ListOffsetsPartition message)
                 {
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.PartitionIndexField);
-                    index = BinaryEncoder.WriteInt32(buffer, index, message.CurrentLeaderEpochField);
-                    index = BinaryEncoder.WriteInt64(buffer, index, message.TimestampField);
+                    var i = index;
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.PartitionIndexField);
+                    i = BinaryEncoder.WriteInt32(buffer, i, message.CurrentLeaderEpochField);
+                    i = BinaryEncoder.WriteInt64(buffer, i, message.TimestampField);
                     var taggedFieldsCount = 0u;
                     var previousTagged = -1;
                     taggedFieldsCount += (uint)message.TaggedFields.Length;
-                    index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                    i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                     foreach(var taggedField in message.TaggedFields)
                     {
                         if(taggedField.Tag <= previousTagged)
                             throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                        index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                        index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                        i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                        i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                     }
-                    return index;
+                    return i;
                 }
             }
         }

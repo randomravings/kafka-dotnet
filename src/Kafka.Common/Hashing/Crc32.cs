@@ -1,4 +1,6 @@
-﻿namespace Kafka.Common.Hashing
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace Kafka.Common.Hashing
 {
     /// <summary>
     /// CRC implemtation (ISO 3309).
@@ -13,7 +15,7 @@
         /// </summary>
         /// <param name="bytes">Span to compute from.</param>
         /// <returns></returns>
-        public static uint Update(byte[] bytes) =>
+        public static uint Update([NotNull] byte[] bytes) =>
             Update(0, bytes, 0, bytes.Length)
         ;
 
@@ -23,7 +25,7 @@
         /// <param name="crc">Prior value.</param>
         /// <param name="bytes">Span to compute from.</param>
         /// <returns></returns>
-        public static uint Update(uint crc, byte[] bytes) =>
+        public static uint Update(uint crc, [NotNull] byte[] bytes) =>
             Update(crc, bytes, 0, bytes.Length)
         ;
 
@@ -34,7 +36,7 @@
         /// <param name="index"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static uint Update(byte[] bytes, int index, int length) =>
+        public static uint Update([NotNull] byte[] bytes, int index, int length) =>
             Update(0U, bytes, index, length)
         ;
 
@@ -46,7 +48,7 @@
         /// <param name="index"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static uint Update(uint crc, byte[] bytes, int index, int length)
+        public static uint Update(uint crc, [NotNull] byte[] bytes, int index, int length)
         {
             var c = crc ^ 0xffffffffU;
             var l = index + length;

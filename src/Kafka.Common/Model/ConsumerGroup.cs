@@ -39,5 +39,7 @@
                 _ => false,
             }
         ;
+        public static ConsumerGroup FromString(string value) => new(value);
+        public int CompareTo(ConsumerGroup other) => string.CompareOrdinal(this.Value, other.Value);
     }
 }

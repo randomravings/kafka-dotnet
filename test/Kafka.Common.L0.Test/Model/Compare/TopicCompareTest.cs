@@ -17,11 +17,11 @@ namespace Kafka.Common.L0.Test.Model.Compare
         [TestCase([null, "a", null, "a"], ExpectedResult = 0)]
         public int CompareTest(string? idA, string? nameA, string? idB, string? nameB)
         {
-            var topicIdA = (TopicId)idA;
+            var topicIdA = idA == null ? Guid.Empty : Guid.Parse(idA);
             var topicNameA = (TopicName)nameA;
             var a = new Topic(topicIdA, topicNameA);
 
-            var topicIdB = (TopicId)idB;
+            var topicIdB = idB == null ? Guid.Empty : Guid.Parse(idB);
             var topicNameB = (TopicName)nameB;
             var b = new Topic(topicIdB, topicNameB);
 
@@ -39,11 +39,11 @@ namespace Kafka.Common.L0.Test.Model.Compare
         [TestCase([null, "a", null, "a"], ExpectedResult = true)]
         public bool EqualityTest(string? idA, string? nameA, string? idB, string? nameB)
         {
-            var topicIdA = (TopicId)idA;
+            var topicIdA = idA == null ? Guid.Empty : Guid.Parse(idA);
             var topicNameA = (TopicName)nameA;
             var a = new Topic(topicIdA, topicNameA);
 
-            var topicIdB = (TopicId)idB;
+            var topicIdB = idB == null ? Guid.Empty : Guid.Parse(idB);
             var topicNameB = (TopicName)nameB;
             var b = new Topic(topicIdB, topicNameB);
 
@@ -61,11 +61,11 @@ namespace Kafka.Common.L0.Test.Model.Compare
         [TestCase([null, "a", null, "a"], ExpectedResult = true)]
         public bool HashCodeTest(string? idA, string? nameA, string? idB, string? nameB)
         {
-            var topicIdA = (TopicId)idA;
+            var topicIdA = idA == null ? Guid.Empty : Guid.Parse(idA);
             var topicNameA = (TopicName)nameA;
             var a = new Topic(topicIdA, topicNameA);
 
-            var topicIdB = (TopicId)idB;
+            var topicIdB = idB == null ? Guid.Empty : Guid.Parse(idB);
             var topicNameB = (TopicName)nameB;
             var b = new Topic(topicIdB, topicNameB);
 

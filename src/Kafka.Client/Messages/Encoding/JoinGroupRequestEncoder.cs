@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using JoinGroupRequestProtocol = Kafka.Client.Messages.JoinGroupRequestData.JoinGroupRequestProtocol;
 
 namespace Kafka.Client.Messages.Encoding
@@ -21,14 +22,14 @@ namespace Kafka.Client.Messages.Encoding
                 WriteV0
             )
         { }
-        protected override EncodeDelegate<RequestHeaderData> GetHeaderEncoder(short apiVersion)
+        protected override EncodeValue<RequestHeaderData> GetHeaderEncoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return RequestHeaderEncoder.WriteV2;
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeDelegate<JoinGroupRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<JoinGroupRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
@@ -44,262 +45,282 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV0);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV0);
+            return i;
         }
-        private static int WriteV1(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.RebalanceTimeoutMsField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV1);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.RebalanceTimeoutMsField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV1);
+            return i;
         }
-        private static int WriteV2(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.RebalanceTimeoutMsField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV2);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.RebalanceTimeoutMsField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV2);
+            return i;
         }
-        private static int WriteV3(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.RebalanceTimeoutMsField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV3);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.RebalanceTimeoutMsField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV3);
+            return i;
         }
-        private static int WriteV4(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.RebalanceTimeoutMsField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV4);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.RebalanceTimeoutMsField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV4);
+            return i;
         }
-        private static int WriteV5(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.RebalanceTimeoutMsField);
-            index = BinaryEncoder.WriteString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteNullableString(buffer, index, message.GroupInstanceIdField);
-            index = BinaryEncoder.WriteString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV5);
-            return index;
+            var i = index;
+            i = BinaryEncoder.WriteString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.RebalanceTimeoutMsField);
+            i = BinaryEncoder.WriteString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteNullableString(buffer, i, message.GroupInstanceIdField);
+            i = BinaryEncoder.WriteString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV5);
+            return i;
         }
-        private static int WriteV6(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.RebalanceTimeoutMsField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteCompactArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV6);
+            var i = index;
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.RebalanceTimeoutMsField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.GroupInstanceIdField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteCompactArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV6);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV7(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.RebalanceTimeoutMsField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteCompactArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV7);
+            var i = index;
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.RebalanceTimeoutMsField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.GroupInstanceIdField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteCompactArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV7);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV8(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV8([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.RebalanceTimeoutMsField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteCompactArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV8);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.ReasonField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.RebalanceTimeoutMsField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.GroupInstanceIdField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteCompactArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV8);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.ReasonField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
-        private static int WriteV9(byte[] buffer, int index, JoinGroupRequestData message)
+        private static int WriteV9([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestData message)
         {
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.GroupIdField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.SessionTimeoutMsField);
-            index = BinaryEncoder.WriteInt32(buffer, index, message.RebalanceTimeoutMsField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.MemberIdField);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.GroupInstanceIdField);
-            index = BinaryEncoder.WriteCompactString(buffer, index, message.ProtocolTypeField);
-            index = BinaryEncoder.WriteCompactArray<JoinGroupRequestProtocol>(buffer, index, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV9);
-            index = BinaryEncoder.WriteCompactNullableString(buffer, index, message.ReasonField);
+            var i = index;
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.GroupIdField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.SessionTimeoutMsField);
+            i = BinaryEncoder.WriteInt32(buffer, i, message.RebalanceTimeoutMsField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.MemberIdField);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.GroupInstanceIdField);
+            i = BinaryEncoder.WriteCompactString(buffer, i, message.ProtocolTypeField);
+            i = BinaryEncoder.WriteCompactArray<JoinGroupRequestProtocol>(buffer, i, message.ProtocolsField, JoinGroupRequestProtocolEncoder.WriteV9);
+            i = BinaryEncoder.WriteCompactNullableString(buffer, i, message.ReasonField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;
-            index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
             foreach(var taggedField in message.TaggedFields)
             {
                 if(taggedField.Tag <= previousTagged)
                     throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
             }
-            return index;
+            return i;
         }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class JoinGroupRequestProtocolEncoder
         {
-            public static int WriteV0(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.MetadataField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.MetadataField);
+                return i;
             }
-            public static int WriteV1(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.MetadataField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.MetadataField);
+                return i;
             }
-            public static int WriteV2(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.MetadataField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.MetadataField);
+                return i;
             }
-            public static int WriteV3(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.MetadataField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.MetadataField);
+                return i;
             }
-            public static int WriteV4(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV4([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.MetadataField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.MetadataField);
+                return i;
             }
-            public static int WriteV5(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteBytes(buffer, index, message.MetadataField);
-                return index;
+                var i = index;
+                i = BinaryEncoder.WriteString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteBytes(buffer, i, message.MetadataField);
+                return i;
             }
-            public static int WriteV6(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV6([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, message.MetadataField);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, message.MetadataField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV7(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV7([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, message.MetadataField);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, message.MetadataField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV8(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV8([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, message.MetadataField);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, message.MetadataField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
-            public static int WriteV9(byte[] buffer, int index, JoinGroupRequestProtocol message)
+            public static int WriteV9([NotNull] in byte[] buffer, in int index, [NotNull] in JoinGroupRequestProtocol message)
             {
-                index = BinaryEncoder.WriteCompactString(buffer, index, message.NameField);
-                index = BinaryEncoder.WriteCompactBytes(buffer, index, message.MetadataField);
+                var i = index;
+                i = BinaryEncoder.WriteCompactString(buffer, i, message.NameField);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, message.MetadataField);
                 var taggedFieldsCount = 0u;
                 var previousTagged = -1;
                 taggedFieldsCount += (uint)message.TaggedFields.Length;
-                index = BinaryEncoder.WriteVarUInt32(buffer, index, taggedFieldsCount);
+                i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
                 foreach(var taggedField in message.TaggedFields)
                 {
                     if(taggedField.Tag <= previousTagged)
                         throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
-                    index = BinaryEncoder.WriteVarInt32(buffer, index, taggedField.Tag);
-                    index = BinaryEncoder.WriteCompactBytes(buffer, index, taggedField.Value);
+                    i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                    i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
                 }
-                return index;
+                return i;
             }
         }
     }

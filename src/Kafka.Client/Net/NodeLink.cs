@@ -1,5 +1,4 @@
-﻿using Kafka.Client.Collections;
-using Kafka.Client.Config;
+﻿using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Messages.Encoding;
@@ -48,56 +47,56 @@ namespace Kafka.Client.Net
             []
         );
 
-        private readonly IRequestEncoder<RequestHeaderData, ApiVersionsRequestData> _apiVersionRequestHandler = new ApiVersionsRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, ApiVersionsResponseData> _apiVersionResponseHandler = new ApiVersionsResponseDecoder();
+        private readonly ApiVersionsRequestEncoder _apiVersionRequestEncoder = new();
+        private readonly ApiVersionsResponseDecoder _apiVersionResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, MetadataRequestData> _metadataRequestHandler = new MetadataRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, MetadataResponseData> _metadataResponseHandler = new MetadataResponseDecoder();
+        private readonly MetadataRequestEncoder _metadataRequestEncoder = new();
+        private readonly MetadataResponseDecoder _metadataResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, CreateTopicsRequestData> _createTopicsRequestHandler = new CreateTopicsRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, CreateTopicsResponseData> _createTopicsResponseHandler = new CreateTopicsResponseDecoder();
+        private readonly CreateTopicsRequestEncoder _createTopicsRequestEncoder = new();
+        private readonly CreateTopicsResponseDecoder _createTopicsResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, DeleteTopicsRequestData> _deleteTopicsRequestHandler = new DeleteTopicsRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, DeleteTopicsResponseData> _deleteTopicsResponseHandler = new DeleteTopicsResponseDecoder();
+        private readonly DeleteTopicsRequestEncoder _deleteTopicsRequestEncoder = new();
+        private readonly DeleteTopicsResponseDecoder _deleteTopicsResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, FindCoordinatorRequestData> _findCoordinatorRequestHandler = new FindCoordinatorRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, FindCoordinatorResponseData> _findCoordinatorResponseHandler = new FindCoordinatorResponseDecoder();
+        private readonly FindCoordinatorRequestEncoder _findCoordinatorRequestEncoder = new();
+        private readonly FindCoordinatorResponseDecoder _findCoordinatorResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, OffsetFetchRequestData> _offsetFetchRequestHandler = new OffsetFetchRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, OffsetFetchResponseData> _offsetFetchResponseHandler = new OffsetFetchResponseDecoder();
+        private readonly OffsetFetchRequestEncoder _offsetFetchRequestEncoder = new();
+        private readonly OffsetFetchResponseDecoder _offsetFetchResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, ListOffsetsRequestData> _listOffsetsRequestHandler = new ListOffsetsRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, ListOffsetsResponseData> _listOffsetsResponseHandler = new ListOffsetsResponseDecoder();
+        private readonly ListOffsetsRequestEncoder _listOffsetsRequestEncoder = new();
+        private readonly ListOffsetsResponseDecoder _listOffsetsResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, InitProducerIdRequestData> _initProducerIdRequestHandler = new InitProducerIdRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, InitProducerIdResponseData> _initProducerIdResponseHandler = new InitProducerIdResponseDecoder();
+        private readonly InitProducerIdRequestEncoder _initProducerIdRequestEncoder = new();
+        private readonly InitProducerIdResponseDecoder _initProducerIdResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, ProduceRequestData> _produceRequestHandler = new ProduceRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, ProduceResponseData> _produceResponseHandler = new ProduceResponseDecoder();
+        private readonly ProduceRequestEncoder _produceRequestEncoder = new();
+        private readonly ProduceResponseDecoder _produceResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, AddPartitionsToTxnRequestData> _addPartitionsToTxnRequestHandler = new AddPartitionsToTxnRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, AddPartitionsToTxnResponseData> _addPartitionsToTxnResponseHandler = new AddPartitionsToTxnResponseDecoder();
+        private readonly AddPartitionsToTxnRequestEncoder _addPartitionsToTxnRequestEncoder = new();
+        private readonly AddPartitionsToTxnResponseDecoder _addPartitionsToTxnResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, EndTxnRequestData> _endTxnRequestHandler = new EndTxnRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, EndTxnResponseData> _endTxnResponseHandler = new EndTxnResponseDecoder();
+        private readonly EndTxnRequestEncoder _endTxnRequestEncoder = new();
+        private readonly EndTxnResponseDecoder _endTxnResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, HeartbeatRequestData> _heartbeatRequestHandler = new HeartbeatRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, HeartbeatResponseData> _heartbeatResponseHandler = new HeartbeatResponseDecoder();
+        private readonly HeartbeatRequestEncoder _heartbeatRequestEncoder = new();
+        private readonly HeartbeatResponseDecoder _heartbeatResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, JoinGroupRequestData> _joinGroupRequestHandler = new JoinGroupRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, JoinGroupResponseData> _joinGroupResponseHandler = new JoinGroupResponseDecoder();
+        private readonly JoinGroupRequestEncoder _joinGroupRequestEncoder = new();
+        private readonly JoinGroupResponseDecoder _joinGroupResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, SyncGroupRequestData> _syncGroupRequestHandler = new SyncGroupRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, SyncGroupResponseData> _syncGroupResponseHandler = new SyncGroupResponseDecoder();
+        private readonly SyncGroupRequestEncoder _syncGroupRequestEncoder = new();
+        private readonly SyncGroupResponseDecoder _syncGroupResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, LeaveGroupRequestData> _leaveGroupRequestHandler = new LeaveGroupRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, LeaveGroupResponseData> _leaveGroupResponseHandler = new LeaveGroupResponseDecoder();
+        private readonly LeaveGroupRequestEncoder _leaveGroupRequestEncoder = new();
+        private readonly LeaveGroupResponseDecoder _leaveGroupResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, OffsetCommitRequestData> _offsetCommitRequestHandler = new OffsetCommitRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, OffsetCommitResponseData> _offsetCommitResponseHandler = new OffsetCommitResponseDecoder();
+        private readonly OffsetCommitRequestEncoder _offsetCommitRequestEncoder = new();
+        private readonly OffsetCommitResponseDecoder _offsetCommitResponseDecoder = new();
 
-        private readonly IRequestEncoder<RequestHeaderData, FetchRequestData> _fetchRequestHandler = new FetchRequestEncoder();
-        private readonly IResponseDecoder<ResponseHeaderData, FetchResponseData> _fetchResponseHandler = new FetchResponseDecoder();
+        private readonly FetchRequestEncoder _fetchRequestEncoder = new();
+        private readonly FetchResponseDecoder _fetchResponseDecoder = new();
 
         private readonly string _clientId = config.Client.ClientId;
         private readonly int _retries = config.Client.Retries;
@@ -153,18 +152,18 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _apiVersionRequestHandler,
-                _apiVersionResponseHandler,
+                _apiVersionRequestEncoder,
+                _apiVersionResponseDecoder,
                 ApiVersionsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) ApiVersionsError(ApiVersionsResponseData response)
+        private static (bool, ImmutableArray<ApiError>) ApiVersionsError(ApiVersionsResponseData response)
         {
             if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<Error>.Empty);
-            var errors = ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
             return (IsTransient(errors), errors);
         }
 
@@ -193,24 +192,24 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _metadataRequestHandler,
-                _metadataResponseHandler,
+                _metadataRequestEncoder,
+                _metadataResponseDecoder,
                 MetadataError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) MetadataError(MetadataResponseData response)
+        private static (bool, ImmutableArray<ApiError>) MetadataError(MetadataResponseData response)
         {
             var errors = response
                 .TopicsField
                 .Where(t => t.ErrorCodeField != 0)
-                .Select(t => Errors.Translate(t.ErrorCodeField))
+                .Select(t => ApiErrors.Translate(t.ErrorCodeField))
                 .Concat(response
                     .TopicsField
                     .SelectMany(t => t.PartitionsField
                         .Where(p => p.ErrorCodeField != 0)
-                        .Select(p => Errors.Translate(p.ErrorCodeField))
+                        .Select(p => ApiErrors.Translate(p.ErrorCodeField))
                     )
                 )
                 .ToImmutableArray()
@@ -218,7 +217,7 @@ namespace Kafka.Client.Net
 
             if (errors.Length == 0)
                 return (false, errors);
-            if (errors.Any(r => r.Code == Errors.Known.UNKNOWN_TOPIC_OR_PARTITION.Code))
+            if (errors.Any(r => r.Code == ApiError.UnknownTopicOrPartition.Code))
                 return (false, errors);
             return (IsTransient(errors), errors);
         }
@@ -229,21 +228,21 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _createTopicsRequestHandler,
-                _createTopicsResponseHandler,
+                _createTopicsRequestEncoder,
+                _createTopicsResponseDecoder,
                 CreateTopicsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) CreateTopicsError(
+        private static (bool, ImmutableArray<ApiError>) CreateTopicsError(
             CreateTopicsResponseData response
         )
         {
             var errors = response
                 .TopicsField
                 .Where(r => r.ErrorCodeField != 0)
-                .Select(r => Errors.Translate(r.ErrorCodeField))
+                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
                 .ToImmutableArray()
             ;
             return (IsTransient(errors), errors);
@@ -255,23 +254,23 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _deleteTopicsRequestHandler,
-                _deleteTopicsResponseHandler,
+                _deleteTopicsRequestEncoder,
+                _deleteTopicsResponseDecoder,
                 DeleteTopicsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) DeleteTopicsError(
+        private static (bool, ImmutableArray<ApiError>) DeleteTopicsError(
             DeleteTopicsResponseData response
         )
         {
             var errors = response.ResponsesField
                 .Where(r => r.ErrorCodeField != 0)
-                .Select(r => Errors.Translate(r.ErrorCodeField))
+                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
                 .ToImmutableArray()
             ;
-            if(errors.Length > 0 && errors.Any(r => r.Code == Errors.Known.UNKNOWN_TOPIC_OR_PARTITION.Code))
+            if (errors.Length > 0 && errors.Any(r => r.Code == ApiError.UnknownTopicOrPartition.Code))
                 return (false, errors);
             return (IsTransient(errors), errors);
         }
@@ -282,23 +281,23 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _findCoordinatorRequestHandler,
-                _findCoordinatorResponseHandler,
+                _findCoordinatorRequestEncoder,
+                _findCoordinatorResponseDecoder,
                 FindCoordinatorError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) FindCoordinatorError(FindCoordinatorResponseData response)
+        private static (bool, ImmutableArray<ApiError>) FindCoordinatorError(FindCoordinatorResponseData response)
         {
             var errors = response.ErrorCodeField switch
             {
                 0 => response
                         .CoordinatorsField
                         .Where(r => r.ErrorCodeField != 0)
-                        .Select(r => Errors.Translate(r.ErrorCodeField))
+                        .Select(r => ApiErrors.Translate(r.ErrorCodeField))
                         .ToImmutableArray(),
-                _ => [Errors.Translate(response.ErrorCodeField)]
+                _ => [ApiErrors.Translate(response.ErrorCodeField)]
             };
             return (IsTransient(errors), errors);
         }
@@ -309,20 +308,20 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _offsetFetchRequestHandler,
-                _offsetFetchResponseHandler,
+                _offsetFetchRequestEncoder,
+                _offsetFetchResponseDecoder,
                 OffsetFetchError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) OffsetFetchError(
+        private static (bool, ImmutableArray<ApiError>) OffsetFetchError(
             OffsetFetchResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<Error>.Empty);
-            var errors = ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
             return (IsTransient(errors), errors);
         }
 
@@ -332,14 +331,14 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _listOffsetsRequestHandler,
-                _listOffsetsResponseHandler,
+                _listOffsetsRequestEncoder,
+                _listOffsetsResponseDecoder,
                 ListOffsetsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) ListOffsetsError(
+        private static (bool, ImmutableArray<ApiError>) ListOffsetsError(
             ListOffsetsResponseData response
         )
         {
@@ -347,7 +346,7 @@ namespace Kafka.Client.Net
                 .TopicsField
                 .SelectMany(t => t.PartitionsField
                     .Where(p => p.ErrorCodeField != 0)
-                    .Select(p => Errors.Translate(p.ErrorCodeField))
+                    .Select(p => ApiErrors.Translate(p.ErrorCodeField))
                 )
                 .ToImmutableArray()
             ;
@@ -359,18 +358,18 @@ namespace Kafka.Client.Net
             CancellationToken cancellationToken
         ) => await Execute(
                 request,
-                _initProducerIdRequestHandler,
-                _initProducerIdResponseHandler,
+                _initProducerIdRequestEncoder,
+                _initProducerIdResponseDecoder,
                 InitProducerIdError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) InitProducerIdError(InitProducerIdResponseData response)
+        private static (bool, ImmutableArray<ApiError>) InitProducerIdError(InitProducerIdResponseData response)
         {
             if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<Error>.Empty);
-            var errors = ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
             return (IsTransient(errors), errors);
         }
 
@@ -380,20 +379,20 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _produceRequestHandler,
-                _produceResponseHandler,
+                _produceRequestEncoder,
+                _produceResponseDecoder,
                 ProduceError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) ProduceError(ProduceResponseData response)
+        private static (bool, ImmutableArray<ApiError>) ProduceError(ProduceResponseData response)
         {
             var errors = response
                 .ResponsesField
                 .SelectMany(t => t.PartitionResponsesField
                     .Where(r => r.ErrorCodeField != 0)
-                    .Select(r => Errors.Translate(r.ErrorCodeField))
+                    .Select(r => ApiErrors.Translate(r.ErrorCodeField))
                 )
                 .ToImmutableArray()
             ;
@@ -406,7 +405,7 @@ namespace Kafka.Client.Net
         ) =>
             await ExecuteOneWay(
                 request,
-                _produceRequestHandler,
+                _produceRequestEncoder,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
@@ -417,14 +416,14 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _addPartitionsToTxnRequestHandler,
-                _addPartitionsToTxnResponseHandler,
+                _addPartitionsToTxnRequestEncoder,
+                _addPartitionsToTxnResponseDecoder,
                 AddPartitionsToTxnError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) AddPartitionsToTxnError(
+        private static (bool, ImmutableArray<ApiError>) AddPartitionsToTxnError(
             AddPartitionsToTxnResponseData response
         )
         {
@@ -432,7 +431,7 @@ namespace Kafka.Client.Net
                 .ResultsByTopicV3AndBelowField
                 .SelectMany(t => t.ResultsByPartitionField
                     .Where(p => p.PartitionErrorCodeField != 0)
-                    .Select(p => Errors.Translate(p.PartitionErrorCodeField))
+                    .Select(p => ApiErrors.Translate(p.PartitionErrorCodeField))
                 )
                 .ToImmutableArray()
             ;
@@ -445,20 +444,20 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _endTxnRequestHandler,
-                _endTxnResponseHandler,
+                _endTxnRequestEncoder,
+                _endTxnResponseDecoder,
                 EndTxnError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) EndTxnError(
+        private static (bool, ImmutableArray<ApiError>) EndTxnError(
             EndTxnResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<Error>.Empty);
-            var errors = ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
             return (IsTransient(errors), errors);
         }
 
@@ -468,20 +467,20 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _heartbeatRequestHandler,
-                _heartbeatResponseHandler,
+                _heartbeatRequestEncoder,
+                _heartbeatResponseDecoder,
                 HeartbeatError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) HeartbeatError(
+        private static (bool, ImmutableArray<ApiError>) HeartbeatError(
             HeartbeatResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<Error>.Empty);
-            var errors = ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
             return (IsTransient(errors), errors);
         }
 
@@ -491,20 +490,20 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _joinGroupRequestHandler,
-                _joinGroupResponseHandler,
+                _joinGroupRequestEncoder,
+                _joinGroupResponseDecoder,
                 JoinGroupError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) JoinGroupError(
+        private static (bool, ImmutableArray<ApiError>) JoinGroupError(
             JoinGroupResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<Error>.Empty);
-            var errors = ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
             return (IsTransient(errors), errors);
         }
 
@@ -514,20 +513,20 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _syncGroupRequestHandler,
-                _syncGroupResponseHandler,
+                _syncGroupRequestEncoder,
+                _syncGroupResponseDecoder,
                 SyncGroupError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) SyncGroupError(
+        private static (bool, ImmutableArray<ApiError>) SyncGroupError(
             SyncGroupResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<Error>.Empty);
-            var errors = ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
             return (IsTransient(errors), errors);
         }
 
@@ -537,20 +536,20 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _leaveGroupRequestHandler,
-                _leaveGroupResponseHandler,
+                _leaveGroupRequestEncoder,
+                _leaveGroupResponseDecoder,
                 LeaveGroupError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) LeaveGroupError(
+        private static (bool, ImmutableArray<ApiError>) LeaveGroupError(
             LeaveGroupResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<Error>.Empty);
-            var errors = ImmutableArray.Create(Errors.Translate(response.ErrorCodeField));
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
             return (IsTransient(errors), errors);
         }
 
@@ -560,14 +559,14 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _offsetCommitRequestHandler,
-                _offsetCommitResponseHandler,
+                _offsetCommitRequestEncoder,
+                _offsetCommitResponseDecoder,
                 OffsetCommitError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) OffsetCommitError(
+        private static (bool, ImmutableArray<ApiError>) OffsetCommitError(
             OffsetCommitResponseData response
         )
         {
@@ -575,7 +574,7 @@ namespace Kafka.Client.Net
                 .TopicsField
                 .SelectMany(t => t.PartitionsField
                     .Where(p => p.ErrorCodeField != 0)
-                    .Select(p => Errors.Translate(p.ErrorCodeField))
+                    .Select(p => ApiErrors.Translate(p.ErrorCodeField))
                 )
                 .ToImmutableArray()
             ;
@@ -588,14 +587,14 @@ namespace Kafka.Client.Net
         ) =>
             await Execute(
                 request,
-                _fetchRequestHandler,
-                _fetchResponseHandler,
+                _fetchRequestEncoder,
+                _fetchResponseDecoder,
                 FetchError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<Error>) FetchError(
+        private static (bool, ImmutableArray<ApiError>) FetchError(
             FetchResponseData response
         )
         {
@@ -605,10 +604,10 @@ namespace Kafka.Client.Net
                         .ResponsesField
                         .SelectMany(t => t.PartitionsField
                             .Where(p => p.ErrorCodeField != 0)
-                            .Select(p => Errors.Translate(p.ErrorCodeField))
+                            .Select(p => ApiErrors.Translate(p.ErrorCodeField))
                         )
                         .ToImmutableArray(),
-                _ => [Errors.Translate(response.ErrorCodeField)]
+                _ => [ApiErrors.Translate(response.ErrorCodeField)]
             };
             return (IsTransient(errors), errors);
         }
@@ -626,7 +625,7 @@ namespace Kafka.Client.Net
             TRequest requestMessage,
             IRequestEncoder<RequestHeaderData, TRequest> requestEncoder,
             IResponseDecoder<ResponseHeaderData, TResponse> responseDecoder,
-            Func<TResponse, (bool, ImmutableArray<Error>)> errorDelegate,
+            Func<TResponse, (bool, ImmutableArray<ApiError>)> errorDelegate,
             CancellationToken cancellationToken
         )
             where TRequest : notnull, RequestMessage
@@ -678,12 +677,11 @@ namespace Kafka.Client.Net
             TaskCompletionSource<byte[]> TaskCompletionSource
         );
 
-        private async Task ExecuteOneWay<TRequest>(
-            TRequest requestMessage,
-            IRequestEncoder<RequestHeaderData, TRequest> requestEncoder,
+        private async Task ExecuteOneWay(
+            ProduceRequestData requestMessage,
+            ProduceRequestEncoder requestEncoder,
             CancellationToken cancellationToken
         )
-            where TRequest : notnull, RequestMessage
         {
             var tries = 0;
             var requestBytes = new byte[1024 * 1024];
@@ -718,22 +716,22 @@ namespace Kafka.Client.Net
             CancellationToken cancellationToken
         )
         {
-            _apiVersionRequestHandler.SetApiVersion(0);
-            _apiVersionResponseHandler.SetApiVersion(0);
+            _apiVersionRequestEncoder.SetApiVersion(0);
+            _apiVersionResponseDecoder.SetApiVersion(0);
             var tries = 0;
             var requestBytes = new byte[1024 * 1024];
             while (true)
             {
                 var offset = 0;
-                var requestHeader = CreateRequestHeader(_apiVersionRequestHandler, []);
-                offset = _apiVersionRequestHandler.WriteHeader(requestBytes, offset, requestHeader);
-                offset = _apiVersionRequestHandler.WriteMessage(requestBytes, offset, API_VERSION_REQUEST);
+                var requestHeader = CreateRequestHeader(_apiVersionRequestEncoder, []);
+                offset = _apiVersionRequestEncoder.WriteHeader(requestBytes, offset, requestHeader);
+                offset = _apiVersionRequestEncoder.WriteMessage(requestBytes, offset, API_VERSION_REQUEST);
 
                 await _transport.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
                 var responseBytes = await _transport.Receive(cancellationToken).ConfigureAwait(false);
 
-                (offset, var _) = _apiVersionResponseHandler.ReadHeader(responseBytes, 0);
-                (_, var apiVersionsResponse) = _apiVersionResponseHandler.ReadMessage(responseBytes, offset);
+                (offset, var _) = _apiVersionResponseDecoder.ReadHeader(responseBytes, 0);
+                (_, var apiVersionsResponse) = _apiVersionResponseDecoder.ReadMessage(responseBytes, offset);
 
                 var (_, errors) = ApiVersionsError(apiVersionsResponse);
                 if (errors.Length == 0)
@@ -759,15 +757,15 @@ namespace Kafka.Client.Net
             while (true)
             {
                 var offset = 0;
-                var requestHeader = CreateRequestHeader(_metadataRequestHandler, []);
-                offset = _metadataRequestHandler.WriteHeader(requestBytes, offset, requestHeader);
-                offset = _metadataRequestHandler.WriteMessage(requestBytes, offset, CLUSTER_METADATA_REQUEST);
+                var requestHeader = CreateRequestHeader(_metadataRequestEncoder, []);
+                offset = _metadataRequestEncoder.WriteHeader(requestBytes, offset, requestHeader);
+                offset = _metadataRequestEncoder.WriteMessage(requestBytes, offset, CLUSTER_METADATA_REQUEST);
 
                 await _transport.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
                 var responseBytes = await _transport.Receive(cancellationToken).ConfigureAwait(false);
 
-                (offset, var _) = _metadataResponseHandler.ReadHeader(responseBytes, 0);
-                (_, var metadataResponse) = _metadataResponseHandler.ReadMessage(responseBytes, offset);
+                (offset, var _) = _metadataResponseDecoder.ReadHeader(responseBytes, 0);
+                (_, var metadataResponse) = _metadataResponseDecoder.ReadMessage(responseBytes, offset);
 
                 var (_, errors) = MetadataError(metadataResponse);
                 if (errors.Length == 0)
@@ -784,7 +782,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        private static void ApiExceptions(ImmutableArray<Error> errors) =>
+        private static void ApiExceptions(ImmutableArray<ApiError> errors) =>
             throw new AggregateException(
                 errors.Select(e => new ApiException(e))
             )
@@ -881,13 +879,13 @@ namespace Kafka.Client.Net
             }
         }
 
-        private static void LogError(ILogger logger, RequestHeaderData header, ImmutableArray<Error> errors)
+        private static void LogError(ILogger logger, RequestHeaderData header, ImmutableArray<ApiError> errors)
         {
             foreach (var error in errors)
                 logger.LogApiError(header, error);
         }
 
-        private static bool IsTransient(ImmutableArray<Error> errors)
+        private static bool IsTransient(ImmutableArray<ApiError> errors)
         {
             foreach (var error in errors)
                 if (!error.Retriable)
@@ -926,56 +924,56 @@ namespace Kafka.Client.Net
             foreach (var apiKey in apiVersionsResponse.ApiKeysField)
                 _apiVersions[(ApiKey)apiKey.ApiKeyField] = apiKey.MaxVersionField;
 
-            SetCodecVersion(_apiVersionRequestHandler, _apiVersions);
-            SetCodecVersion(_apiVersionResponseHandler, _apiVersions);
+            SetCodecVersion(_apiVersionRequestEncoder, _apiVersions);
+            SetCodecVersion(_apiVersionResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_metadataRequestHandler, _apiVersions);
-            SetCodecVersion(_metadataResponseHandler, _apiVersions);
+            SetCodecVersion(_metadataRequestEncoder, _apiVersions);
+            SetCodecVersion(_metadataResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_createTopicsRequestHandler, _apiVersions);
-            SetCodecVersion(_createTopicsResponseHandler, _apiVersions);
+            SetCodecVersion(_createTopicsRequestEncoder, _apiVersions);
+            SetCodecVersion(_createTopicsResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_deleteTopicsRequestHandler, _apiVersions);
-            SetCodecVersion(_deleteTopicsResponseHandler, _apiVersions);
+            SetCodecVersion(_deleteTopicsRequestEncoder, _apiVersions);
+            SetCodecVersion(_deleteTopicsResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_findCoordinatorRequestHandler, _apiVersions);
-            SetCodecVersion(_findCoordinatorResponseHandler, _apiVersions);
+            SetCodecVersion(_findCoordinatorRequestEncoder, _apiVersions);
+            SetCodecVersion(_findCoordinatorResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_offsetFetchRequestHandler, _apiVersions);
-            SetCodecVersion(_offsetFetchResponseHandler, _apiVersions);
+            SetCodecVersion(_offsetFetchRequestEncoder, _apiVersions);
+            SetCodecVersion(_offsetFetchResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_listOffsetsRequestHandler, _apiVersions);
-            SetCodecVersion(_listOffsetsResponseHandler, _apiVersions);
+            SetCodecVersion(_listOffsetsRequestEncoder, _apiVersions);
+            SetCodecVersion(_listOffsetsResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_initProducerIdRequestHandler, _apiVersions);
-            SetCodecVersion(_initProducerIdResponseHandler, _apiVersions);
+            SetCodecVersion(_initProducerIdRequestEncoder, _apiVersions);
+            SetCodecVersion(_initProducerIdResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_produceRequestHandler, _apiVersions);
-            SetCodecVersion(_produceResponseHandler, _apiVersions);
+            SetCodecVersion(_produceRequestEncoder, _apiVersions);
+            SetCodecVersion(_produceResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_addPartitionsToTxnRequestHandler, _apiVersions);
-            SetCodecVersion(_addPartitionsToTxnResponseHandler, _apiVersions);
+            SetCodecVersion(_addPartitionsToTxnRequestEncoder, _apiVersions);
+            SetCodecVersion(_addPartitionsToTxnResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_endTxnRequestHandler, _apiVersions);
-            SetCodecVersion(_endTxnResponseHandler, _apiVersions);
+            SetCodecVersion(_endTxnRequestEncoder, _apiVersions);
+            SetCodecVersion(_endTxnResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_heartbeatRequestHandler, _apiVersions);
-            SetCodecVersion(_heartbeatResponseHandler, _apiVersions);
+            SetCodecVersion(_heartbeatRequestEncoder, _apiVersions);
+            SetCodecVersion(_heartbeatResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_joinGroupRequestHandler, _apiVersions);
-            SetCodecVersion(_joinGroupResponseHandler, _apiVersions);
+            SetCodecVersion(_joinGroupRequestEncoder, _apiVersions);
+            SetCodecVersion(_joinGroupResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_syncGroupRequestHandler, _apiVersions);
-            SetCodecVersion(_syncGroupResponseHandler, _apiVersions);
+            SetCodecVersion(_syncGroupRequestEncoder, _apiVersions);
+            SetCodecVersion(_syncGroupResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_leaveGroupRequestHandler, _apiVersions);
-            SetCodecVersion(_leaveGroupResponseHandler, _apiVersions);
+            SetCodecVersion(_leaveGroupRequestEncoder, _apiVersions);
+            SetCodecVersion(_leaveGroupResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_offsetCommitRequestHandler, _apiVersions);
-            SetCodecVersion(_offsetCommitResponseHandler, _apiVersions);
+            SetCodecVersion(_offsetCommitRequestEncoder, _apiVersions);
+            SetCodecVersion(_offsetCommitResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_fetchRequestHandler, _apiVersions);
-            SetCodecVersion(_fetchResponseHandler, _apiVersions);
+            SetCodecVersion(_fetchRequestEncoder, _apiVersions);
+            SetCodecVersion(_fetchResponseDecoder, _apiVersions);
         }
 
         private async Task NetworkLoopStop(CancellationToken cancellationToken)

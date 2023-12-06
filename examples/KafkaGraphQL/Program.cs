@@ -1,7 +1,7 @@
 using Kafka.Client.Extensions.DependencyInjection;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
-using Kafka.Common.Serialization;
+using Kafka.Common.Serialization.Nullable;
 using KafkaGraphQL.InputTypes;
 using KafkaGraphQL.Model;
 using KafkaGraphQL.Queries;
@@ -16,13 +16,13 @@ builder.Services
     .AddKafkaClient(builder.Configuration)
     .AddKafkaStreamWriter(
         "test",
-        StringSerializer.Instance,
-        StringSerializer.Instance
+        StringSerde.Serializer,
+        StringSerde.Serializer
     )
     .AddKafkaStreamReader(
         "test",
-        StringDeserializer.Instance,
-        StringDeserializer.Instance
+        StringSerde.Deserializer,
+        StringSerde.Deserializer
     )
 ;
 

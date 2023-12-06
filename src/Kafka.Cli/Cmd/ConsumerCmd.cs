@@ -7,6 +7,7 @@ using Kafka.Client.Config;
 using Kafka.Client.IO;
 using Kafka.Common.Model;
 using Kafka.Common.Serialization;
+using Kafka.Common.Serialization.Nullable;
 
 namespace Kafka.Cli.Cmd
 {
@@ -72,14 +73,15 @@ namespace Kafka.Cli.Cmd
         {
             var stream = client
                 .CreateInputStream()
-                .AsApplication(topicNames)
+                .AsApplication()
                 .Build()
             ;
 
             var reader = stream
                 .CreateReader()
-                .WithKey(StringDeserializer.Instance)
-                .WithValue(StringDeserializer.Instance)
+                .WithTopics(topicNames)
+                .WithKey(StringSerde.Deserializer)
+                .WithValue(StringSerde.Deserializer)
                 .Build()
             ;
             try
@@ -105,8 +107,8 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task Interactive<TKey, TValue>(
-            IApplicationInputStream inputStream,
-            IStreamReader<TKey, TValue> streamReader,
+            IApplicationReadStream inputStream,
+            IApplicationReader<TKey, TValue> streamReader,
             IReadOnlySet<TopicName> topicNames,
             CancellationToken cancellationToken
         )
@@ -194,7 +196,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task Fetch<TKey, TValue>(
-            IStreamReader<TKey, TValue> streamReader,
+            IApplicationReader<TKey, TValue> streamReader,
             CancellationToken cancellationToken
         )
         {
@@ -210,7 +212,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task Fetch<TKey, TValue>(
-            IStreamReader<TKey, TValue> streamReader,
+            IApplicationReader<TKey, TValue> streamReader,
             int recordCount,
             int timeoutMs,
             CancellationToken cancellationToken
@@ -261,7 +263,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task CloseStream(
-            IInputStream inputStream,
+            IReadStream inputStream,
             CancellationToken cancellationToken
         )
         {
@@ -276,7 +278,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task CloseReader<TKey, TValue>(
-            IStreamReader<TKey, TValue> streamReader,
+            IApplicationReader<TKey, TValue> streamReader,
             CancellationToken cancellationToken
         )
         {
@@ -304,7 +306,7 @@ namespace Kafka.Cli.Cmd
                     ClientId = "kafka-cli.net",
                     BootstrapServers = opts.BootstrapServer
                 },
-                Consumer = new()
+                ReadStream = new()
                 {
                     GroupId = groupId,
                     EnableAutoCommit = !opts.Interactive

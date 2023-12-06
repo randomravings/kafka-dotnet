@@ -4,6 +4,7 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using DeleteRecordsPartitionResult = Kafka.Client.Messages.DeleteRecordsResponseData.DeleteRecordsTopicResult.DeleteRecordsPartitionResult;
 using DeleteRecordsTopicResult = Kafka.Client.Messages.DeleteRecordsResponseData.DeleteRecordsTopicResult;
 
@@ -22,14 +23,14 @@ namespace Kafka.Client.Messages.Encoding
                 ReadV0
             )
         { }
-        protected override DecodeDelegate<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
+        protected override DecodeValue<ResponseHeaderData> GetHeaderDecoder(short apiVersion)
         {
-            if (_flexibleVersions.Includes(apiVersion))
+            if (FlexibleVersions.Includes(apiVersion))
                 return ResponseHeaderDecoder.ReadV1;
             else
                 return ResponseHeaderDecoder.ReadV0;
         }
-        protected override DecodeDelegate<DeleteRecordsResponseData> GetMessageDecoder(short apiVersion) =>
+        protected override DecodeValue<DeleteRecordsResponseData> GetMessageDecoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => ReadV0,
@@ -38,64 +39,67 @@ namespace Kafka.Client.Messages.Encoding
                 _ => throw new NotSupportedException()
             }
         ;
-        private static DecodeResult<DeleteRecordsResponseData> ReadV0(byte[] buffer, int index)
+        private static DecodeResult<DeleteRecordsResponseData> ReadV0([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<DeleteRecordsTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<DeleteRecordsTopicResult>(buffer, index, DeleteRecordsTopicResultDecoder.ReadV0);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<DeleteRecordsTopicResult>(buffer, i, DeleteRecordsTopicResultDecoder.ReadV0);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<DeleteRecordsResponseData> ReadV1(byte[] buffer, int index)
+        private static DecodeResult<DeleteRecordsResponseData> ReadV1([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<DeleteRecordsTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadArray<DeleteRecordsTopicResult>(buffer, index, DeleteRecordsTopicResultDecoder.ReadV1);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadArray<DeleteRecordsTopicResult>(buffer, i, DeleteRecordsTopicResultDecoder.ReadV1);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
             ));
         }
-        private static DecodeResult<DeleteRecordsResponseData> ReadV2(byte[] buffer, int index)
+        private static DecodeResult<DeleteRecordsResponseData> ReadV2([NotNull] in byte[] buffer, in int index)
         {
+            var i = index;
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<DeleteRecordsTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (index, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, index);
-            (index, var _topicsField_) = BinaryDecoder.ReadCompactArray<DeleteRecordsTopicResult>(buffer, index, DeleteRecordsTopicResultDecoder.ReadV2);
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<DeleteRecordsTopicResult>(buffer, i, DeleteRecordsTopicResultDecoder.ReadV2);
             if (_topicsField_ == null)
                 throw new NullReferenceException("Null not allowed for 'Topics'");
             else
                 topicsField = _topicsField_.Value;
-            (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
                 var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                 while (taggedFieldsCount > 0)
                 {
-                    (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                    (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                     taggedFieldsBuilder.Add(new(tag, bytes));
                     taggedFieldsCount--;
                 }
             }
-            return new(index, new(
+            return new(i, new(
                 throttleTimeMsField,
                 topicsField,
                 taggedFields
@@ -104,64 +108,67 @@ namespace Kafka.Client.Messages.Encoding
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class DeleteRecordsTopicResultDecoder
         {
-            public static DecodeResult<DeleteRecordsTopicResult> ReadV0(byte[] buffer, int index)
+            public static DecodeResult<DeleteRecordsTopicResult> ReadV0([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<DeleteRecordsPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<DeleteRecordsPartitionResult>(buffer, index, DeleteRecordsPartitionResultDecoder.ReadV0);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<DeleteRecordsPartitionResult>(buffer, i, DeleteRecordsPartitionResultDecoder.ReadV0);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<DeleteRecordsTopicResult> ReadV1(byte[] buffer, int index)
+            public static DecodeResult<DeleteRecordsTopicResult> ReadV1([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<DeleteRecordsPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadArray<DeleteRecordsPartitionResult>(buffer, index, DeleteRecordsPartitionResultDecoder.ReadV1);
+                (i, nameField) = BinaryDecoder.ReadString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadArray<DeleteRecordsPartitionResult>(buffer, i, DeleteRecordsPartitionResultDecoder.ReadV1);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
                 ));
             }
-            public static DecodeResult<DeleteRecordsTopicResult> ReadV2(byte[] buffer, int index)
+            public static DecodeResult<DeleteRecordsTopicResult> ReadV2([NotNull] in byte[] buffer, in int index)
             {
+                var i = index;
                 var nameField = "";
                 var partitionsField = ImmutableArray<DeleteRecordsPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
-                (index, nameField) = BinaryDecoder.ReadCompactString(buffer, index);
-                (index, var _partitionsField_) = BinaryDecoder.ReadCompactArray<DeleteRecordsPartitionResult>(buffer, index, DeleteRecordsPartitionResultDecoder.ReadV2);
+                (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<DeleteRecordsPartitionResult>(buffer, i, DeleteRecordsPartitionResultDecoder.ReadV2);
                 if (_partitionsField_ == null)
                     throw new NullReferenceException("Null not allowed for 'Partitions'");
                 else
                     partitionsField = _partitionsField_.Value;
-                (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
                     var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                     while (taggedFieldsCount > 0)
                     {
-                        (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                        (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                         taggedFieldsBuilder.Add(new(tag, bytes));
                         taggedFieldsCount--;
                     }
                 }
-                return new(index, new(
+                return new(i, new(
                     nameField,
                     partitionsField,
                     taggedFields
@@ -170,60 +177,63 @@ namespace Kafka.Client.Messages.Encoding
             [GeneratedCodeAttribute("kgen", "1.0.0.0")]
             private static class DeleteRecordsPartitionResultDecoder
             {
-                public static DecodeResult<DeleteRecordsPartitionResult> ReadV0(byte[] buffer, int index)
+                public static DecodeResult<DeleteRecordsPartitionResult> ReadV0([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var lowWatermarkField = default(long);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, lowWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, lowWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         lowWatermarkField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<DeleteRecordsPartitionResult> ReadV1(byte[] buffer, int index)
+                public static DecodeResult<DeleteRecordsPartitionResult> ReadV1([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var lowWatermarkField = default(long);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, lowWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    return new(index, new(
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, lowWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    return new(i, new(
                         partitionIndexField,
                         lowWatermarkField,
                         errorCodeField,
                         taggedFields
                     ));
                 }
-                public static DecodeResult<DeleteRecordsPartitionResult> ReadV2(byte[] buffer, int index)
+                public static DecodeResult<DeleteRecordsPartitionResult> ReadV2([NotNull] in byte[] buffer, in int index)
                 {
+                    var i = index;
                     var partitionIndexField = default(int);
                     var lowWatermarkField = default(long);
                     var errorCodeField = default(short);
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
-                    (index, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, index);
-                    (index, lowWatermarkField) = BinaryDecoder.ReadInt64(buffer, index);
-                    (index, errorCodeField) = BinaryDecoder.ReadInt16(buffer, index);
-                    (index, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, index);
+                    (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
+                    (i, lowWatermarkField) = BinaryDecoder.ReadInt64(buffer, i);
+                    (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+                    (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
                         var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
                         while (taggedFieldsCount > 0)
                         {
-                            (index, var tag) = BinaryDecoder.ReadVarInt32(buffer, index);
-                            (index, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, index);
+                            (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                            (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
                             taggedFieldsBuilder.Add(new(tag, bytes));
                             taggedFieldsCount--;
                         }
                     }
-                    return new(index, new(
+                    return new(i, new(
                         partitionIndexField,
                         lowWatermarkField,
                         errorCodeField,

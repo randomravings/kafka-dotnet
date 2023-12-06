@@ -1,6 +1,6 @@
 ﻿namespace Kafka.Common.Model
 {
-    public enum TimestampType : short
+    public enum TimestampType : int
     {
         None = -1,
         CreateTime = 0,

@@ -1,6 +1,6 @@
 ﻿namespace Kafka.Common.Model
 {
-    public enum CompressionType : short
+    public enum CompressionType : int
     {
         None = 0,
         Gzip = 1,

@@ -8,6 +8,6 @@ namespace Kafka.Client.Model
         int NumPartitions,
         int ReplicationFactor,
         IReadOnlyDictionary<string, string?> Config,
-        Error Error
+        ApiError Error
     );
 }
