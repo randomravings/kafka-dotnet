@@ -32,7 +32,7 @@ namespace Kafka.Client
 
         IKafkaClient IKafkaClientBuilder.Build()
         {
-            _logger.ClientConfig(_config);
+            _logger.AdminConfig(_config);
             var bootstrapServers = GetBootstrapServers(
                 _config,
                 _logger

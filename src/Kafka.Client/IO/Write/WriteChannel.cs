@@ -51,7 +51,7 @@ namespace Kafka.Client.IO.Write
             _producerId = producerId;
             _producerEpoch = producerEpoch;
             _transactionalId = producerConfig.TransactionalId;
-            _acks = ParseAcks(producerConfig, logger);
+            _acks = ParseAcks(nodeId, producerConfig, logger);
             _sendDelegate = _acks switch
             {
                 0 => SendBatchOneWay,
@@ -85,7 +85,7 @@ namespace Kafka.Client.IO.Write
             Task.Yield();
             return Task.Run(() =>
             {
-                _logger.LogInformation($"Node {_nodeId.Value} - Batch collector started.");
+                _logger.BatchCollectorStarted(_nodeId);
                 try
                 {
                     var carryOver = default(ProduceCommand?);
@@ -98,13 +98,16 @@ namespace Kafka.Client.IO.Write
                             carryOver,
                             cancellationToken
                         );
-                        _logger.BatchCollected(batch.Count, reason);
+                        _logger.BatchCollected(_nodeId, batch.Count, reason);
                         if (batch.Count > 0)
                             _sendQueue.Add(batch, cancellationToken);
                     }
                 }
                 catch (OperationCanceledException) { }
-                _logger.LogInformation($"Node {_nodeId.Value} - Batch collector stoppped.");
+                finally
+                {
+                    _logger.BatchCollectorStopped(_nodeId);
+                }
             }, CancellationToken.None);
         }
 
@@ -160,13 +163,13 @@ namespace Kafka.Client.IO.Write
             Task.Yield();
             return Task.Run(async () =>
             {
-                _logger.LogInformation($"Node {_nodeId.Value} - Dispatcher started.");
+                _logger.DispatcherStarted(_nodeId);
                 try
                 {
                     while (!cancellationToken.IsCancellationRequested)
                     {
                         var batch = _sendQueue.Take(cancellationToken);
-                        _logger.ProduceCommandDequeue(batch.Count);
+                        _logger.DispatcherDequeue(_nodeId, batch.Count);
                         await Task.Yield();
                         await _sendDelegate(
                             batch,
@@ -175,11 +178,10 @@ namespace Kafka.Client.IO.Write
                     }
                 }
                 catch (OperationCanceledException) { }
-                catch (CorrelationIdException ex)
+                finally
                 {
-                    _logger.CorrelationMismatch(ex);
+                    _logger.DispatcherStarted(_nodeId);
                 }
-                _logger.LogInformation($"Node {_nodeId.Value} - Dispatcher stopped.");
 
             }, CancellationToken.None);
         }
@@ -247,16 +249,12 @@ namespace Kafka.Client.IO.Write
 
                 _topicPartitionStates.Get(topicPartition, out int baseSequence);
                 produceRecords.SetBaseSequence(baseSequence);
-                var records = BuildRecords(
-                    baseSequence,
-                    produceRecords
-                );
-                baseSequence += records.Records.Count;
+                baseSequence += produceRecords.Records.Count;
                 partitionStates[topicPartition] = baseSequence;
                 partitionProduceDataBuilder.Add(
                     new(
                         topicPartition.Partition,
-                        ImmutableArray.Create(records),
+                        ImmutableArray.Create((IRecords)produceRecords),
                         []
                     )
                 );
@@ -365,15 +363,6 @@ namespace Kafka.Client.IO.Write
             );
         }
 
-        private static IRecords BuildRecords(
-            in int baseSequence,
-            in WriteRecords records
-        )
-        {
-            records.SetBaseSequence(baseSequence);
-            return records;
-        }
-
         public async Task Close(
             CancellationToken cancellationToken
         )
@@ -407,15 +396,16 @@ namespace Kafka.Client.IO.Write
         }
 
         private static short ParseAcks(
-            WriteStreamConfig producerConfig,
-            ILogger logger
+            in NodeId nodeId,
+            in WriteStreamConfig producerConfig,
+            in ILogger logger
         )
         {
             if (producerConfig.Acks == "all")
                 return -1;
             if (short.TryParse(producerConfig.Acks, out var acks) && acks >= 0)
                 return acks;
-            logger.DefaultAcks(producerConfig.Acks);
+            logger.DefaultAcks(nodeId, producerConfig.Acks);
             return -1;
         }
 

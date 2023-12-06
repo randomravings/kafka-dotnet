@@ -1,5 +1,6 @@
 ﻿using Kafka.Client.Collections;
 using Kafka.Client.Config;
+using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
 using Kafka.Client.Model.Internal;
@@ -13,16 +14,19 @@ using System.Collections.Immutable;
 namespace Kafka.Client.IO.Read
 {
     internal sealed class ReadChannel(
+        NodeId nodeId,
         ReadStreamConfig config,
         ILogger logger
     )
     {
+        private readonly NodeId _nodeId = nodeId;
         private readonly int _fetchMaxWaitMs = config.FetchMaxWaitMs;
         private readonly int _fetchMinBytes = config.FetchMinBytes;
         private readonly int _fetchMaxBytes = config.FetchMaxBytes;
         private readonly sbyte _isolationLevel = (sbyte)config.IsolationLevel;
         private readonly string _clientRack = config.ClientRack;
         private readonly int _maxPartitionFetchBytes = config.MaxPartitionFetchBytes;
+        private readonly ILogger _logger = logger;
 
         public async Task Run(
             INodeLink connection,
@@ -32,6 +36,7 @@ namespace Kafka.Client.IO.Read
             CancellationToken cancellationToken
         )
         {
+            _logger.FetchLoopStart(_nodeId);
             try
             {
                 var fetchRequest = CreateFetchRequest(topicPartitionOffsets);
@@ -68,6 +73,10 @@ namespace Kafka.Client.IO.Read
             }
             catch (TaskCanceledException) { }
             catch (OperationCanceledException) { }
+            finally
+            {
+                _logger.FetchLoopStop(_nodeId);
+            }
         }
 
         private static FetchResponseProcessResult2 ProcessFetchResponse(

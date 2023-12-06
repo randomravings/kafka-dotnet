@@ -60,31 +60,31 @@ namespace Kafka.Client.IO.Write
 
         public int BatchSize => _batchSize;
 
-        long IRecords.BaseOffset => 0;
+        public long BaseOffset => 0;
 
-        int IRecords.BatchLength => _batchSize;
+        public int BatchLength => _batchSize;
 
-        int IRecords.PartitionLeaderEpoch => _partitionLeaderEpoch;
+        public int PartitionLeaderEpoch => _partitionLeaderEpoch;
 
-        sbyte IRecords.Magic => 2;
+        public sbyte Magic => 2;
 
-        int IRecords.Crc => 0;
+        public int Crc => 0;
 
-        Attributes IRecords.Attributes => _attributes;
+        public Attributes Attributes => _attributes;
 
-        int IRecords.LastOffsetDelta => _packedRecords.Count - 1;
+        public int LastOffsetDelta => _packedRecords.Count - 1;
 
-        long IRecords.BaseTimestamp => _baseTimestamp;
+        public long BaseTimestamp => _baseTimestamp;
 
-        long IRecords.MaxTimestamp => _maxTimestamp;
+        public long MaxTimestamp => _maxTimestamp;
 
-        long IRecords.ProducerId => _producerId;
+        public long ProducerId => _producerId;
 
-        short IRecords.ProducerEpoch => _producerEpoch;
+        public short ProducerEpoch => _producerEpoch;
 
-        int IRecords.BaseSequence => _baseSequence;
+        public int BaseSequence => _baseSequence;
 
-        IReadOnlyList<IRecord> IRecords.Records => _packedRecords;
+        public IReadOnlyList<IRecord> Records => _packedRecords;
 
         /// <summary>
         /// Tries to add a record to the collection.

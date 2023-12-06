@@ -142,11 +142,11 @@ namespace Kafka.Client.IO.Read
             );
 
             var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
-             var topicPartitions = await GetTopicPartitionLeaders(
-                coordinator,
-                _assignments,
-                cancellationToken
-            ).ConfigureAwait(false);
+            var topicPartitions = await GetTopicPartitionLeaders(
+               coordinator,
+               _assignments,
+               cancellationToken
+           ).ConfigureAwait(false);
             RemoveUnassignedTopicPartitions(
                 topicPartitions,
                 _assignments
@@ -287,7 +287,7 @@ namespace Kafka.Client.IO.Read
                 if (topicPartitions.Get(synchedTopicPartition, out var topicPartition))
                     _assignments.Add(topicPartition);
                 else
-                    _logger.LogError($"Unexpected sync member '{synchedTopicPartition.Topic.TopicName.Value}:{synchedTopicPartition.Partition.Value}'");
+                    _logger.ConsumerGroupUnexpectedTopicPartition(synchedTopicPartition);
             _joinGroupSync.Set();
         }
 
@@ -425,10 +425,11 @@ namespace Kafka.Client.IO.Read
         )
         {
             _logger.HeartbeatLoopStart();
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                try
+                while (!cancellationToken.IsCancellationRequested)
                 {
+
                     if (!_joinGroupSync.IsSet)
                     {
                         _logger.HeartbeatLoopPreJoin();
@@ -462,9 +463,12 @@ namespace Kafka.Client.IO.Read
                             _joinGroupSync.Reset();
                     }
                 }
-                catch (OperationCanceledException) { }
             }
-            _logger.HeartbeatLoopStop();
+            catch (OperationCanceledException) { }
+            finally
+            {
+                _logger.HeartbeatLoopStop();
+            }
         }
 
         private async Task AutoCommitLoop(
@@ -473,21 +477,23 @@ namespace Kafka.Client.IO.Read
         {
             await Task.Yield();
             _logger.CommitLoopStart();
-            while (!cancellationToken.IsCancellationRequested)
+            try
             {
-                try
+                while (!cancellationToken.IsCancellationRequested)
                 {
                     cancellationToken.WaitHandle.WaitOne(_autoCommitIntervalMs);
                     await CommitDelta(cancellationToken).ConfigureAwait(false);
                 }
-                catch (OperationCanceledException)
-                {
-                    using var lts = new CancellationTokenSource(5000);
-                    await CommitDelta(lts.Token).ConfigureAwait(false);
-                }
-
             }
-            _logger.CommitLoopStop();
+            catch (OperationCanceledException)
+            {
+                using var lts = new CancellationTokenSource(5000);
+                await CommitDelta(lts.Token).ConfigureAwait(false);
+            }
+            finally
+            {
+                _logger.CommitLoopStop();
+            }
         }
 
         private async Task CommitDelta(

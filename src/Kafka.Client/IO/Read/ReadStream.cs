@@ -328,6 +328,7 @@ namespace Kafka.Client.IO.Read
                 );
 
             var channel = new ReadChannel(
+                nodeId,
                 _config,
                 _logger
             );
