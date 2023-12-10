@@ -43,7 +43,7 @@ namespace KafkaGraphQL.Queries
             TopicName[] topicNames,
 
             [Service]
-            IApplicationReader<string, string> streamReader,
+            IGroupReader<string, string> streamReader,
             int maxCount,
             int timeoutMs,
 

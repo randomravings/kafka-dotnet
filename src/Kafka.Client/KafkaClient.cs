@@ -44,7 +44,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false);
         }
 
-        IReadStreamBuilder IKafkaClient.CreateInputStream() =>
+        IReadStreamBuilder IKafkaClient.CreateReadStream() =>
             new ReadStreamBuilder(
                 _connections,
                 _config.ReadStream,
@@ -52,7 +52,7 @@ namespace Kafka.Client
             )
         ;
 
-        IReadStreamBuilder IKafkaClient.CreateInputStream(Action<ReadStreamConfig> configure)
+        IReadStreamBuilder IKafkaClient.CreateReadStream(Action<ReadStreamConfig> configure)
         {
             var config = new ReadStreamConfig();
             configure(config);
@@ -63,7 +63,7 @@ namespace Kafka.Client
             );
         }
 
-        IWriteStreamBuilder IKafkaClient.CreateOutputStream() =>
+        IWriteStreamBuilder IKafkaClient.CreateWriteStream() =>
             new WriteStreamBuilder(
                 _connections,
                 _config.WriteStream,
@@ -71,7 +71,7 @@ namespace Kafka.Client
             )
         ;
 
-        IWriteStreamBuilder IKafkaClient.CreateOutputStream(Action<WriteStreamConfig> configure)
+        IWriteStreamBuilder IKafkaClient.CreateWriteStream(Action<WriteStreamConfig> configure)
         {
             var config = new WriteStreamConfig();
             configure(config);

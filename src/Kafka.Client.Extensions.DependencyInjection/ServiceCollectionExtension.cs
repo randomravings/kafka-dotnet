@@ -52,7 +52,7 @@ namespace Kafka.Client.Extensions.DependencyInjection
             {
                 var client = sp.GetRequiredService<IKafkaClient>();
                 var logger = sp.GetRequiredService<ILogger<IWriteStream>>();
-                var stream = client.CreateOutputStream()
+                var stream = client.CreateWriteStream()
                     .WithLogger(logger)
                     .Build()
                 ;
@@ -76,8 +76,8 @@ namespace Kafka.Client.Extensions.DependencyInjection
             collection.AddSingleton(sp =>
             {
                 var client = sp.GetRequiredService<IKafkaClient>();
-                var logger = sp.GetRequiredService<ILogger<IApplicationReadStream>>();
-                var stream = client.CreateInputStream()
+                var logger = sp.GetRequiredService<ILogger<IGroupReadStream>>();
+                var stream = client.CreateReadStream()
                     .WithLogger(logger)
                     .AsApplication()
                     .Build();

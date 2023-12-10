@@ -23,13 +23,13 @@ namespace Kafka.Client
         /// Creates a new input stream to cluster for writing records.
         /// </summary>
         /// <returns></returns>
-        IReadStreamBuilder CreateInputStream();
+        IReadStreamBuilder CreateReadStream();
 
         /// <summary>
         /// Creates a new input stream to cluster for writing records.
         /// </summary>
         /// <returns></returns>
-        IReadStreamBuilder CreateInputStream(
+        IReadStreamBuilder CreateReadStream(
             Action<ReadStreamConfig> configure
         );
 
@@ -37,13 +37,13 @@ namespace Kafka.Client
         /// Creates a new output stream from cluster for reading records.
         /// </summary>
         /// <returns></returns>
-        IWriteStreamBuilder CreateOutputStream();
+        IWriteStreamBuilder CreateWriteStream();
 
         /// <summary>
         /// Creates a new output stream from cluster for reading records.
         /// </summary>
         /// <returns></returns>
-        IWriteStreamBuilder CreateOutputStream(
+        IWriteStreamBuilder CreateWriteStream(
             Action<WriteStreamConfig> configure
         );
 

@@ -1,11 +1,9 @@
-﻿using Kafka.Client.Collections;
-using Kafka.Client.Config;
+﻿using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
 using Kafka.Client.Model.Internal;
 using Kafka.Client.Net;
-using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
 using Kafka.Common.Protocol;
@@ -35,7 +33,7 @@ namespace Kafka.Client.IO.Write
         private readonly string? _transactionalId;
         private readonly ILogger _logger;
         private readonly INodeLink _protocol;
-        private readonly TopicPartitionMap<int> _topicPartitionStates = [];
+        private readonly ConcurrentDictionary<TopicPartition, int> _topicPartitionStates = new(TopicPartitionCompare.Equality);
         private readonly Func<WriteBatch, CancellationToken, Task> _sendDelegate;
 
         public WriteChannel(
@@ -206,7 +204,7 @@ namespace Kafka.Client.IO.Write
             );
             // TODO: This needs revisit, just hacked in.
             foreach (var state in partitionStates)
-                _topicPartitionStates.Upsert(state.Key, state.Value);
+                _topicPartitionStates[state.Key] = state.Value;
         }
 
         private async Task SendBatchOneWay(
@@ -228,7 +226,7 @@ namespace Kafka.Client.IO.Write
             );
             // TODO: This needs revisit, just hacked in.
             foreach (var state in partitionStates)
-                _topicPartitionStates.Upsert(state.Key, state.Value);
+                _topicPartitionStates[state.Key] = state.Value;
         }
 
         private ProduceRequestData CreateProduceRequest(
@@ -247,7 +245,7 @@ namespace Kafka.Client.IO.Write
                 }
                 var partitionProduceDataBuilder = ImmutableArray.CreateBuilder<ProduceRequestData.TopicProduceData.PartitionProduceData>();
 
-                _topicPartitionStates.Get(topicPartition, out int baseSequence);
+                _topicPartitionStates.TryGetValue(topicPartition, out int baseSequence);
                 produceRecords.SetBaseSequence(baseSequence);
                 baseSequence += produceRecords.Records.Count;
                 partitionStates[topicPartition] = baseSequence;

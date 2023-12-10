@@ -1,5 +1,6 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Kafka.Client.Collections;
+using Kafka.Client.Collections.Compare;
+using Kafka.Client.Collections.Internal;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
 using System.Buffers;
@@ -12,7 +13,7 @@ namespace Kafka.Client.Benchmark.Buffering
     [ThreadingDiagnoser]
     public class ConcurrentCollectionBenchmark
     {
-        [Params(1, 8)]
+        [Params(8)]
         public int ThreadCount { get; set; }
 
         [Params(100)]
@@ -26,7 +27,13 @@ namespace Kafka.Client.Benchmark.Buffering
 
         private readonly List<TopicPartition> _topicsPartitions = [];
         private readonly ConcurrentDictionary<TopicPartition, object> _concurrentDictionary = new(TopicPartitionCompare.Equality);
-        private readonly TopicPartitionMap<object> _topicPartitionMap = [];
+        private readonly IndexedDictionary<TopicPartition, object> _indexedDictionary =
+            new(
+                4096 * 2,
+                TopicNamePartitionCompare.Instance,
+                TopicIdPartitionCompare.Instance
+            )
+        ;
 
         private readonly object _object = new();
 
@@ -34,9 +41,7 @@ namespace Kafka.Client.Benchmark.Buffering
         public void Setup()
         {
             _concurrentDictionary.Clear();
-            _topicPartitionMap.Clear();
-
-            _topicsPartitions.Clear();
+            _indexedDictionary.Clear();
 
             var topics = Enumerable
                 .Range(0, Topics)
@@ -65,12 +70,19 @@ namespace Kafka.Client.Benchmark.Buffering
         }
 
         [Benchmark]
-        public void ConcurrentDictionary()
+        public void ConcurrentDictionaryAddOrSet()
         {
             int passes = 0;
             var tasks = Enumerable
                 .Range(0, ThreadCount)
-                .Select(t => new Task(() => Run(_concurrentDictionary, UpsertConcurrentDictionary, TotalOperations, ref passes)))
+                .Select(t => new Task(() => Run(
+                    _topicsPartitions,
+                    _concurrentDictionary,
+                    UpsertConcurrentDictionary,
+                    TotalOperations,
+                    _object,
+                    ref passes
+                 )))
                 .ToArray()
             ;
             foreach (var task in tasks)
@@ -79,12 +91,19 @@ namespace Kafka.Client.Benchmark.Buffering
         }
 
         [Benchmark]
-        public void SpinningTopicPartitionDictionary()
+        public void FunkyDictionaryAddOrSet()
         {
             int passes = 0;
             var tasks = Enumerable
                 .Range(0, ThreadCount)
-                .Select(t => new Task(() => Run(_topicPartitionMap, UpsertSpinningTopicPartitionDictionary, TotalOperations, ref passes)))
+                .Select(t => new Task(() => Run(
+                    _topicsPartitions,
+                    _indexedDictionary,
+                    UpsertFunkyDictionary,
+                    TotalOperations,
+                    _object,
+                    ref passes
+                 )))
                 .ToArray()
             ;
             foreach (var task in tasks)
@@ -92,10 +111,12 @@ namespace Kafka.Client.Benchmark.Buffering
             Task.WaitAll(tasks);
         }
 
-        private void Run<TCollection>(
+        private static void Run<TCollection, TKey, TValue>(
+            in List<TKey> keys,
             in TCollection collection,
-            in UpsertDelegate<TCollection, TopicPartition, object> upsert,
+            in UpsertDelegate<TCollection, TKey, TValue> upsert,
             in int passes,
+            in TValue value,
             ref int counter
         )
         {
@@ -104,9 +125,9 @@ namespace Kafka.Client.Benchmark.Buffering
                 var pass = Interlocked.Increment(ref counter);
                 if (pass >= passes)
                     break;
-                var index = pass % _topicsPartitions.Count;
-                var topicPartition = _topicsPartitions[index];
-                upsert(collection, topicPartition, _object);
+                var index = pass % keys.Count;
+                var key = keys[index];
+                upsert(collection, key, value);
             }
         }
 
@@ -122,10 +143,10 @@ namespace Kafka.Client.Benchmark.Buffering
             in TValue value
         ) where TKey : notnull => concurrentDictionary[key] = value;
 
-        private static void UpsertSpinningTopicPartitionDictionary<TValue>(
-            in TopicPartitionMap<TValue> spinningTopicPartitionDictionary,
-            in TopicPartition key,
+        private static void UpsertFunkyDictionary<TKey, TValue>(
+            in IndexedDictionary<TKey, TValue> dictionary,
+            in TKey key,
             in TValue value
-        ) => spinningTopicPartitionDictionary.Upsert(key, value);
+        ) => dictionary.AddOrSet(key, value);
     }
 }

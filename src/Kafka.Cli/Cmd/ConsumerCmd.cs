@@ -72,7 +72,7 @@ namespace Kafka.Cli.Cmd
         )
         {
             var stream = client
-                .CreateInputStream()
+                .CreateReadStream()
                 .AsApplication()
                 .Build()
             ;
@@ -107,8 +107,8 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task Interactive<TKey, TValue>(
-            IApplicationReadStream inputStream,
-            IApplicationReader<TKey, TValue> streamReader,
+            IGroupReadStream inputStream,
+            IGroupReader<TKey, TValue> streamReader,
             IReadOnlySet<TopicName> topicNames,
             CancellationToken cancellationToken
         )
@@ -196,7 +196,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task Fetch<TKey, TValue>(
-            IApplicationReader<TKey, TValue> streamReader,
+            IGroupReader<TKey, TValue> streamReader,
             CancellationToken cancellationToken
         )
         {
@@ -212,7 +212,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task Fetch<TKey, TValue>(
-            IApplicationReader<TKey, TValue> streamReader,
+            IGroupReader<TKey, TValue> streamReader,
             int recordCount,
             int timeoutMs,
             CancellationToken cancellationToken
@@ -278,7 +278,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task CloseReader<TKey, TValue>(
-            IApplicationReader<TKey, TValue> streamReader,
+            IGroupReader<TKey, TValue> streamReader,
             CancellationToken cancellationToken
         )
         {

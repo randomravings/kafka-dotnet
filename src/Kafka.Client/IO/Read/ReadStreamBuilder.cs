@@ -11,8 +11,8 @@ namespace Kafka.Client.IO.Read
         ILogger logger
     ) :
         IReadStreamBuilder,
-        IApplicationReadStreamBuilder,
-        IManualReadStreamBuilder
+        IGroupReadStreamBuilder,
+        IAssignedReadStreamBuilder
     {
         private readonly ICluster<INodeLink> _cluster = cluster;
         private readonly ReadStreamConfig _config = config;
@@ -24,24 +24,24 @@ namespace Kafka.Client.IO.Read
             return this;
         }
 
-        public IApplicationReadStreamBuilder AsApplication() =>
+        public IGroupReadStreamBuilder AsApplication() =>
             this
         ;
 
-        public IManualReadStreamBuilder AsManual() =>
+        public IAssignedReadStreamBuilder AsManual() =>
             this
         ;
 
-        IApplicationReadStream IApplicationReadStreamBuilder.Build() =>
-            new ApplicationReadStream(
+        IGroupReadStream IGroupReadStreamBuilder.Build() =>
+            new GroupReadStream(
                 _cluster,
                 _config,
                 _logger
             )
         ;
 
-        IManualReadStream IManualReadStreamBuilder.Build() =>
-            new ManualReadStream(
+        IAssignedReadStream IAssignedReadStreamBuilder.Build() =>
+            new AssignedReadStream(
                 _cluster,
                 _config,
                 _logger

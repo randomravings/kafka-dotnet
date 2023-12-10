@@ -1,5 +1,5 @@
 ﻿using BenchmarkDotNet.Attributes;
-using Kafka.Client.Collections;
+using Kafka.Client.Collections.Internal;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
 using System.Buffers;
@@ -61,7 +61,7 @@ namespace Kafka.Client.Benchmark.Buffering
         public void CustomCompareByName()
         {
             foreach (var sample in _samples)
-                ArrayOperations.BinaryIndexOf(_topicsPartitions, sample, _topicsPartitions.Length, Compare.TopicPartitionName);
+                ArrayOperations.BinaryIndexOf(_topicsPartitions, sample, _topicsPartitions.Length, KeyOperations.TopicPartitionName);
         }
     }
 }

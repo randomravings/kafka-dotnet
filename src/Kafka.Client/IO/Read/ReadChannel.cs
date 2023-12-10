@@ -1,4 +1,5 @@
 ﻿using Kafka.Client.Collections;
+using Kafka.Client.Collections.Internal;
 using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
@@ -30,7 +31,7 @@ namespace Kafka.Client.IO.Read
 
         public async Task Run(
             INodeLink connection,
-            TopicPartitionMap<Offset> topicPartitionOffsets,
+            ImmutableTopicPartitionMap<TopicPartitionReadState> topicPartitionOffsets,
             ConcurrentQueue<FetchResult> queue,
             ManualResetEventSlim resetEvent,
             CancellationToken cancellationToken
@@ -81,7 +82,7 @@ namespace Kafka.Client.IO.Read
 
         private static FetchResponseProcessResult2 ProcessFetchResponse(
             in FetchResponseData fetchResponse,
-            in TopicPartitionMap<Offset> watermarks
+            in ImmutableTopicPartitionMap<TopicPartitionReadState> topicPartitionOffsets
         )
         {
             if (fetchResponse.ResponsesField.IsDefaultOrEmpty)
@@ -96,7 +97,7 @@ namespace Kafka.Client.IO.Read
                     topic,
                     topicResponse,
                     topicRecordsBuilder,
-                    watermarks
+                    topicPartitionOffsets
                 );
                 totalOffsetsProcessed += processedOffsets;
             }
@@ -107,7 +108,7 @@ namespace Kafka.Client.IO.Read
             in Topic topic,
             in FetchResponseData.FetchableTopicResponse topicResponse,
             in ImmutableArray<KeyValuePair<TopicPartition, IReadOnlyList<ReadRecord>>>.Builder topicRecordsBuilder,
-            in TopicPartitionMap<Offset> watermarks
+            in ImmutableTopicPartitionMap<TopicPartitionReadState> topicPartitionOffsets
         )
         {
             var offsetsProcessed = 0;
@@ -115,9 +116,10 @@ namespace Kafka.Client.IO.Read
             {
                 var partition = topicResponse.PartitionsField[i];
                 var topicPartition = new TopicPartition(topic, partition.PartitionIndexField);
+                topicPartitionOffsets.Get(topicPartition, out var readState);
                 if (partition.ErrorCodeField != 0)
                 {
-                    var watermark = watermarks[topicPartition];
+                    var watermark = readState.Value.GetOffset();
                     var error = ApiErrors.Translate(partition.ErrorCodeField);
                     var errorRecord = new ReadRecord(
                         topicPartition,
@@ -136,10 +138,9 @@ namespace Kafka.Client.IO.Read
                 }
                 var partitionRecordsBuilder = ImmutableArray.CreateBuilder<ReadRecord>();
                 var totalRecordsProcessed = ProcessPartitionResponse(
-                    topicPartition,
+                    readState,
                     partition,
-                    partitionRecordsBuilder,
-                    watermarks
+                    partitionRecordsBuilder
                 );
                 topicRecordsBuilder.Add(new(
                     topicPartition,
@@ -151,10 +152,9 @@ namespace Kafka.Client.IO.Read
         }
 
         private static int ProcessPartitionResponse(
-            in TopicPartition topicPartition,
+            in KeyValuePair<TopicPartition, TopicPartitionReadState> state,
             in FetchResponseData.FetchableTopicResponse.PartitionData partition,
-            in ImmutableArray<ReadRecord>.Builder recordsBuilder,
-            in TopicPartitionMap<Offset> watermarks
+            in ImmutableArray<ReadRecord>.Builder recordsBuilder
         )
         {
             // Skip empty records.
@@ -163,7 +163,7 @@ namespace Kafka.Client.IO.Read
                 return 0;
 
             var offsetsProcessed = 0;
-            var watermark = watermarks[topicPartition];
+            var watermark = state.Value.GetOffset();
             for (int i = 0; i < recordBatches.Length; i++)
             {
                 var recordBatch = recordBatches[i];
@@ -173,8 +173,7 @@ namespace Kafka.Client.IO.Read
                 // Control batches are expected to have exactly one record.
                 if (recordBatch.Attributes.HasFlag(Attributes.IsControlBatch))
                 {
-                    watermarks.Set(
-                        topicPartition,
+                    state.Value.SetOffset(
                         offset + recordBatch.Records.Count
                     );
                     continue;
@@ -193,7 +192,7 @@ namespace Kafka.Client.IO.Read
                     ;
 
                     var rawConsumerRecord = new ReadRecord(
-                        TopicPartition: topicPartition,
+                        TopicPartition: state.Key,
                         Offset: offset,
                         Timestamp: timestamp,
                         Key: record.Key,
@@ -203,8 +202,7 @@ namespace Kafka.Client.IO.Read
                     );
                     recordsBuilder.Add(rawConsumerRecord);
                 }
-                watermarks.Set(
-                    topicPartition,
+                state.Value.SetOffset(
                     offset
                 );
             }
@@ -212,12 +210,10 @@ namespace Kafka.Client.IO.Read
         }
 
         private FetchRequestData CreateFetchRequest(
-            in TopicPartitionMap<Offset> topicPartitionOffsets
+            in ImmutableTopicPartitionMap<TopicPartitionReadState> topicPartitionOffsets
         )
         {
-            var items = topicPartitionOffsets.CopyItems();
-            if (items.Length == 0)
-                return FetchRequestData.Empty;
+            var items = topicPartitionOffsets.Values;
             var fetchTopicsBuilder = ImmutableArray.CreateBuilder<FetchRequestData.FetchTopic>();
             var fetchPartitionsBuilder = ImmutableArray.CreateBuilder<FetchRequestData.FetchTopic.FetchPartition>();
             var index = 0;
@@ -225,11 +221,11 @@ namespace Kafka.Client.IO.Read
             var currentTopic = items[0].Key.Topic;
             while (index < length)
             {
-                (var (topic, partition), var offset) = items[index];
+                (var (topic, partition), var state) = items[index];
                 var fetchPartition = new FetchRequestData.FetchTopic.FetchPartition(
                     PartitionField: partition,
                     CurrentLeaderEpochField: -1,
-                    FetchOffsetField: offset,
+                    FetchOffsetField: state.GetOffset(),
                     LastFetchedEpochField: -1,
                     LogStartOffsetField: -1,
                     PartitionMaxBytesField: _maxPartitionFetchBytes,

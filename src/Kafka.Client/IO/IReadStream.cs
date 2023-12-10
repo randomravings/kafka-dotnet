@@ -67,7 +67,7 @@ namespace Kafka.Client.IO
         /// </summary>
         /// <param name="topicPartition"></param>
         /// <param name="offset"></param>
-        void UpdateOffsets(
+        void UpdateOffset(
             in TopicPartition topicPartition,
             in Offset offset
         );

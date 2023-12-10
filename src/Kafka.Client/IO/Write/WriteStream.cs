@@ -7,6 +7,7 @@ using Kafka.Client.Model.Internal;
 using Kafka.Client.Net;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
 using Kafka.Common.Net;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
@@ -25,9 +26,9 @@ namespace Kafka.Client.IO.Write
     {
         private readonly CancellationTokenSource _internalCts = new();
         private readonly ConcurrentDictionary<NodeId, WriteChannel> _brokerChannels = [];
-        private readonly TopicPartitionMap<WriteChannel> _brokerChannelsByTopicPartition = [];
-        private readonly TopicMap<ProducerTopicMetadata> _producerMetadata = [];
-        private readonly TopicPartitionSet _transactionMembers = [];
+        private readonly ConcurrentDictionary<TopicPartition, WriteChannel> _brokerChannelsByTopicPartition = new(TopicPartitionCompare.Equality);
+        private readonly ConcurrentDictionary<Topic, ProducerTopicMetadata> _producerMetadata = new(TopicCompare.Equality);
+        private readonly SortedSet<TopicPartition> _transactionMembers = new(TopicPartitionCompare.Instance);
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
         private Attributes _attributes = Attributes.None;
         private readonly string _transactionalId = producerConfig.TransactionalId ?? "";
@@ -66,11 +67,11 @@ namespace Kafka.Client.IO.Write
             CancellationToken cancellationToken
         )
         {
-            if (_producerMetadata.Get(topic, out var metadata) && metadata.ExpireTime < DateTimeOffset.UtcNow)
+            if (_producerMetadata.TryGetValue(topic, out var metadata) && metadata.ExpireTime < DateTimeOffset.UtcNow)
                 return metadata;
             _producerMetadata.Remove(topic, out _);
             metadata = await CreateTopicMetadata(topic, cancellationToken).ConfigureAwait(false);
-            _producerMetadata.Add(topic, metadata);
+            _producerMetadata.TryAdd(topic, metadata);
             return metadata;
         }
 
@@ -233,13 +234,13 @@ namespace Kafka.Client.IO.Write
             CancellationToken cancellationToken
         )
         {
-            if (_brokerChannelsByTopicPartition.Get(topicPartition, out var channel))
+            if (_brokerChannelsByTopicPartition.TryGetValue(topicPartition, out var channel))
                 return channel;
 
             await _semaphoreSlim.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (_brokerChannelsByTopicPartition.Get(topicPartition, out channel))
+                if (_brokerChannelsByTopicPartition.TryGetValue(topicPartition, out channel))
                     return channel;
                 var metadata = await MetadataForTopic(
                     topicPartition.Topic.TopicName,
@@ -256,7 +257,7 @@ namespace Kafka.Client.IO.Write
                     _brokerChannels.TryAdd(nodeId, channel);
                 }
 
-                _brokerChannelsByTopicPartition.Add(topicPartition, channel);
+                _brokerChannelsByTopicPartition.TryAdd(topicPartition, channel);
                 return channel;
             }
             finally

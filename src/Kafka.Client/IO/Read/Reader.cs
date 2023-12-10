@@ -66,7 +66,7 @@ namespace Kafka.Client.IO.Read
                 throw new ApiException(record.Error);
             var key = _keyDeserializer.Read(record.Key);
             var value = _valueDeserializer.Read(record.Value);
-            _stream.UpdateOffsets(record.TopicPartition, record.Offset + 1);
+            _stream.UpdateOffset(record.TopicPartition, record.Offset + 1);
             return new(
                 record.TopicPartition,
                 record.Offset,
