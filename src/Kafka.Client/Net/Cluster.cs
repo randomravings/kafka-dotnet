@@ -22,7 +22,7 @@ namespace Kafka.Client.Net
         IDisposable
     {
         private readonly ImmutableArray<BootstrapServer> _bootstrapServers = bootstrapServers;
-        private readonly ConcurrentDictionary<NodeId, INodeLink> _connections = [];
+        private readonly ConcurrentDictionary<NodeId, NodeLink> _connections = [];
         private readonly KafkaClientConfig _config = config;
         private readonly ILogger _logger = logger;
         private readonly SemaphoreSlim _semaphore = new(1, 1);
@@ -112,7 +112,7 @@ namespace Kafka.Client.Net
             _semaphore.Dispose();
         }
 
-        private async Task<INodeLink> GetConnection(
+        private async Task<NodeLink> GetConnection(
             NodeId nodeId,
             CancellationToken cancellationToken
         )
@@ -125,7 +125,7 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false);
         }
 
-        private async Task<INodeLink> GetController(
+        private async Task<NodeLink> GetController(
             CancellationToken cancellationToken
         )
         {
@@ -136,7 +136,7 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false);
         }
 
-        private async Task<INodeLink> InitConnection(
+        private async Task<NodeLink> InitConnection(
             NodeId clusterNodeId,
             CancellationToken cancellationToken
         )
@@ -144,7 +144,7 @@ namespace Kafka.Client.Net
             if (_connections.TryGetValue(clusterNodeId, out var connection))
                 return connection;
 
-            connection = await Controller(cancellationToken)
+            connection = await GetController(cancellationToken)
                 .ConfigureAwait(false)
             ;
 
@@ -178,7 +178,7 @@ namespace Kafka.Client.Net
             return connection;
         }
 
-        private async Task<INodeLink> InitController(
+        private async Task<NodeLink> InitController(
             CancellationToken cancellationToken
         )
         {
@@ -248,7 +248,7 @@ namespace Kafka.Client.Net
                 port
             );
 
-            var connection = (INodeLink)new NodeLink(
+            var connection = new NodeLink(
                 transport,
                 _config,
                 _logger
@@ -285,7 +285,7 @@ namespace Kafka.Client.Net
             return connection;
         }
 
-        private ITransport CreateTransport(
+        private TcpTransport CreateTransport(
             string host,
             int port
         ) =>

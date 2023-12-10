@@ -1,5 +1,4 @@
-﻿using Kafka.Client.Collections;
-using Kafka.Client.Config;
+﻿using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
@@ -31,16 +30,17 @@ namespace Kafka.Client.IO.Write
         private readonly SortedSet<TopicPartition> _transactionMembers = new(TopicPartitionCompare.Instance);
         private readonly SemaphoreSlim _semaphoreSlim = new(1, 1);
         private Attributes _attributes = Attributes.None;
-        private readonly string _transactionalId = producerConfig.TransactionalId ?? "";
+        private readonly string? _transactionalId = producerConfig.TransactionalId;
         private readonly int _transactionTimeoutMs = producerConfig.TransactionTimeoutMs;
         private readonly bool _enableIdempotence = producerConfig.EnableIdempotence;
         private readonly WriteStreamConfig _producerConfig = producerConfig;
         private readonly ILogger _logger = logger;
         private readonly ICluster<INodeLink> _connections = connections;
 
+        private bool _initialized;
         private long _producerId = -1;
         private short _producerEpoch = -1;
-        private INodeLink? _coordinator;
+        private NodeId _coordinator;
 
         async Task<ProducerTopicMetadata> IWriteStream.MetadataForTopic(
             TopicName topic,
@@ -88,6 +88,13 @@ namespace Kafka.Client.IO.Write
             CancellationToken cancellationToken
         )
         {
+            if (!_initialized)
+                await InitializeProducer(cancellationToken).ConfigureAwait(false);
+            if (_attributes.HasFlag(Attributes.IsTransactional))
+                await CheckTransactionMembership(
+                    produceRecord.TopicPartition,
+                    cancellationToken
+                ).ConfigureAwait(false);
             var callback = new TaskCompletionSource<ProduceResult>(
                 TaskCreationOptions.RunContinuationsAsynchronously
             );
@@ -125,18 +132,6 @@ namespace Kafka.Client.IO.Write
             finally { _semaphoreSlim.Release(); }
         }
 
-        private async Task<INodeLink> GetCoordinator(
-            CancellationToken cancellationToken
-        )
-        {
-            if (_coordinator != null)
-                return _coordinator;
-            _coordinator = await CreateController(
-                cancellationToken
-            ).ConfigureAwait(false);
-            return _coordinator;
-        }
-
         private async Task CheckTransactionMembership(
             TopicPartition topicPartition,
             CancellationToken cancellationToken
@@ -169,7 +164,10 @@ namespace Kafka.Client.IO.Write
                 V3AndBelowTopicsField: partitions,
                 []
             );
-            var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
+            var coordinator = await _connections.Connection(
+                _coordinator,
+                cancellationToken
+            ).ConfigureAwait(false);
             var addPartitionsToTxnResponse = await coordinator.AddPartitionsToTxn(
                 addPartitionsToTxnRequest,
                 cancellationToken
@@ -197,7 +195,10 @@ namespace Kafka.Client.IO.Write
                     commit,
                     []
                 );
-                var coordinator = await GetCoordinator(cancellationToken).ConfigureAwait(false);
+                var coordinator = await _connections.Connection(
+                    _coordinator,
+                    cancellationToken
+                ).ConfigureAwait(false);
                 var endTxnResponse = await coordinator.EndTxn(
                     endTxnRequest,
                     cancellationToken
@@ -209,8 +210,12 @@ namespace Kafka.Client.IO.Write
                     _logger.TransactionCommit();
                 else
                     _logger.TransactionRollback();
+                _attributes &= ~Attributes.IsTransactional;
             }
-            finally { _semaphoreSlim.Release(); }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
         }
 
         private async Task FlushChannels(CancellationToken cancellationToken)
@@ -226,7 +231,10 @@ namespace Kafka.Client.IO.Write
             {
                 await FlushChannels(cancellationToken).ConfigureAwait(false);
             }
-            finally { _semaphoreSlim.Release(); }
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
         }
 
         private async Task<WriteChannel> GetChannel(
@@ -334,62 +342,49 @@ namespace Kafka.Client.IO.Write
             );
         }
 
-        private static async Task<(long ProducerId, short ProducerEpoch)> GetProducerInstance(
-            INodeLink protocol,
-            string? transactionalId,
-            int transactionTimeoutMs,
-            long producerId,
-            short producerEpoch,
+        private async Task InitializeProducer(
             CancellationToken cancellationToken
         )
         {
-            var initProducerIdRequest = new InitProducerIdRequestData(
-                transactionalId,
-                transactionTimeoutMs,
-                producerId,
-                producerEpoch,
-                []
-            );
-            var initProducerIdResponse = await protocol.InitProducerId(
-                initProducerIdRequest,
-                cancellationToken
-            ).ConfigureAwait(false);
-            return (
-                initProducerIdResponse.ProducerIdField,
-                initProducerIdResponse.ProducerEpochField
-            );
-        }
+            if (string.IsNullOrEmpty(_transactionalId) && !_enableIdempotence)
+            {
+                _initialized = true;
+                return;
+            }
 
-        private async Task<INodeLink> CreateController(
-            CancellationToken cancellationToken
-        )
-        {
             var coordinator = await _connections.Controller(
                 cancellationToken
             ).ConfigureAwait(false);
 
-            // If transactional then the coordinator is not the same as controller.
-            if (!string.IsNullOrEmpty(_transactionalId) || _enableIdempotence)
+            if (!string.IsNullOrEmpty(_transactionalId))
             {
-                coordinator = await FindCoordinator(
+                _coordinator = await FindCoordinator(
                     coordinator,
                     _transactionalId,
                     cancellationToken
                 ).ConfigureAwait(false);
-
-                (_producerId, _producerEpoch) = await GetProducerInstance(
-                    coordinator,
-                    _transactionalId,
-                    _transactionTimeoutMs,
-                    _producerId,
-                    _producerEpoch,
-                    cancellationToken
-                ).ConfigureAwait(false);
+                _logger.LogInformation($"Transaction coordinator for producer is broker: {_coordinator.Value}");
             }
-            return coordinator;
+
+            var initProducerIdRequest = new InitProducerIdRequestData(
+                _transactionalId,
+                _transactionTimeoutMs,
+                _producerId,
+                _producerEpoch,
+                []
+            );
+            var initProducerIdResponse = await coordinator.InitProducerId(
+                initProducerIdRequest,
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            _producerId = initProducerIdResponse.ProducerIdField;
+            _producerEpoch = initProducerIdResponse.ProducerEpochField;
+            _logger.LogInformation($"Producer instance created with id: {_producerId} and epoch: {_producerEpoch}");
+            _initialized = true;
         }
 
-        private async Task<INodeLink> FindCoordinator(
+        private async Task<NodeId> FindCoordinator(
             INodeLink protocol,
             string transactionalId,
             CancellationToken cancellationToken
@@ -408,12 +403,7 @@ namespace Kafka.Client.IO.Write
             var nodeId = findCoordinatorResponse.NodeIdField;
             if (findCoordinatorResponse.CoordinatorsField.Any())
                 nodeId = findCoordinatorResponse.CoordinatorsField[0].NodeIdField;
-            if (protocol.NodeId == nodeId)
-                return protocol;
-            else
-                return await _connections.Connection(nodeId, cancellationToken)
-                    .ConfigureAwait(false)
-                ;
+            return nodeId;
         }
 
         async Task IWriteStream.Close(CancellationToken cancellationToken)

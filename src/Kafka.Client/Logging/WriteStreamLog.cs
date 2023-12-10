@@ -32,13 +32,13 @@ namespace Kafka.Client.Logging
         [LoggerMessage(EventId = 2004, Level = LogLevel.Trace, Message = "Write Channel {nodeId} - Unknown value 'acks={acks}, defaulting to 'acks=all'")]
         internal static partial void DefaultAcks(this ILogger logger, in NodeId nodeId, in string acks);
 
-        [LoggerMessage(EventId = 2101, Level = LogLevel.Trace, Message = "Transaction begin")]
+        [LoggerMessage(EventId = 2101, Level = LogLevel.Information, Message = "Transaction begin")]
         internal static partial void TransactionBegin(this ILogger logger);
-        [LoggerMessage(EventId = 2102, Level = LogLevel.Trace, Message = "Transaction comitted")]
+        [LoggerMessage(EventId = 2102, Level = LogLevel.Information, Message = "Transaction comitted")]
         internal static partial void TransactionCommit(this ILogger logger);
-        [LoggerMessage(EventId = 2103, Level = LogLevel.Trace, Message = "Transaction rolback")]
+        [LoggerMessage(EventId = 2103, Level = LogLevel.Information, Message = "Transaction rolback")]
         internal static partial void TransactionRollback(this ILogger logger);
-        [LoggerMessage(EventId = 2104, Level = LogLevel.Trace, Message = "Transaction partition adeed: {topicPartition}")]
+        [LoggerMessage(EventId = 2104, Level = LogLevel.Information, Message = "Transaction partition adeed: {topicPartition}")]
         internal static partial void TransactionAdd(this ILogger logger, TopicPartition topicPartition);
     }
 }

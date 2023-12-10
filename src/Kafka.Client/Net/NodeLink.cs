@@ -110,18 +110,18 @@ namespace Kafka.Client.Net
 
         NodeId INode.NodeId => _nodeId;
 
-        IReadOnlyDictionary<ApiKey, ApiVersion> INode.Apis =>
+        public IReadOnlyDictionary<ApiKey, ApiVersion> Apis =>
             _apiVersions
         ;
 
-        async Task INode.Open(CancellationToken cancellationToken) =>
+        public async Task Open(CancellationToken cancellationToken) =>
             await EnsureConnection(
                 cancellationToken
             )
             .ConfigureAwait(false)
         ;
 
-        async Task INode.Close(CancellationToken cancellationToken)
+        public async Task Close(CancellationToken cancellationToken)
         {
             await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
@@ -137,7 +137,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        async Task<ApiVersionsResponseData> INodeLink.ApiVersions(
+        public async Task<ApiVersionsResponseData> ApiVersions(
             CancellationToken cancellationToken
         ) =>
             await ApiVersions(
@@ -167,7 +167,7 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        async Task<MetadataResponseData> INodeLink.Metadata(
+        public async Task<MetadataResponseData> Metadata(
             CancellationToken cancellationToken
         ) =>
             await Metadata(
@@ -612,12 +612,11 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
-        void IDisposable.Dispose()
+        public void Dispose()
         {
             _internalCts.Dispose();
             _sendQueue.Dispose();
             _semaphore.Dispose();
-            _transport.Dispose();
             GC.SuppressFinalize(this);
         }
 

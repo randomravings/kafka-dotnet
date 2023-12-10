@@ -1,45 +1,41 @@
 ﻿namespace Kafka.Client.IO.Write
 {
-    internal sealed class Transaction :
+    internal sealed class Transaction(
+        Func<bool, CancellationToken, Task> endTransactionDelegate
+    ) :
         ITransaction
     {
-        private readonly Func<bool, CancellationToken, Task> _endTransactionDelegate;
-        private bool _active;
-        public Transaction(
-            Func<bool, CancellationToken, Task> endTransactionDelegate
-        )
+        private readonly Func<bool, CancellationToken, Task> _endTransactionDelegate = endTransactionDelegate;
+        private int _completed;
+
+        async Task ITransaction.Commit(CancellationToken cancellationToken)
         {
-            _endTransactionDelegate = endTransactionDelegate;
-            _active = true;
+            if (Interlocked.CompareExchange(ref _completed, 1, 0) != 0)
+                throw new InvalidOperationException("Transaction has been completed");
+            await _endTransactionDelegate(
+                true,
+                cancellationToken
+            ).ConfigureAwait(false);
         }
-        async ValueTask ITransaction.Commit(CancellationToken cancellationToken)
+        async Task ITransaction.Rollback(CancellationToken cancellationToken)
         {
-            if (_active)
-                await _endTransactionDelegate(true, cancellationToken).ConfigureAwait(false);
-            else
-                throw new InvalidOperationException();
-            _active = false;
-        }
-        async ValueTask ITransaction.Rollback(CancellationToken cancellationToken)
-        {
-            if (_active)
-                await _endTransactionDelegate(false, cancellationToken).ConfigureAwait(false);
-            else
-                throw new InvalidOperationException();
-            _active = false;
+            if (Interlocked.CompareExchange(ref _completed, 1, 0) != 0)
+                throw new InvalidOperationException("Transaction has been completed");
+            await _endTransactionDelegate(
+                false,
+                cancellationToken
+            ).ConfigureAwait(false);
         }
         public void Dispose()
         {
-            if (_active)
-            {
-                using var cts = new CancellationTokenSource();
-                cts.CancelAfter(5000);
-                try
-                {
-                    _endTransactionDelegate(false, cts.Token).Wait(CancellationToken.None);
-                }
-                catch (OperationCanceledException) { }
-            }
+            if (Interlocked.CompareExchange(ref _completed, 1, 0) != 0)
+                return;
+            using var cts = new CancellationTokenSource();
+            cts.CancelAfter(5000);
+            _endTransactionDelegate(
+                false,
+                cts.Token
+            ).Wait(cts.Token);
         }
     }
 }

@@ -7,7 +7,8 @@ using System.Net.Sockets;
 namespace Kafka.Common.Net.Transport
 {
     public abstract class TcpTransport :
-        ITransport
+        ITransport,
+        IDisposable
     {
         private readonly DnsEndPoint _endPoint;
         private readonly Socket _socket;
