@@ -67,7 +67,7 @@ namespace KafkaGraphQL.Queries
             IEnumerable<Record> records,
 
             [Service]
-            IStreamWriter<string, string> streamWriter,
+            IStreamWriter<string?, string?> streamWriter,
 
             CancellationToken cancellationToken
         )

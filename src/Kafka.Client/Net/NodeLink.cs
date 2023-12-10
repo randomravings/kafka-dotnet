@@ -617,6 +617,7 @@ namespace Kafka.Client.Net
             _internalCts.Dispose();
             _sendQueue.Dispose();
             _semaphore.Dispose();
+            _transport.Dispose();
             GC.SuppressFinalize(this);
         }
 

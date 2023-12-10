@@ -5,7 +5,8 @@ using System.Diagnostics;
 namespace Kafka.Client.Pooling
 {
     internal sealed class BufferPool :
-        IBufferPool
+        IBufferPool,
+        IDisposable
     {
         private static readonly byte[] EMPTY = [];
 
@@ -145,5 +146,10 @@ namespace Kafka.Client.Pooling
         public long UnreservedSpace() =>
             _memory - (_allocatedMemory + _poolableMemory * _pool.Count)
         ;
+
+        public void Dispose()
+        {
+            _semaphore.Dispose();
+        }
     }
 }

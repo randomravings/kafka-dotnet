@@ -15,12 +15,12 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddKafkaClient(builder.Configuration)
     .AddKafkaStreamWriter(
-        StringSerde.Serializer,
-        StringSerde.Serializer
+        StringSerde.NullabeSerializer,
+        StringSerde.NullabeSerializer
     )
     .AddKafkaStreamReader(
-        StringSerde.Deserializer,
-        StringSerde.Deserializer
+        StringSerde.NullabeDeserializer,
+        StringSerde.NullabeDeserializer
     )
 ;
 

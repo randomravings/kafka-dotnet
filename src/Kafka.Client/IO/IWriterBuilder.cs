@@ -14,7 +14,6 @@ namespace Kafka.Client.IO
         IStreamWriterBuilder<TKey> WithKey<TKey>(
             ISerializer<TKey> keySerialzier
         );
-        IWriter Build();
     }
 
     public interface IStreamWriterBuilder<TKey>

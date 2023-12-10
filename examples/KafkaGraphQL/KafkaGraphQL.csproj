@@ -17,4 +17,8 @@
     <ProjectReference Include="..\..\src\Kafka.Client\Kafka.Client.csproj" />
   </ItemGroup>
 
+  <PropertyGroup>
+    <NoWarn>AD0001</NoWarn>
+  </PropertyGroup>
+
 </Project>

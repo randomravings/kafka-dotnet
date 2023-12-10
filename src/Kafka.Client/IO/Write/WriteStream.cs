@@ -88,13 +88,11 @@ namespace Kafka.Client.IO.Write
             CancellationToken cancellationToken
         )
         {
-            if (!_initialized)
-                await InitializeProducer(cancellationToken).ConfigureAwait(false);
-            if (_attributes.HasFlag(Attributes.IsTransactional))
-                await CheckTransactionMembership(
-                    produceRecord.TopicPartition,
-                    cancellationToken
-                ).ConfigureAwait(false);
+            await EnsureProducer(cancellationToken).ConfigureAwait(false);
+            await CheckTransactionMembership(
+                produceRecord.TopicPartition,
+                cancellationToken
+            ).ConfigureAwait(false);
             var callback = new TaskCompletionSource<ProduceResult>(
                 TaskCreationOptions.RunContinuationsAsynchronously
             );
@@ -137,6 +135,10 @@ namespace Kafka.Client.IO.Write
             CancellationToken cancellationToken
         )
         {
+            if (!_attributes.HasFlag(Attributes.IsTransactional))
+                return;
+            if (string.IsNullOrEmpty(_transactionalId))
+                throw new InvalidOperationException("Transactional Id not set");
             if (_transactionMembers.Contains(topicPartition))
                 return;
             var partitions = ImmutableArray.Create(
@@ -178,6 +180,7 @@ namespace Kafka.Client.IO.Write
                     if (partition.PartitionErrorCodeField != 0)
                         throw new ApiException(ApiErrors.Translate(partition.PartitionErrorCodeField));
             _transactionMembers.Add(topicPartition);
+            _logger.TransactionAdd(topicPartition);
         }
 
         private async Task EndTransaction(bool commit, CancellationToken cancellationToken)
@@ -187,6 +190,8 @@ namespace Kafka.Client.IO.Write
             {
                 if (!_attributes.HasFlag(Attributes.IsTransactional))
                     throw new InvalidOperationException("No active transaction");
+                if (string.IsNullOrEmpty(_transactionalId))
+                    throw new InvalidOperationException("Transactional Id not set");
                 await FlushChannels(cancellationToken).ConfigureAwait(false);
                 var endTxnRequest = new EndTxnRequestData(
                     _transactionalId,
@@ -342,46 +347,62 @@ namespace Kafka.Client.IO.Write
             );
         }
 
-        private async Task InitializeProducer(
+        private async Task EnsureProducer(
             CancellationToken cancellationToken
         )
         {
-            if (string.IsNullOrEmpty(_transactionalId) && !_enableIdempotence)
-            {
-                _initialized = true;
+            if (_initialized)
                 return;
-            }
 
-            var coordinator = await _connections.Controller(
+            await _semaphoreSlim.WaitAsync(
                 cancellationToken
             ).ConfigureAwait(false);
-
-            if (!string.IsNullOrEmpty(_transactionalId))
+            try
             {
-                _coordinator = await FindCoordinator(
-                    coordinator,
-                    _transactionalId,
+                if (_initialized)
+                    return;
+
+                if (string.IsNullOrEmpty(_transactionalId) && !_enableIdempotence)
+                {
+                    _initialized = true;
+                    return;
+                }
+
+                var coordinator = await _connections.Controller(
                     cancellationToken
                 ).ConfigureAwait(false);
-                _logger.LogInformation($"Transaction coordinator for producer is broker: {_coordinator.Value}");
+
+                if (!string.IsNullOrEmpty(_transactionalId))
+                {
+                    _coordinator = await FindCoordinator(
+                        coordinator,
+                        _transactionalId,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+                    _logger.TransactionCoordinator(_coordinator);
+                }
+
+                var initProducerIdRequest = new InitProducerIdRequestData(
+                    _transactionalId,
+                    _transactionTimeoutMs,
+                    _producerId,
+                    _producerEpoch,
+                    []
+                );
+                var initProducerIdResponse = await coordinator.InitProducerId(
+                    initProducerIdRequest,
+                    cancellationToken
+                ).ConfigureAwait(false);
+
+                _producerId = initProducerIdResponse.ProducerIdField;
+                _producerEpoch = initProducerIdResponse.ProducerEpochField;
+                _logger.ProducerInstance(_producerId, _producerEpoch);
+                _initialized = true;
             }
-
-            var initProducerIdRequest = new InitProducerIdRequestData(
-                _transactionalId,
-                _transactionTimeoutMs,
-                _producerId,
-                _producerEpoch,
-                []
-            );
-            var initProducerIdResponse = await coordinator.InitProducerId(
-                initProducerIdRequest,
-                cancellationToken
-            ).ConfigureAwait(false);
-
-            _producerId = initProducerIdResponse.ProducerIdField;
-            _producerEpoch = initProducerIdResponse.ProducerEpochField;
-            _logger.LogInformation($"Producer instance created with id: {_producerId} and epoch: {_producerEpoch}");
-            _initialized = true;
+            finally
+            {
+                _semaphoreSlim.Release();
+            }
         }
 
         private async Task<NodeId> FindCoordinator(

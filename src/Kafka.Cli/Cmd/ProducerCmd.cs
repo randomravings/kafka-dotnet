@@ -5,7 +5,6 @@ using Kafka.Cli.Text;
 using Kafka.Client.Config;
 using Kafka.Client.IO;
 using Kafka.Common.Model;
-using Kafka.Common.Serialization;
 using Kafka.Common.Serialization.Nullable;
 
 namespace Kafka.Cli.Cmd

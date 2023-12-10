@@ -2,9 +2,9 @@
 {
     internal sealed class BucketEntry<TKey, TValue>
     {
-        public BucketEntry()
+        public BucketEntry(Bucket<TKey, TValue> bucket)
         {
-            Bucket = default;
+            Bucket = bucket;
             KeyValue = default;
             Next = default;
         }

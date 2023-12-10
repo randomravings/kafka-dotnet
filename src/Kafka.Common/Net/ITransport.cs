@@ -1,6 +1,7 @@
 ﻿namespace Kafka.Common.Net
 {
-    public interface ITransport
+    public interface ITransport :
+        IDisposable
     {
         bool IsConnected { get; }
         string Host { get; }

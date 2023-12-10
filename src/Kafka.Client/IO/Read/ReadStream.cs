@@ -282,7 +282,7 @@ namespace Kafka.Client.IO.Read
             }
         }
 
-        private static IDictionary<NodeId, IDictionary<TopicPartition, Offset>> GetTopicPartitionAssignments(
+        private static Dictionary<NodeId, IDictionary<TopicPartition, Offset>> GetTopicPartitionAssignments(
             IDictionary<TopicPartition, LeaderAndOffset> topicPartitionDetails
         )
         {

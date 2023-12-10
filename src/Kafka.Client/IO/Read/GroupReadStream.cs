@@ -613,7 +613,7 @@ namespace Kafka.Client.IO.Read
 
         private static void RemoveUnassignedTopicPartitions(
             in IDictionary<TopicPartition, LeaderAndOffset> topicPartitionOffsets,
-            in IReadOnlySet<TopicPartition> topicPartitions
+            in SortedSet<TopicPartition> topicPartitions
         )
         {
             foreach (var (topicPartition, _) in topicPartitionOffsets)

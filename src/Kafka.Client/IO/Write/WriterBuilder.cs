@@ -48,14 +48,6 @@ namespace Kafka.Client.IO.Write
                 _logger
             )
         ;
-
-        IWriter IWriterBuilder.Build() =>
-            new Writer(
-                _stream,
-                _partitioner,
-                _logger
-            )
-        ;
     }
 
     internal class StreamWriterBuilder<TKey> :

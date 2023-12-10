@@ -4,18 +4,27 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Kafka.Client.Collections.Internal
 {
-    internal sealed class Bucket<Tkey, TValue>(
-        IObjectPool<BucketEntry<Tkey, TValue>> objectPool,
-        IKeyCompare<Tkey> keyCompare
-    ) : IEnumerable<KeyValuePair<Tkey, TValue>>
+    internal sealed class Bucket<Tkey, TValue> :
+        IEnumerable<KeyValuePair<Tkey, TValue>>
     {
         private readonly object _lock = new();
-        private readonly IObjectPool<BucketEntry<Tkey, TValue>> _objectPool = objectPool;
-        private readonly IKeyCompare<Tkey> _keyCompare = keyCompare;
-        private readonly BucketEntry<Tkey, TValue> _head = new();
+        private readonly IObjectPool<BucketEntry<Tkey, TValue>> _objectPool;
+        private readonly IKeyCompare<Tkey> _keyCompare;
+        private readonly BucketEntry<Tkey, TValue> _head;
 
-        private static BucketEntry<Tkey, TValue> NewBucketItem() =>
-            new()
+        public Bucket(
+            IObjectPool<BucketEntry<Tkey, TValue>> objectPool,
+            IKeyCompare<Tkey> keyCompare
+        )
+        {
+            _objectPool = objectPool;
+            _keyCompare = keyCompare;
+            _head = new(this);
+        }
+
+
+        private BucketEntry<Tkey, TValue> NewBucketItem() =>
+            new(this)
         ;
 
         public bool Add(in Tkey key, in TValue value, [MaybeNullWhen(false)] out BucketEntry<Tkey, TValue> entry)

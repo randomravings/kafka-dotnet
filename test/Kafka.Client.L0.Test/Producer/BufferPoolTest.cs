@@ -121,7 +121,8 @@ namespace Kafka.Client.L0.Test.Producer
                 Assert.That(buffer3, Has.Length.EqualTo(0));
             });
 
-            bufferPool.DeallocateBuffer(buffer2);
+            if(buffer2 != null)
+                bufferPool.DeallocateBuffer(buffer2);
             var success4 = bufferPool.TryAllocateBuffer(128, 200, out var buffer4);
 
             Assert.Multiple(() =>
@@ -154,7 +155,8 @@ namespace Kafka.Client.L0.Test.Producer
                 Assert.That(buffer3, Has.Length.EqualTo(0));
             });
 
-            bufferPool.DeallocateBuffer(buffer2);
+            if (buffer2 != null)
+                bufferPool.DeallocateBuffer(buffer2);
             var success4 = bufferPool.TryAllocateBuffer(128, 200, out var buffer4);
 
             Assert.Multiple(() =>
@@ -234,7 +236,8 @@ namespace Kafka.Client.L0.Test.Producer
                 Assert.That(metrics.UsedMemory, Is.LessThanOrEqualTo(bufferPool.Memory));
                 Assert.That(metrics.AvailableMemory, Is.GreaterThanOrEqualTo(0));
             });
-            buffers[index] = buffer;
+            if(buffer != null)
+                buffers[index] = buffer;
         }
     }
 }

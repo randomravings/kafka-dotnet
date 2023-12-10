@@ -1,9 +1,7 @@
-﻿using Kafka.Client.Collections;
-using Kafka.Client.Config;
+﻿using Kafka.Client.Config;
 using Kafka.Client.Messages;
 using Kafka.Client.Model.Internal;
 using Kafka.Common.Model;
-using Kafka.Common.Model.Comparison;
 using Kafka.Common.Net;
 using Kafka.Common.Net.Transport;
 using Microsoft.Extensions.Logging;
@@ -13,6 +11,7 @@ using System.Security.Cryptography;
 
 namespace Kafka.Client.Net
 {
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Disposable ownership transfer ignored.")]
     internal sealed class Cluster(
         ImmutableArray<BootstrapServer> bootstrapServers,
         KafkaClientConfig config,
@@ -225,13 +224,13 @@ namespace Kafka.Client.Net
             return controller;
         }
 
-        private INodeLink RandomizeExistingConnection()
+        private NodeLink RandomizeExistingConnection()
         {
             var randomIndex = RandomNumberGenerator.GetInt32(0, _connections.Count - 1);
             return _connections.ElementAt(randomIndex).Value;
         }
 
-        private async Task<INodeLink> RandomizeBootstrapConnection(
+        private async Task<NodeLink> RandomizeBootstrapConnection(
             CancellationToken cancellationToken
         )
         {
@@ -285,7 +284,7 @@ namespace Kafka.Client.Net
             return connection;
         }
 
-        private TcpTransport CreateTransport(
+        private SaslPlaintextTransport CreateTransport(
             string host,
             int port
         ) =>
