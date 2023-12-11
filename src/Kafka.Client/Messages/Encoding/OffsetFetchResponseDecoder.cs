@@ -7,9 +7,9 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using OffsetFetchResponseGroup = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup;
 using OffsetFetchResponsePartition = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseTopic.OffsetFetchResponsePartition;
-using OffsetFetchResponseTopics = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics;
-using OffsetFetchResponseTopic = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseTopic;
 using OffsetFetchResponsePartitions = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics.OffsetFetchResponsePartitions;
+using OffsetFetchResponseTopic = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseTopic;
+using OffsetFetchResponseTopics = Kafka.Client.Messages.OffsetFetchResponseData.OffsetFetchResponseGroup.OffsetFetchResponseTopics;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -57,11 +57,10 @@ namespace Kafka.Client.Messages.Encoding
             var errorCodeField = default(short);
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV0);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV0);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 topicsField,
@@ -78,11 +77,10 @@ namespace Kafka.Client.Messages.Encoding
             var errorCodeField = default(short);
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV1);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV1);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 topicsField,
@@ -99,11 +97,10 @@ namespace Kafka.Client.Messages.Encoding
             var errorCodeField = default(short);
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV2);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV2);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
             return new(i, new(
                 throttleTimeMsField,
@@ -122,11 +119,10 @@ namespace Kafka.Client.Messages.Encoding
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV3);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV3);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
             return new(i, new(
                 throttleTimeMsField,
@@ -145,11 +141,10 @@ namespace Kafka.Client.Messages.Encoding
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV4);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV4);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
             return new(i, new(
                 throttleTimeMsField,
@@ -168,11 +163,10 @@ namespace Kafka.Client.Messages.Encoding
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV5);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV5);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
             return new(i, new(
                 throttleTimeMsField,
@@ -191,11 +185,10 @@ namespace Kafka.Client.Messages.Encoding
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV6);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV6);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
@@ -226,11 +219,10 @@ namespace Kafka.Client.Messages.Encoding
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV7);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseTopic>(buffer, i, OffsetFetchResponseTopicDecoder.ReadV7);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
@@ -261,11 +253,10 @@ namespace Kafka.Client.Messages.Encoding
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _groupsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseGroup>(buffer, i, OffsetFetchResponseGroupDecoder.ReadV8);
-            if (_groupsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Groups'");
-            else
-                groupsField = _groupsField_.Value;
+            (i, groupsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseGroup>(buffer, i, OffsetFetchResponseGroupDecoder.ReadV8);
+            if (groupsField.IsDefault)
+                throw new InvalidDataException("groupsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -295,11 +286,10 @@ namespace Kafka.Client.Messages.Encoding
             var groupsField = ImmutableArray<OffsetFetchResponseGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _groupsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseGroup>(buffer, i, OffsetFetchResponseGroupDecoder.ReadV9);
-            if (_groupsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Groups'");
-            else
-                groupsField = _groupsField_.Value;
+            (i, groupsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseGroup>(buffer, i, OffsetFetchResponseGroupDecoder.ReadV9);
+            if (groupsField.IsDefault)
+                throw new InvalidDataException("groupsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -467,11 +457,10 @@ namespace Kafka.Client.Messages.Encoding
                 var errorCodeField = default(short);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, groupIdField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseTopics>(buffer, i, OffsetFetchResponseTopicsDecoder.ReadV8);
-                if (_topicsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Topics'");
-                else
-                    topicsField = _topicsField_.Value;
+                (i, topicsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseTopics>(buffer, i, OffsetFetchResponseTopicsDecoder.ReadV8);
+                if (topicsField.IsDefault)
+                    throw new InvalidDataException("topicsField was null");
+;
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
@@ -500,11 +489,10 @@ namespace Kafka.Client.Messages.Encoding
                 var errorCodeField = default(short);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, groupIdField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseTopics>(buffer, i, OffsetFetchResponseTopicsDecoder.ReadV9);
-                if (_topicsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Topics'");
-                else
-                    topicsField = _topicsField_.Value;
+                (i, topicsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponseTopics>(buffer, i, OffsetFetchResponseTopicsDecoder.ReadV9);
+                if (topicsField.IsDefault)
+                    throw new InvalidDataException("topicsField was null");
+;
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
@@ -655,11 +643,10 @@ namespace Kafka.Client.Messages.Encoding
                     var partitionsField = ImmutableArray<OffsetFetchResponsePartitions>.Empty;
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
                     (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
-                    (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponsePartitions>(buffer, i, OffsetFetchResponsePartitionsDecoder.ReadV8);
-                    if (_partitionsField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'Partitions'");
-                    else
-                        partitionsField = _partitionsField_.Value;
+                    (i, partitionsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponsePartitions>(buffer, i, OffsetFetchResponsePartitionsDecoder.ReadV8);
+                    if (partitionsField.IsDefault)
+                        throw new InvalidDataException("partitionsField was null");
+;
                     (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
@@ -685,11 +672,10 @@ namespace Kafka.Client.Messages.Encoding
                     var partitionsField = ImmutableArray<OffsetFetchResponsePartitions>.Empty;
                     var taggedFields = ImmutableArray<TaggedField>.Empty;
                     (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
-                    (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponsePartitions>(buffer, i, OffsetFetchResponsePartitionsDecoder.ReadV9);
-                    if (_partitionsField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'Partitions'");
-                    else
-                        partitionsField = _partitionsField_.Value;
+                    (i, partitionsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponsePartitions>(buffer, i, OffsetFetchResponsePartitionsDecoder.ReadV9);
+                    if (partitionsField.IsDefault)
+                        throw new InvalidDataException("partitionsField was null");
+;
                     (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
@@ -962,11 +948,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<OffsetFetchResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV0);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV0);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionsField,
@@ -980,11 +965,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<OffsetFetchResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV1);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV1);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionsField,
@@ -998,11 +982,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<OffsetFetchResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV2);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV2);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionsField,
@@ -1016,11 +999,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<OffsetFetchResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV3);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV3);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionsField,
@@ -1034,11 +1016,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<OffsetFetchResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV4);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV4);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionsField,
@@ -1052,11 +1033,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<OffsetFetchResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV5);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV5);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionsField,
@@ -1070,11 +1050,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<OffsetFetchResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV6);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV6);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
@@ -1100,11 +1079,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<OffsetFetchResponsePartition>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV7);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadCompactArray<OffsetFetchResponsePartition>(buffer, i, OffsetFetchResponsePartitionDecoder.ReadV7);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {

@@ -51,11 +51,10 @@ namespace Kafka.Client.Messages.Encoding
             var resultsByTopicV3AndBelowField = ImmutableArray<AddPartitionsToTxnTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _resultsByTopicV3AndBelowField_) = BinaryDecoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV0);
-            if (_resultsByTopicV3AndBelowField_ == null)
-                throw new NullReferenceException("Null not allowed for 'ResultsByTopicV3AndBelow'");
-            else
-                resultsByTopicV3AndBelowField = _resultsByTopicV3AndBelowField_.Value;
+            (i, resultsByTopicV3AndBelowField) = BinaryDecoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV0);
+            if (resultsByTopicV3AndBelowField.IsDefault)
+                throw new InvalidDataException("resultsByTopicV3AndBelowField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -73,11 +72,10 @@ namespace Kafka.Client.Messages.Encoding
             var resultsByTopicV3AndBelowField = ImmutableArray<AddPartitionsToTxnTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _resultsByTopicV3AndBelowField_) = BinaryDecoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV1);
-            if (_resultsByTopicV3AndBelowField_ == null)
-                throw new NullReferenceException("Null not allowed for 'ResultsByTopicV3AndBelow'");
-            else
-                resultsByTopicV3AndBelowField = _resultsByTopicV3AndBelowField_.Value;
+            (i, resultsByTopicV3AndBelowField) = BinaryDecoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV1);
+            if (resultsByTopicV3AndBelowField.IsDefault)
+                throw new InvalidDataException("resultsByTopicV3AndBelowField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -95,11 +93,10 @@ namespace Kafka.Client.Messages.Encoding
             var resultsByTopicV3AndBelowField = ImmutableArray<AddPartitionsToTxnTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _resultsByTopicV3AndBelowField_) = BinaryDecoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV2);
-            if (_resultsByTopicV3AndBelowField_ == null)
-                throw new NullReferenceException("Null not allowed for 'ResultsByTopicV3AndBelow'");
-            else
-                resultsByTopicV3AndBelowField = _resultsByTopicV3AndBelowField_.Value;
+            (i, resultsByTopicV3AndBelowField) = BinaryDecoder.ReadArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV2);
+            if (resultsByTopicV3AndBelowField.IsDefault)
+                throw new InvalidDataException("resultsByTopicV3AndBelowField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -117,11 +114,10 @@ namespace Kafka.Client.Messages.Encoding
             var resultsByTopicV3AndBelowField = ImmutableArray<AddPartitionsToTxnTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _resultsByTopicV3AndBelowField_) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV3);
-            if (_resultsByTopicV3AndBelowField_ == null)
-                throw new NullReferenceException("Null not allowed for 'ResultsByTopicV3AndBelow'");
-            else
-                resultsByTopicV3AndBelowField = _resultsByTopicV3AndBelowField_.Value;
+            (i, resultsByTopicV3AndBelowField) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV3);
+            if (resultsByTopicV3AndBelowField.IsDefault)
+                throw new InvalidDataException("resultsByTopicV3AndBelowField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -152,11 +148,10 @@ namespace Kafka.Client.Messages.Encoding
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _resultsByTransactionField_) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnResult>(buffer, i, AddPartitionsToTxnResultDecoder.ReadV4);
-            if (_resultsByTransactionField_ == null)
-                throw new NullReferenceException("Null not allowed for 'ResultsByTransaction'");
-            else
-                resultsByTransactionField = _resultsByTransactionField_.Value;
+            (i, resultsByTransactionField) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnResult>(buffer, i, AddPartitionsToTxnResultDecoder.ReadV4);
+            if (resultsByTransactionField.IsDefault)
+                throw new InvalidDataException("resultsByTransactionField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -345,11 +340,10 @@ namespace Kafka.Client.Messages.Encoding
                 var topicResultsField = ImmutableArray<AddPartitionsToTxnTopicResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, transactionalIdField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _topicResultsField_) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV4);
-                if (_topicResultsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'TopicResults'");
-                else
-                    topicResultsField = _topicResultsField_.Value;
+                (i, topicResultsField) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnTopicResult>(buffer, i, AddPartitionsToTxnTopicResultDecoder.ReadV4);
+                if (topicResultsField.IsDefault)
+                    throw new InvalidDataException("topicResultsField was null");
+;
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
@@ -379,11 +373,10 @@ namespace Kafka.Client.Messages.Encoding
                 var resultsByPartitionField = ImmutableArray<AddPartitionsToTxnPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _resultsByPartitionField_) = BinaryDecoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV0);
-                if (_resultsByPartitionField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'ResultsByPartition'");
-                else
-                    resultsByPartitionField = _resultsByPartitionField_.Value;
+                (i, resultsByPartitionField) = BinaryDecoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV0);
+                if (resultsByPartitionField.IsDefault)
+                    throw new InvalidDataException("resultsByPartitionField was null");
+;
                 return new(i, new(
                     nameField,
                     resultsByPartitionField,
@@ -397,11 +390,10 @@ namespace Kafka.Client.Messages.Encoding
                 var resultsByPartitionField = ImmutableArray<AddPartitionsToTxnPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _resultsByPartitionField_) = BinaryDecoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV1);
-                if (_resultsByPartitionField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'ResultsByPartition'");
-                else
-                    resultsByPartitionField = _resultsByPartitionField_.Value;
+                (i, resultsByPartitionField) = BinaryDecoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV1);
+                if (resultsByPartitionField.IsDefault)
+                    throw new InvalidDataException("resultsByPartitionField was null");
+;
                 return new(i, new(
                     nameField,
                     resultsByPartitionField,
@@ -415,11 +407,10 @@ namespace Kafka.Client.Messages.Encoding
                 var resultsByPartitionField = ImmutableArray<AddPartitionsToTxnPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _resultsByPartitionField_) = BinaryDecoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV2);
-                if (_resultsByPartitionField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'ResultsByPartition'");
-                else
-                    resultsByPartitionField = _resultsByPartitionField_.Value;
+                (i, resultsByPartitionField) = BinaryDecoder.ReadArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV2);
+                if (resultsByPartitionField.IsDefault)
+                    throw new InvalidDataException("resultsByPartitionField was null");
+;
                 return new(i, new(
                     nameField,
                     resultsByPartitionField,
@@ -433,11 +424,10 @@ namespace Kafka.Client.Messages.Encoding
                 var resultsByPartitionField = ImmutableArray<AddPartitionsToTxnPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _resultsByPartitionField_) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV3);
-                if (_resultsByPartitionField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'ResultsByPartition'");
-                else
-                    resultsByPartitionField = _resultsByPartitionField_.Value;
+                (i, resultsByPartitionField) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV3);
+                if (resultsByPartitionField.IsDefault)
+                    throw new InvalidDataException("resultsByPartitionField was null");
+;
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
@@ -463,11 +453,10 @@ namespace Kafka.Client.Messages.Encoding
                 var resultsByPartitionField = ImmutableArray<AddPartitionsToTxnPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _resultsByPartitionField_) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV4);
-                if (_resultsByPartitionField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'ResultsByPartition'");
-                else
-                    resultsByPartitionField = _resultsByPartitionField_.Value;
+                (i, resultsByPartitionField) = BinaryDecoder.ReadCompactArray<AddPartitionsToTxnPartitionResult>(buffer, i, AddPartitionsToTxnPartitionResultDecoder.ReadV4);
+                if (resultsByPartitionField.IsDefault)
+                    throw new InvalidDataException("resultsByPartitionField was null");
+;
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {

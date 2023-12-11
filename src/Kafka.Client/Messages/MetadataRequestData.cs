@@ -12,7 +12,7 @@ namespace Kafka.Client.Messages {
     /// </summary>
     [GeneratedCode("kgen", "1.0.0.0")]
     internal sealed record MetadataRequestData (
-        ImmutableArray<MetadataRequestTopic>? TopicsField,
+        ImmutableArray<MetadataRequestTopic> TopicsField,
         bool AllowAutoTopicCreationField,
         bool IncludeClusterAuthorizedOperationsField,
         bool IncludeTopicAuthorizedOperationsField,
@@ -20,7 +20,7 @@ namespace Kafka.Client.Messages {
     ) : RequestMessage (TaggedFields)
     {
         internal static MetadataRequestData Empty { get; } = new(
-            default(ImmutableArray<MetadataRequestTopic>?),
+            default(ImmutableArray<MetadataRequestTopic>),
             default(bool),
             default(bool),
             default(bool),

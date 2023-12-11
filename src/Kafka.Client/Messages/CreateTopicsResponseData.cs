@@ -1,8 +1,8 @@
 using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponseData.CreatableTopicResult;
 using CreatableTopicConfigs = Kafka.Client.Messages.CreateTopicsResponseData.CreatableTopicResult.CreatableTopicConfigs;
+using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponseData.CreatableTopicResult;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -40,7 +40,7 @@ namespace Kafka.Client.Messages {
             short TopicConfigErrorCodeField,
             int NumPartitionsField,
             short ReplicationFactorField,
-            ImmutableArray<CreatableTopicConfigs>? ConfigsField,
+            ImmutableArray<CreatableTopicConfigs> ConfigsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
@@ -52,7 +52,7 @@ namespace Kafka.Client.Messages {
                 default(short),
                 default(int),
                 default(short),
-                default(ImmutableArray<CreatableTopicConfigs>?),
+                default(ImmutableArray<CreatableTopicConfigs>),
                 ImmutableArray<TaggedField>.Empty
             );
             /// <summary>

@@ -46,11 +46,10 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<DeleteRecordsTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<DeleteRecordsTopicResult>(buffer, i, DeleteRecordsTopicResultDecoder.ReadV0);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<DeleteRecordsTopicResult>(buffer, i, DeleteRecordsTopicResultDecoder.ReadV0);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 topicsField,
@@ -64,11 +63,10 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<DeleteRecordsTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<DeleteRecordsTopicResult>(buffer, i, DeleteRecordsTopicResultDecoder.ReadV1);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<DeleteRecordsTopicResult>(buffer, i, DeleteRecordsTopicResultDecoder.ReadV1);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 topicsField,
@@ -82,11 +80,10 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<DeleteRecordsTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<DeleteRecordsTopicResult>(buffer, i, DeleteRecordsTopicResultDecoder.ReadV2);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<DeleteRecordsTopicResult>(buffer, i, DeleteRecordsTopicResultDecoder.ReadV2);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -115,11 +112,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<DeleteRecordsPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<DeleteRecordsPartitionResult>(buffer, i, DeleteRecordsPartitionResultDecoder.ReadV0);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<DeleteRecordsPartitionResult>(buffer, i, DeleteRecordsPartitionResultDecoder.ReadV0);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionsField,
@@ -133,11 +129,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<DeleteRecordsPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<DeleteRecordsPartitionResult>(buffer, i, DeleteRecordsPartitionResultDecoder.ReadV1);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<DeleteRecordsPartitionResult>(buffer, i, DeleteRecordsPartitionResultDecoder.ReadV1);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionsField,
@@ -151,11 +146,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionsField = ImmutableArray<DeleteRecordsPartitionResult>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<DeleteRecordsPartitionResult>(buffer, i, DeleteRecordsPartitionResultDecoder.ReadV2);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadCompactArray<DeleteRecordsPartitionResult>(buffer, i, DeleteRecordsPartitionResultDecoder.ReadV2);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {

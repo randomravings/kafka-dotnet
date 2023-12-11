@@ -158,15 +158,14 @@ namespace Kafka.Client.IO.Read
         )
         {
             // Skip empty records.
-            var recordBatches = partition.RecordsField.GetValueOrDefault([]);
-            if (recordBatches.Length == 0)
+            if (partition.RecordsField.IsDefaultOrEmpty)
                 return 0;
 
             var offsetsProcessed = 0;
             var watermark = state.Value.GetOffset();
-            for (int i = 0; i < recordBatches.Length; i++)
+            for (int i = 0; i < partition.RecordsField.Length; i++)
             {
-                var recordBatch = recordBatches[i];
+                var recordBatch = partition.RecordsField[i];
                 offsetsProcessed += recordBatch.Records.Count;
                 var offset = recordBatch.BaseOffset;
 

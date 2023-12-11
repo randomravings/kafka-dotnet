@@ -183,14 +183,14 @@ namespace Kafka.Common.Encoding
             return new(endIndex, buffer[i..endIndex]);
         }
 
-        public static DecodeResult<ImmutableArray<IRecords>?> ReadRecords([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<ImmutableArray<IRecords>> ReadRecords([NotNull] in byte[] buffer, in int index)
         {
             var i = index;
             (i, var length) = ReadInt32(buffer, i);
             return ReadRecordBatches(buffer, length, i);
         }
 
-        public static DecodeResult<ImmutableArray<IRecords>?> ReadCompactRecords([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<ImmutableArray<IRecords>> ReadCompactRecords([NotNull] in byte[] buffer, in int index)
         {
             var i = index;
             (i, var length) = ReadVarUInt32(buffer, i);
@@ -198,10 +198,10 @@ namespace Kafka.Common.Encoding
             return ReadRecordBatches(buffer, intLength, i);
         }
 
-        private static DecodeResult<ImmutableArray<IRecords>?> ReadRecordBatches([NotNull] in byte[] buffer, int length, in int index)
+        private static DecodeResult<ImmutableArray<IRecords>> ReadRecordBatches([NotNull] in byte[] buffer, int length, in int index)
         {
             if (length == 0)
-                return new(index, null);
+                return new(index, default);
             var i = index;
             var limit = length + index;
             var recordBatchesBuilder = ImmutableArray.CreateBuilder<IRecords>();
@@ -216,7 +216,7 @@ namespace Kafka.Common.Encoding
         private static DecodeResult<IRecords> ReadRecordBatch([NotNull] in byte[] buffer, in int index)
         {
             var i = index;
-            var records = default(ImmutableArray<IRecord>?);
+            var records = ImmutableArray<IRecord>.Empty;
             (i, var baseOffset) = ReadInt64(buffer, i);
             (i, var size) = ReadInt32(buffer, i);
             (i, var partitionLeaderEpoch) = ReadInt32(buffer, i);
@@ -256,7 +256,7 @@ namespace Kafka.Common.Encoding
                 ProducerId: producerId,
                 ProducerEpoch: producerEpoch,
                 BaseSequence: baseSequence,
-                Records: records ?? []
+                Records: records
             ));
         }
 
@@ -365,7 +365,7 @@ namespace Kafka.Common.Encoding
             return new(i, new(key, value));
         }
 
-        public static DecodeResult<ImmutableArray<TItem>?> ReadArray<TItem>([NotNull] in byte[] buffer, in int index, [NotNull] in DecodeValue<TItem> readItem)
+        public static DecodeResult<ImmutableArray<TItem>> ReadArray<TItem>([NotNull] in byte[] buffer, in int index, [NotNull] in DecodeValue<TItem> readItem)
         {
             var i = index;
             (i, var length) = ReadInt32(buffer, i);
@@ -380,7 +380,7 @@ namespace Kafka.Common.Encoding
             return new(i, items.ToImmutable());
         }
 
-        public static DecodeResult<ImmutableArray<TItem>?> ReadCompactArray<TItem>([NotNull] in byte[] buffer, in int index, [NotNull] in DecodeValue<TItem> readItem)
+        public static DecodeResult<ImmutableArray<TItem>> ReadCompactArray<TItem>([NotNull] in byte[] buffer, in int index, [NotNull] in DecodeValue<TItem> readItem)
         {
             var (i, length) = ReadVarUInt32(buffer, index);
             if (length == 0)

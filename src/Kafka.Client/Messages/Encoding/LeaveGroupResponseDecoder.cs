@@ -97,11 +97,10 @@ namespace Kafka.Client.Messages.Encoding
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadArray<MemberResponse>(buffer, i, MemberResponseDecoder.ReadV3);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadArray<MemberResponse>(buffer, i, MemberResponseDecoder.ReadV3);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -118,11 +117,10 @@ namespace Kafka.Client.Messages.Encoding
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<MemberResponse>(buffer, i, MemberResponseDecoder.ReadV4);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadCompactArray<MemberResponse>(buffer, i, MemberResponseDecoder.ReadV4);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -151,11 +149,10 @@ namespace Kafka.Client.Messages.Encoding
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<MemberResponse>(buffer, i, MemberResponseDecoder.ReadV5);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadCompactArray<MemberResponse>(buffer, i, MemberResponseDecoder.ReadV5);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {

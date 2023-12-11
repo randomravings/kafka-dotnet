@@ -5,8 +5,8 @@ using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponseData.CreatableTopicResult;
 using CreatableTopicConfigs = Kafka.Client.Messages.CreateTopicsResponseData.CreatableTopicResult.CreatableTopicConfigs;
+using CreatableTopicResult = Kafka.Client.Messages.CreateTopicsResponseData.CreatableTopicResult;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -50,11 +50,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<CreatableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV0);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV0);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 topicsField,
@@ -67,11 +66,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var topicsField = ImmutableArray<CreatableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV1);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV1);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 topicsField,
@@ -85,11 +83,10 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<CreatableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV2);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV2);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 topicsField,
@@ -103,11 +100,10 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<CreatableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV3);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV3);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 topicsField,
@@ -121,11 +117,10 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<CreatableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV4);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV4);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 topicsField,
@@ -139,11 +134,10 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<CreatableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV5);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV5);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -169,11 +163,10 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<CreatableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV6);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV6);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -199,11 +192,10 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<CreatableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV7);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<CreatableTopicResult>(buffer, i, CreatableTopicResultDecoder.ReadV7);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -235,7 +227,7 @@ namespace Kafka.Client.Messages.Encoding
                 var topicConfigErrorCodeField = default(short);
                 var numPartitionsField = default(int);
                 var replicationFactorField = default(short);
-                var configsField = default(ImmutableArray<CreatableTopicConfigs>?);
+                var configsField = default(ImmutableArray<CreatableTopicConfigs>);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
@@ -261,7 +253,7 @@ namespace Kafka.Client.Messages.Encoding
                 var topicConfigErrorCodeField = default(short);
                 var numPartitionsField = default(int);
                 var replicationFactorField = default(short);
-                var configsField = default(ImmutableArray<CreatableTopicConfigs>?);
+                var configsField = default(ImmutableArray<CreatableTopicConfigs>);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
@@ -288,7 +280,7 @@ namespace Kafka.Client.Messages.Encoding
                 var topicConfigErrorCodeField = default(short);
                 var numPartitionsField = default(int);
                 var replicationFactorField = default(short);
-                var configsField = default(ImmutableArray<CreatableTopicConfigs>?);
+                var configsField = default(ImmutableArray<CreatableTopicConfigs>);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
@@ -315,7 +307,7 @@ namespace Kafka.Client.Messages.Encoding
                 var topicConfigErrorCodeField = default(short);
                 var numPartitionsField = default(int);
                 var replicationFactorField = default(short);
-                var configsField = default(ImmutableArray<CreatableTopicConfigs>?);
+                var configsField = default(ImmutableArray<CreatableTopicConfigs>);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
@@ -342,7 +334,7 @@ namespace Kafka.Client.Messages.Encoding
                 var topicConfigErrorCodeField = default(short);
                 var numPartitionsField = default(int);
                 var replicationFactorField = default(short);
-                var configsField = default(ImmutableArray<CreatableTopicConfigs>?);
+                var configsField = default(ImmutableArray<CreatableTopicConfigs>);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
@@ -369,7 +361,7 @@ namespace Kafka.Client.Messages.Encoding
                 var topicConfigErrorCodeField = default(short);
                 var numPartitionsField = default(int);
                 var replicationFactorField = default(short);
-                var configsField = default(ImmutableArray<CreatableTopicConfigs>?);
+                var configsField = default(ImmutableArray<CreatableTopicConfigs>);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
@@ -419,7 +411,7 @@ namespace Kafka.Client.Messages.Encoding
                 var topicConfigErrorCodeField = default(short);
                 var numPartitionsField = default(int);
                 var replicationFactorField = default(short);
-                var configsField = default(ImmutableArray<CreatableTopicConfigs>?);
+                var configsField = default(ImmutableArray<CreatableTopicConfigs>);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
@@ -469,7 +461,7 @@ namespace Kafka.Client.Messages.Encoding
                 var topicConfigErrorCodeField = default(short);
                 var numPartitionsField = default(int);
                 var replicationFactorField = default(short);
-                var configsField = default(ImmutableArray<CreatableTopicConfigs>?);
+                var configsField = default(ImmutableArray<CreatableTopicConfigs>);
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
                 (i, topicIdField) = BinaryDecoder.ReadUuid(buffer, i);

@@ -3,7 +3,6 @@ using Kafka.Common.Model;
 using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using CreatableReplicaAssignment = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic.CreatableReplicaAssignment;
 using CreatableTopic = Kafka.Client.Messages.CreateTopicsRequestData.CreatableTopic;

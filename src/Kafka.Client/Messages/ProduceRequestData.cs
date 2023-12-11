@@ -51,13 +51,13 @@ namespace Kafka.Client.Messages {
             [GeneratedCode("kgen", "1.0.0.0")]
             internal sealed record PartitionProduceData (
                 int IndexField,
-                ImmutableArray<IRecords>? RecordsField,
+                ImmutableArray<IRecords> RecordsField,
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
                 internal static PartitionProduceData Empty { get; } = new(
                     default(int),
-                    default(ImmutableArray<IRecords>?),
+                    default(ImmutableArray<IRecords>),
                     ImmutableArray<TaggedField>.Empty
                 );
             };

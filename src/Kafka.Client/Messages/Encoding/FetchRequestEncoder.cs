@@ -3,12 +3,11 @@ using Kafka.Common.Model;
 using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using ForgottenTopic = Kafka.Client.Messages.FetchRequestData.ForgottenTopic;
-using FetchTopic = Kafka.Client.Messages.FetchRequestData.FetchTopic;
-using ReplicaState = Kafka.Client.Messages.FetchRequestData.ReplicaState;
 using FetchPartition = Kafka.Client.Messages.FetchRequestData.FetchTopic.FetchPartition;
+using FetchTopic = Kafka.Client.Messages.FetchRequestData.FetchTopic;
+using ForgottenTopic = Kafka.Client.Messages.FetchRequestData.ForgottenTopic;
+using ReplicaState = Kafka.Client.Messages.FetchRequestData.ReplicaState;
 
 namespace Kafka.Client.Messages.Encoding
 {

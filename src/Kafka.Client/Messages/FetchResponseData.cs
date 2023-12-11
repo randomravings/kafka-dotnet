@@ -2,13 +2,13 @@ using Kafka.Common.Model;
 using Kafka.Common.Records;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
-using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
+using AbortedTransaction = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.AbortedTransaction;
+using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
 using FetchableTopicResponse = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse;
 using LeaderIdAndEpoch = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.LeaderIdAndEpoch;
-using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
-using EpochEndOffset = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.EpochEndOffset;
-using AbortedTransaction = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.AbortedTransaction;
 using NodeEndpoint = Kafka.Client.Messages.FetchResponseData.NodeEndpoint;
+using PartitionData = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData;
+using SnapshotId = Kafka.Client.Messages.FetchResponseData.FetchableTopicResponse.PartitionData.SnapshotId;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -78,9 +78,9 @@ namespace Kafka.Client.Messages {
                 EpochEndOffset DivergingEpochField,
                 LeaderIdAndEpoch CurrentLeaderField,
                 SnapshotId SnapshotIdField,
-                ImmutableArray<AbortedTransaction>? AbortedTransactionsField,
+                ImmutableArray<AbortedTransaction> AbortedTransactionsField,
                 int PreferredReadReplicaField,
-                ImmutableArray<IRecords>? RecordsField,
+                ImmutableArray<IRecords> RecordsField,
                 ImmutableArray<TaggedField> TaggedFields
             )
             {
@@ -93,9 +93,9 @@ namespace Kafka.Client.Messages {
                     EpochEndOffset.Empty,
                     LeaderIdAndEpoch.Empty,
                     SnapshotId.Empty,
-                    default(ImmutableArray<AbortedTransaction>?),
+                    default(ImmutableArray<AbortedTransaction>),
                     default(int),
-                    default(ImmutableArray<IRecords>?),
+                    default(ImmutableArray<IRecords>),
                     ImmutableArray<TaggedField>.Empty
                 );
                 /// <summary>

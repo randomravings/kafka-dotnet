@@ -544,27 +544,25 @@ namespace Kafka.Common.Encoding
             return i;
         }
 
-        public static int WriteArray<TItem>([NotNull] in byte[] buffer, in int index, in ImmutableArray<TItem>? value, [NotNull] in EncodeValue<TItem> encodeItem)
+        public static int WriteArray<TItem>([NotNull] in byte[] buffer, in int index, in ImmutableArray<TItem> value, [NotNull] in EncodeValue<TItem> encodeItem)
         {
             var i = index;
-            var array = value.GetValueOrDefault();
-            if (array == null)
+            if (value.IsDefault)
                 return WriteInt32(buffer, i, -1);
-            i = WriteInt32(buffer, i, array.Length);
-            for (int j = 0; j < array.Length; j++)
-                i = encodeItem(buffer, i, array[j]);
+            i = WriteInt32(buffer, i, value.Length);
+            for (int j = 0; j < value.Length; j++)
+                i = encodeItem(buffer, i, value[j]);
             return i;
         }
 
-        public static int WriteCompactArray<TItem>([NotNull] in byte[] buffer, in int index, in ImmutableArray<TItem>? value, [NotNull] in EncodeValue<TItem> encodeItem)
+        public static int WriteCompactArray<TItem>([NotNull] in byte[] buffer, in int index, in ImmutableArray<TItem> value, [NotNull] in EncodeValue<TItem> encodeItem)
         {
             var i = index;
-            var array = value.GetValueOrDefault();
-            if (array == null)
+            if (value.IsDefault)
                 return WriteVarUInt32(buffer, i, 0);
-            i = WriteVarUInt32(buffer, i, (uint)array.Length + 1);
-            for (int j = 0; j < array.Length; j++)
-                i = encodeItem(buffer, i, array[j]);
+            i = WriteVarUInt32(buffer, i, (uint)value.Length + 1);
+            for (int j = 0; j < value.Length; j++)
+                i = encodeItem(buffer, i, value[j]);
             return i;
         }
 

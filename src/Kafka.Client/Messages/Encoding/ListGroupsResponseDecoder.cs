@@ -48,11 +48,10 @@ namespace Kafka.Client.Messages.Encoding
             var groupsField = ImmutableArray<ListedGroup>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _groupsField_) = BinaryDecoder.ReadArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV0);
-            if (_groupsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Groups'");
-            else
-                groupsField = _groupsField_.Value;
+            (i, groupsField) = BinaryDecoder.ReadArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV0);
+            if (groupsField.IsDefault)
+                throw new InvalidDataException("groupsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -69,11 +68,10 @@ namespace Kafka.Client.Messages.Encoding
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _groupsField_) = BinaryDecoder.ReadArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV1);
-            if (_groupsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Groups'");
-            else
-                groupsField = _groupsField_.Value;
+            (i, groupsField) = BinaryDecoder.ReadArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV1);
+            if (groupsField.IsDefault)
+                throw new InvalidDataException("groupsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -90,11 +88,10 @@ namespace Kafka.Client.Messages.Encoding
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _groupsField_) = BinaryDecoder.ReadArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV2);
-            if (_groupsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Groups'");
-            else
-                groupsField = _groupsField_.Value;
+            (i, groupsField) = BinaryDecoder.ReadArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV2);
+            if (groupsField.IsDefault)
+                throw new InvalidDataException("groupsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -111,11 +108,10 @@ namespace Kafka.Client.Messages.Encoding
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _groupsField_) = BinaryDecoder.ReadCompactArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV3);
-            if (_groupsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Groups'");
-            else
-                groupsField = _groupsField_.Value;
+            (i, groupsField) = BinaryDecoder.ReadCompactArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV3);
+            if (groupsField.IsDefault)
+                throw new InvalidDataException("groupsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -144,11 +140,10 @@ namespace Kafka.Client.Messages.Encoding
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _groupsField_) = BinaryDecoder.ReadCompactArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV4);
-            if (_groupsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Groups'");
-            else
-                groupsField = _groupsField_.Value;
+            (i, groupsField) = BinaryDecoder.ReadCompactArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV4);
+            if (groupsField.IsDefault)
+                throw new InvalidDataException("groupsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {

@@ -154,12 +154,12 @@ namespace Kafka.Client
                         r.NameField,
                         r.NumPartitionsField,
                         r.ReplicationFactorField,
-                        r.ConfigsField.HasValue ?
-                            r.ConfigsField.Value.ToImmutableSortedDictionary(
+                        r.ConfigsField.IsDefaultOrEmpty ?
+                            ImmutableSortedDictionary<string, string?>.Empty :
+                            r.ConfigsField.ToImmutableSortedDictionary(
                                 k => k.NameField,
-                                v => v.ValueField
-                            ) :
-                            ImmutableSortedDictionary<string, string?>.Empty,
+                                v => (string?)v.ValueField
+                            ),
                         r.ErrorCodeField == 0 ?
                             ApiError.None :
                             ApiErrors.Translate(r.ErrorCodeField)
@@ -297,7 +297,7 @@ namespace Kafka.Client
             ;
 
             var request = new MetadataRequestData(
-                metadataTopicsReques.Length == 0 ? null : metadataTopicsReques,
+                metadataTopicsReques.Length == 0 ? default : metadataTopicsReques,
                 false,
                 false,
                 options.IncludeTopicAuthorizedOperations,

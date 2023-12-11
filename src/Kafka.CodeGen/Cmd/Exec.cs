@@ -19,7 +19,7 @@ namespace Kafka.CodeGen.Cmd
             Both = Client | Server
         }
 
-        private static readonly ImmutableSortedSet<ApiKey> CLIENT_API_KEYS = ImmutableSortedSet.Create(
+        private static readonly ImmutableSortedSet<ApiKey> CLIENT_API_KEYS = [
             ApiKey.Produce,
             ApiKey.Fetch,
             ApiKey.ListOffsets,
@@ -38,8 +38,10 @@ namespace Kafka.CodeGen.Cmd
             ApiKey.DeleteRecords,
             ApiKey.InitProducerId,
             ApiKey.AddPartitionsToTxn,
-            ApiKey.EndTxn
-        );
+            ApiKey.EndTxn,
+            ApiKey.SaslHandshake,
+            ApiKey.SaslAuthenticate
+        ];
 
         public static async ValueTask<int> Fetch(
             IFileSystem fileSystem,

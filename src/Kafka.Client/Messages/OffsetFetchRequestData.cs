@@ -2,8 +2,8 @@ using Kafka.Common.Model;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using OffsetFetchRequestGroup = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup;
-using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
 using OffsetFetchRequestTopic = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestTopic;
+using OffsetFetchRequestTopics = Kafka.Client.Messages.OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics;
 
 namespace Kafka.Client.Messages {
     /// <summary>
@@ -15,7 +15,7 @@ namespace Kafka.Client.Messages {
     [GeneratedCode("kgen", "1.0.0.0")]
     internal sealed record OffsetFetchRequestData (
         string GroupIdField,
-        ImmutableArray<OffsetFetchRequestTopic>? TopicsField,
+        ImmutableArray<OffsetFetchRequestTopic> TopicsField,
         ImmutableArray<OffsetFetchRequestGroup> GroupsField,
         bool RequireStableField,
         ImmutableArray<TaggedField> TaggedFields
@@ -23,7 +23,7 @@ namespace Kafka.Client.Messages {
     {
         internal static OffsetFetchRequestData Empty { get; } = new(
             "",
-            default(ImmutableArray<OffsetFetchRequestTopic>?),
+            default(ImmutableArray<OffsetFetchRequestTopic>),
             ImmutableArray<OffsetFetchRequestGroup>.Empty,
             default(bool),
             ImmutableArray<TaggedField>.Empty
@@ -39,7 +39,7 @@ namespace Kafka.Client.Messages {
             string GroupIdField,
             string? MemberIdField,
             int MemberEpochField,
-            ImmutableArray<OffsetFetchRequestTopics>? TopicsField,
+            ImmutableArray<OffsetFetchRequestTopics> TopicsField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
@@ -47,7 +47,7 @@ namespace Kafka.Client.Messages {
                 "",
                 default(string?),
                 default(int),
-                default(ImmutableArray<OffsetFetchRequestTopics>?),
+                default(ImmutableArray<OffsetFetchRequestTopics>),
                 ImmutableArray<TaggedField>.Empty
             );
             /// <summary>

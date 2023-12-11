@@ -8,6 +8,7 @@ using Kafka.Common.Records;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.IO.Abstractions;
 
 namespace Kafka.CodeGen.CSharp
@@ -28,13 +29,14 @@ namespace Kafka.CodeGen.CSharp
             var typeLookup = CreateTypeLookup(messageDefinition);
             var typeFlags = GetUsings(messageDefinition, typeLookup);
 
-            var usings = new List<string>();
-            if (messageDefinition.FlexibleVersions.Some())
-                usings.Add("Kafka.Common.Model");
-            if (messageDefinition.FlexibleVersions.Some() || typeFlags.HasFlag(UsingsFlags.Array))
-                usings.Add("System.Collections.Immutable");
+            var usings = new List<string?>
+            {
+                typeof(GeneratedCodeAttribute).Namespace,
+                typeof(Api).Namespace,
+                typeof(ImmutableArray).Namespace
+            };
             if (typeFlags.HasFlag(UsingsFlags.Record))
-                usings.Add("Kafka.Common.Records");
+                usings.Add(typeof(IRecords).Namespace);
 
             var messageName = GetMessageName(messageDefinition);
             var writer = CreateWriter(directoryInfo, messageName);
@@ -65,17 +67,17 @@ namespace Kafka.CodeGen.CSharp
             var typeLookup = CreateTypeLookup(messageDefinition);
             var typeFlags = GetUsings(messageDefinition, typeLookup);
 
-            var usings = new List<string>
+            var usings = new List<string?>
             {
-                typeof(BinaryEncoder).Namespace ?? "",
-                "Kafka.Common.Model",
-                "Kafka.Common.Protocol",
-                "Kafka.Common.Model.Extensions",
-                "System.Collections.Immutable",
-                "System.Diagnostics.CodeAnalysis"
+                typeof(VersionRangeExtensions).Namespace,
+                typeof(NotNullAttribute).Namespace,
+                typeof(BinaryEncoder).Namespace,
+                typeof(GeneratedCodeAttribute).Namespace,
+                typeof(Api).Namespace,
+                typeof(IMessageCodec).Namespace
             };
             if (typeFlags.HasFlag(UsingsFlags.Record))
-                usings.Add("Kafka.Common.Records");
+                usings.Add(typeof(IRecords).Namespace);
 
             var writer = CreateWriter(
                 directoryInfo,
@@ -134,17 +136,18 @@ namespace Kafka.CodeGen.CSharp
             var typeLookup = CreateTypeLookup(messageDefinition);
             var typeFlags = GetUsings(messageDefinition, typeLookup);
 
-            var usings = new List<string>
+            var usings = new List<string?>
             {
-                typeof(BinaryEncoder).Namespace ?? "",
-                "Kafka.Common.Model",
-                "Kafka.Common.Model.Extensions",
-                "Kafka.Common.Protocol",
-                "System.Collections.Immutable",
-                "System.Diagnostics.CodeAnalysis"
-        };
+                typeof(VersionRangeExtensions).Namespace,
+                typeof(NotNullAttribute).Namespace,
+                typeof(BinaryDecoder).Namespace,
+                typeof(GeneratedCodeAttribute).Namespace,
+                typeof(ImmutableArray).Namespace,
+                typeof(Api).Namespace,
+                typeof(IMessageCodec).Namespace,
+            };
             if (typeFlags.HasFlag(UsingsFlags.Record))
-                usings.Add("Kafka.Common.Records");
+                usings.Add(typeof(IRecords).Namespace);
 
             var writer = CreateWriter(
                 directoryInfo,
@@ -782,12 +785,12 @@ namespace Kafka.CodeGen.CSharp
             in StreamWriter writer,
             in string messageNamespace,
             in IReadOnlyDictionary<string, QualifiedStruct> typeLookup,
-            in IEnumerable<string> namespaces
+            in IEnumerable<string?> namespaces
         )
         {
-            foreach (var ns in namespaces.Append("System.CodeDom.Compiler").Order())
+            foreach (var ns in namespaces.Order().Where(n => !string.IsNullOrEmpty(n)).Distinct())
                 writer.WriteLine($"using {ns};");
-            foreach (var type in typeLookup)
+            foreach (var type in typeLookup.OrderBy(r => r.Key))
                 writer.WriteLine($"using {type.Value.Name} = {messageNamespace}.{type.Value.ParentName};");
             writer.WriteLine();
         }
@@ -806,6 +809,7 @@ namespace Kafka.CodeGen.CSharp
             WriteFields(
                 writer,
                 message.Fields,
+                message.FlexibleVersions.Some(),
                 $"{indent}    "
             );
             writer.Write($"{indent})");
@@ -824,12 +828,14 @@ namespace Kafka.CodeGen.CSharp
                 writer,
                 messageName,
                 message.Fields,
+                message.FlexibleVersions.Some(),
                 $"{indent}    "
             );
             foreach (var @struct in message.Structs)
                 WriteStructRecord(
                     writer,
                     @struct.Value,
+                    message.FlexibleVersions.Some(),
                     $"{indent}    "
                 );
             writer.WriteLine($"{indent}}};");
@@ -838,6 +844,7 @@ namespace Kafka.CodeGen.CSharp
         private static void WriteStructRecord(
             in StreamWriter writer,
             in StructDefinition structDefinition,
+            in bool flexible,
             in string indent
         )
         {
@@ -849,6 +856,7 @@ namespace Kafka.CodeGen.CSharp
             WriteFields(
                 writer,
                 structDefinition.Fields,
+                flexible,
                 $"{indent}    "
             );
             writer.Write($"{indent})");
@@ -858,12 +866,14 @@ namespace Kafka.CodeGen.CSharp
                 writer,
                 messageName,
                 structDefinition.Fields,
+                flexible,
                 $"{indent}    "
             );
             foreach (var @struct in structDefinition.Structs)
                 WriteStructRecord(
                     writer,
                     @struct.Value,
+                    flexible,
                     $"{indent}    "
                 );
             writer.WriteLine($"{indent}}};");
@@ -873,6 +883,7 @@ namespace Kafka.CodeGen.CSharp
             in StreamWriter writer,
             in string name,
             in ImmutableArray<Field> fields,
+            in bool flexible,
             in string indent
         )
         {
@@ -893,6 +904,7 @@ namespace Kafka.CodeGen.CSharp
         private static void WriteFields(
             in StreamWriter writer,
             in IEnumerable<Field> fields,
+            in bool flexible,
             in string indent
         )
         {
@@ -903,7 +915,8 @@ namespace Kafka.CodeGen.CSharp
                 WriteFieldProperty(writer, indent, field);
             }
             writer.WriteLine($",");
-            writer.WriteLine($"{indent}ImmutableArray<{nameof(TaggedField)}> {TAG_BUFFER}");
+            writer.Write($"{indent}ImmutableArray<{nameof(TaggedField)}> {TAG_BUFFER}");
+            writer.WriteLine();
         }
 
         private static void DecodeFieldDeclare(
@@ -987,8 +1000,8 @@ namespace Kafka.CodeGen.CSharp
                 return;
             var taggedFields = GetKnownTaggedFields(fields, version);
             var requiredTaggedFieldsCount = 0;
-            foreach(var taggedField in taggedFields)
-                if(!IsNullable(taggedField, version))
+            foreach (var taggedField in taggedFields)
+                if (!IsNullable(taggedField, version))
                     requiredTaggedFieldsCount++;
             var optionalTaggedFieldsBuilder = ImmutableArray.CreateBuilder<Field>();
             foreach (var taggedField in taggedFields)
@@ -1112,7 +1125,7 @@ namespace Kafka.CodeGen.CSharp
                     utaggedFieldsBuilder.Add(field);
             return utaggedFieldsBuilder.ToImmutable();
         }
-            
+
 
         private static bool IsFlexible(
             in MessageDefinition messageDefinition,
@@ -1206,14 +1219,17 @@ namespace Kafka.CodeGen.CSharp
         }
 
         private static string QualifyType(
-            in FieldType fieldType
+            in FieldType fieldType,
+            in bool nullable
         ) =>
-            fieldType switch
+            (fieldType, nullable) switch
             {
-                StructFieldType f => $"{GetMessageName(f)}",
-                ArrayFieldType f => $"ImmutableArray<{QualifyType(f.ItemType)}>",
-                RecordsFieldType => "ImmutableArray<IRecords>",
-                FieldType f => f.ToSystemType()
+                (ArrayFieldType f, _) => $"ImmutableArray<{QualifyType(f.ItemType, false)}>",
+                (RecordsFieldType, _) => "ImmutableArray<IRecords>",
+                (StructFieldType f, true) => $"{GetMessageName(f)}?",
+                (StructFieldType f, false) => $"{GetMessageName(f)}",
+                (FieldType f, true) => $"{f.ToSystemType()}?",
+                (FieldType f, false) => f.ToSystemType()
             }
         ;
 
@@ -1323,7 +1339,7 @@ namespace Kafka.CodeGen.CSharp
             in string dereference
         )
         {
-            var typeArg = QualifyType(fieldType.ItemType);
+            var typeArg = QualifyType(fieldType.ItemType, false);
             writer.Write($"{nameof(BinaryEncoder)}.Write");
             if (flexible)
                 writer.Write("Compact");
@@ -1421,10 +1437,7 @@ namespace Kafka.CodeGen.CSharp
             var nullable = field.Properties.NullableVersions.Includes(version);
             writer.Write(indent);
             writer.Write($"(i, ");
-            if (field.Type is ArrayFieldType && !nullable)
-                writer.Write($"var _{reference}_");
-            else
-                writer.Write(reference);
+            writer.Write(reference);
             writer.Write(") = ");
             DecodeFieldStatement(writer, indent, flexible, nullable, field, version, reference);
         }
@@ -1469,7 +1482,7 @@ namespace Kafka.CodeGen.CSharp
             in string dereference
         )
         {
-            var typeArg = QualifyType(fieldType.ItemType);
+            var typeArg = QualifyType(fieldType.ItemType, false);
             writer.Write($"{nameof(BinaryDecoder)}.Read");
             if (flexible)
                 writer.Write("Compact");
@@ -1493,10 +1506,8 @@ namespace Kafka.CodeGen.CSharp
             if (!fieldProperties.NullableVersions.Includes(version))
             {
                 writer.WriteLine($";");
-                writer.WriteLine(@$"{indent}if (_{dereference}_ == null)");
-                writer.WriteLine(@$"{indent}    throw new {nameof(NullReferenceException)}(""Null not allowed for '{fieldName}'"");");
-                writer.WriteLine(@$"{indent}else");
-                writer.Write(@$"{indent}    {dereference} = _{dereference}_.Value");
+                writer.WriteLine(@$"{indent}if ({dereference}.IsDefault)");
+                writer.WriteLine(@$"{indent}    throw new {nameof(InvalidDataException)}(""{dereference} was null"");");
             }
             writer.WriteLine(";");
         }
@@ -1563,7 +1574,7 @@ namespace Kafka.CodeGen.CSharp
         ) =>
             nullable switch
             {
-                true => $"default(ImmutableArray<{nameof(IRecords)}>?)",
+                true => $"default(ImmutableArray<{nameof(IRecords)}>)",
                 false => $"ImmutableArray<{nameof(IRecords)}>.Empty"
             }
         ;
@@ -1600,9 +1611,9 @@ namespace Kafka.CodeGen.CSharp
                 (ScalarFieldType f, false) => $"ImmutableArray<{f.ToSystemType()}>.Empty",
                 (RecordsFieldType f, false) => $"ImmutableArray<{nameof(IRecords)}>.Empty",
                 (StructFieldType f, false) => $"ImmutableArray<{GetMessageName(f)}>.Empty",
-                (ScalarFieldType f, true) => $"default(ImmutableArray<{f.ToSystemType()}>?)",
-                (RecordsFieldType f, true) => $"default(ImmutableArray<{nameof(IRecords)}>?)",
-                (StructFieldType f, true) => $"default(ImmutableArray<{GetMessageName(f)}>?)",
+                (ScalarFieldType f, true) => $"default(ImmutableArray<{f.ToSystemType()}>)",
+                (RecordsFieldType f, true) => $"default(ImmutableArray<{nameof(IRecords)}>)",
+                (StructFieldType f, true) => $"default(ImmutableArray<{GetMessageName(f)}>)",
                 _ => "default",
             }
         ;
@@ -1719,9 +1730,7 @@ namespace Kafka.CodeGen.CSharp
             in Field field
         )
         {
-            var type = QualifyType(field.Type);
-            if (field.Properties.NullableVersions.Some())
-                type += "?";
+            var type = QualifyType(field.Type, field.Properties.NullableVersions.Some());
             return type;
         }
 

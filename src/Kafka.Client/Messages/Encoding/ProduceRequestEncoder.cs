@@ -4,7 +4,6 @@ using Kafka.Common.Model.Extensions;
 using Kafka.Common.Protocol;
 using Kafka.Common.Records;
 using System.CodeDom.Compiler;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using PartitionProduceData = Kafka.Client.Messages.ProduceRequestData.TopicProduceData.PartitionProduceData;
 using TopicProduceData = Kafka.Client.Messages.ProduceRequestData.TopicProduceData;

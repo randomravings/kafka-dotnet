@@ -6,8 +6,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using MetadataResponseBroker = Kafka.Client.Messages.MetadataResponseData.MetadataResponseBroker;
-using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic;
 using MetadataResponsePartition = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic.MetadataResponsePartition;
+using MetadataResponseTopic = Kafka.Client.Messages.MetadataResponseData.MetadataResponseTopic;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -60,16 +60,14 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<MetadataResponseTopic>.Empty;
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _brokersField_) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV0);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV0);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV0);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
+            (i, topicsField) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV0);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 brokersField,
@@ -90,17 +88,15 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<MetadataResponseTopic>.Empty;
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _brokersField_) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV1);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV1);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV1);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV1);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 brokersField,
@@ -121,18 +117,16 @@ namespace Kafka.Client.Messages.Encoding
             var topicsField = ImmutableArray<MetadataResponseTopic>.Empty;
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _brokersField_) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV2);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV2);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV2);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV2);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 brokersField,
@@ -154,18 +148,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV3);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV3);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV3);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV3);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 brokersField,
@@ -187,18 +179,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV4);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV4);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV4);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV4);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 brokersField,
@@ -220,18 +210,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV5);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV5);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV5);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV5);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 brokersField,
@@ -253,18 +241,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV6);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV6);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV6);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV6);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 brokersField,
@@ -286,18 +272,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV7);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV7);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV7);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV7);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 brokersField,
@@ -319,18 +303,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV8);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV8);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV8);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV8);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, clusterAuthorizedOperationsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 throttleTimeMsField,
@@ -353,18 +335,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadCompactArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV9);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadCompactArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV9);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV9);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV9);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, clusterAuthorizedOperationsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
@@ -399,18 +379,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadCompactArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV10);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadCompactArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV10);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV10);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV10);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, clusterAuthorizedOperationsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
@@ -445,18 +423,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadCompactArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV11);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadCompactArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV11);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV11);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV11);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -490,18 +466,16 @@ namespace Kafka.Client.Messages.Encoding
             var clusterAuthorizedOperationsField = default(int);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _brokersField_) = BinaryDecoder.ReadCompactArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV12);
-            if (_brokersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Brokers'");
-            else
-                brokersField = _brokersField_.Value;
+            (i, brokersField) = BinaryDecoder.ReadCompactArray<MetadataResponseBroker>(buffer, i, MetadataResponseBrokerDecoder.ReadV12);
+            if (brokersField.IsDefault)
+                throw new InvalidDataException("brokersField was null");
+;
             (i, clusterIdField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
             (i, controllerIdField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _topicsField_) = BinaryDecoder.ReadCompactArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV12);
-            if (_topicsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Topics'");
-            else
-                topicsField = _topicsField_.Value;
+            (i, topicsField) = BinaryDecoder.ReadCompactArray<MetadataResponseTopic>(buffer, i, MetadataResponseTopicDecoder.ReadV12);
+            if (topicsField.IsDefault)
+                throw new InvalidDataException("topicsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -850,11 +824,10 @@ namespace Kafka.Client.Messages.Encoding
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV0);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV0);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     errorCodeField,
                     nameField,
@@ -878,11 +851,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV1);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV1);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     errorCodeField,
                     nameField,
@@ -906,11 +878,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV2);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV2);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     errorCodeField,
                     nameField,
@@ -934,11 +905,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV3);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV3);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     errorCodeField,
                     nameField,
@@ -962,11 +932,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV4);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV4);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     errorCodeField,
                     nameField,
@@ -990,11 +959,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV5);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV5);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     errorCodeField,
                     nameField,
@@ -1018,11 +986,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV6);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV6);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     errorCodeField,
                     nameField,
@@ -1046,11 +1013,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV7);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV7);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 return new(i, new(
                     errorCodeField,
                     nameField,
@@ -1074,11 +1040,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV8);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV8);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 (i, topicAuthorizedOperationsField) = BinaryDecoder.ReadInt32(buffer, i);
                 return new(i, new(
                     errorCodeField,
@@ -1103,11 +1068,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV9);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadCompactArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV9);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 (i, topicAuthorizedOperationsField) = BinaryDecoder.ReadInt32(buffer, i);
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
@@ -1145,11 +1109,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
                 (i, topicIdField) = BinaryDecoder.ReadUuid(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV10);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadCompactArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV10);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 (i, topicAuthorizedOperationsField) = BinaryDecoder.ReadInt32(buffer, i);
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
@@ -1187,11 +1150,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
                 (i, topicIdField) = BinaryDecoder.ReadUuid(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV11);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadCompactArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV11);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 (i, topicAuthorizedOperationsField) = BinaryDecoder.ReadInt32(buffer, i);
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
@@ -1229,11 +1191,10 @@ namespace Kafka.Client.Messages.Encoding
                 (i, nameField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
                 (i, topicIdField) = BinaryDecoder.ReadUuid(buffer, i);
                 (i, isInternalField) = BinaryDecoder.ReadBoolean(buffer, i);
-                (i, var _partitionsField_) = BinaryDecoder.ReadCompactArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV12);
-                if (_partitionsField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'Partitions'");
-                else
-                    partitionsField = _partitionsField_.Value;
+                (i, partitionsField) = BinaryDecoder.ReadCompactArray<MetadataResponsePartition>(buffer, i, MetadataResponsePartitionDecoder.ReadV12);
+                if (partitionsField.IsDefault)
+                    throw new InvalidDataException("partitionsField was null");
+;
                 (i, topicAuthorizedOperationsField) = BinaryDecoder.ReadInt32(buffer, i);
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
@@ -1274,16 +1235,14 @@ namespace Kafka.Client.Messages.Encoding
                     (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
                     return new(i, new(
                         errorCodeField,
                         partitionIndexField,
@@ -1309,16 +1268,14 @@ namespace Kafka.Client.Messages.Encoding
                     (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
                     return new(i, new(
                         errorCodeField,
                         partitionIndexField,
@@ -1344,16 +1301,14 @@ namespace Kafka.Client.Messages.Encoding
                     (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
                     return new(i, new(
                         errorCodeField,
                         partitionIndexField,
@@ -1379,16 +1334,14 @@ namespace Kafka.Client.Messages.Encoding
                     (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
                     return new(i, new(
                         errorCodeField,
                         partitionIndexField,
@@ -1414,16 +1367,14 @@ namespace Kafka.Client.Messages.Encoding
                     (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
                     return new(i, new(
                         errorCodeField,
                         partitionIndexField,
@@ -1449,21 +1400,18 @@ namespace Kafka.Client.Messages.Encoding
                     (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
-                    (i, var _offlineReplicasField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_offlineReplicasField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                    else
-                        offlineReplicasField = _offlineReplicasField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
+                    (i, offlineReplicasField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (offlineReplicasField.IsDefault)
+                        throw new InvalidDataException("offlineReplicasField was null");
+;
                     return new(i, new(
                         errorCodeField,
                         partitionIndexField,
@@ -1489,21 +1437,18 @@ namespace Kafka.Client.Messages.Encoding
                     (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
-                    (i, var _offlineReplicasField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_offlineReplicasField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                    else
-                        offlineReplicasField = _offlineReplicasField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
+                    (i, offlineReplicasField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (offlineReplicasField.IsDefault)
+                        throw new InvalidDataException("offlineReplicasField was null");
+;
                     return new(i, new(
                         errorCodeField,
                         partitionIndexField,
@@ -1530,21 +1475,18 @@ namespace Kafka.Client.Messages.Encoding
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
-                    (i, var _offlineReplicasField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_offlineReplicasField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                    else
-                        offlineReplicasField = _offlineReplicasField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
+                    (i, offlineReplicasField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (offlineReplicasField.IsDefault)
+                        throw new InvalidDataException("offlineReplicasField was null");
+;
                     return new(i, new(
                         errorCodeField,
                         partitionIndexField,
@@ -1571,21 +1513,18 @@ namespace Kafka.Client.Messages.Encoding
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
-                    (i, var _offlineReplicasField_) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_offlineReplicasField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                    else
-                        offlineReplicasField = _offlineReplicasField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
+                    (i, offlineReplicasField) = BinaryDecoder.ReadArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (offlineReplicasField.IsDefault)
+                        throw new InvalidDataException("offlineReplicasField was null");
+;
                     return new(i, new(
                         errorCodeField,
                         partitionIndexField,
@@ -1612,21 +1551,18 @@ namespace Kafka.Client.Messages.Encoding
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
-                    (i, var _offlineReplicasField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_offlineReplicasField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                    else
-                        offlineReplicasField = _offlineReplicasField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
+                    (i, offlineReplicasField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (offlineReplicasField.IsDefault)
+                        throw new InvalidDataException("offlineReplicasField was null");
+;
                     (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
@@ -1665,21 +1601,18 @@ namespace Kafka.Client.Messages.Encoding
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
-                    (i, var _offlineReplicasField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_offlineReplicasField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                    else
-                        offlineReplicasField = _offlineReplicasField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
+                    (i, offlineReplicasField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (offlineReplicasField.IsDefault)
+                        throw new InvalidDataException("offlineReplicasField was null");
+;
                     (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
@@ -1718,21 +1651,18 @@ namespace Kafka.Client.Messages.Encoding
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
-                    (i, var _offlineReplicasField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_offlineReplicasField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                    else
-                        offlineReplicasField = _offlineReplicasField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
+                    (i, offlineReplicasField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (offlineReplicasField.IsDefault)
+                        throw new InvalidDataException("offlineReplicasField was null");
+;
                     (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {
@@ -1771,21 +1701,18 @@ namespace Kafka.Client.Messages.Encoding
                     (i, partitionIndexField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderIdField) = BinaryDecoder.ReadInt32(buffer, i);
                     (i, leaderEpochField) = BinaryDecoder.ReadInt32(buffer, i);
-                    (i, var _replicaNodesField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_replicaNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'ReplicaNodes'");
-                    else
-                        replicaNodesField = _replicaNodesField_.Value;
-                    (i, var _isrNodesField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_isrNodesField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'IsrNodes'");
-                    else
-                        isrNodesField = _isrNodesField_.Value;
-                    (i, var _offlineReplicasField_) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
-                    if (_offlineReplicasField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'OfflineReplicas'");
-                    else
-                        offlineReplicasField = _offlineReplicasField_.Value;
+                    (i, replicaNodesField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (replicaNodesField.IsDefault)
+                        throw new InvalidDataException("replicaNodesField was null");
+;
+                    (i, isrNodesField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (isrNodesField.IsDefault)
+                        throw new InvalidDataException("isrNodesField was null");
+;
+                    (i, offlineReplicasField) = BinaryDecoder.ReadCompactArray<int>(buffer, i, BinaryDecoder.ReadInt32);
+                    if (offlineReplicasField.IsDefault)
+                        throw new InvalidDataException("offlineReplicasField was null");
+;
                     (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
                     {

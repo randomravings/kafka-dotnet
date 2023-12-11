@@ -8,14 +8,14 @@ using System.Diagnostics.CodeAnalysis;
 namespace Kafka.Client.Messages.Encoding
 {
     [GeneratedCodeAttribute("kgen", "1.0.0.0")]
-    internal class ApiVersionsRequestEncoder : 
-        RequestEncoder<RequestHeaderData, ApiVersionsRequestData>
+    internal class SaslAuthenticateRequestEncoder : 
+        RequestEncoder<RequestHeaderData, SaslAuthenticateRequestData>
     {
-        internal ApiVersionsRequestEncoder() :
+        internal SaslAuthenticateRequestEncoder() :
             base(
-                ApiKey.ApiVersions,
-                new(0, 3),
-                new(3, 32767),
+                ApiKey.SaslAuthenticate,
+                new(0, 2),
+                new(2, 32767),
                 RequestHeaderEncoder.WriteV0,
                 WriteV0
             )
@@ -27,36 +27,31 @@ namespace Kafka.Client.Messages.Encoding
             else
                 return RequestHeaderEncoder.WriteV1;
         }
-        protected override EncodeValue<ApiVersionsRequestData> GetMessageEncoder(short apiVersion) =>
+        protected override EncodeValue<SaslAuthenticateRequestData> GetMessageEncoder(short apiVersion) =>
             apiVersion switch
             {
                 0 => WriteV0,
                 1 => WriteV1,
                 2 => WriteV2,
-                3 => WriteV3,
                 _ => throw new NotSupportedException()
             }
         ;
-        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in ApiVersionsRequestData message)
+        private static int WriteV0([NotNull] in byte[] buffer, in int index, [NotNull] in SaslAuthenticateRequestData message)
         {
             var i = index;
+            i = BinaryEncoder.WriteBytes(buffer, i, message.AuthBytesField);
             return i;
         }
-        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in ApiVersionsRequestData message)
+        private static int WriteV1([NotNull] in byte[] buffer, in int index, [NotNull] in SaslAuthenticateRequestData message)
         {
             var i = index;
+            i = BinaryEncoder.WriteBytes(buffer, i, message.AuthBytesField);
             return i;
         }
-        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in ApiVersionsRequestData message)
+        private static int WriteV2([NotNull] in byte[] buffer, in int index, [NotNull] in SaslAuthenticateRequestData message)
         {
             var i = index;
-            return i;
-        }
-        private static int WriteV3([NotNull] in byte[] buffer, in int index, [NotNull] in ApiVersionsRequestData message)
-        {
-            var i = index;
-            i = BinaryEncoder.WriteCompactString(buffer, i, message.ClientSoftwareNameField);
-            i = BinaryEncoder.WriteCompactString(buffer, i, message.ClientSoftwareVersionField);
+            i = BinaryEncoder.WriteCompactBytes(buffer, i, message.AuthBytesField);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;

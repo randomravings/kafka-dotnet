@@ -174,11 +174,10 @@ namespace Kafka.Client.Messages.Encoding
             var coordinatorsField = ImmutableArray<Coordinator>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _coordinatorsField_) = BinaryDecoder.ReadCompactArray<Coordinator>(buffer, i, CoordinatorDecoder.ReadV4);
-            if (_coordinatorsField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Coordinators'");
-            else
-                coordinatorsField = _coordinatorsField_.Value;
+            (i, coordinatorsField) = BinaryDecoder.ReadCompactArray<Coordinator>(buffer, i, CoordinatorDecoder.ReadV4);
+            if (coordinatorsField.IsDefault)
+                throw new InvalidDataException("coordinatorsField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {

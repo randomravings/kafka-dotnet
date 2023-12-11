@@ -48,11 +48,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var responsesField = ImmutableArray<DeletableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV0);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV0);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 responsesField,
@@ -66,11 +65,10 @@ namespace Kafka.Client.Messages.Encoding
             var responsesField = ImmutableArray<DeletableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV1);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV1);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 responsesField,
@@ -84,11 +82,10 @@ namespace Kafka.Client.Messages.Encoding
             var responsesField = ImmutableArray<DeletableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV2);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV2);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 responsesField,
@@ -102,11 +99,10 @@ namespace Kafka.Client.Messages.Encoding
             var responsesField = ImmutableArray<DeletableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV3);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV3);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 responsesField,
@@ -120,11 +116,10 @@ namespace Kafka.Client.Messages.Encoding
             var responsesField = ImmutableArray<DeletableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV4);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadCompactArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV4);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -150,11 +145,10 @@ namespace Kafka.Client.Messages.Encoding
             var responsesField = ImmutableArray<DeletableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV5);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadCompactArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV5);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -180,11 +174,10 @@ namespace Kafka.Client.Messages.Encoding
             var responsesField = ImmutableArray<DeletableTopicResult>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
-            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV6);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadCompactArray<DeletableTopicResult>(buffer, i, DeletableTopicResultDecoder.ReadV6);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {

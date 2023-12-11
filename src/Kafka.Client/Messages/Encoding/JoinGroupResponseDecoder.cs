@@ -63,11 +63,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
             (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV0);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV0);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -99,11 +98,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
             (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV1);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV1);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -136,11 +134,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
             (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV2);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV2);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -173,11 +170,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
             (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV3);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV3);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -210,11 +206,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
             (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV4);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV4);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -247,11 +242,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, protocolNameField) = BinaryDecoder.ReadString(buffer, i);
             (i, leaderField) = BinaryDecoder.ReadString(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV5);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV5);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             return new(i, new(
                 throttleTimeMsField,
                 errorCodeField,
@@ -284,11 +278,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, protocolNameField) = BinaryDecoder.ReadCompactString(buffer, i);
             (i, leaderField) = BinaryDecoder.ReadCompactString(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV6);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV6);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -334,11 +327,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, protocolNameField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
             (i, leaderField) = BinaryDecoder.ReadCompactString(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV7);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV7);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -384,11 +376,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, protocolNameField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
             (i, leaderField) = BinaryDecoder.ReadCompactString(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV8);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV8);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {
@@ -435,11 +426,10 @@ namespace Kafka.Client.Messages.Encoding
             (i, leaderField) = BinaryDecoder.ReadCompactString(buffer, i);
             (i, skipAssignmentField) = BinaryDecoder.ReadBoolean(buffer, i);
             (i, memberIdField) = BinaryDecoder.ReadCompactString(buffer, i);
-            (i, var _membersField_) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV9);
-            if (_membersField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Members'");
-            else
-                membersField = _membersField_.Value;
+            (i, membersField) = BinaryDecoder.ReadCompactArray<JoinGroupResponseMember>(buffer, i, JoinGroupResponseMemberDecoder.ReadV9);
+            if (membersField.IsDefault)
+                throw new InvalidDataException("membersField was null");
+;
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
             {

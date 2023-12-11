@@ -6,8 +6,8 @@ using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using ApiVersion = Kafka.Client.Messages.ApiVersionsResponseData.ApiVersion;
-using SupportedFeatureKey = Kafka.Client.Messages.ApiVersionsResponseData.SupportedFeatureKey;
 using FinalizedFeatureKey = Kafka.Client.Messages.ApiVersionsResponseData.FinalizedFeatureKey;
+using SupportedFeatureKey = Kafka.Client.Messages.ApiVersionsResponseData.SupportedFeatureKey;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -49,11 +49,10 @@ namespace Kafka.Client.Messages.Encoding
             var zkMigrationReadyField = default(bool);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _apiKeysField_) = BinaryDecoder.ReadArray<ApiVersion>(buffer, i, ApiVersionDecoder.ReadV0);
-            if (_apiKeysField_ == null)
-                throw new NullReferenceException("Null not allowed for 'ApiKeys'");
-            else
-                apiKeysField = _apiKeysField_.Value;
+            (i, apiKeysField) = BinaryDecoder.ReadArray<ApiVersion>(buffer, i, ApiVersionDecoder.ReadV0);
+            if (apiKeysField.IsDefault)
+                throw new InvalidDataException("apiKeysField was null");
+;
             return new(i, new(
                 errorCodeField,
                 apiKeysField,
@@ -77,11 +76,10 @@ namespace Kafka.Client.Messages.Encoding
             var zkMigrationReadyField = default(bool);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _apiKeysField_) = BinaryDecoder.ReadArray<ApiVersion>(buffer, i, ApiVersionDecoder.ReadV1);
-            if (_apiKeysField_ == null)
-                throw new NullReferenceException("Null not allowed for 'ApiKeys'");
-            else
-                apiKeysField = _apiKeysField_.Value;
+            (i, apiKeysField) = BinaryDecoder.ReadArray<ApiVersion>(buffer, i, ApiVersionDecoder.ReadV1);
+            if (apiKeysField.IsDefault)
+                throw new InvalidDataException("apiKeysField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 errorCodeField,
@@ -106,11 +104,10 @@ namespace Kafka.Client.Messages.Encoding
             var zkMigrationReadyField = default(bool);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _apiKeysField_) = BinaryDecoder.ReadArray<ApiVersion>(buffer, i, ApiVersionDecoder.ReadV2);
-            if (_apiKeysField_ == null)
-                throw new NullReferenceException("Null not allowed for 'ApiKeys'");
-            else
-                apiKeysField = _apiKeysField_.Value;
+            (i, apiKeysField) = BinaryDecoder.ReadArray<ApiVersion>(buffer, i, ApiVersionDecoder.ReadV2);
+            if (apiKeysField.IsDefault)
+                throw new InvalidDataException("apiKeysField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 errorCodeField,
@@ -135,11 +132,10 @@ namespace Kafka.Client.Messages.Encoding
             var zkMigrationReadyField = default(bool);
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, var _apiKeysField_) = BinaryDecoder.ReadCompactArray<ApiVersion>(buffer, i, ApiVersionDecoder.ReadV3);
-            if (_apiKeysField_ == null)
-                throw new NullReferenceException("Null not allowed for 'ApiKeys'");
-            else
-                apiKeysField = _apiKeysField_.Value;
+            (i, apiKeysField) = BinaryDecoder.ReadCompactArray<ApiVersion>(buffer, i, ApiVersionDecoder.ReadV3);
+            if (apiKeysField.IsDefault)
+                throw new InvalidDataException("apiKeysField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
@@ -151,21 +147,19 @@ namespace Kafka.Client.Messages.Encoding
                     switch (tag)
                     {
                         case 0:
-                            (i, var _supportedFeaturesField_) = BinaryDecoder.ReadCompactArray<SupportedFeatureKey>(buffer, i, SupportedFeatureKeyDecoder.ReadV3);
-                            if (_supportedFeaturesField_ == null)
-                                throw new NullReferenceException("Null not allowed for 'SupportedFeatures'");
-                            else
-                                supportedFeaturesField = _supportedFeaturesField_.Value;
+                            (i, supportedFeaturesField) = BinaryDecoder.ReadCompactArray<SupportedFeatureKey>(buffer, i, SupportedFeatureKeyDecoder.ReadV3);
+                            if (supportedFeaturesField.IsDefault)
+                                throw new InvalidDataException("supportedFeaturesField was null");
+;
                             break;
                         case 1:
                             (i, finalizedFeaturesEpochField) = BinaryDecoder.ReadInt64(buffer, i);
                             break;
                         case 2:
-                            (i, var _finalizedFeaturesField_) = BinaryDecoder.ReadCompactArray<FinalizedFeatureKey>(buffer, i, FinalizedFeatureKeyDecoder.ReadV3);
-                            if (_finalizedFeaturesField_ == null)
-                                throw new NullReferenceException("Null not allowed for 'FinalizedFeatures'");
-                            else
-                                finalizedFeaturesField = _finalizedFeaturesField_.Value;
+                            (i, finalizedFeaturesField) = BinaryDecoder.ReadCompactArray<FinalizedFeatureKey>(buffer, i, FinalizedFeatureKeyDecoder.ReadV3);
+                            if (finalizedFeaturesField.IsDefault)
+                                throw new InvalidDataException("finalizedFeaturesField was null");
+;
                             break;
                         case 3:
                             (i, zkMigrationReadyField) = BinaryDecoder.ReadBoolean(buffer, i);

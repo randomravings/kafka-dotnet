@@ -5,11 +5,11 @@ using Kafka.Common.Protocol;
 using System.CodeDom.Compiler;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
+using LeaderIdAndEpoch = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.LeaderIdAndEpoch;
+using NodeEndpoint = Kafka.Client.Messages.ProduceResponseData.NodeEndpoint;
 using PartitionProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse;
 using TopicProduceResponse = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse;
-using LeaderIdAndEpoch = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.LeaderIdAndEpoch;
-using BatchIndexAndErrorMessage = Kafka.Client.Messages.ProduceResponseData.TopicProduceResponse.PartitionProduceResponse.BatchIndexAndErrorMessage;
-using NodeEndpoint = Kafka.Client.Messages.ProduceResponseData.NodeEndpoint;
 
 namespace Kafka.Client.Messages.Encoding
 {
@@ -57,11 +57,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV0);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV0);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             return new(i, new(
                 responsesField,
                 throttleTimeMsField,
@@ -76,11 +75,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV1);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV1);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 responsesField,
@@ -96,11 +94,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV2);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV2);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 responsesField,
@@ -116,11 +113,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV3);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV3);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 responsesField,
@@ -136,11 +132,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV4);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV4);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 responsesField,
@@ -156,11 +151,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV5);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV5);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 responsesField,
@@ -176,11 +170,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV6);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV6);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 responsesField,
@@ -196,11 +189,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV7);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV7);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 responsesField,
@@ -216,11 +208,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV8);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV8);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             return new(i, new(
                 responsesField,
@@ -236,11 +227,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV9);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadCompactArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV9);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
@@ -268,11 +258,10 @@ namespace Kafka.Client.Messages.Encoding
             var throttleTimeMsField = default(int);
             var nodeEndpointsField = ImmutableArray<NodeEndpoint>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
-            (i, var _responsesField_) = BinaryDecoder.ReadCompactArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV10);
-            if (_responsesField_ == null)
-                throw new NullReferenceException("Null not allowed for 'Responses'");
-            else
-                responsesField = _responsesField_.Value;
+            (i, responsesField) = BinaryDecoder.ReadCompactArray<TopicProduceResponse>(buffer, i, TopicProduceResponseDecoder.ReadV10);
+            if (responsesField.IsDefault)
+                throw new InvalidDataException("responsesField was null");
+;
             (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
             (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
             if (taggedFieldsCount > 0)
@@ -284,11 +273,10 @@ namespace Kafka.Client.Messages.Encoding
                     switch (tag)
                     {
                         case 0:
-                            (i, var _nodeEndpointsField_) = BinaryDecoder.ReadCompactArray<NodeEndpoint>(buffer, i, NodeEndpointDecoder.ReadV10);
-                            if (_nodeEndpointsField_ == null)
-                                throw new NullReferenceException("Null not allowed for 'NodeEndpoints'");
-                            else
-                                nodeEndpointsField = _nodeEndpointsField_.Value;
+                            (i, nodeEndpointsField) = BinaryDecoder.ReadCompactArray<NodeEndpoint>(buffer, i, NodeEndpointDecoder.ReadV10);
+                            if (nodeEndpointsField.IsDefault)
+                                throw new InvalidDataException("nodeEndpointsField was null");
+;
                             break;
                         default:
                             (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
@@ -523,11 +511,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV0);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV0);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionResponsesField,
@@ -541,11 +528,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV1);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV1);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionResponsesField,
@@ -559,11 +545,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV2);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV2);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionResponsesField,
@@ -577,11 +562,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV3);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV3);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionResponsesField,
@@ -595,11 +579,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV4);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV4);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionResponsesField,
@@ -613,11 +596,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV5);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV5);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionResponsesField,
@@ -631,11 +613,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV6);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV6);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionResponsesField,
@@ -649,11 +630,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV7);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV7);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionResponsesField,
@@ -667,11 +647,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV8);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV8);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 return new(i, new(
                     nameField,
                     partitionResponsesField,
@@ -685,11 +664,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadCompactArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV9);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadCompactArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV9);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
@@ -715,11 +693,10 @@ namespace Kafka.Client.Messages.Encoding
                 var partitionResponsesField = ImmutableArray<PartitionProduceResponse>.Empty;
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, nameField) = BinaryDecoder.ReadCompactString(buffer, i);
-                (i, var _partitionResponsesField_) = BinaryDecoder.ReadCompactArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV10);
-                if (_partitionResponsesField_ == null)
-                    throw new NullReferenceException("Null not allowed for 'PartitionResponses'");
-                else
-                    partitionResponsesField = _partitionResponsesField_.Value;
+                (i, partitionResponsesField) = BinaryDecoder.ReadCompactArray<PartitionProduceResponse>(buffer, i, PartitionProduceResponseDecoder.ReadV10);
+                if (partitionResponsesField.IsDefault)
+                    throw new InvalidDataException("partitionResponsesField was null");
+;
                 (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                 if (taggedFieldsCount > 0)
                 {
@@ -983,11 +960,10 @@ namespace Kafka.Client.Messages.Encoding
                     (i, baseOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
                     (i, logAppendTimeMsField) = BinaryDecoder.ReadInt64(buffer, i);
                     (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
-                    (i, var _recordErrorsField_) = BinaryDecoder.ReadArray<BatchIndexAndErrorMessage>(buffer, i, BatchIndexAndErrorMessageDecoder.ReadV8);
-                    if (_recordErrorsField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'RecordErrors'");
-                    else
-                        recordErrorsField = _recordErrorsField_.Value;
+                    (i, recordErrorsField) = BinaryDecoder.ReadArray<BatchIndexAndErrorMessage>(buffer, i, BatchIndexAndErrorMessageDecoder.ReadV8);
+                    if (recordErrorsField.IsDefault)
+                        throw new InvalidDataException("recordErrorsField was null");
+;
                     (i, errorMessageField) = BinaryDecoder.ReadNullableString(buffer, i);
                     return new(i, new(
                         indexField,
@@ -1018,11 +994,10 @@ namespace Kafka.Client.Messages.Encoding
                     (i, baseOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
                     (i, logAppendTimeMsField) = BinaryDecoder.ReadInt64(buffer, i);
                     (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
-                    (i, var _recordErrorsField_) = BinaryDecoder.ReadCompactArray<BatchIndexAndErrorMessage>(buffer, i, BatchIndexAndErrorMessageDecoder.ReadV9);
-                    if (_recordErrorsField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'RecordErrors'");
-                    else
-                        recordErrorsField = _recordErrorsField_.Value;
+                    (i, recordErrorsField) = BinaryDecoder.ReadCompactArray<BatchIndexAndErrorMessage>(buffer, i, BatchIndexAndErrorMessageDecoder.ReadV9);
+                    if (recordErrorsField.IsDefault)
+                        throw new InvalidDataException("recordErrorsField was null");
+;
                     (i, errorMessageField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
                     (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
@@ -1065,11 +1040,10 @@ namespace Kafka.Client.Messages.Encoding
                     (i, baseOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
                     (i, logAppendTimeMsField) = BinaryDecoder.ReadInt64(buffer, i);
                     (i, logStartOffsetField) = BinaryDecoder.ReadInt64(buffer, i);
-                    (i, var _recordErrorsField_) = BinaryDecoder.ReadCompactArray<BatchIndexAndErrorMessage>(buffer, i, BatchIndexAndErrorMessageDecoder.ReadV10);
-                    if (_recordErrorsField_ == null)
-                        throw new NullReferenceException("Null not allowed for 'RecordErrors'");
-                    else
-                        recordErrorsField = _recordErrorsField_.Value;
+                    (i, recordErrorsField) = BinaryDecoder.ReadCompactArray<BatchIndexAndErrorMessage>(buffer, i, BatchIndexAndErrorMessageDecoder.ReadV10);
+                    if (recordErrorsField.IsDefault)
+                        throw new InvalidDataException("recordErrorsField was null");
+;
                     (i, errorMessageField) = BinaryDecoder.ReadCompactNullableString(buffer, i);
                     (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
                     if (taggedFieldsCount > 0)
