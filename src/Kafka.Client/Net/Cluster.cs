@@ -7,6 +7,7 @@ using Kafka.Common.Net.Transport;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using System.Net;
 using System.Security.Cryptography;
 
 namespace Kafka.Client.Net
@@ -284,22 +285,25 @@ namespace Kafka.Client.Net
             return connection;
         }
 
-        private SaslPlaintextTransport CreateTransport(
+        private TcpTransport CreateTransport(
             string host,
             int port
-        ) =>
-            _config.Client.SecurityProtocol switch
-            {
-                SecurityProtocol.Plaintext or SecurityProtocol.SaslPlaintext => new SaslPlaintextTransport(
-                    host,
-                    port,
-                    _logger
-                ),
-                _ => throw new NotImplementedException(
-                    $"Implementation does not support security protocol: {_config.Client.SecurityProtocol}"
-                )
-            }
+        )
+        {
+            var useSsl =
+                _config.Client.SecurityProtocol == SecurityProtocol.Ssl ||
+                _config.Client.SecurityProtocol == SecurityProtocol.SaslSsl
+            ;
 
-        ;
+            var entry = Dns.GetHostEntry(host);
+            var ipAddres = entry.AddressList[0];
+            var ipEndPoint = new IPEndPoint(ipAddres, port);
+
+            return new TcpTransport(
+                ipEndPoint,
+                useSsl,
+                _logger
+            );
+        }
     }
 }

@@ -413,7 +413,7 @@ namespace Kafka.Client.Config
         /// </list>
         /// </summary>
         [JsonPropertyName("sasl.mechanism")]
-        public SaslMechanism SaslMechanism { get; set; } = SaslMechanism.Gssapi;
+        public SaslMechanism SaslMechanism { get; set; } = SaslMechanism.GssApi;
 
         /// <summary>
         /// Username to be used with PLAIN and SASL mechanisms

@@ -5,7 +5,7 @@ namespace Kafka.Common.Model
     public enum SaslMechanism
     {
         [EnumMember(Value = "GSSAPI")]
-        Gssapi = 0,
+        GssApi = 0,
         [EnumMember(Value = "PLAIN")]
         Plain = 1,
         [EnumMember(Value = "SCRAM-SHA-256")]

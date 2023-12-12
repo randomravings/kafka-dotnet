@@ -827,8 +827,6 @@ namespace Kafka.Client.Net
                 []
             );
 
-            _logger.LogTrace("{username}:{password}", _saslUsername, _saslPassword);
-
             var tries = 0;
             var requestBytes = new byte[1024 * 1024];
             while (true)

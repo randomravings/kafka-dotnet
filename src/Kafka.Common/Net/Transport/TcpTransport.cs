@@ -2,34 +2,40 @@
 using Kafka.Common.Exceptions;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Kafka.Common.Net.Transport
 {
-    public abstract class TcpTransport :
+    public sealed class TcpTransport :
         ITransport,
         IDisposable
     {
-        private readonly DnsEndPoint _endPoint;
+        private readonly IPEndPoint _endPoint;
         private readonly Socket _socket;
         private readonly ILogger _logger;
-        private bool _disposed;
+        private readonly bool _useSsl;
+        private Stream _stream;
 
-        protected TcpTransport(
-            string host,
-            int port,
+        public TcpTransport(
+            IPEndPoint dnsEndPoint,
+            bool useSsl,
             ILogger logger
         )
         {
-            _endPoint = new DnsEndPoint(host, port, AddressFamily.InterNetwork);
-            _socket = new(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp)
+            _endPoint = dnsEndPoint;
+            _socket = new(_endPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp)
             {
                 ExclusiveAddressUse = true,
             };
+            _useSsl = useSsl;
             _logger = logger;
+
+            _stream = new MemoryStream([]);
         }
 
-        public string Host => _endPoint.Host;
+        public string Host => _endPoint.Address.ToString();
 
         public int Port => _endPoint.Port;
 
@@ -41,7 +47,29 @@ namespace Kafka.Common.Net.Transport
         {
             try
             {
-                await _socket.ConnectAsync(_endPoint.Host, _endPoint.Port, cancellationToken).ConfigureAwait(false);
+                await _socket.ConnectAsync(
+                    _endPoint,
+                    cancellationToken
+                ).ConfigureAwait(false);
+
+                var networkStream = new NetworkStream(_socket, false); ;
+
+                if (_useSsl)
+                {
+                    var sslStream = new SslStream(networkStream, true);
+                    var sslClientAuthenticationOptions = new SslClientAuthenticationOptions
+                    {
+                        TargetHost = _endPoint.Address.ToString()
+                    };
+                    await sslStream.AuthenticateAsClientAsync(
+                        _endPoint.Address.ToString()
+                    ).ConfigureAwait(false);
+                    _stream = sslStream;
+                }
+                else
+                {
+                    _stream = networkStream;
+                }
             }
             catch (Exception ex)
             {
@@ -55,6 +83,7 @@ namespace Kafka.Common.Net.Transport
         {
             try
             {
+                _stream.Close();
                 if (_socket.Connected)
                     _socket.Close();
                 return ValueTask.CompletedTask;
@@ -72,11 +101,11 @@ namespace Kafka.Common.Net.Transport
         {
             var lenBytes = new byte[4];
             _ = BinaryEncoder.WriteInt32(lenBytes, 0, data.Length);
-            await _socket.SendAsync(
+            await _stream.WriteAsync(
                 lenBytes,
                 cancellationToken
             ).ConfigureAwait(false);
-            await _socket.SendAsync(
+            await _stream.WriteAsync(
                 data,
                 cancellationToken
             ).ConfigureAwait(false);
@@ -87,50 +116,17 @@ namespace Kafka.Common.Net.Transport
         )
         {
             var sizeBytes = new byte[4];
-            if (!await ReadBytesFromNetwork(_socket, sizeBytes, cancellationToken).ConfigureAwait(false))
-                return [];
+            await _stream.ReadAtLeastAsync(sizeBytes, 4, true, cancellationToken).ConfigureAwait(false);
             (_, var messageLen) = BinaryDecoder.ReadInt32(sizeBytes, 0);
             var responseBytes = new byte[messageLen];
-            if (!await ReadBytesFromNetwork(_socket, responseBytes, cancellationToken).ConfigureAwait(false))
-                return [];
+            await _stream.ReadAtLeastAsync(responseBytes, messageLen, true, cancellationToken).ConfigureAwait(false);
             return responseBytes;
-        }
-
-        private static async ValueTask<bool> ReadBytesFromNetwork(
-            Socket socket,
-            byte[] bytes,
-            CancellationToken cancellationToken
-        )
-        {
-            var offset = 0;
-            while (offset < bytes.Length)
-            {
-                var bytesReceived = await socket.ReceiveAsync(
-                    bytes.AsMemory(offset, bytes.Length - offset),
-                    cancellationToken
-                ).ConfigureAwait(false);
-                if (bytesReceived == 0)
-                    return false;
-                offset += bytesReceived;
-            }
-            return true;
-        }
-
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    _socket.Dispose();
-                }
-                _disposed = true;
-            }
         }
 
         public void Dispose()
         {
-            Dispose(disposing: true);
+            _stream.Dispose();
+            _socket.Dispose();
             GC.SuppressFinalize(this);
         }
     }
