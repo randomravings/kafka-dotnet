@@ -290,7 +290,7 @@ namespace Kafka.Client.Net
         ) =>
             _config.Client.SecurityProtocol switch
             {
-                SecurityProtocol.Plaintext => new SaslPlaintextTransport(
+                SecurityProtocol.Plaintext or SecurityProtocol.SaslPlaintext => new SaslPlaintextTransport(
                     host,
                     port,
                     _logger

@@ -391,6 +391,54 @@ namespace Kafka.Client.Config
         [JsonPropertyName("security.protocol")]
         public SecurityProtocol SecurityProtocol { get; set; } = SecurityProtocol.Plaintext;
 
+        /// <summary>
+        /// Protocol used to communicate with brokers. Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
+        /// <list type="table">
+        ///   <item>
+        ///     <term>Type</term>
+        ///     <description>string</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Default</term>
+        ///     <description>GSSAPI</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Valid Values</term>
+        ///     <description>[GSSAPI, PLAINTEXT]</description>
+        ///   </item>
+        ///   <item>
+        ///     <term>Importance</term>
+        ///     <description>medium</description>
+        ///   </item>
+        /// </list>
+        /// </summary>
+        [JsonPropertyName("sasl.mechanism")]
+        public SaslMechanism SaslMechanism { get; set; } = SaslMechanism.Gssapi;
+
+        /// <summary>
+        /// Username to be used with PLAIN and SASL mechanisms
+        /// </summary>
+        [JsonPropertyName("sasl.username")]
+        public string SaslUsername { get; set; } = "";
+
+        /// <summary>
+        /// Username to be used with PLAIN and SASL mechanisms.
+        /// </summary>
+        [JsonPropertyName("sasl.password")]
+        public string SaslPassword { get; set; } = "";
+
+        /// <summary>
+        /// Environment variable storing sasl password.
+        /// </summary>
+        [JsonPropertyName("sasl.username.variable")]
+        public string SaslUsernameVariable { get; set; } = "";
+
+        /// <summary>
+        /// Environment variable storing sasl password.
+        /// </summary>
+        [JsonPropertyName("sasl.password.variable")]
+        public string SaslPasswordVariable { get; set; } = "";
+
         public override string ToString() =>
             JsonSerializer.Serialize(
                 this,
