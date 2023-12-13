@@ -1497,7 +1497,7 @@ namespace Kafka.CodeGen.CSharp
                     writer.WriteLine($"{nameof(BinaryDecoder)}{nameof(BinaryDecoder.ReadRecords)}");
                     break;
                 case ScalarFieldType f:
-                    writer.Write($"{nameof(BinaryDecoder)}.{ScalarFieldToDecode(f, false, flexible)}");
+                    writer.Write($"{nameof(BinaryDecoder)}.{ScalarFieldToDecode(f, false, fieldProperties.FlexibleVersions.Includes(version))}");
                     break;
                 default:
                     throw new InvalidOperationException($"Unsupported array field item type '{fieldType.GetType().Name}'");

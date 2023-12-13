@@ -289,22 +289,19 @@ namespace Kafka.Client.Net
         private TcpTransport CreateTransport(
             string host,
             int port
-        )
-        {
-            var useSsl =
-                _config.Client.SecurityProtocol == SecurityProtocol.Ssl ||
-                _config.Client.SecurityProtocol == SecurityProtocol.SaslSsl
-            ;
+        ) =>
+            _config.Client.SecurityProtocol switch
+            {
+                SecurityProtocol.Plaintext => new SaslPlaintextTransport(
+                    host,
+                    port,
+                    _logger
+                ),
+                _ => throw new NotImplementedException(
+                    $"Implementation does not support security protocol: {_config.Client.SecurityProtocol}"
+                )
+            }
 
-            var entry = Dns.GetHostEntry(host, AddressFamily.InterNetwork);
-            var ipAddres = entry.AddressList[0];
-            var ipEndPoint = new IPEndPoint(ipAddres, port);
-
-            return new TcpTransport(
-                ipEndPoint,
-                useSsl,
-                _logger
-            );
-        }
+        ;
     }
 }

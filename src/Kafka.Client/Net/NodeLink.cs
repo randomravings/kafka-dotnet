@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Net.Sockets;
-using System.Runtime.Serialization;
 
 namespace Kafka.Client.Net
 {
@@ -26,6 +25,14 @@ namespace Kafka.Client.Net
         private const string CLIENT_NAME = "kafka-dotnet";
         private const string CLIENT_VERSION = "0.1.0";
 
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]>> _pendingRequests = new();
+        private readonly BlockingCollection<SendThing> _sendQueue = [];
+
+        private CancellationTokenSource _internalCts = new();
+        private Task _senderThread = Task.CompletedTask;
+        private Task _receiverThread = Task.CompletedTask;
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
+
         private static readonly ApiVersionsRequestData API_VERSION_REQUEST = new(
             CLIENT_NAME,
             CLIENT_VERSION,
@@ -33,53 +40,18 @@ namespace Kafka.Client.Net
         );
 
         private static readonly MetadataRequestData CLUSTER_METADATA_REQUEST = new(
-            [],
+            ImmutableArray<MetadataRequestData.MetadataRequestTopic>.Empty,
             false,
             false,
             false,
             []
         );
 
-        private readonly string _clientId = config.Client.ClientId;
-        private readonly int _retries = config.Client.Retries;
-        private readonly TimeSpan _retryBackOffMs = TimeSpan.FromMilliseconds(config.Client.RetryBackoffMs);
-        private readonly ILogger _logger = logger;
-        private readonly ITransport _transport = connection;
-        private readonly SecurityProtocol _securityProtocol = config.Client.SecurityProtocol;
-        private readonly SaslMechanism _saslMechanism = config.Client.SaslMechanism;
-        private readonly string _saslUsername =
-            string.IsNullOrEmpty(config.Client.SaslUsername) ?
-            Environment.GetEnvironmentVariable(config.Client.SaslUsernameVariable, EnvironmentVariableTarget.Process) ??
-            Environment.GetEnvironmentVariable(config.Client.SaslUsernameVariable, EnvironmentVariableTarget.User) ??
-            Environment.GetEnvironmentVariable(config.Client.SaslUsernameVariable, EnvironmentVariableTarget.Machine) ??
-            "" :
-            config.Client.SaslUsername
-        ;
-        private readonly string _saslPassword =
-            string.IsNullOrEmpty(config.Client.SaslPassword) ?
-            Environment.GetEnvironmentVariable(config.Client.SaslPasswordVariable, EnvironmentVariableTarget.Process) ??
-            Environment.GetEnvironmentVariable(config.Client.SaslPasswordVariable, EnvironmentVariableTarget.User) ??
-            Environment.GetEnvironmentVariable(config.Client.SaslPasswordVariable, EnvironmentVariableTarget.Machine) ??
-            "" :
-            config.Client.SaslPassword
-        ;
-
-        private readonly ConcurrentDictionary<int, TaskCompletionSource<byte[]>> _pendingRequests = [];
-        private readonly ConcurrentDictionary<ApiKey, ApiVersion> _apiVersions = [];
-        private readonly BlockingCollection<SendThing> _sendQueue = [];
-        private readonly SemaphoreSlim _semaphore = new(1, 1);
-
         private readonly ApiVersionsRequestEncoder _apiVersionRequestEncoder = new();
         private readonly ApiVersionsResponseDecoder _apiVersionResponseDecoder = new();
 
         private readonly MetadataRequestEncoder _metadataRequestEncoder = new();
         private readonly MetadataResponseDecoder _metadataResponseDecoder = new();
-
-        private readonly SaslHandshakeRequestEncoder _saslHandshakeRequestEncoder = new();
-        private readonly SaslHandshakeResponseDecoder _saslHandshakeResponseDecoder = new();
-
-        private readonly SaslAuthenticateRequestEncoder _saslAuthenticateRequestEncoder = new();
-        private readonly SaslAuthenticateResponseDecoder _saslAuthenticateResponseDecoder = new();
 
         private readonly CreateTopicsRequestEncoder _createTopicsRequestEncoder = new();
         private readonly CreateTopicsResponseDecoder _createTopicsResponseDecoder = new();
@@ -126,11 +98,15 @@ namespace Kafka.Client.Net
         private readonly FetchRequestEncoder _fetchRequestEncoder = new();
         private readonly FetchResponseDecoder _fetchResponseDecoder = new();
 
-        private CancellationTokenSource _internalCts = new();
-        private Task _senderThread = Task.CompletedTask;
-        private Task _receiverThread = Task.CompletedTask;
-        private NodeId _nodeId = -1;
+        private readonly string _clientId = config.Client.ClientId;
+        private readonly int _retries = config.Client.Retries;
+        private readonly TimeSpan _retryBackOffMs = TimeSpan.FromMilliseconds(config.Client.RetryBackoffMs);
+        private readonly ILogger _logger = logger;
+        private readonly ITransport _transport = connection;
         private int _coorelationIds;
+        private NodeId _nodeId = -1;
+
+        private readonly ConcurrentDictionary<ApiKey, ApiVersion> _apiVersions = [];
 
         NodeId INode.NodeId => _nodeId;
 
@@ -772,41 +748,6 @@ namespace Kafka.Client.Net
             }
         }
 
-        private async Task SaslHandshake(
-            CancellationToken cancellationToken
-        )
-        {
-            var saslHandshakeRequest = new SaslHandshakeRequestData(
-                GetEnumAttributeValue(_saslMechanism),
-                []
-            );
-
-            var tries = 0;
-            var requestBytes = new byte[1024 * 1024];
-            while (true)
-            {
-                var offset = 0;
-                var requestHeader = CreateRequestHeader(_saslHandshakeRequestEncoder, []);
-                offset = _saslHandshakeRequestEncoder.WriteHeader(requestBytes, offset, requestHeader);
-                offset = _saslHandshakeRequestEncoder.WriteMessage(requestBytes, offset, saslHandshakeRequest);
-
-                await _transport.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
-                var responseBytes = await _transport.Receive(cancellationToken).ConfigureAwait(false);
-
-                (offset, var _) = _saslHandshakeResponseDecoder.ReadHeader(responseBytes, 0);
-                (_, var saslHandshakeResponse) = _saslHandshakeResponseDecoder.ReadMessage(responseBytes, offset);
-
-                var (_, errors) = SaslHandshakeError(saslHandshakeResponse);
-                if (errors.Length == 0)
-                    return;
-                LogError(_logger, requestHeader, errors);
-                if (tries++ <= _retries && IsTransient(errors))
-                    cancellationToken.WaitHandle.WaitOne(_retryBackOffMs);
-                else
-                    ApiExceptions(errors);
-            }
-        }
-
         private static (bool, ImmutableArray<ApiError>) SaslHandshakeError(SaslHandshakeResponseData response)
         {
             if (response.ErrorCodeField == 0)
@@ -963,13 +904,6 @@ namespace Kafka.Client.Net
                 await NetworkLoopStop(cancellationToken).ConfigureAwait(false);
                 await OpenTransport(cancellationToken).ConfigureAwait(false);
                 await ApiKeyBootstrap(cancellationToken).ConfigureAwait(false);
-                switch(_securityProtocol)
-                {
-                    case SecurityProtocol.SaslPlaintext:
-                        await SaslHandshake(cancellationToken).ConfigureAwait(false);
-                        await SaslAuthenticate(cancellationToken).ConfigureAwait(false);
-                        break;
-                }
                 await MetadataBootstrap(cancellationToken).ConfigureAwait(false);
                 await NetworkLoopStart(cancellationToken).ConfigureAwait(false);
             }
@@ -1076,12 +1010,6 @@ namespace Kafka.Client.Net
 
             SetCodecVersion(_metadataRequestEncoder, _apiVersions);
             SetCodecVersion(_metadataResponseDecoder, _apiVersions);
-
-            SetCodecVersion(_saslHandshakeRequestEncoder, _apiVersions);
-            SetCodecVersion(_saslHandshakeResponseDecoder, _apiVersions);
-
-            SetCodecVersion(_saslAuthenticateRequestEncoder, _apiVersions);
-            SetCodecVersion(_saslAuthenticateResponseDecoder, _apiVersions);
 
             SetCodecVersion(_createTopicsRequestEncoder, _apiVersions);
             SetCodecVersion(_createTopicsResponseDecoder, _apiVersions);

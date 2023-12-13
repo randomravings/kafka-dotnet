@@ -2,7 +2,6 @@
 using Kafka.Common.Exceptions;
 using Microsoft.Extensions.Logging;
 using System.Net;
-using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Cryptography;
@@ -18,7 +17,8 @@ namespace Kafka.Common.Net.Transport
         private readonly Socket _socket;
         private readonly ILogger _logger;
         private readonly bool _useSsl;
-        private Stream _stream;
+        private Stream _readStream;
+        private Stream _writeStream;
 
         public TcpTransport(
             IPEndPoint dnsEndPoint,
@@ -33,8 +33,8 @@ namespace Kafka.Common.Net.Transport
             };
             _useSsl = useSsl;
             _logger = logger;
-
-            _stream = new MemoryStream([]);
+            _readStream = new MemoryStream([]);
+            _writeStream = new MemoryStream([]);
         }
 
         public string Host => _endPoint.Address.ToString();
@@ -42,6 +42,37 @@ namespace Kafka.Common.Net.Transport
         public int Port => _endPoint.Port;
 
         public bool IsConnected => _socket.Connected;
+
+        private void CreateStream(Socket socket)
+        {
+            var readStream = new NetworkStream(_socket, FileAccess.Read, false);
+            var writeStream = new NetworkStream(_socket, FileAccess.Write, false);
+
+            if (!_useSsl)
+            {
+                _readStream = readStream;
+                _writeStream = writeStream;
+            }
+
+            string certPath = "E:\\docker_environments\\cp-single-sasl_ssl\\client-creds\\kafka.client.pfx";
+            string certPass = "secret";
+            var collection = new X509Certificate2Collection();
+            collection.Import(certPath, certPass, X509KeyStorageFlags.PersistKeySet);
+
+            var cert = collection[0];
+
+            var rsaPublicKey = cert.GetRSAPublicKey();
+
+            var aes = Aes.Create();
+            aes.KeySize = 256;
+            aes.Mode = CipherMode.CBC;
+
+            var keyFormatter = new RSAPKCS1KeyExchangeFormatter(rsaPublicKey);
+            var keyEncrypted = keyFormatter.CreateKeyExchange(aes.Key, aes.GetType());
+
+            _readStream = new CryptoStream(readStream, aes.CreateDecryptor(), CryptoStreamMode.Read, true);
+            _writeStream = new CryptoStream(writeStream, aes.CreateEncryptor(), CryptoStreamMode.Write, true);
+        }
 
         public async ValueTask Open(
             CancellationToken cancellationToken
@@ -53,35 +84,7 @@ namespace Kafka.Common.Net.Transport
                     _endPoint,
                     cancellationToken
                 ).ConfigureAwait(false);
-
-                var networkStream = new NetworkStream(_socket, false); ;
-
-                if (_useSsl)
-                {
-                    string certPath = "kafka.client.pfx";
-                    string certPass = "secret";
-                    var collection = new X509Certificate2Collection();
-                    collection.Import(certPath, certPass, X509KeyStorageFlags.PersistKeySet);
-                    var sslStream = new SslStream(networkStream, true);
-                    var sslClientAuthenticationOptions = new SslClientAuthenticationOptions
-                    {
-                        EnabledSslProtocols =  System.Security.Authentication.SslProtocols.Tls13,
-                        CipherSuitesPolicy = new(new[] { TlsCipherSuite.TLS_AES_256_GCM_SHA384 }),
-                        TargetHost = "localhost",
-                        AllowRenegotiation = false,
-                        AllowTlsResume = false,
-                        ClientCertificates = collection
-                    };
-                    await sslStream.AuthenticateAsClientAsync(
-                        sslClientAuthenticationOptions,
-                        cancellationToken
-                    ).ConfigureAwait(false);
-                    _stream = sslStream;
-                }
-                else
-                {
-                    _stream = networkStream;
-                }
+                CreateStream(_socket);
             }
             catch (Exception ex)
             {
@@ -107,7 +110,9 @@ namespace Kafka.Common.Net.Transport
         {
             try
             {
-                _stream.Close();
+
+                _writeStream.Close();
+                _readStream.Close();
                 if (_socket.Connected)
                     _socket.Close();
                 return ValueTask.CompletedTask;
@@ -125,11 +130,11 @@ namespace Kafka.Common.Net.Transport
         {
             var lenBytes = new byte[4];
             _ = BinaryEncoder.WriteInt32(lenBytes, 0, data.Length);
-            await _stream.WriteAsync(
+            await _writeStream.WriteAsync(
                 lenBytes,
                 cancellationToken
             ).ConfigureAwait(false);
-            await _stream.WriteAsync(
+            await _writeStream.WriteAsync(
                 data,
                 cancellationToken
             ).ConfigureAwait(false);
@@ -140,16 +145,17 @@ namespace Kafka.Common.Net.Transport
         )
         {
             var sizeBytes = new byte[4];
-            await _stream.ReadAtLeastAsync(sizeBytes, 4, true, cancellationToken).ConfigureAwait(false);
+            await _readStream.ReadAtLeastAsync(sizeBytes, 4, true, cancellationToken).ConfigureAwait(false);
             (_, var messageLen) = BinaryDecoder.ReadInt32(sizeBytes, 0);
             var responseBytes = new byte[messageLen];
-            await _stream.ReadAtLeastAsync(responseBytes, messageLen, true, cancellationToken).ConfigureAwait(false);
+            await _readStream.ReadAtLeastAsync(responseBytes, messageLen, true, cancellationToken).ConfigureAwait(false);
             return responseBytes;
         }
 
         public void Dispose()
         {
-            _stream.Dispose();
+            _writeStream.Dispose();
+            _readStream.Dispose();
             _socket.Dispose();
             GC.SuppressFinalize(this);
         }
