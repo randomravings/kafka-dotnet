@@ -4,6 +4,7 @@ using Kafka.Client.Config;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Text.Json.Serialization;
 
 namespace Kafka.Cli.Client
@@ -127,11 +128,32 @@ namespace Kafka.Cli.Client
                 propertyInfo.SetValue(instance, intValue);
             else if (type.Equals(typeof(long)) && long.TryParse(value, out var longValue))
                 propertyInfo.SetValue(instance, longValue);
-            else if (type.IsEnum && Enum.TryParse(type, value, true, out var enumValue))
+            else if (type.IsEnum && TryGetEnumValue(type, value, out var enumValue))
                 propertyInfo.SetValue(instance, enumValue);
             else
                 return false;
             return true;
+        }
+
+        private static bool TryGetEnumValue(Type enumType, string? stringValue, out object? enumValue)
+        {
+            enumValue = default;
+            var memberInfos = enumType
+                .GetFields()
+                .Select(e => (
+                    Member: e,
+                    Attribute: (EnumMemberAttribute?)e.GetCustomAttribute(
+                        typeof(EnumMemberAttribute),
+                        false
+                    )
+                ))
+                .Where(e => e.Attribute != null && e.Attribute.Value == stringValue)
+            ;
+            if (!memberInfos.Any())
+                return false;
+
+            enumValue = memberInfos.First().Member.GetValue(null);
+            return true; ;
         }
 
         private static ImmutableSortedDictionary<string, PropertyInfo> MapProperties()

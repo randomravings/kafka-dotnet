@@ -43,7 +43,7 @@ namespace Kafka.Client.Messages.Encoding
             var mechanismsField = ImmutableArray<string>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, mechanismsField) = BinaryDecoder.ReadArray<string>(buffer, i, BinaryDecoder.ReadCompactString);
+            (i, mechanismsField) = BinaryDecoder.ReadArray<string>(buffer, i, BinaryDecoder.ReadString);
             if (mechanismsField.IsDefault)
                 throw new InvalidDataException("mechanismsField was null");
 ;
@@ -60,7 +60,7 @@ namespace Kafka.Client.Messages.Encoding
             var mechanismsField = ImmutableArray<string>.Empty;
             var taggedFields = ImmutableArray<TaggedField>.Empty;
             (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
-            (i, mechanismsField) = BinaryDecoder.ReadArray<string>(buffer, i, BinaryDecoder.ReadCompactString);
+            (i, mechanismsField) = BinaryDecoder.ReadArray<string>(buffer, i, BinaryDecoder.ReadString);
             if (mechanismsField.IsDefault)
                 throw new InvalidDataException("mechanismsField was null");
 ;
