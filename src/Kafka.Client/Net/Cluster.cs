@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 
 namespace Kafka.Client.Net
@@ -295,7 +296,7 @@ namespace Kafka.Client.Net
                 _config.Client.SecurityProtocol == SecurityProtocol.SaslSsl
             ;
 
-            var entry = Dns.GetHostEntry(host);
+            var entry = Dns.GetHostEntry(host, AddressFamily.InterNetwork);
             var ipAddres = entry.AddressList[0];
             var ipEndPoint = new IPEndPoint(ipAddres, port);
 

@@ -2,8 +2,10 @@
 using Kafka.Common.Exceptions;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Security;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Kafka.Common.Net.Transport
@@ -56,13 +58,23 @@ namespace Kafka.Common.Net.Transport
 
                 if (_useSsl)
                 {
+                    string certPath = "kafka.client.pfx";
+                    string certPass = "secret";
+                    var collection = new X509Certificate2Collection();
+                    collection.Import(certPath, certPass, X509KeyStorageFlags.PersistKeySet);
                     var sslStream = new SslStream(networkStream, true);
                     var sslClientAuthenticationOptions = new SslClientAuthenticationOptions
                     {
-                        TargetHost = _endPoint.Address.ToString()
+                        EnabledSslProtocols =  System.Security.Authentication.SslProtocols.Tls13,
+                        CipherSuitesPolicy = new(new[] { TlsCipherSuite.TLS_AES_256_GCM_SHA384 }),
+                        TargetHost = "localhost",
+                        AllowRenegotiation = false,
+                        AllowTlsResume = false,
+                        ClientCertificates = collection
                     };
                     await sslStream.AuthenticateAsClientAsync(
-                        _endPoint.Address.ToString()
+                        sslClientAuthenticationOptions,
+                        cancellationToken
                     ).ConfigureAwait(false);
                     _stream = sslStream;
                 }
@@ -76,6 +88,18 @@ namespace Kafka.Common.Net.Transport
                 throw new OpenConnectionException("Error during connect", ex);
             }
         }
+
+        public static bool RemoteCertificateValidationCallback(
+            object sender,
+            X509Certificate? certificate,
+            X509Chain? chain,
+            SslPolicyErrors sslPolicyErrors
+        )
+        {
+            //sslPolicyErrors returns RemoteCertificateNameMismatch
+            return true; //Code shortened
+        }
+
 
         public ValueTask Close(
             CancellationToken cancellationToken
