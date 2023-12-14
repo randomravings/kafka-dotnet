@@ -9,8 +9,8 @@ namespace Kafka.Client.Logging
     {
         [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "{config}", SkipEnabledCheck = false)]
         public static partial void WriteStreamConfig(this ILogger logger, in WriteStreamConfig config);
-        [LoggerMessage(EventId = 2001, Level = LogLevel.Information, Message = "Producer instance created with id: {producerId} and epoch: {producerEpoch}", SkipEnabledCheck = true)]
-        internal static partial void ProducerInstance(this ILogger logger, in long producerId, in short producerEpoch);
+        [LoggerMessage(EventId = 2001, Level = LogLevel.Information, Message = "Producer instance created with id: {producerId}, epoch: {producerEpoch}, idempotent: {idempotent}, transaction id: {transactionalId}.", SkipEnabledCheck = true)]
+        internal static partial void WriteInstance(this ILogger logger, in long producerId, in short producerEpoch, bool idempotent, string? transactionalId);
 
         [LoggerMessage(EventId = 2010, Level = LogLevel.Information, Message = "Write Channel {nodeId} - Batch Collector started")]
         internal static partial void BatchCollectorStarted(this ILogger logger, in NodeId nodeId);

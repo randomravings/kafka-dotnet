@@ -2,7 +2,7 @@
 
 namespace Kafka.Cli.Options
 {
-    public sealed class ConsumerOpts
+    public sealed class ReadOpts
         : Opts
     {
         [Option("topics", Required = true)]

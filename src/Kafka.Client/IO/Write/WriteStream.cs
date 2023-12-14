@@ -365,6 +365,7 @@ namespace Kafka.Client.IO.Write
                 if (string.IsNullOrEmpty(_transactionalId) && !_enableIdempotence)
                 {
                     _initialized = true;
+                    _logger.WriteInstance(_producerId, _producerEpoch, _enableIdempotence, _transactionalId);
                     return;
                 }
 
@@ -396,7 +397,7 @@ namespace Kafka.Client.IO.Write
 
                 _producerId = initProducerIdResponse.ProducerIdField;
                 _producerEpoch = initProducerIdResponse.ProducerEpochField;
-                _logger.ProducerInstance(_producerId, _producerEpoch);
+                _logger.WriteInstance(_producerId, _producerEpoch, _enableIdempotence, _transactionalId);
                 _initialized = true;
             }
             finally
@@ -405,7 +406,7 @@ namespace Kafka.Client.IO.Write
             }
         }
 
-        private async Task<NodeId> FindCoordinator(
+        private static async Task<NodeId> FindCoordinator(
             INodeLink protocol,
             string transactionalId,
             CancellationToken cancellationToken

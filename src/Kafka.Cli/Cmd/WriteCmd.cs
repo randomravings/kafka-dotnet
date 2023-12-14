@@ -9,7 +9,7 @@ using Kafka.Common.Serialization.Nullable;
 
 namespace Kafka.Cli.Cmd
 {
-    internal static class ProducerCmd
+    internal static class WriteCmd
     {
         public static async Task<int> Parse(
             IEnumerable<string> args,
@@ -21,15 +21,15 @@ namespace Kafka.Cli.Cmd
             with.IgnoreUnknownArguments = false;
             with.CaseInsensitiveEnumValues = true;
             with.AllowMultiInstance = false;
-        }).ParseArguments<ProducerOpts>(args)
+        }).ParseArguments<WriteOpts>(args)
             .MapResult(
-                (ProducerOpts opts) => Run(opts, cancellationToken),
+                (WriteOpts opts) => Run(opts, cancellationToken),
                 errs => Task.FromResult(-1)
             )
         ;
 
         private static async Task<int> Run(
-            ProducerOpts opts,
+            WriteOpts opts,
             CancellationToken cancellationToken
         )
         {
@@ -218,7 +218,7 @@ namespace Kafka.Cli.Cmd
 
 
         private static KafkaClientConfig CreateConfig(
-            ProducerOpts opts
+            WriteOpts opts
         )
         {
             var config = new KafkaClientConfig

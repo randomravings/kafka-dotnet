@@ -2,7 +2,7 @@
 
 namespace Kafka.Cli.Options
 {
-    public sealed class ProducerOpts
+    public sealed class WriteOpts
         : Opts
     {
         [Option("topic", Required = true)]

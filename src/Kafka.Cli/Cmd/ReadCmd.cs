@@ -6,12 +6,11 @@ using Kafka.Client;
 using Kafka.Client.Config;
 using Kafka.Client.IO;
 using Kafka.Common.Model;
-using Kafka.Common.Serialization;
 using Kafka.Common.Serialization.Nullable;
 
 namespace Kafka.Cli.Cmd
 {
-    internal static class ConsumerCmd
+    internal static class ReadCmd
     {
         public static async Task<int> Parse(
             IEnumerable<string> args,
@@ -23,15 +22,15 @@ namespace Kafka.Cli.Cmd
             with.IgnoreUnknownArguments = false;
             with.CaseInsensitiveEnumValues = true;
             with.AllowMultiInstance = false;
-        }).ParseArguments<ConsumerOpts>(args)
+        }).ParseArguments<ReadOpts>(args)
             .MapResult(
-                (ConsumerOpts opts) => Run(opts, cancellationToken),
+                (ReadOpts opts) => Run(opts, cancellationToken),
                 errs => Task.FromResult(-1)
             )
         ;
 
         public static async Task<int> Run(
-            ConsumerOpts opts,
+            ReadOpts opts,
             CancellationToken cancellationToken
         )
         {
@@ -87,9 +86,9 @@ namespace Kafka.Cli.Cmd
             try
             {
                 if (interactive)
-                    await Interactive(stream, reader, topicNames, cancellationToken);
+                    await RunInteractive(stream, reader, topicNames, cancellationToken);
                 else
-                    await Fetch(reader, cancellationToken);
+                    await RunContinuously(reader, cancellationToken);
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)
@@ -106,7 +105,7 @@ namespace Kafka.Cli.Cmd
             }
         }
 
-        private static async Task Interactive<TKey, TValue>(
+        private static async Task RunInteractive<TKey, TValue>(
             IGroupReadStream inputStream,
             IGroupReader<TKey, TValue> streamReader,
             IReadOnlySet<TopicName> topicNames,
@@ -195,7 +194,7 @@ namespace Kafka.Cli.Cmd
             return true;
         }
 
-        private static async Task Fetch<TKey, TValue>(
+        private static async Task RunContinuously<TKey, TValue>(
             IGroupReader<TKey, TValue> streamReader,
             CancellationToken cancellationToken
         )
@@ -293,7 +292,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static KafkaClientConfig CreateConfig(
-            ConsumerOpts opts
+            ReadOpts opts
         )
         {
             var groupId = opts.GroupId;
