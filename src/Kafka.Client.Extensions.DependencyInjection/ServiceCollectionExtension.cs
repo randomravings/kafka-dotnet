@@ -13,11 +13,18 @@ namespace Kafka.Client.Extensions.DependencyInjection
 {
     public static class ServiceCollectionExtension
     {
-        public static IServiceCollection AddKafkaClient(this IServiceCollection collection, IConfiguration configuration) =>
+        public static IServiceCollection AddKafkaClient(
+            this IServiceCollection collection,
+            IConfiguration configuration
+        ) =>
             AddKafkaClient(collection, configuration, "KafkaClient")
         ;
 
-        public static IServiceCollection AddKafkaClient(this IServiceCollection collection, IConfiguration configuration, string key)
+        public static IServiceCollection AddKafkaClient(
+            this IServiceCollection collection,
+            IConfiguration configuration,
+            string key
+        )
         {
             var properties = MapProperties();
             collection.Configure<KafkaClientConfig>(kafkaClientConfig =>
