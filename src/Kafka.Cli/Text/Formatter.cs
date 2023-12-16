@@ -8,6 +8,7 @@ namespace Kafka.Cli.Text
         public static string Print<TKey, TValue>(in ReadRecord<TKey, TValue> value) =>
             $"{Print(value.TopicPartition)}:{Print(value.Offset)}:{PrintKey(value.Key)}:{PrintValue(value.Value)}"
         ;
+
         public static string Print(in ApiError value) =>
             value.Code switch
             {
@@ -18,6 +19,7 @@ namespace Kafka.Cli.Text
         public static string Print(TopicPartitionOffset value) =>
             $"{Print(value.TopicPartition)}:{Print(value.Offset)}"
         ;
+
         public static string Print(in TopicName topic) =>
             topic.Value switch
             {
@@ -25,6 +27,7 @@ namespace Kafka.Cli.Text
                 string s => s
             }
         ;
+
         public static string PrintKey<TKey>(in TKey key) =>
             key switch
             {

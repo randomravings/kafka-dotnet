@@ -10,6 +10,9 @@ using Kafka.Common.Model.Comparison;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
+using System.Reflection;
+using System.Runtime.Serialization;
+using static Kafka.Client.Messages.FindCoordinatorResponseData;
 
 namespace Kafka.Client
 {
@@ -20,7 +23,7 @@ namespace Kafka.Client
     ) :
         IKafkaClient,
         ITopics,
-        IConsumerGroups
+        IGroups
     {
         private readonly Net.Cluster _connections =
             new(
@@ -33,7 +36,7 @@ namespace Kafka.Client
         private readonly ILogger<IKafkaClient> _logger = logger;
 
         ITopics IKafkaClient.Topics => this;
-        IConsumerGroups IKafkaClient.ConsumerGroups => this;
+        IGroups IKafkaClient.Groups => this;
 
         async Task IKafkaClient.Close(
             CancellationToken cancellationToken
@@ -242,44 +245,44 @@ namespace Kafka.Client
             );
         }
 
-        async ValueTask<GetTopicsResult> ITopics.Get(
+        async ValueTask<ListTopicsResult> ITopics.List(
             TopicName topic,
-            GetTopicsOptions options,
+            ListTopicsOptions options,
             CancellationToken cancellationToken
         ) =>
-            await Get(
-                ImmutableArray.Create(topic),
+            await List(
+                [topic],
                 options,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<GetTopicsResult> ITopics.Get(
+        async ValueTask<ListTopicsResult> ITopics.List(
             IReadOnlyList<TopicName> topics,
-            GetTopicsOptions options,
+            ListTopicsOptions options,
             CancellationToken cancellationToken
         ) =>
-            await Get(
+            await List(
                 topics,
                 options,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<GetTopicsResult> ITopics.Get(
-            GetTopicsOptions options,
+        async ValueTask<ListTopicsResult> ITopics.List(
+            ListTopicsOptions options,
             CancellationToken cancellationToken
         ) =>
-            await Get(
+            await List(
                 ImmutableSortedSet<TopicName>.Empty,
                 options,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        private async ValueTask<GetTopicsResult> Get(
+        private async ValueTask<ListTopicsResult> List(
             IReadOnlyList<TopicName> topics,
-            GetTopicsOptions options,
+            ListTopicsOptions options,
             CancellationToken cancellationToken
         )
         {
@@ -496,43 +499,133 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        ValueTask<GetTopicsResult> IConsumerGroups.Get(
-            ConsumerGroup consumerGroup,
-            GetConsumerGroupsOptions options,
+
+
+        async ValueTask<IReadOnlyList<GroupDescription>> IGroups.List(
+            ListGroupsOptions options,
             CancellationToken cancellationToken
         )
         {
-            throw new NotImplementedException();
+            var states = options.States.Select(r => r.ToString()).ToImmutableArray();
+            var request = new ListGroupsRequestData(
+                states,
+                []
+            );
+
+            var connection = await _connections.Controller(
+                cancellationToken
+            ).ConfigureAwait(false);
+            var metadata = await connection.Metadata(
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            var resultsBuilder = ImmutableArray.CreateBuilder<GroupDescription>();
+            foreach (var broker in metadata.BrokersField)
+            {
+                var brokerConnection = await _connections.Connection(
+                    broker.NodeIdField,
+                    cancellationToken
+                ).ConfigureAwait(false);
+                var response = await brokerConnection.ListGroups(
+                    request,
+                    cancellationToken
+                ).ConfigureAwait(false);
+                foreach (var result in response.GroupsField)
+                {
+                    resultsBuilder.Add(new GroupDescription(
+                        result.GroupIdField,
+                        result.ProtocolTypeField,
+                        result.GroupStateField
+                    ));
+                }
+            }
+            return resultsBuilder.ToImmutable();
         }
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IConsumerGroups.OffsetsCommitted(
-            ConsumerGroup consumerGroup,
-            TopicName topicName,
+        async ValueTask<IReadOnlyList<DeleteGroupResult>> IGroups.Delete(
+            IEnumerable<ConsumerGroup> groups,
+            CancellationToken cancellationToken
+        )
+        {
+            var connection = await _connections.Controller(
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            var coordinators = await connection.FindCoordinator(
+                new(
+                    "",
+                    (sbyte)CoordinatorType.GROUP,
+                    groups.Select(r => r.Value).ToImmutableArray(),
+                    []
+                ),
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            var groupsByCoordinators = coordinators
+                .CoordinatorsField
+                .GroupBy(g => g.NodeIdField)
+                .Select(r => new KeyValuePair<NodeId, ImmutableArray<string>>(
+                    new NodeId(r.Key),
+                    r.Select(r => r.KeyField).ToImmutableArray()
+                )).ToImmutableArray()
+            ;
+
+            var resultsBuilder = ImmutableArray.CreateBuilder<DeleteGroupResult>();
+            foreach(var groupsByCoordinator in groupsByCoordinators)
+            {
+                var request = new DeleteGroupsRequestData(
+                    groupsByCoordinator.Value,
+                    []
+                );
+                var coordinator = await _connections.Connection(
+                    groupsByCoordinator.Key,
+                    cancellationToken
+                ).ConfigureAwait(false);
+                var response = await coordinator.DeleteGroups(
+                    request,
+                    cancellationToken
+                ).ConfigureAwait(false);
+                foreach(var result in response.ResultsField)
+                {
+                    resultsBuilder.Add(new DeleteGroupResult(
+                        result.GroupIdField,
+                        result.ErrorCodeField == 0 ?
+                            ApiError.None :
+                            ApiErrors.Translate(result.ErrorCodeField)
+                    ));
+                }
+            }
+            return resultsBuilder.ToImmutable();
+        }
+
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IGroups.OffsetsCommitted(
+            ConsumerGroup group,
+            TopicName topic,
             CancellationToken cancellationToken
         ) =>
             await FetchTopicPartitionOffsets(
-                consumerGroup,
-                ToReadOnlySet(topicName),
+                group,
+                ToReadOnlySet(topic),
                 [],
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IConsumerGroups.OffsetsCommitted(
-            ConsumerGroup consumerGroup,
-            IReadOnlySet<TopicName> topicNames,
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IGroups.OffsetsCommitted(
+            ConsumerGroup group,
+            IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         ) =>
             await FetchTopicPartitionOffsets(
-                consumerGroup,
-                topicNames,
+                group,
+                topics,
                 [],
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
         private async ValueTask<ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionOffset>>> ListTopicPartitionOffsets(
-            IReadOnlySet<TopicName> topicNames,
+            IReadOnlySet<TopicName> topics,
             IReadOnlySet<TopicPartition> filter,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
@@ -542,7 +635,7 @@ namespace Kafka.Client
                 cancellationToken
             ).ConfigureAwait(false);
             var metadataRequest = new MetadataRequestData(
-                topicNames.Select(t =>
+                topics.Select(t =>
                     new MetadataRequestData.MetadataRequestTopic(
                         Guid.Empty,
                         t,
@@ -600,8 +693,8 @@ namespace Kafka.Client
         }
 
         private async ValueTask<ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionOffset>>> FetchTopicPartitionOffsets(
-            ConsumerGroup consumerGroup,
-            IReadOnlySet<TopicName> topicNames,
+            ConsumerGroup group,
+            IEnumerable<TopicName> topics,
             ImmutableSortedSet<TopicPartition> filter,
             CancellationToken cancellationToken
         )
@@ -610,7 +703,7 @@ namespace Kafka.Client
                 cancellationToken
             ).ConfigureAwait(false);
             var metadataRequest = new MetadataRequestData(
-                topicNames.Select(t =>
+                topics.Select(t =>
                     new MetadataRequestData.MetadataRequestTopic(
                         Guid.Empty,
                         t,
@@ -628,7 +721,7 @@ namespace Kafka.Client
                 cancellationToken
             ).ConfigureAwait(false);
             var offsetFetchRequest = new OffsetFetchRequestData(
-                consumerGroup,
+                group,
                 metadataResponse.TopicsField.Select(t => new OffsetFetchRequestData.OffsetFetchRequestTopic(
                     t.NameField ?? "",
                     t.PartitionsField
@@ -643,7 +736,7 @@ namespace Kafka.Client
                 .ToImmutableArray(),
                 [
                     new OffsetFetchRequestData.OffsetFetchRequestGroup(
-                            consumerGroup,
+                            group,
                             null,
                             -1,
                             metadataResponse.TopicsField.Select(t => new OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
@@ -670,8 +763,8 @@ namespace Kafka.Client
             ).ConfigureAwait(false);
 
             var builder = ImmutableSortedDictionary.CreateBuilder<TopicName, ImmutableArray<PartitionOffset>>(TopicNameCompare.Instance);
-            foreach (var group in offsetFetchResponse.GroupsField)
-                foreach (var topic in group.TopicsField)
+            foreach (var offsetFetchResponseGroup in offsetFetchResponse.GroupsField)
+                foreach (var topic in offsetFetchResponseGroup.TopicsField)
                     foreach (var partition in topic.PartitionsField)
                         builder.TryAdd(
                             new TopicName(topic.NameField),

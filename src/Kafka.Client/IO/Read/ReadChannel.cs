@@ -80,13 +80,13 @@ namespace Kafka.Client.IO.Read
             }
         }
 
-        private static FetchResponseProcessResult2 ProcessFetchResponse(
+        private static FetchResponseProcessResult ProcessFetchResponse(
             in FetchResponseData fetchResponse,
             in ImmutableTopicPartitionMap<TopicPartitionReadState> topicPartitionOffsets
         )
         {
             if (fetchResponse.ResponsesField.IsDefaultOrEmpty)
-                return FetchResponseProcessResult2.Empty;
+                return FetchResponseProcessResult.Empty;
             var totalOffsetsProcessed = 0;
             var topicRecordsBuilder = ImmutableArray.CreateBuilder<KeyValuePair<TopicPartition, IReadOnlyList<ReadRecord>>>();
             for (int i = 0; i < fetchResponse.ResponsesField.Length; i++)
@@ -190,7 +190,7 @@ namespace Kafka.Client.IO.Read
                         Timestamp.Created(timestampMs)
                     ;
 
-                    var rawConsumerRecord = new ReadRecord(
+                    var readRecord = new ReadRecord(
                         TopicPartition: state.Key,
                         Offset: offset,
                         Timestamp: timestamp,
@@ -199,7 +199,7 @@ namespace Kafka.Client.IO.Read
                         Headers: record.Headers,
                         Error: ApiError.None
                     );
-                    recordsBuilder.Add(rawConsumerRecord);
+                    recordsBuilder.Add(readRecord);
                 }
                 state.Value.SetOffset(
                     offset

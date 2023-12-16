@@ -6,20 +6,20 @@ namespace Kafka.Client
 {
     public interface ITopics
     {
-        ValueTask<GetTopicsResult> Get(
-            GetTopicsOptions options,
+        ValueTask<ListTopicsResult> List(
+            ListTopicsOptions options,
             CancellationToken cancellationToken
         );
 
-        ValueTask<GetTopicsResult> Get(
+        ValueTask<ListTopicsResult> List(
             TopicName topics,
-            GetTopicsOptions options,
+            ListTopicsOptions options,
             CancellationToken cancellationToken
         );
 
-        ValueTask<GetTopicsResult> Get(
+        ValueTask<ListTopicsResult> List(
             IReadOnlyList<TopicName> topics,
-            GetTopicsOptions options,
+            ListTopicsOptions options,
             CancellationToken cancellationToken
         );
 

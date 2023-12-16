@@ -2,6 +2,7 @@
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Messages.Encoding;
+using Kafka.Client.Model.Internal;
 using Kafka.Common.Encoding;
 using Kafka.Common.Exceptions;
 using Kafka.Common.Model;
@@ -87,6 +88,12 @@ namespace Kafka.Client.Net
         private readonly DeleteTopicsRequestEncoder _deleteTopicsRequestEncoder = new();
         private readonly DeleteTopicsResponseDecoder _deleteTopicsResponseDecoder = new();
 
+        private readonly ListGroupsRequestEncoder _listGroupsRequestEncoder = new();
+        private readonly ListGroupsResponseDecoder _listGroupsResponseDecoder = new();
+
+        private readonly DeleteGroupsRequestEncoder _deleteGroupsRequestEncoder = new();
+        private readonly DeleteGroupsResponseDecoder _deleteGroupsResponseDecoder = new();
+
         private readonly FindCoordinatorRequestEncoder _findCoordinatorRequestEncoder = new();
         private readonly FindCoordinatorResponseDecoder _findCoordinatorResponseDecoder = new();
 
@@ -138,6 +145,8 @@ namespace Kafka.Client.Net
             _apiVersions
         ;
 
+        IReadOnlyDictionary<ApiKey, ApiVersion> INode.Apis => throw new NotImplementedException();
+
         public async Task Open(CancellationToken cancellationToken) =>
             await EnsureConnection(
                 cancellationToken
@@ -183,7 +192,9 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) ApiVersionsError(ApiVersionsResponseData response)
+        private static ApiErrorsReturnValue ApiVersionsError(
+            in ApiVersionsResponseData response
+        )
         {
             if (response.ErrorCodeField == 0)
                 return (false, ImmutableArray<ApiError>.Empty);
@@ -223,7 +234,9 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) MetadataError(MetadataResponseData response)
+        private static ApiErrorsReturnValue MetadataError(
+            in MetadataResponseData response
+        )
         {
             var errors = response
                 .TopicsField
@@ -259,8 +272,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) CreateTopicsError(
-            CreateTopicsResponseData response
+        private static ApiErrorsReturnValue CreateTopicsError(
+            in CreateTopicsResponseData response
         )
         {
             var errors = response
@@ -285,8 +298,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) DeleteTopicsError(
-            DeleteTopicsResponseData response
+        private static ApiErrorsReturnValue DeleteTopicsError(
+            in DeleteTopicsResponseData response
         )
         {
             var errors = response.ResponsesField
@@ -296,6 +309,55 @@ namespace Kafka.Client.Net
             ;
             if (errors.Length > 0 && errors.Any(r => r.Code == ApiError.UnknownTopicOrPartition.Code))
                 return (false, errors);
+            return (IsTransient(errors), errors);
+        }
+
+        async Task<ListGroupsResponseData> INodeLink.ListGroups(
+            ListGroupsRequestData request,
+            CancellationToken cancellationToken
+        ) =>
+            await Execute(
+                request,
+                _listGroupsRequestEncoder,
+                _listGroupsResponseDecoder,
+                ListGroupsError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ApiErrorsReturnValue ListGroupsError(
+            in ListGroupsResponseData response
+        )
+        {
+            if (response.ErrorCodeField == 0)
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
+            return (IsTransient(errors), errors);
+        }
+
+        async Task<DeleteGroupsResponseData> INodeLink.DeleteGroups(
+            DeleteGroupsRequestData request,
+            CancellationToken cancellationToken
+        ) =>
+            await Execute(
+                request,
+                _deleteGroupsRequestEncoder,
+                _deleteGroupsResponseDecoder,
+                DeleteGroupsError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ApiErrorsReturnValue DeleteGroupsError(
+            in DeleteGroupsResponseData response
+        )
+        {
+            var errors = response
+                .ResultsField
+                .Where(r => r.ErrorCodeField != 0)
+                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
+                .ToImmutableArray()
+            ;
             return (IsTransient(errors), errors);
         }
 
@@ -312,7 +374,9 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) FindCoordinatorError(FindCoordinatorResponseData response)
+        private static ApiErrorsReturnValue FindCoordinatorError(
+            in FindCoordinatorResponseData response
+        )
         {
             var errors = response.ErrorCodeField switch
             {
@@ -339,8 +403,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) OffsetFetchError(
-            OffsetFetchResponseData response
+        private static ApiErrorsReturnValue OffsetFetchError(
+            in OffsetFetchResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
@@ -362,8 +426,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) ListOffsetsError(
-            ListOffsetsResponseData response
+        private static ApiErrorsReturnValue ListOffsetsError(
+            in ListOffsetsResponseData response
         )
         {
             var errors = response
@@ -389,7 +453,9 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) InitProducerIdError(InitProducerIdResponseData response)
+        private static ApiErrorsReturnValue InitProducerIdError(
+            in InitProducerIdResponseData response
+        )
         {
             if (response.ErrorCodeField == 0)
                 return (false, ImmutableArray<ApiError>.Empty);
@@ -410,7 +476,9 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) ProduceError(ProduceResponseData response)
+        private static ApiErrorsReturnValue ProduceError(
+            in ProduceResponseData response
+        )
         {
             var errors = response
                 .ResponsesField
@@ -447,8 +515,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) AddPartitionsToTxnError(
-            AddPartitionsToTxnResponseData response
+        private static ApiErrorsReturnValue AddPartitionsToTxnError(
+            in AddPartitionsToTxnResponseData response
         )
         {
             var errors = response
@@ -475,8 +543,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) EndTxnError(
-            EndTxnResponseData response
+        private static ApiErrorsReturnValue EndTxnError(
+            in EndTxnResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
@@ -498,8 +566,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) HeartbeatError(
-            HeartbeatResponseData response
+        private static ApiErrorsReturnValue HeartbeatError(
+            in HeartbeatResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
@@ -521,8 +589,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) JoinGroupError(
-            JoinGroupResponseData response
+        private static ApiErrorsReturnValue JoinGroupError(
+            in JoinGroupResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
@@ -544,8 +612,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) SyncGroupError(
-            SyncGroupResponseData response
+        private static ApiErrorsReturnValue SyncGroupError(
+            in SyncGroupResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
@@ -567,8 +635,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) LeaveGroupError(
-            LeaveGroupResponseData response
+        private static ApiErrorsReturnValue LeaveGroupError(
+            in LeaveGroupResponseData response
         )
         {
             if (response.ErrorCodeField == 0)
@@ -590,8 +658,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) OffsetCommitError(
-            OffsetCommitResponseData response
+        private static ApiErrorsReturnValue OffsetCommitError(
+            in OffsetCommitResponseData response
         )
         {
             var errors = response
@@ -618,8 +686,8 @@ namespace Kafka.Client.Net
             ).ConfigureAwait(false)
         ;
 
-        private static (bool, ImmutableArray<ApiError>) FetchError(
-            FetchResponseData response
+        private static ApiErrorsReturnValue FetchError(
+            in FetchResponseData response
         )
         {
             var errors = response.ErrorCodeField switch
@@ -649,7 +717,7 @@ namespace Kafka.Client.Net
             TRequest requestMessage,
             IRequestEncoder<RequestHeaderData, TRequest> requestEncoder,
             IResponseDecoder<ResponseHeaderData, TResponse> responseDecoder,
-            Func<TResponse, (bool, ImmutableArray<ApiError>)> errorDelegate,
+            ApiErrorDelegate<TResponse> errorDelegate,
             CancellationToken cancellationToken
         )
             where TRequest : notnull, RequestMessage
@@ -807,7 +875,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        private static (bool, ImmutableArray<ApiError>) SaslHandshakeError(SaslHandshakeResponseData response)
+        private static ApiErrorsReturnValue SaslHandshakeError(SaslHandshakeResponseData response)
         {
             if (response.ErrorCodeField == 0)
                 return (false, ImmutableArray<ApiError>.Empty);
@@ -853,7 +921,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        private static (bool, ImmutableArray<ApiError>) SaslAuthenticateError(SaslAuthenticateResponseData response)
+        private static ApiErrorsReturnValue SaslAuthenticateError(SaslAuthenticateResponseData response)
         {
             if (response.ErrorCodeField == 0)
                 return (false, ImmutableArray<ApiError>.Empty);
@@ -1076,6 +1144,12 @@ namespace Kafka.Client.Net
 
             SetCodecVersion(_metadataRequestEncoder, _apiVersions);
             SetCodecVersion(_metadataResponseDecoder, _apiVersions);
+
+            SetCodecVersion(_listGroupsRequestEncoder, _apiVersions) ;
+            SetCodecVersion(_listGroupsResponseDecoder, _apiVersions);
+
+            SetCodecVersion(_deleteGroupsRequestEncoder, _apiVersions);
+            SetCodecVersion(_deleteGroupsResponseDecoder, _apiVersions);
 
             SetCodecVersion(_saslHandshakeRequestEncoder, _apiVersions);
             SetCodecVersion(_saslHandshakeResponseDecoder, _apiVersions);

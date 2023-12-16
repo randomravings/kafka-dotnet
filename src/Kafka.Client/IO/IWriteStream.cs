@@ -6,7 +6,7 @@ namespace Kafka.Client.IO
 {
     public interface IWriteStream
     {
-        internal Task<ProducerTopicMetadata> MetadataForTopic(
+        internal Task<TopicMetadata> MetadataForTopic(
             TopicName topicName,
             CancellationToken cancellationToken
         );
@@ -19,12 +19,12 @@ namespace Kafka.Client.IO
         IWriterBuilder CreateWriter();
 
         /// <summary>
-        /// Produce a single record.
+        /// Write a single record.
         /// </summary>
         /// <param name="record"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        Task<ProduceResult> Write(
+        Task<WriteResult> Write(
             WriteRecord record,
             CancellationToken cancellationToken
         );

@@ -17,7 +17,7 @@ namespace Kafka.Client
         /// <summary>
         /// Gets the admin interface.
         /// </summary>
-        IConsumerGroups ConsumerGroups { get; }
+        IGroups Groups { get; }
 
         /// <summary>
         /// Creates a new input stream to cluster for writing records.

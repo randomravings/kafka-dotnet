@@ -54,7 +54,7 @@ namespace Kafka.Client.IO
         );
 
         /// <summary>
-        /// Closes the consumer instance and frees up resources.
+        /// Closes the read stream instance and frees up resources.
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>

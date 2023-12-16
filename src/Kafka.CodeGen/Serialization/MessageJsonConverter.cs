@@ -1,4 +1,4 @@
-﻿using Kafka.CodeGen.Models;
+﻿using Kafka.CodeGen.Model;
 using Kafka.Common.Model;
 using Newtonsoft.Json;
 using System.Collections.Immutable;

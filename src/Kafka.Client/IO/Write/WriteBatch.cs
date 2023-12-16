@@ -46,50 +46,50 @@ namespace Kafka.Client.IO.Write
         /// <param name="headers"></param>
         /// <returns></returns>
         public AddRecordResult Add(
-            ProduceCommand produceCommand
+            WriteCommand writeCommand
         )
         {
-            if (_topics.TryGetValue(produceCommand.Record.TopicPartition, out var produceRecords))
-                return TryAddExistingPartition(produceCommand, produceRecords);
+            if (_topics.TryGetValue(writeCommand.Record.TopicPartition, out var writeRecords))
+                return TryAddExistingPartition(writeCommand, writeRecords);
             else
-                return TryAddNewPartition(produceCommand);
+                return TryAddNewPartition(writeCommand);
         }
 
         private AddRecordResult TryAddNewPartition(
-            ProduceCommand produceCommand
+            WriteCommand writeCommand
         )
         {
-            var produceRecords = new WriteRecords(
+            var writeRecords = new WriteRecords(
                 _partitionLeaderEpoch,
                 _attributes,
-                produceCommand.Record.Timestamp.Millisconds,
+                writeCommand.Record.Timestamp.Millisconds,
                 _producerId,
                 _producerEpoch
             );
-            (var added, var recordSize) = produceRecords.TryAdd(
-                produceCommand,
+            (var added, var recordSize) = writeRecords.TryAdd(
+                writeCommand,
                 _maxSize - RecordsConstants.RecordsHeaderSize - _batchSize
             );
             if (added)
             {
                 _count++;
                 _batchSize += RecordsConstants.RecordsHeaderSize;
-                _batchSize += produceRecords.BatchSize;
+                _batchSize += writeRecords.BatchSize;
                 _topics.Add(
-                    produceCommand.Record.TopicPartition,
-                    produceRecords
+                    writeCommand.Record.TopicPartition,
+                    writeRecords
                 );
             }
             return (added, recordSize);
         }
 
         private AddRecordResult TryAddExistingPartition(
-            ProduceCommand produceCommand,
-            WriteRecords produceRecords
+            WriteCommand writeCommand,
+            WriteRecords writeRecords
         )
         {
-            (var added, var recordSize) = produceRecords.TryAdd(
-                produceCommand,
+            (var added, var recordSize) = writeRecords.TryAdd(
+                writeCommand,
                 _maxSize - _batchSize
             );
             if (added)

@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 using CommandLine;
 using Kafka.CodeGen.Cmd;
+using Kafka.CodeGen.Options;
 using System.IO.Abstractions;
 
 var fileSystem = new FileSystem();

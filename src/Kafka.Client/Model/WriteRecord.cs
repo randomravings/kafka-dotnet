@@ -7,7 +7,6 @@ namespace Kafka.Client.Model
         Timestamp Timestamp,
         ReadOnlyMemory<byte>? Key,
         ReadOnlyMemory<byte>? Value,
-        IReadOnlyList<RecordHeader> Headers,
-        Attributes Attributes
+        IReadOnlyList<RecordHeader> Headers
     );
 }

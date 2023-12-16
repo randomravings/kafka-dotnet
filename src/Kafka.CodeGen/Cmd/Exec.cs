@@ -1,6 +1,7 @@
 ﻿using Kafka.CodeGen.CSharp;
 using Kafka.CodeGen.GitHub;
-using Kafka.CodeGen.Models;
+using Kafka.CodeGen.Model;
+using Kafka.CodeGen.Options;
 using Kafka.Common.Model;
 using Newtonsoft.Json;
 using System.Collections.Immutable;
@@ -40,7 +41,9 @@ namespace Kafka.CodeGen.Cmd
             ApiKey.AddPartitionsToTxn,
             ApiKey.EndTxn,
             ApiKey.SaslHandshake,
-            ApiKey.SaslAuthenticate
+            ApiKey.SaslAuthenticate,
+            ApiKey.DescribeGroups,
+            ApiKey.DeleteGroups
         ];
 
         public static async ValueTask<int> Fetch(

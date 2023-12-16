@@ -172,5 +172,30 @@ namespace Kafka.Cli.Client
             ;
             return properties;
         }
+
+        public static Dictionary<TEnum, string> EnumMemberDictionary<TEnum>()
+            where TEnum : struct, Enum
+        {
+            var enumMemberDictionary = new Dictionary<TEnum, string>();
+            var enumType = typeof(TEnum);
+            var fieldInfos = enumType.GetFields(
+                BindingFlags.Public | BindingFlags.Static
+            );
+            foreach (var fieldInfo in fieldInfos)
+            {
+                var enumValue = (TEnum?)fieldInfo.GetValue(null);
+                if (!enumValue.HasValue)
+                    continue;
+                var enumMemberValue = ((EnumMemberAttribute?)fieldInfo
+                    .GetCustomAttribute(
+                        typeof(EnumMemberAttribute),
+                        false
+                    )
+                )?.Value ?? "";
+                enumMemberDictionary.Add(enumValue.Value, enumMemberValue);
+            }
+            return enumMemberDictionary;
+        }
+
     }
 }

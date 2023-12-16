@@ -9,7 +9,7 @@ namespace Kafka.Client.Logging
     {
         [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "{config}", SkipEnabledCheck = false)]
         public static partial void WriteStreamConfig(this ILogger logger, in WriteStreamConfig config);
-        [LoggerMessage(EventId = 2001, Level = LogLevel.Information, Message = "Producer instance created with id: {producerId}, epoch: {producerEpoch}, idempotent: {idempotent}, transaction id: {transactionalId}.", SkipEnabledCheck = true)]
+        [LoggerMessage(EventId = 2001, Level = LogLevel.Information, Message = "Write Stream instance created with id: {producerId}, epoch: {producerEpoch}, idempotent: {idempotent}, transaction id: {transactionalId}.", SkipEnabledCheck = true)]
         internal static partial void WriteInstance(this ILogger logger, in long producerId, in short producerEpoch, bool idempotent, string? transactionalId);
 
         [LoggerMessage(EventId = 2010, Level = LogLevel.Information, Message = "Write Channel {nodeId} - Batch Collector started")]
@@ -32,7 +32,7 @@ namespace Kafka.Client.Logging
         [LoggerMessage(EventId = 2004, Level = LogLevel.Trace, Message = "Write Channel {nodeId} - Unknown value 'acks={acks}, defaulting to 'acks=all'")]
         internal static partial void DefaultAcks(this ILogger logger, in NodeId nodeId, in string acks);
 
-        [LoggerMessage(EventId = 2100, Level = LogLevel.Information, Message = "Transaction coordinator for producer is node: {nodeId}", SkipEnabledCheck = true)]
+        [LoggerMessage(EventId = 2100, Level = LogLevel.Information, Message = "Transaction coordinator for write stream is node: {nodeId}", SkipEnabledCheck = true)]
         internal static partial void TransactionCoordinator(this ILogger logger, in NodeId nodeId);
         [LoggerMessage(EventId = 2101, Level = LogLevel.Information, Message = "Transaction begin")]
         internal static partial void TransactionBegin(this ILogger logger);

@@ -57,7 +57,7 @@ namespace KafkaGraphQL.Queries
         }
 
         [GraphQLDescription("Writes a set of records to a topic.")]
-        public async ValueTask<IQueryable<ProduceResult>> WriteToTopic(
+        public async ValueTask<IQueryable<WriteResult>> WriteToTopic(
 
             [GraphQLType<StringType>]
             [GraphQLNonNullType]

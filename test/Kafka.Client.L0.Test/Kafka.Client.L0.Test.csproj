@@ -35,7 +35,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Consumer\" />
+    <Folder Include="ReadStream\" />
   </ItemGroup>
 
 </Project>

@@ -168,7 +168,7 @@ namespace Kafka.Client.IO.Read
             await JoinGroup(
                 cancellationToken
             ).ConfigureAwait(false);
-            _logger.ConsumerGroupJoin(
+            _logger.GroupJoin(
                 _groupId,
                 _memberInfo.MemberId,
                 _memberInfo.GenerationId,
@@ -205,12 +205,12 @@ namespace Kafka.Client.IO.Read
             ;
             if (leaveGroupResponse.ErrorCodeField == 0)
             {
-                _logger.ConsumerGroupLeave(_groupId);
+                _logger.GroupLeave(_groupId);
             }
             else
             {
                 var error = ApiErrors.Translate(leaveGroupResponse.ErrorCodeField);
-                _logger.ConsumerGroupLeaveError(_groupId, error);
+                _logger.GroupLeaveError(_groupId, error);
             }
         }
 
@@ -288,7 +288,7 @@ namespace Kafka.Client.IO.Read
                 if (topicPartitions.TryGetValue(synchedTopicPartition, out var topicPartition))
                     _assignments.Add(topicPartition);
                 else
-                    _logger.ConsumerGroupUnexpectedTopicPartition(synchedTopicPartition);
+                    _logger.GroupUnexpectedTopicPartition(synchedTopicPartition);
             _joinGroupSync.Set();
         }
 

@@ -1,5 +1,7 @@
 ﻿using Kafka.Client.Collections.Internal;
 using Kafka.Common.Model;
+using System.Reflection;
+using System.Runtime.Serialization;
 
 namespace Kafka.Client.L0.Test.Collections
 {

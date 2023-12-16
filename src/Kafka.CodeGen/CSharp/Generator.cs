@@ -1,5 +1,5 @@
-﻿using Kafka.CodeGen.Models;
-using Kafka.CodeGen.Models.Extensions;
+﻿using Kafka.CodeGen.Model;
+using Kafka.CodeGen.Model.Extensions;
 using Kafka.Common.Encoding;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Extensions;

@@ -50,9 +50,9 @@ namespace Kafka.Cli.Cmd
             {
                 var topicNames = opts.Topics.Select(r => new TopicName(r)).ToHashSet();
                 if (opts.PartitionAssign.Any())
-                    await RunAssignedConsumer(client, cancellationToken);
+                    await RunAssignedReader(client, cancellationToken);
                 else
-                    await RunApplicationConsumer(client, topicNames, opts.Interactive, cancellationToken);
+                    await RunGroupReader(client, topicNames, opts.Interactive, cancellationToken);
             }
             finally
             {
@@ -63,7 +63,7 @@ namespace Kafka.Cli.Cmd
             return 0;
         }
 
-        private static async Task RunApplicationConsumer(
+        private static async Task RunGroupReader(
             IKafkaClient client,
             IReadOnlySet<TopicName> topicNames,
             bool interactive,
@@ -201,10 +201,10 @@ namespace Kafka.Cli.Cmd
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var consumerRecord = await streamReader.Read(cancellationToken);
+                var readRecord = await streamReader.Read(cancellationToken);
                 Console.WriteLine(
                     Formatter.Print(
-                        consumerRecord
+                        readRecord
                     )
                 );
             }
@@ -223,10 +223,10 @@ namespace Kafka.Cli.Cmd
                 cts.CancelAfter(timeoutMs);
                 for (int i = 0; i < recordCount && !cts.Token.IsCancellationRequested; i++)
                 {
-                    var consumerRecord = await streamReader.Read(cts.Token);
+                    var readRecord = await streamReader.Read(cts.Token);
                     Console.WriteLine(
                         Formatter.Print(
-                            consumerRecord
+                            readRecord
                         )
                     );
                 }
@@ -238,7 +238,7 @@ namespace Kafka.Cli.Cmd
             }
         }
 
-        private static Task RunAssignedConsumer(
+        private static Task RunAssignedReader(
             IKafkaClient client,
             CancellationToken cancellationToken
         )

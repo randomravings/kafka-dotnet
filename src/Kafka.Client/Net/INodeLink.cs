@@ -4,8 +4,7 @@ using Kafka.Common.Net;
 namespace Kafka.Client.Net
 {
     internal interface INodeLink :
-        INode,
-        IDisposable
+        INode
     {
         Task<ApiVersionsResponseData> ApiVersions(
             CancellationToken cancellationToken
@@ -27,6 +26,16 @@ namespace Kafka.Client.Net
 
         Task<DeleteTopicsResponseData> DeleteTopics(
             DeleteTopicsRequestData options,
+            CancellationToken cancellationToken
+        );
+
+        Task<ListGroupsResponseData> ListGroups(
+            ListGroupsRequestData request,
+            CancellationToken cancellationToken
+        );
+
+        Task<DeleteGroupsResponseData> DeleteGroups(
+            DeleteGroupsRequestData request,
             CancellationToken cancellationToken
         );
 

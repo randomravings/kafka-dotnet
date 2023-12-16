@@ -24,7 +24,7 @@ namespace Kafka.Client.IO.Write
         private readonly Task _recordsBuilderTask;
         private readonly Task _recordsAccumulatorTask;
         private readonly CancellationTokenSource _internalCts = new();
-        private readonly BlockingCollection<ProduceCommand> _commandQueue = [];
+        private readonly BlockingCollection<WriteCommand> _commandQueue = [];
         private readonly BlockingCollection<WriteBatch> _sendQueue = [];
         private readonly ManualResetEventSlim _sendBlocker = new(true);
         private readonly long _producerId;
@@ -41,15 +41,15 @@ namespace Kafka.Client.IO.Write
             long producerId,
             short producerEpoch,
             INodeLink protocol,
-            WriteStreamConfig producerConfig,
+            WriteStreamConfig writeStreamConfig,
             ILogger logger
         )
         {
             _nodeId = nodeId;
             _producerId = producerId;
             _producerEpoch = producerEpoch;
-            _transactionalId = producerConfig.TransactionalId;
-            _acks = ParseAcks(nodeId, producerConfig, logger);
+            _transactionalId = writeStreamConfig.TransactionalId;
+            _acks = ParseAcks(nodeId, writeStreamConfig, logger);
             _sendDelegate = _acks switch
             {
                 0 => SendBatchOneWay,
@@ -57,19 +57,19 @@ namespace Kafka.Client.IO.Write
             };
             _protocol = protocol;
             _logger = logger;
-            _maxRequestSize = producerConfig.MaxRequestSize;
-            _lingerMs = producerConfig.LingerMs;
+            _maxRequestSize = writeStreamConfig.MaxRequestSize;
+            _lingerMs = writeStreamConfig.LingerMs;
             _recordsBuilderTask = RunDispatch(_internalCts.Token);
             _recordsAccumulatorTask = RunCollector(_internalCts.Token);
         }
 
         public void Send(
-            in ProduceCommand produceCommand,
+            in WriteCommand writeCommand,
             in CancellationToken cancellationToken
         )
         {
             _sendBlocker.Wait(cancellationToken);
-            _commandQueue.Add(produceCommand, cancellationToken);
+            _commandQueue.Add(writeCommand, cancellationToken);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace Kafka.Client.IO.Write
                 _logger.BatchCollectorStarted(_nodeId);
                 try
                 {
-                    var carryOver = default(ProduceCommand?);
+                    var carryOver = default(WriteCommand?);
                     var stopwatch = new Stopwatch();
                     stopwatch.Start();
                     while (!cancellationToken.IsCancellationRequested)
@@ -116,14 +116,14 @@ namespace Kafka.Client.IO.Write
         /// <param name="carryOver">Possible carry over from previous fill.</param>
         /// <param name="cancellationToken">Cancellation token for linger time.</param>
         /// <returns></returns>
-        private (WriteBatch Batch, BatchCollectReason Reason, ProduceCommand? Overflow) Collect(
+        private (WriteBatch Batch, BatchCollectReason Reason, WriteCommand? Overflow) Collect(
             in Stopwatch stopwatch,
-            in ProduceCommand? carryOver,
+            in WriteCommand? carryOver,
             in CancellationToken cancellationToken
         )
         {
-            var produceCommand = carryOver ?? _commandQueue.Take(cancellationToken);
-            var attributes = produceCommand.Record.Attributes;
+            var writeCommand = carryOver ?? _commandQueue.Take(cancellationToken);
+            var attributes = writeCommand.Attributes;
             var batch = new WriteBatch(
                 _maxRequestSize,
                 0,
@@ -132,7 +132,7 @@ namespace Kafka.Client.IO.Write
                 _producerEpoch
             )
             {
-                produceCommand
+                writeCommand
             };
             stopwatch.Reset();
             while (true)
@@ -142,15 +142,15 @@ namespace Kafka.Client.IO.Write
                     return (batch, BatchCollectReason.MaxLingerMsReached, null);
 
                 var millisecondTimeout = unchecked((int)(_lingerMs - elapsedMilliseconds));
-                if (!_commandQueue.TryTake(out produceCommand, millisecondTimeout, cancellationToken))
+                if (!_commandQueue.TryTake(out writeCommand, millisecondTimeout, cancellationToken))
                     return (batch, BatchCollectReason.MaxLingerMsReached, null);
 
-                if (produceCommand.Record.Attributes != attributes)
-                    return (batch, BatchCollectReason.AttributesChanged, produceCommand);
+                if (writeCommand.Attributes != attributes)
+                    return (batch, BatchCollectReason.AttributesChanged, writeCommand);
 
-                var (added, _) = batch.Add(produceCommand);
+                var (added, _) = batch.Add(writeCommand);
                 if (!added)
-                    return (batch, BatchCollectReason.MaxSizeExceeded, produceCommand);
+                    return (batch, BatchCollectReason.MaxSizeExceeded, writeCommand);
             }
         }
 
@@ -236,7 +236,7 @@ namespace Kafka.Client.IO.Write
         {
             var topic = TopicName.Empty;
             var topicProduceDataBuilder = ImmutableArray.CreateBuilder<ProduceRequestData.TopicProduceData>();
-            foreach (var (topicPartition, produceRecords) in batch)
+            foreach (var (topicPartition, writeRecords) in batch)
             {
                 if (topic != topicPartition.Topic.TopicName)
                 {
@@ -246,13 +246,13 @@ namespace Kafka.Client.IO.Write
                 var partitionProduceDataBuilder = ImmutableArray.CreateBuilder<ProduceRequestData.TopicProduceData.PartitionProduceData>();
 
                 _topicPartitionStates.TryGetValue(topicPartition, out int baseSequence);
-                produceRecords.SetBaseSequence(baseSequence);
-                baseSequence += produceRecords.Records.Count;
+                writeRecords.SetBaseSequence(baseSequence);
+                baseSequence += writeRecords.Records.Count;
                 partitionStates[topicPartition] = baseSequence;
                 partitionProduceDataBuilder.Add(
                     new(
                         topicPartition.Partition,
-                        ImmutableArray.Create((IRecords)produceRecords),
+                        [(IRecords)writeRecords],
                         []
                     )
                 );
@@ -279,8 +279,8 @@ namespace Kafka.Client.IO.Write
             in WriteBatch batch
         )
         {
-            foreach (var (topicPartition, produceRecords) in batch)
-                foreach (var command in produceRecords)
+            foreach (var (topicPartition, writeRecords) in batch)
+                foreach (var command in writeRecords)
                     FinalizeSend(command, Offset.Unset, ApiError.None, "");
         }
 
@@ -304,21 +304,21 @@ namespace Kafka.Client.IO.Write
         }
 
         private static void FinalizeSend(
-            in WriteRecords produceRecords,
+            in WriteRecords writeRecords,
             in ProduceResponseData.TopicProduceResponse.PartitionProduceResponse response
         )
         {
             var delta = 0;
-            foreach (var produceRecord in produceRecords)
+            foreach (var writeRecord in writeRecords)
             {
-                FinalizeSend(produceRecord, response.BaseOffsetField + delta, ApiError.None, "");
+                FinalizeSend(writeRecord, response.BaseOffsetField + delta, ApiError.None, "");
                 delta++;
             }
 
         }
 
         private static void FinalizeSendWithErrors(
-            in WriteRecords produceRecords,
+            in WriteRecords writeRecords,
             in ProduceResponseData.TopicProduceResponse.PartitionProduceResponse response
         )
         {
@@ -331,25 +331,25 @@ namespace Kafka.Client.IO.Write
                 )
             ;
             var delta = 0;
-            foreach (var produceRecord in produceRecords)
+            foreach (var writeRecord in writeRecords)
             {
                 if (!recordErrors.TryGetValue(delta, out var recordError))
                     recordError = "";
-                FinalizeSend(produceRecord, response.BaseOffsetField + delta, error, recordError);
+                FinalizeSend(writeRecord, response.BaseOffsetField + delta, error, recordError);
                 delta++;
             }
         }
 
         private static void FinalizeSend(
-            in ProduceCommand produceCommand,
+            in WriteCommand writeCommand,
             in Offset offset,
             in ApiError error,
             in string recordError
         )
         {
-            var (record, callback) = produceCommand;
+            var (record, _, callback) = writeCommand;
             callback.SetResult(
-                new ProduceResult(
+                new WriteResult(
                     new TopicPartitionOffset(
                         record.TopicPartition,
                         offset
@@ -395,15 +395,15 @@ namespace Kafka.Client.IO.Write
 
         private static short ParseAcks(
             in NodeId nodeId,
-            in WriteStreamConfig producerConfig,
+            in WriteStreamConfig writeStreamConfig,
             in ILogger logger
         )
         {
-            if (producerConfig.Acks == "all")
+            if (writeStreamConfig.Acks == "all")
                 return -1;
-            if (short.TryParse(producerConfig.Acks, out var acks) && acks >= 0)
+            if (short.TryParse(writeStreamConfig.Acks, out var acks) && acks >= 0)
                 return acks;
-            logger.DefaultAcks(nodeId, producerConfig.Acks);
+            logger.DefaultAcks(nodeId, writeStreamConfig.Acks);
             return -1;
         }
 

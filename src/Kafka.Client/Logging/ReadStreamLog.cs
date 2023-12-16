@@ -10,17 +10,17 @@ namespace Kafka.Client.Logging
         [LoggerMessage(EventId = 1000, Level = LogLevel.Information, Message = "{config}", SkipEnabledCheck = false)]
         public static partial void ReadStreamConfig(this ILogger logger, in ReadStreamConfig config);
 
-        [LoggerMessage(EventId = 1010, Level = LogLevel.Information, Message = "Joined consumer group {groupId} as member: {memberId}, generation: {generationId}, instance: {instanceId}, topicPartitions: {topicPartitions}", SkipEnabledCheck = false)]
-        public static partial void ConsumerGroupJoin(this ILogger logger, in string groupId, in string memberId, in int generationId, in string? instanceId, in IEnumerable<string> topicPartitions);
+        [LoggerMessage(EventId = 1010, Level = LogLevel.Information, Message = "Joined group {groupId} as member: {memberId}, generation: {generationId}, instance: {instanceId}, topicPartitions: {topicPartitions}", SkipEnabledCheck = false)]
+        public static partial void GroupJoin(this ILogger logger, in string groupId, in string memberId, in int generationId, in string? instanceId, in IEnumerable<string> topicPartitions);
 
-        [LoggerMessage(EventId = 1011, Level = LogLevel.Information, Message = "Left consumer group {groupId}", SkipEnabledCheck = false)]
-        public static partial void ConsumerGroupLeave(this ILogger logger, in string groupId);
+        [LoggerMessage(EventId = 1011, Level = LogLevel.Information, Message = "Left group {groupId}", SkipEnabledCheck = false)]
+        public static partial void GroupLeave(this ILogger logger, in string groupId);
 
-        [LoggerMessage(EventId = 1012, Level = LogLevel.Warning, Message = "Left consumer group {groupId}, error: {error}", SkipEnabledCheck = false)]
-        public static partial void ConsumerGroupLeaveError(this ILogger logger, in string groupId, in ApiError error);
+        [LoggerMessage(EventId = 1012, Level = LogLevel.Warning, Message = "Left group {groupId}, error: {error}", SkipEnabledCheck = false)]
+        public static partial void GroupLeaveError(this ILogger logger, in string groupId, in ApiError error);
 
         [LoggerMessage(EventId = 1013, Level = LogLevel.Warning, Message = "Unexpected topic partition during sync {topicPartition}", SkipEnabledCheck = false)]
-        public static partial void ConsumerGroupUnexpectedTopicPartition(this ILogger logger, in TopicPartition topicPartition);
+        public static partial void GroupUnexpectedTopicPartition(this ILogger logger, in TopicPartition topicPartition);
 
         [LoggerMessage(EventId = 2000, Level = LogLevel.Information, Message = "Input stream pre configure.", SkipEnabledCheck = false)]
         public static partial void InputStreamPreConfigure(this ILogger logger);

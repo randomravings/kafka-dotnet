@@ -51,11 +51,11 @@ namespace Kafka.Cli.Cmd
                     config
                 );
 
-                var options = new GetTopicsOptions(
+                var options = new ListTopicsOptions(
                     opts.IncludeInternal,
                     opts.ShowAllowedOperations
                 );
-                var result = await client.Topics.Get(
+                var result = await client.Topics.List(
                     options,
                     cancellationToken
                 );
@@ -209,9 +209,9 @@ namespace Kafka.Cli.Cmd
                     config
                 );
 
-                var result = await client.Topics.Get(
+                var result = await client.Topics.List(
                     opts.Topic,
-                    GetTopicsOptions.Empty,
+                    ListTopicsOptions.Empty,
                     cancellationToken
                 );
                 foreach (var topic in result.Topics)

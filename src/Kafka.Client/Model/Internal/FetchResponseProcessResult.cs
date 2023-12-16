@@ -1,14 +1,16 @@
-﻿using System.Collections.Immutable;
+﻿using Kafka.Common.Model;
+using System.Collections.Immutable;
 
 namespace Kafka.Client.Model.Internal
 {
     internal readonly record struct FetchResponseProcessResult(
         int OffsetsProcessed,
-        ImmutableArray<ReadRecord> Records
+        IReadOnlyList<KeyValuePair<TopicPartition, IReadOnlyList<ReadRecord>>> Records
     )
     {
-        public static implicit operator FetchResponseProcessResult(
-            (int OffsetsProcessed, ImmutableArray<ReadRecord> Records) value
-        ) => new(value.OffsetsProcessed, value.Records);
+        public static FetchResponseProcessResult Empty { get; } = new(
+            0,
+            ImmutableArray<KeyValuePair<TopicPartition, IReadOnlyList<ReadRecord>>>.Empty
+        );
     }
 }

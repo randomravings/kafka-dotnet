@@ -23,7 +23,7 @@ namespace Kafka.Client.IO.Write
         private readonly IPartitioner _partitioner = partitioner;
         private readonly ILogger _logger = logger;
 
-        async Task<ProduceResult> IStreamWriter<TKey, TValue>.Write(
+        async Task<WriteResult> IStreamWriter<TKey, TValue>.Write(
             TopicName topic,
             TKey key,
             TValue value,
@@ -39,7 +39,7 @@ namespace Kafka.Client.IO.Write
             ).ConfigureAwait(false)
         ;
 
-        async Task<ProduceResult> IStreamWriter<TKey, TValue>.Write(
+        async Task<WriteResult> IStreamWriter<TKey, TValue>.Write(
             TopicName topic,
             TKey key,
             TValue value,
@@ -56,7 +56,7 @@ namespace Kafka.Client.IO.Write
             ).ConfigureAwait(false)
         ;
 
-        async Task<ProduceResult> IStreamWriter<TKey, TValue>.Write(
+        async Task<WriteResult> IStreamWriter<TKey, TValue>.Write(
             TopicName topic,
             TKey key,
             TValue value,
@@ -73,7 +73,7 @@ namespace Kafka.Client.IO.Write
             ).ConfigureAwait(false)
         ;
 
-        async Task<ProduceResult> IStreamWriter<TKey, TValue>.Write(
+        async Task<WriteResult> IStreamWriter<TKey, TValue>.Write(
             TopicName topic,
             TKey key,
             TValue value,
@@ -91,7 +91,7 @@ namespace Kafka.Client.IO.Write
             ).ConfigureAwait(false)
         ;
 
-        private async Task<ProduceResult> Write(
+        private async Task<WriteResult> Write(
             TopicName topic,
             TKey key,
             TValue value,
@@ -121,8 +121,7 @@ namespace Kafka.Client.IO.Write
                 timestamp,
                 keyBytes,
                 valueBytes,
-                headers,
-                Attributes.None
+                headers
             );
 
             return await _stream.Write(

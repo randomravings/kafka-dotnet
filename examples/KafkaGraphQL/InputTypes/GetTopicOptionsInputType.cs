@@ -3,9 +3,9 @@
 namespace KafkaGraphQL.InputTypes
 {
     public class GetTopicOptionsInputType :
-        InputObjectType<GetTopicsOptions>
+        InputObjectType<ListTopicsOptions>
     {
-        protected override void Configure(IInputObjectTypeDescriptor<GetTopicsOptions> descriptor)
+        protected override void Configure(IInputObjectTypeDescriptor<ListTopicsOptions> descriptor)
         {
             base.Configure(descriptor);
             descriptor.BindFieldsExplicitly();

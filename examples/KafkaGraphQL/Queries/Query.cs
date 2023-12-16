@@ -1,10 +1,8 @@
-﻿using GreenDonut;
-using Kafka.Client;
+﻿using Kafka.Client;
 using Kafka.Client.IO;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
 using KafkaGraphQL.Model;
-using System.Diagnostics;
 
 namespace KafkaGraphQL.Queries
 {
@@ -19,7 +17,7 @@ namespace KafkaGraphQL.Queries
 
 
             [GraphQLDescription("Options fetching topics.")]
-            GetTopicsOptions? options,
+            ListTopicsOptions? options,
 
             [Service]
             IKafkaClient kafkaClient,
@@ -27,9 +25,9 @@ namespace KafkaGraphQL.Queries
             CancellationToken cancellationToken
         )
         {
-            var result = await kafkaClient.Topics.Get(
+            var result = await kafkaClient.Topics.List(
                 topicNames ?? [],
-                options ?? GetTopicsOptions.Empty,
+                options ?? ListTopicsOptions.Empty,
                 cancellationToken
             );
             return result.Topics.AsQueryable();

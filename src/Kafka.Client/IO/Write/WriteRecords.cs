@@ -6,16 +6,22 @@ using System.Collections;
 
 namespace Kafka.Client.IO.Write
 {
-    internal sealed class WriteRecords :
+    internal sealed class WriteRecords(
+        int partitionLeaderEpoch,
+        Attributes attributes,
+        long baseTimestamp,
+        long producerId,
+        short producerEpoch
+    ) :
         IRecords,
-        IEnumerable<ProduceCommand>
+        IEnumerable<WriteCommand>
     {
-        private readonly int _partitionLeaderEpoch;
-        private readonly Attributes _attributes;
-        private readonly long _baseTimestamp;
-        private readonly long _producerId;
-        private readonly short _producerEpoch;
-        private readonly List<IRecord> _packedRecords = new();
+        private readonly int _partitionLeaderEpoch = partitionLeaderEpoch;
+        private readonly Attributes _attributes = attributes;
+        private readonly long _baseTimestamp = baseTimestamp;
+        private readonly long _producerId = producerId;
+        private readonly short _producerEpoch = producerEpoch;
+        private readonly List<IRecord> _packedRecords = [];
 
         private int _baseSequence;
         private int _batchSize;
@@ -25,7 +31,7 @@ namespace Kafka.Client.IO.Write
             int Length,
             long TimestampDelta,
             int OffsetDelta,
-            ProduceCommand ProduceCommand
+            WriteCommand WriteCommand
         ) : IRecord
         {
             int IRecord.Length => Length;
@@ -36,26 +42,11 @@ namespace Kafka.Client.IO.Write
 
             int IRecord.OffsetDelta => OffsetDelta;
 
-            ReadOnlyMemory<byte>? IRecord.Key => ProduceCommand.Record.Key;
+            ReadOnlyMemory<byte>? IRecord.Key => WriteCommand.Record.Key;
 
-            ReadOnlyMemory<byte>? IRecord.Value => ProduceCommand.Record.Value;
+            ReadOnlyMemory<byte>? IRecord.Value => WriteCommand.Record.Value;
 
-            IReadOnlyList<RecordHeader> IRecord.Headers => ProduceCommand.Record.Headers;
-        }
-
-        public WriteRecords(
-            int partitionLeaderEpoch,
-            Attributes attributes,
-            long baseTimestamp,
-            long producerId,
-            short producerEpoch
-        )
-        {
-            _partitionLeaderEpoch = partitionLeaderEpoch;
-            _attributes = attributes;
-            _baseTimestamp = baseTimestamp;
-            _producerId = producerId;
-            _producerEpoch = producerEpoch;
+            IReadOnlyList<RecordHeader> IRecord.Headers => WriteCommand.Record.Headers;
         }
 
         public int BatchSize => _batchSize;
@@ -94,12 +85,12 @@ namespace Kafka.Client.IO.Write
         /// <param name="maxSize">The size limit to add.</param>
         /// <returns>A tuple containing: A boolean indicating if the record was added and, The total number of bytes required.</returns>
         public AddRecordResult TryAdd(
-            in ProduceCommand produceCommand,
+            in WriteCommand writeCommand,
             in int maxSize
         )
         {
-            var (record, _) = produceCommand;
-            var timestampDelta = produceCommand.Record.Timestamp.Millisconds - _baseTimestamp;
+            var (record, _, _) = writeCommand;
+            var timestampDelta = writeCommand.Record.Timestamp.Millisconds - _baseTimestamp;
             var offsetDelta = _packedRecords.Count;
             var recordSize = BinaryEncoder.ComputeRecordSize(
                 timestampDelta,
@@ -115,7 +106,7 @@ namespace Kafka.Client.IO.Write
                 recordSize,
                 timestampDelta,
                 offsetDelta,
-                produceCommand
+                writeCommand
             );
             _packedRecords.Add(packedRecord);
             _maxTimestamp = Math.Max(_maxTimestamp, record.Timestamp.Millisconds);
@@ -127,10 +118,10 @@ namespace Kafka.Client.IO.Write
             _baseSequence = baseSequence
         ;
 
-        public IEnumerator<ProduceCommand> GetEnumerator()
+        public IEnumerator<WriteCommand> GetEnumerator()
         {
             for (int i = 0; i < _packedRecords.Count; i++)
-                yield return ((PackedRecord)_packedRecords[i]).ProduceCommand;
+                yield return ((PackedRecord)_packedRecords[i]).WriteCommand;
         }
 
         IEnumerator IEnumerable.GetEnumerator() =>
