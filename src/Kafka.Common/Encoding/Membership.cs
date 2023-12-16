@@ -9,24 +9,22 @@ namespace Kafka.Common.Encoding
     public static class Membership
     {
         public static byte[] PackProtocolMetadata(
-            in short version,
-            [NotNull] in IReadOnlySet<TopicName> assignments,
-            [NotNull] in byte[] userData
+            [NotNull] in ProtocolMetadata memberMetadata
         )
         {
             var metadataSize =
                 2 + // version
                 4 + // count
-                assignments.Sum(r => 2 + r.Value?.Length ?? 0) +
-                userData.Length
+                memberMetadata.Assignments.Sum(r => 2 + r.Value?.Length ?? 0) +
+                memberMetadata.UserData.Length
             ;
             var protocolMetadata = new byte[metadataSize];
             var offset = 0;
-            offset = BinaryEncoder.WriteInt16(protocolMetadata, offset, version);
-            offset = BinaryEncoder.WriteInt32(protocolMetadata, offset, assignments.Count);
-            foreach (var topic in assignments)
+            offset = BinaryEncoder.WriteInt16(protocolMetadata, offset, memberMetadata.Version);
+            offset = BinaryEncoder.WriteInt32(protocolMetadata, offset, memberMetadata.Assignments.Count);
+            foreach (var topic in memberMetadata.Assignments)
                 offset = BinaryEncoder.WriteString(protocolMetadata, offset, topic);
-            Array.Copy(userData, 0, protocolMetadata, offset, userData.Length);
+            memberMetadata.UserData.CopyTo(0, protocolMetadata, offset, memberMetadata.UserData.Length);
             return protocolMetadata;
         }
 
@@ -65,6 +63,29 @@ namespace Kafka.Common.Encoding
                     offset = BinaryEncoder.WriteInt32(bytes, offset, partition.Partition.Value);
             }
             return bytes;
+        }
+
+        public static ProtocolMetadata UnpackProtocolMetadata(
+            [NotNull] in byte[] data
+        )
+        {
+            var set = ImmutableSortedSet.CreateBuilder(TopicNameCompare.Instance);
+            var offset = 0;
+            (offset, var version) = BinaryDecoder.ReadInt16(data, offset);
+            (offset, var assignments) = BinaryDecoder.ReadInt32(data, offset);
+            for (int i = 0; i < assignments; i++)
+            {
+                (offset, var topic) = BinaryDecoder.ReadString(data, offset);
+                set.Add(topic);
+            }
+            var userData = ImmutableArray<byte>.Empty;
+            if (offset < data.Length)
+                userData = ImmutableArray.Create(data[offset..]);
+            return new(
+                version,
+                set.ToImmutable(),
+                userData
+            );
         }
 
         public static IReadOnlySet<TopicPartition> UnpackTopicPartitions(

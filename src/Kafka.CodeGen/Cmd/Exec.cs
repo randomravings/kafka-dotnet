@@ -33,6 +33,8 @@ namespace Kafka.CodeGen.Cmd
             ApiKey.LeaveGroup,
             ApiKey.SyncGroup,
             ApiKey.ListGroups,
+            ApiKey.DescribeGroups,
+            ApiKey.DeleteGroups,
             ApiKey.ApiVersions,
             ApiKey.CreateTopics,
             ApiKey.DeleteTopics,
@@ -42,8 +44,6 @@ namespace Kafka.CodeGen.Cmd
             ApiKey.EndTxn,
             ApiKey.SaslHandshake,
             ApiKey.SaslAuthenticate,
-            ApiKey.DescribeGroups,
-            ApiKey.DeleteGroups
         ];
 
         public static async ValueTask<int> Fetch(

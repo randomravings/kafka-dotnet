@@ -5,11 +5,13 @@ using Kafka.Client.IO.Write;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
 using Kafka.Client.Model.Internal;
+using Kafka.Common.Encoding;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 using static Kafka.Client.Messages.FindCoordinatorResponseData;
@@ -499,8 +501,6 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-
-
         async ValueTask<IReadOnlyList<GroupDescription>> IGroups.List(
             ListGroupsOptions options,
             CancellationToken cancellationToken
@@ -519,23 +519,98 @@ namespace Kafka.Client
                 cancellationToken
             ).ConfigureAwait(false);
 
+            var listTasks = metadata
+                .BrokersField
+                .Select(r => Task.Run(async () =>
+                {
+                    var brokerConnection = await _connections.Connection(
+                        r.NodeIdField,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+                    var result = await brokerConnection.ListGroups(
+                        request,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+                    return new KeyValuePair<NodeId, ListGroupsResponseData>(r.NodeIdField, result);
+                }, CancellationToken.None))
+                .ToImmutableArray()
+            ;
+            var responses = await Task.WhenAll(
+                listTasks
+            ).ConfigureAwait(false);
             var resultsBuilder = ImmutableArray.CreateBuilder<GroupDescription>();
-            foreach (var broker in metadata.BrokersField)
+            foreach (var (nodeId, listGroupsResponse) in responses)
             {
-                var brokerConnection = await _connections.Connection(
-                    broker.NodeIdField,
-                    cancellationToken
-                ).ConfigureAwait(false);
-                var response = await brokerConnection.ListGroups(
-                    request,
-                    cancellationToken
-                ).ConfigureAwait(false);
+                foreach (var group in listGroupsResponse.GroupsField)
+                    resultsBuilder.Add(new GroupDescription(
+                        group.GroupIdField,
+                        group.ProtocolTypeField,
+                        group.GroupStateField,
+                        nodeId
+                    ));
+            }
+            return resultsBuilder.ToImmutable();
+        }
+
+        async ValueTask<IReadOnlyList<DescribeGroupResult>> IGroups.Describe(
+            IEnumerable<ConsumerGroup> groups,
+            DescribeGroupOptions options,
+            CancellationToken cancellationToken
+        )
+        {
+            var groupsByCoordinators = await FindCoordinators(
+                groups,
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            var describeTasks = groupsByCoordinators
+                .Select(r => Task.Run(async () =>
+                {
+                    var brokerConnection = await _connections.Connection(
+                        r.Key,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+                    var request = new DescribeGroupsRequestData(
+                        r.Value,
+                        options.IncludeAuthorizedOperations,
+                        []
+                    );
+                    var result = await brokerConnection.DescribeGroups(
+                        request,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+                    return new KeyValuePair<NodeId, DescribeGroupsResponseData>(r.Key, result);
+                }, CancellationToken.None))
+                .ToImmutableArray()
+            ;
+            var responses = await Task.WhenAll(
+                describeTasks
+            ).ConfigureAwait(false);
+
+            var resultsBuilder = ImmutableArray.CreateBuilder<DescribeGroupResult>();
+            foreach (var (nodeId, response) in responses)
+            {
                 foreach (var result in response.GroupsField)
                 {
-                    resultsBuilder.Add(new GroupDescription(
+                    resultsBuilder.Add(new DescribeGroupResult(
                         result.GroupIdField,
+                        result.GroupStateField,
                         result.ProtocolTypeField,
-                        result.GroupStateField
+                        result.ProtocolDataField,
+                        nodeId,
+                        result.MembersField
+                            .Select(r => new DescribeGroupMemberResult(
+                                r.MemberIdField,
+                                r.GroupInstanceIdField,
+                                r.ClientIdField,
+                                r.ClientHostField,
+                                Membership.UnpackProtocolMetadata(r.MemberMetadataField),
+                                Membership.UnpackTopicPartitions(r.MemberAssignmentField)
+                            )).ToImmutableArray(),
+                        result.AuthorizedOperationsField,
+                        result.ErrorCodeField == 0 ?
+                            ApiError.None :
+                            ApiErrors.Translate(result.ErrorCodeField)
                     ));
                 }
             }
@@ -543,6 +618,55 @@ namespace Kafka.Client
         }
 
         async ValueTask<IReadOnlyList<DeleteGroupResult>> IGroups.Delete(
+            IEnumerable<ConsumerGroup> groups,
+            CancellationToken cancellationToken
+        )
+        {
+            var groupsByCoordinators = await FindCoordinators(
+                groups,
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            var deleteTasks = groupsByCoordinators
+                .Select(r => Task.Run(async () =>
+                {
+                    var brokerConnection = await _connections.Connection(
+                        r.Key,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+                    var request = new DeleteGroupsRequestData(
+                        r.Value,
+                        []
+                    );
+                    var result = await brokerConnection.DeleteGroups(
+                        request,
+                        cancellationToken
+                    ).ConfigureAwait(false);
+                    return new KeyValuePair<NodeId, DeleteGroupsResponseData>(r.Key, result);
+                }, CancellationToken.None))
+                .ToImmutableArray()
+            ;
+            var responses = await Task.WhenAll(
+                deleteTasks
+            ).ConfigureAwait(false);
+
+            var resultsBuilder = ImmutableArray.CreateBuilder<DeleteGroupResult>();
+            foreach (var (nodeId, response) in responses)
+            {
+                foreach (var result in response.ResultsField)
+                {
+                    resultsBuilder.Add(new DeleteGroupResult(
+                        result.GroupIdField,
+                        result.ErrorCodeField == 0 ?
+                            ApiError.None :
+                            ApiErrors.Translate(result.ErrorCodeField)
+                    ));
+                }
+            }
+            return resultsBuilder.ToImmutable();
+        }
+
+        private async ValueTask<ImmutableSortedDictionary<int, ImmutableArray<string>>> FindCoordinators(
             IEnumerable<ConsumerGroup> groups,
             CancellationToken cancellationToken
         )
@@ -561,41 +685,14 @@ namespace Kafka.Client
                 cancellationToken
             ).ConfigureAwait(false);
 
-            var groupsByCoordinators = coordinators
+            return coordinators
                 .CoordinatorsField
                 .GroupBy(g => g.NodeIdField)
-                .Select(r => new KeyValuePair<NodeId, ImmutableArray<string>>(
-                    new NodeId(r.Key),
-                    r.Select(r => r.KeyField).ToImmutableArray()
-                )).ToImmutableArray()
+                .ToImmutableSortedDictionary(
+                    k => k.Key,
+                    v => v.Select(r => r.KeyField).ToImmutableArray()
+                )
             ;
-
-            var resultsBuilder = ImmutableArray.CreateBuilder<DeleteGroupResult>();
-            foreach(var groupsByCoordinator in groupsByCoordinators)
-            {
-                var request = new DeleteGroupsRequestData(
-                    groupsByCoordinator.Value,
-                    []
-                );
-                var coordinator = await _connections.Connection(
-                    groupsByCoordinator.Key,
-                    cancellationToken
-                ).ConfigureAwait(false);
-                var response = await coordinator.DeleteGroups(
-                    request,
-                    cancellationToken
-                ).ConfigureAwait(false);
-                foreach(var result in response.ResultsField)
-                {
-                    resultsBuilder.Add(new DeleteGroupResult(
-                        result.GroupIdField,
-                        result.ErrorCodeField == 0 ?
-                            ApiError.None :
-                            ApiErrors.Translate(result.ErrorCodeField)
-                    ));
-                }
-            }
-            return resultsBuilder.ToImmutable();
         }
 
         async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IGroups.OffsetsCommitted(

@@ -5,6 +5,7 @@ namespace Kafka.Client.Model
     public sealed record GroupDescription(
         ConsumerGroup GroupId,
         string ProtocolType,
-        string GroupState
+        string GroupState,
+        NodeId Coordinator
     );
 }

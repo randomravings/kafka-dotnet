@@ -34,6 +34,11 @@ namespace Kafka.Client.Net
             CancellationToken cancellationToken
         );
 
+        Task<DescribeGroupsResponseData> DescribeGroups(
+            DescribeGroupsRequestData request,
+            CancellationToken cancellationToken
+        );
+
         Task<DeleteGroupsResponseData> DeleteGroups(
             DeleteGroupsRequestData request,
             CancellationToken cancellationToken

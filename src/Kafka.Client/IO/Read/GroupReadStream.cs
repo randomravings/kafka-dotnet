@@ -297,10 +297,13 @@ namespace Kafka.Client.IO.Read
             string memberId
         )
         {
-            var topicMetadata = Membership.PackProtocolMetadata(
+            var protocolMetadata = new ProtocolMetadata(
                 3,
                 topics,
                 []
+            );
+            var topicMetadata = Membership.PackProtocolMetadata(
+                protocolMetadata
             );
             return new(
                 _groupId,

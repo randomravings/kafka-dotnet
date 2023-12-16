@@ -25,6 +25,19 @@ namespace Kafka.Client
         /// <param name="options"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
+        ValueTask<IReadOnlyList<DescribeGroupResult>> Describe(
+            IEnumerable<ConsumerGroup> groups,
+            DescribeGroupOptions options,
+            CancellationToken cancellationToken
+        );
+
+        /// <summary>
+        /// Gets a list of topics in use for a given consumer group.
+        /// </summary>
+        /// <param name="group"></param>
+        /// <param name="options"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
         ValueTask<IReadOnlyList<DeleteGroupResult>> Delete(
             IEnumerable<ConsumerGroup> groups,
             CancellationToken cancellationToken

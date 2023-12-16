@@ -91,6 +91,9 @@ namespace Kafka.Client.Net
         private readonly ListGroupsRequestEncoder _listGroupsRequestEncoder = new();
         private readonly ListGroupsResponseDecoder _listGroupsResponseDecoder = new();
 
+        private readonly DescribeGroupsRequestEncoder _describeGroupsRequestEncoder = new();
+        private readonly DescribeGroupsResponseDecoder _describeGroupsResponseDecoder = new();
+
         private readonly DeleteGroupsRequestEncoder _deleteGroupsRequestEncoder = new();
         private readonly DeleteGroupsResponseDecoder _deleteGroupsResponseDecoder = new();
 
@@ -332,6 +335,32 @@ namespace Kafka.Client.Net
             if (response.ErrorCodeField == 0)
                 return (false, ImmutableArray<ApiError>.Empty);
             var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
+            return (IsTransient(errors), errors);
+        }
+
+        async Task<DescribeGroupsResponseData> INodeLink.DescribeGroups(
+            DescribeGroupsRequestData request,
+            CancellationToken cancellationToken
+        ) =>
+            await Execute(
+                request,
+                _describeGroupsRequestEncoder,
+                _describeGroupsResponseDecoder,
+                DescribeGroupsError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ApiErrorsReturnValue DescribeGroupsError(
+            in DescribeGroupsResponseData response
+        )
+        {
+            var errors = response
+                .GroupsField
+                .Where(r => r.ErrorCodeField != 0)
+                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
+                .ToImmutableArray()
+            ;
             return (IsTransient(errors), errors);
         }
 
@@ -1145,8 +1174,11 @@ namespace Kafka.Client.Net
             SetCodecVersion(_metadataRequestEncoder, _apiVersions);
             SetCodecVersion(_metadataResponseDecoder, _apiVersions);
 
-            SetCodecVersion(_listGroupsRequestEncoder, _apiVersions) ;
+            SetCodecVersion(_listGroupsRequestEncoder, _apiVersions);
             SetCodecVersion(_listGroupsResponseDecoder, _apiVersions);
+
+            SetCodecVersion(_describeGroupsRequestEncoder, _apiVersions);
+            SetCodecVersion(_describeGroupsResponseDecoder, _apiVersions);
 
             SetCodecVersion(_deleteGroupsRequestEncoder, _apiVersions);
             SetCodecVersion(_deleteGroupsResponseDecoder, _apiVersions);
