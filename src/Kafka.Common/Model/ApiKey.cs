@@ -1,73 +1,141 @@
+using System.ComponentModel;
+using System.Runtime.Serialization;
+
 namespace Kafka.Common.Model
 {
     ///<summary>
     /// The following are the numeric codes that the ApiKey in the request can take for each of the below request types.
     ///<summary>
+    [DefaultValue(None)]
     public enum ApiKey : int
     {
+        [EnumMember(Value = "NONE")]
         None = -1,
+        [EnumMember(Value = "PRODUCE")]
         Produce = 0,
+        [EnumMember(Value = "FETCH")]
         Fetch = 1,
+        [EnumMember(Value = "LIST_OFFSETS")]
         ListOffsets = 2,
+        [EnumMember(Value = "METADATA")]
         Metadata = 3,
+        [EnumMember(Value = "LEADER_AND_ISR")]
         LeaderAndIsr = 4,
+        [EnumMember(Value = "STOP_REPLICA")]
         StopReplica = 5,
+        [EnumMember(Value = "UPDATE_METADATA")]
         UpdateMetadata = 6,
+        [EnumMember(Value = "CONTROLLED_SHUTDOWN")]
         ControlledShutdown = 7,
+        [EnumMember(Value = "OFFSET_COMMIT")]
         OffsetCommit = 8,
+        [EnumMember(Value = "OFFSET_FETCH")]
         OffsetFetch = 9,
+        [EnumMember(Value = "FIND_COORDINATOR")]
         FindCoordinator = 10,
+        [EnumMember(Value = "JOIN_GROUP")]
         JoinGroup = 11,
+        [EnumMember(Value = "HEARTBEAT")]
         Heartbeat = 12,
+        [EnumMember(Value = "LEAVE_GROUP")]
         LeaveGroup = 13,
+        [EnumMember(Value = "SYNC_GROUP")]
         SyncGroup = 14,
+        [EnumMember(Value = "DESCRIBE_GROUPS")]
         DescribeGroups = 15,
+        [EnumMember(Value = "LIST_GROUPS")]
         ListGroups = 16,
+        [EnumMember(Value = "SASL_HANDSHAKE")]
         SaslHandshake = 17,
+        [EnumMember(Value = "API_VERSIONS")]
         ApiVersions = 18,
+        [EnumMember(Value = "CREATE_TOPICS")]
         CreateTopics = 19,
+        [EnumMember(Value = "DELETE_TOPICS")]
         DeleteTopics = 20,
+        [EnumMember(Value = "DELETE_RECORDS")]
         DeleteRecords = 21,
+        [EnumMember(Value = "INIT_PRODUCER_ID")]
         InitProducerId = 22,
+        [EnumMember(Value = "OFFSET_FOR_LEADER_EPOCH")]
         OffsetForLeaderEpoch = 23,
+        [EnumMember(Value = "ADD_PARTITIONS_TO_TXN")]
         AddPartitionsToTxn = 24,
+        [EnumMember(Value = "ADD_OFFSETS_TO_TXN")]
         AddOffsetsToTxn = 25,
+        [EnumMember(Value = "END_TXN")]
         EndTxn = 26,
+        [EnumMember(Value = "WRITE_TXN_MARKERS")]
         WriteTxnMarkers = 27,
+        [EnumMember(Value = "TXN_OFFSET_COMMIT")]
         TxnOffsetCommit = 28,
+        [EnumMember(Value = "DESCRIBE_ACLS")]
         DescribeAcls = 29,
+        [EnumMember(Value = "CREATE_ACLS")]
         CreateAcls = 30,
+        [EnumMember(Value = "DELETE_ACLS")]
         DeleteAcls = 31,
+        [EnumMember(Value = "DESCRIBE_CONFIGS")]
         DescribeConfigs = 32,
+        [EnumMember(Value = "ALTER_CONFIGS")]
         AlterConfigs = 33,
+        [EnumMember(Value = "ALTER_REPLICA_LOG_DIRS")]
         AlterReplicaLogDirs = 34,
+        [EnumMember(Value = "DESCRIBE_LOG_DIRS")]
         DescribeLogDirs = 35,
+        [EnumMember(Value = "SASL_AUTHENTICATE")]
         SaslAuthenticate = 36,
+        [EnumMember(Value = "CREATE_PARTITIONS")]
         CreatePartitions = 37,
+        [EnumMember(Value = "CREATE_DELEGATION_TOKEN")]
         CreateDelegationToken = 38,
+        [EnumMember(Value = "RENEW_DELEGATION_TOKEN")]
         RenewDelegationToken = 39,
+        [EnumMember(Value = "EXPIRE_DELEGATION_TOKEN")]
         ExpireDelegationToken = 40,
+        [EnumMember(Value = "DESCRIBE_DELEGATION_TOKEN")]
         DescribeDelegationToken = 41,
+        [EnumMember(Value = "DELETE_GROUPS")]
         DeleteGroups = 42,
+        [EnumMember(Value = "ELECT_LEADERS")]
         ElectLeaders = 43,
+        [EnumMember(Value = "INCREMENTAL_ALTER_CONFIGS")]
         IncrementalAlterConfigs = 44,
+        [EnumMember(Value = "ALTER_PARTITION_REASSIGNMENTS")]
         AlterPartitionReassignments = 45,
+        [EnumMember(Value = "LIST_PARTITION_REASSIGNMENTS")]
         ListPartitionReassignments = 46,
+        [EnumMember(Value = "OFFSET_DELETE")]
         OffsetDelete = 47,
+        [EnumMember(Value = "DESCRIBE_CLIENT_QUOTAS")]
         DescribeClientQuotas = 48,
+        [EnumMember(Value = "ALTER_CLIENT_QUOTAS")]
         AlterClientQuotas = 49,
+        [EnumMember(Value = "DESCRIBE_USER_SCRAM_CREDENTIALS")]
         DescribeUserScramCredentials = 50,
+        [EnumMember(Value = "ALTER_USER_SCRAM_CREDENTIALS")]
         AlterUserScramCredentials = 51,
+        [EnumMember(Value = "DESCRIBE_QUORUM")]
         DescribeQuorum = 55,
+        [EnumMember(Value = "ALTER_PARTITION")]
         AlterPartition = 56,
+        [EnumMember(Value = "UPDATE_FEATURES")]
         UpdateFeatures = 57,
+        [EnumMember(Value = "ENVELOPE")]
         Envelope = 58,
+        [EnumMember(Value = "DESCRIBE_CLUSTER")]
         DescribeCluster = 60,
+        [EnumMember(Value = "DESCRIBE_PRODUCERS")]
         DescribeProducers = 61,
+        [EnumMember(Value = "UNREGISTER_BROKER")]
         UnregisterBroker = 64,
+        [EnumMember(Value = "DESCRIBE_TRANSACTIONS")]
         DescribeTransactions = 65,
+        [EnumMember(Value = "LIST_TRANSACTIONS")]
         ListTransactions = 66,
+        [EnumMember(Value = "ALLOCATE_PRODUCER_IDS")]
         AllocateProducerIds = 67,
+        [EnumMember(Value = "CONSUMER_GROUP_HEARTBEAT")]
         ConsumerGroupHeartbeat = 68
     }
 }

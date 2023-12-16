@@ -381,7 +381,7 @@ namespace Kafka.Client.IO.Write
         {
             var findCoordinatorRequest = new FindCoordinatorRequestData(
                 transactionalId,
-                (sbyte)CoordinatorType.TRANSACTION,
+                (sbyte)CoordinatorType.Transaction,
                 [transactionalId],
                 []
             );

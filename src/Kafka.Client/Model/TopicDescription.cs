@@ -7,7 +7,7 @@ namespace Kafka.Client.Model
         TopicName TopicName,
         bool Internal,
         ImmutableArray<PartitionDescription> Partitions,
-        int TopicAuthorizedOperations,
+        AclOperation TopicAuthorizedOperations,
         ApiError Error
     );
 }

@@ -206,7 +206,7 @@ namespace Kafka.Client.IO.Read
             var groupId = _config.GroupId ?? "";
             var request = new FindCoordinatorRequestData(
                 groupId,
-                (sbyte)CoordinatorType.GROUP,
+                (sbyte)CoordinatorType.Group,
                 [groupId],
                 []
             );

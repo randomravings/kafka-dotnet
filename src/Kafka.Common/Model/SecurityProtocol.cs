@@ -1,9 +1,14 @@
-﻿using System.Runtime.Serialization;
+﻿using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace Kafka.Common.Model
 {
+    [DefaultValue(Plaintext)]
     public enum SecurityProtocol
     {
+
+        [EnumMember(Value = "NONE")]
+        None = -1,
         [EnumMember(Value = "PLAINTEXT")]
         Plaintext = 0,
         [EnumMember(Value = "SASL_SSL")]

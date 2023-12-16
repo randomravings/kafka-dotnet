@@ -100,7 +100,7 @@ namespace Kafka.Client
         ;
 
         async ValueTask<CreateTopicsResult> ITopics.Create(
-            IReadOnlyList<CreateTopicDefinition> topics,
+            IEnumerable<CreateTopicDefinition> topics,
             CreateTopicOptions options,
             CancellationToken cancellationToken
         ) =>
@@ -112,7 +112,7 @@ namespace Kafka.Client
         ;
 
         private async ValueTask<CreateTopicsResult> CreateTopics(
-            IReadOnlyList<CreateTopicDefinition> topics,
+            IEnumerable<CreateTopicDefinition> topics,
             CreateTopicOptions options,
             CancellationToken cancellationToken
         )
@@ -163,7 +163,7 @@ namespace Kafka.Client
                             ImmutableSortedDictionary<string, string?>.Empty :
                             r.ConfigsField.ToImmutableSortedDictionary(
                                 k => k.NameField,
-                                v => (string?)v.ValueField
+                                v => v.ValueField
                             ),
                         r.ErrorCodeField == 0 ?
                             ApiError.None :
@@ -188,7 +188,7 @@ namespace Kafka.Client
         ;
 
         async ValueTask<DeleteTopicsResult> ITopics.Delete(
-            IReadOnlyList<TopicName> topics,
+            IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         ) =>
             await DeleteTopics(
@@ -198,14 +198,18 @@ namespace Kafka.Client
         ;
 
         private async ValueTask<DeleteTopicsResult> DeleteTopics(
-            IReadOnlyList<TopicName> topics,
+            IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         )
         {
             var protocol = await _connections.Controller(cancellationToken)
                 .ConfigureAwait(false)
             ;
-            var deleteTopicStates = topics
+            var topicNames = topics
+                .Select(r => r.Value ?? "")
+                .ToImmutableArray()
+            ;
+            var deleteTopicStates = topicNames
                 .Select(
                     r => new DeleteTopicsRequestData.DeleteTopicState(
                         r,
@@ -213,10 +217,6 @@ namespace Kafka.Client
                         []
                     )
                 )
-                .ToImmutableArray()
-            ;
-            var topicNames = topics
-                .Select(r => r.Value ?? "")
                 .ToImmutableArray()
             ;
             var request = new DeleteTopicsRequestData(
@@ -247,7 +247,7 @@ namespace Kafka.Client
             );
         }
 
-        async ValueTask<ListTopicsResult> ITopics.List(
+        async ValueTask<IReadOnlyList<TopicDescription>> ITopics.List(
             TopicName topic,
             ListTopicsOptions options,
             CancellationToken cancellationToken
@@ -259,8 +259,8 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<ListTopicsResult> ITopics.List(
-            IReadOnlyList<TopicName> topics,
+        async ValueTask<IReadOnlyList<TopicDescription>> ITopics.List(
+            IEnumerable<TopicName> topics,
             ListTopicsOptions options,
             CancellationToken cancellationToken
         ) =>
@@ -271,7 +271,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<ListTopicsResult> ITopics.List(
+        async ValueTask<IReadOnlyList<TopicDescription>> ITopics.List(
             ListTopicsOptions options,
             CancellationToken cancellationToken
         ) =>
@@ -282,8 +282,8 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        private async ValueTask<ListTopicsResult> List(
-            IReadOnlyList<TopicName> topics,
+        private async ValueTask<IReadOnlyList<TopicDescription>> List(
+            IEnumerable<TopicName> topics,
             ListTopicsOptions options,
             CancellationToken cancellationToken
         )
@@ -313,7 +313,7 @@ namespace Kafka.Client
                 cancellationToken
             ).ConfigureAwait(false);
 
-            var topicDescriptions = response
+            return response
                 .TopicsField
                 .Where(t => options.IncludeInternal || t.IsInternalField == false)
                 .Select(t => new TopicDescription(
@@ -339,9 +339,7 @@ namespace Kafka.Client
                                 ApiErrors.Translate(p.ErrorCodeField)
                         ))
                         .ToImmutableArray(),
-                    options.IncludeTopicAuthorizedOperations ?
-                        t.TopicAuthorizedOperationsField :
-                        0,
+                    (AclOperation)t.TopicAuthorizedOperationsField,
                     t.ErrorCodeField == 0 ?
                         ApiError.None :
                         ApiErrors.Translate(t.ErrorCodeField)
@@ -350,28 +348,27 @@ namespace Kafka.Client
                 .ThenBy(t => t.TopicId)
                 .ToImmutableArray()
             ;
-            return new(topicDescriptions);
         }
 
         async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsStart(
-            TopicName topicName,
+            TopicName topic,
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                ToReadOnlySet(topicName),
-                ImmutableSortedSet<TopicPartition>.Empty,
+                ToReadOnlySet(topic),
+                [],
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.Beginning.Value),
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
         async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsStart(
-            IReadOnlySet<TopicName> topicNames,
+            IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                topicNames,
-                ImmutableSortedSet<TopicPartition>.Empty,
+                ToReadOnlySet(topics),
+                [],
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.Beginning.Value),
                 cancellationToken
             ).ConfigureAwait(false)
@@ -383,19 +380,19 @@ namespace Kafka.Client
         ) =>
             await ListTopicPartitionOffsets(
                 ToNameReadonlySet(topicPartition),
-                ImmutableSortedSet.Create(topicPartition),
+                ToReadOnlySet(topicPartition),
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.Beginning.Value),
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
         async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsStart(
-            IReadOnlySet<TopicPartition> topicPartitions,
+            IEnumerable<TopicPartition> topicPartitions,
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
                 ToNameReadonlySet(topicPartitions),
-                topicPartitions,
+                ToReadOnlySet(topicPartitions),
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.Beginning.Value),
                 cancellationToken
             ).ConfigureAwait(false)
@@ -407,19 +404,19 @@ namespace Kafka.Client
         ) =>
             await ListTopicPartitionOffsets(
                 ToReadOnlySet(topicName),
-                ImmutableSortedSet<TopicPartition>.Empty,
+                [],
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.End.Value),
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
         async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsEnd(
-            IReadOnlySet<TopicName> topicNames,
+            IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                topicNames,
-                ImmutableSortedSet<TopicPartition>.Empty,
+                ToReadOnlySet(topics),
+                [],
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.End.Value),
                 cancellationToken
             ).ConfigureAwait(false)
@@ -438,12 +435,12 @@ namespace Kafka.Client
         ;
 
         async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsEnd(
-            IReadOnlySet<TopicPartition> topicPartitions,
+            IEnumerable<TopicPartition> topicPartitions,
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
                 ToNameReadonlySet(topicPartitions),
-                topicPartitions,
+                ToReadOnlySet(topicPartitions),
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.End.Value),
                 cancellationToken
             ).ConfigureAwait(false)
@@ -456,20 +453,20 @@ namespace Kafka.Client
         ) =>
             await ListTopicPartitionOffsets(
                 ToReadOnlySet(topicName),
-                ImmutableSortedSet<TopicPartition>.Empty,
+                [],
                 timestamp,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
         async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsForTimestamp(
-            IReadOnlySet<TopicName> topicNames,
+            IEnumerable<TopicName> topics,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                topicNames,
-                ImmutableSortedSet<TopicPartition>.Empty,
+                ToReadOnlySet(topics),
+                [],
                 timestamp,
                 cancellationToken
             ).ConfigureAwait(false)
@@ -482,20 +479,20 @@ namespace Kafka.Client
         ) =>
             await ListTopicPartitionOffsets(
                 ToNameReadonlySet(topicPartition),
-                ImmutableSortedSet.Create(topicPartition),
+                ToReadOnlySet(topicPartition),
                 timestamp,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
         async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsForTimestamp(
-            IReadOnlySet<TopicPartition> topicPartitions,
+            IEnumerable<TopicPartition> topicPartitions,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
                 ToNameReadonlySet(topicPartitions),
-                topicPartitions,
+                ToReadOnlySet(topicPartitions),
                 timestamp,
                 cancellationToken
             ).ConfigureAwait(false)
@@ -607,7 +604,7 @@ namespace Kafka.Client
                                 Membership.UnpackProtocolMetadata(r.MemberMetadataField),
                                 Membership.UnpackTopicPartitions(r.MemberAssignmentField)
                             )).ToImmutableArray(),
-                        result.AuthorizedOperationsField,
+                        (AclOperation)result.AuthorizedOperationsField,
                         result.ErrorCodeField == 0 ?
                             ApiError.None :
                             ApiErrors.Translate(result.ErrorCodeField)
@@ -678,7 +675,7 @@ namespace Kafka.Client
             var coordinators = await connection.FindCoordinator(
                 new(
                     "",
-                    (sbyte)CoordinatorType.GROUP,
+                    (sbyte)CoordinatorType.Group,
                     groups.Select(r => r.Value).ToImmutableArray(),
                     []
                 ),
@@ -695,35 +692,32 @@ namespace Kafka.Client
             ;
         }
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IGroups.OffsetsCommitted(
-            ConsumerGroup group,
-            TopicName topic,
+        async ValueTask<IReadOnlyDictionary<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>> IGroups.OffsetsCommitted(
+            IEnumerable<ConsumerGroup> group,
             CancellationToken cancellationToken
         ) =>
             await FetchTopicPartitionOffsets(
                 group,
-                ToReadOnlySet(topic),
                 [],
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IGroups.OffsetsCommitted(
-            ConsumerGroup group,
+        async ValueTask<IReadOnlyDictionary<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>> IGroups.OffsetsCommitted(
+            IEnumerable<ConsumerGroup> group,
             IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         ) =>
             await FetchTopicPartitionOffsets(
                 group,
                 topics,
-                [],
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
         private async ValueTask<ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionOffset>>> ListTopicPartitionOffsets(
-            IReadOnlySet<TopicName> topics,
-            IReadOnlySet<TopicPartition> filter,
+            ImmutableSortedSet<TopicName> topics,
+            ImmutableSortedSet<TopicPartition> filter,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
         )
@@ -757,7 +751,7 @@ namespace Kafka.Client
                     .Select(t => new ListOffsetsRequestData.ListOffsetsTopic(
                         t.NameField ?? "",
                         t.PartitionsField
-                            .Where(p => !filter.Any() || filter.Contains(new TopicPartition(t.NameField, p.PartitionIndexField)))
+                            .Where(p => !filter.IsEmpty || filter.Contains(new TopicPartition(t.NameField, p.PartitionIndexField)))
                             .Select(p => new ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition(
                                 p.PartitionIndexField,
                                 p.LeaderEpochField,
@@ -789,16 +783,21 @@ namespace Kafka.Client
             ;
         }
 
-        private async ValueTask<ImmutableSortedDictionary<TopicName, ImmutableArray<PartitionOffset>>> FetchTopicPartitionOffsets(
-            ConsumerGroup group,
+        private async ValueTask<IReadOnlyDictionary<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>> FetchTopicPartitionOffsets(
+            IEnumerable<ConsumerGroup> group,
             IEnumerable<TopicName> topics,
-            ImmutableSortedSet<TopicPartition> filter,
             CancellationToken cancellationToken
         )
         {
-            var protocol = await _connections.Controller(
+            var coordinator = await FindCoordinators(
+                group,
                 cancellationToken
             ).ConfigureAwait(false);
+
+            var nodeId = coordinator.First().Key;
+            var connection = await _connections.Connection(nodeId, cancellationToken).ConfigureAwait(false);
+
+            var topicsToFetch = default(ImmutableArray<OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics>);
             var metadataRequest = new MetadataRequestData(
                 topics.Select(t =>
                     new MetadataRequestData.MetadataRequestTopic(
@@ -813,73 +812,60 @@ namespace Kafka.Client
                 false,
                 []
             );
-            var metadataResponse = await protocol.Metadata(
-                metadataRequest,
-                cancellationToken
-            ).ConfigureAwait(false);
-            var offsetFetchRequest = new OffsetFetchRequestData(
-                group,
-                metadataResponse.TopicsField.Select(t => new OffsetFetchRequestData.OffsetFetchRequestTopic(
-                    t.NameField ?? "",
-                    t.PartitionsField
-                        .Where(p => !filter.IsEmpty || filter.Contains(new TopicPartition(t.NameField, p.PartitionIndexField)))
-                        .Select(p =>
-                            p.PartitionIndexField
-                        )
-                        .ToImmutableArray(),
-                        []
-                    )
-                )
-                .ToImmutableArray(),
-                [
-                    new OffsetFetchRequestData.OffsetFetchRequestGroup(
-                            group,
-                            null,
-                            -1,
-                            metadataResponse.TopicsField.Select(t => new OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
-                                t.NameField ?? "",
-                                t.PartitionsField
-                                    .Where(p => !filter.IsEmpty || filter.Contains(new TopicPartition(t.NameField, p.PartitionIndexField)))
-                                    .Select(p =>
-                                        p.PartitionIndexField
-                                    )
-                                    .ToImmutableArray(),
-                                    []
-                                )
+            if (metadataRequest.TopicsField.Length > 0)
+            {
+                var metadataResponse = await connection.Metadata(
+                    metadataRequest,
+                    cancellationToken
+                ).ConfigureAwait(false);
+                topicsToFetch = metadataResponse
+                    .TopicsField
+                    .Select(t => new OffsetFetchRequestData.OffsetFetchRequestGroup.OffsetFetchRequestTopics(
+                        t.NameField ?? "",
+                        t.PartitionsField
+                            .Select(p =>
+                                p.PartitionIndexField
                             )
                             .ToImmutableArray(),
                             []
-                        ),
+                        )
+                    )
+                    .ToImmutableArray()
+                ;
+            }
+            var offsetFetchRequest = new OffsetFetchRequestData(
+                "",
+                default,
+                [
+                    new OffsetFetchRequestData.OffsetFetchRequestGroup(
+                        group.First(),
+                        null,
+                        -1,
+                        topicsToFetch,
+                        []
+                    )
                 ],
                 false,
                 []
             );
-            var offsetFetchResponse = await protocol.OffsetFetch(
+            var offsetFetchResponse = await connection.OffsetFetch(
                 offsetFetchRequest,
                 cancellationToken
             ).ConfigureAwait(false);
 
-            var builder = ImmutableSortedDictionary.CreateBuilder<TopicName, ImmutableArray<PartitionOffset>>(TopicNameCompare.Instance);
+            var builder = ImmutableSortedDictionary.CreateBuilder<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>(ConsumerGroupCompare.Instance);
             foreach (var offsetFetchResponseGroup in offsetFetchResponse.GroupsField)
-                foreach (var topic in offsetFetchResponseGroup.TopicsField)
-                    foreach (var partition in topic.PartitionsField)
-                        builder.TryAdd(
-                            new TopicName(topic.NameField),
-                            topic.PartitionsField
-                                .Select(r => new PartitionOffset(r.PartitionIndexField, r.CommittedOffsetField))
-                                .ToImmutableArray()
-                       );
-
-            // Check if stored by topic.
-            foreach (var topic in offsetFetchResponse.TopicsField)
-                foreach (var partition in topic.PartitionsField)
-                    builder.TryAdd(
-                        new TopicName(topic.NameField),
-                        topic.PartitionsField
-                            .Select(r => new PartitionOffset(r.PartitionIndexField, r.CommittedOffsetField))
-                            .ToImmutableArray()
-                    );
-
+            {
+                var groupId = new ConsumerGroup(offsetFetchResponseGroup.GroupIdField);
+                var topicPartitions = offsetFetchResponseGroup
+                    .TopicsField
+                    .SelectMany(t => t.PartitionsField
+                        .Select(p => new TopicPartitionOffset(new(t.NameField, p.PartitionIndexField), p.CommittedOffsetField))
+                    )
+                    .ToImmutableArray()
+                ;
+                builder.Add(groupId, topicPartitions);
+            }
             return builder.ToImmutable();
         }
 
@@ -887,7 +873,7 @@ namespace Kafka.Client
             ToReadOnlySet(topicPartition.Topic.TopicName)
         ;
 
-        private static ImmutableSortedSet<TopicName> ToNameReadonlySet(IReadOnlySet<TopicPartition> topicPartitions) =>
+        private static ImmutableSortedSet<TopicName> ToNameReadonlySet(IEnumerable<TopicPartition> topicPartitions) =>
             ToReadOnlySet(topicPartitions.Select(r => r.Topic.TopicName))
         ;
 
@@ -898,6 +884,15 @@ namespace Kafka.Client
         private static ImmutableSortedSet<TopicName> ToReadOnlySet(IEnumerable<TopicName> topicNames) =>
             topicNames
             .ToImmutableSortedSet(TopicNameCompare.Instance)
+        ;
+
+        private static ImmutableSortedSet<TopicPartition> ToReadOnlySet(IEnumerable<TopicPartition> topicPartitions) =>
+            topicPartitions
+            .ToImmutableSortedSet(TopicPartitionCompare.Instance)
+        ;
+
+        private static ImmutableSortedSet<TopicPartition> ToReadOnlySet(TopicPartition topicPartition) =>
+            ImmutableSortedSet.Create(TopicPartitionCompare.Instance, topicPartition)
         ;
 
         void IDisposable.Dispose()

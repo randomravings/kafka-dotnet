@@ -59,7 +59,7 @@ namespace Kafka.Cli.Cmd
                     options,
                     cancellationToken
                 );
-                foreach (var topic in result.Topics.Where(t => options.IncludeInternal || t.Internal == false))
+                foreach (var topic in result.Where(t => options.IncludeInternal || t.Internal == false))
                     Console.WriteLine(topic.TopicName);
                 await client.Close(CancellationToken.None);
                 return 0;
@@ -211,30 +211,27 @@ namespace Kafka.Cli.Cmd
 
                 var result = await client.Topics.List(
                     opts.Topic,
-                    ListTopicsOptions.Empty,
+                    new ListTopicsOptions(true, opts.ShowAllowedOperations),
                     cancellationToken
                 );
-                foreach (var topic in result.Topics)
+                foreach (var topic in result)
                 {
-                    if(topic.Error.Code != 0)
+                    Console.WriteLine();
+                    Console.WriteLine(topic.TopicName.Value);
+                    Console.WriteLine($"  Id: {topic.TopicId}");
+                    Console.WriteLine($"  Error: {Formatter.Print(topic.Error)}");
+                    Console.WriteLine($"  Internal: {Formatter.Print(topic.Internal)}");
+                    Console.WriteLine($"  AuthorizedOperations: [{topic.TopicAuthorizedOperations}]");
+                    Console.WriteLine($"  Partitions: [");
+                    foreach (var partition in topic.Partitions.OrderBy(r => r.PartitionIndex.Value))
                     {
-                        Console.WriteLine($"Name: {topic.TopicName.Value}");
-                        Console.WriteLine($"Error: {Formatter.Print(topic.Error)}");
-                        continue;
-                    }
-                    Console.WriteLine($"Id: {topic.TopicId}");
-                    Console.WriteLine($"Name: {topic.TopicName.Value}");
-                    Console.WriteLine($"Internal: {topic.Internal}");
-                    Console.WriteLine($"AuthorizedOperations: {topic.TopicAuthorizedOperations}");
-                    foreach (var partition in topic.Partitions.OrderBy(r => r.PartitionIndex))
-                    {
-                        Console.WriteLine($"Partition: {partition.PartitionIndex.Value}");
-                        Console.WriteLine($"  LeaderId: {partition.LeaderId.Value}");
-                        Console.WriteLine($"  LeaderEpoch: {partition.LeaderEpoch.Value}");
-                        Console.WriteLine($"  Error: {Formatter.Print(topic.Error)}");
-                        Console.WriteLine($"  ReplicaNodes: [{string.Join(',', partition.ReplicaNodes.Select(r => r.Value))}]");
-                        Console.WriteLine($"  IsrNodes: [{string.Join(',', partition.IsrNodes.Select(r => r.Value))}]");
-                        Console.WriteLine($"  OfflineReplicas: [{string.Join(',', partition.OfflineReplicas.Select(r => r.Value))}]");
+                        Console.WriteLine($"    Partition: {partition.PartitionIndex.Value}");
+                        Console.WriteLine($"      LeaderId: {partition.LeaderId.Value}");
+                        Console.WriteLine($"      LeaderEpoch: {partition.LeaderEpoch.Value}");
+                        Console.WriteLine($"      Error: {Formatter.Print(topic.Error)}");
+                        Console.WriteLine($"      ReplicaNodes: [{string.Join(',', partition.ReplicaNodes.Select(r => r.Value))}]");
+                        Console.WriteLine($"      IsrNodes: [{string.Join(',', partition.IsrNodes.Select(r => r.Value))}]");
+                        Console.WriteLine($"      OfflineReplicas: [{string.Join(',', partition.OfflineReplicas.Select(r => r.Value))}]");
                     }
                 }
                 await client.Close(CancellationToken.None);

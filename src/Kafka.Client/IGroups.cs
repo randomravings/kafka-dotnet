@@ -44,16 +44,15 @@ namespace Kafka.Client
         );
 
         /// <summary>
-        /// Gets the committed offsets for a topic in consumer group.
+        /// Gets the committed offsets for all topics in consumer group.
         /// The group is specified by 'group.id'.
         /// </summary>
         /// <param name="group"></param>
         /// <param name="topic"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> OffsetsCommitted(
-            ConsumerGroup group,
-            TopicName topic,
+        ValueTask<IReadOnlyDictionary<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>> OffsetsCommitted(
+            IEnumerable<ConsumerGroup> group,
             CancellationToken cancellationToken
         );
 
@@ -64,8 +63,8 @@ namespace Kafka.Client
         /// <param name="topics"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> OffsetsCommitted(
-            ConsumerGroup group,
+        ValueTask<IReadOnlyDictionary<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>> OffsetsCommitted(
+            IEnumerable<ConsumerGroup> group,
             IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         );

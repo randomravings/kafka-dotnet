@@ -12,7 +12,10 @@ namespace Kafka.Cli.Cmd
 {
     internal static class GroupsCmd
     {
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new() { WriteIndented = true };
+        private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
+        {
+            WriteIndented = true
+        };
         public static async Task<int> Parse(
                 IEnumerable<string> args,
                 CancellationToken cancellationToken
@@ -24,10 +27,11 @@ namespace Kafka.Cli.Cmd
                     with.IgnoreUnknownArguments = false;
                     with.CaseInsensitiveEnumValues = true;
                     with.AllowMultiInstance = false;
-                }).ParseArguments<GroupsListOpts, GroupsDescribeOpts, GroupsDeleteOpts>(args)
+                }).ParseArguments<GroupsListOpts, GroupsDescribeOpts, GroupsOffsetOpts, GroupsDeleteOpts>(args)
                     .MapResult(
                         (GroupsListOpts opts) => List(opts, cancellationToken),
                         (GroupsDescribeOpts opts) => Describe(opts, cancellationToken),
+                        (GroupsOffsetOpts opts) => Offsets(opts, cancellationToken),
                         (GroupsDeleteOpts opts) => Delete(opts, cancellationToken),
                         errs => Task.FromResult(-1)
                     )
@@ -107,6 +111,47 @@ namespace Kafka.Cli.Cmd
             }
         }
 
+        public static async Task<int> Offsets(
+            GroupsOffsetOpts opts,
+            CancellationToken cancellationToken
+        )
+        {
+            try
+            {
+                var config = CreateConfig(
+                    opts
+                );
+
+                if (!ClientUtils.TrySetProperties(config, opts, Console.Out))
+                    return -1;
+
+                using var client = ClientUtils.CreateClient(
+                    opts,
+                    config
+                );
+
+
+                var result = await client.Groups.OffsetsCommitted(
+                    [opts.Group],
+                    opts.Topics.Select(r => new TopicName(r)),
+                    cancellationToken
+                );
+                foreach (var (group, topicPartitionOffsets) in result)
+                {
+                    Console.WriteLine(group.Value);
+                    foreach (var topicPartitionOffset in topicPartitionOffsets)
+                        Console.WriteLine($"  {Formatter.Print(topicPartitionOffset)}");
+                }
+                await client.Close(CancellationToken.None);
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+                return -1;
+            }
+        }
+
         public static async Task<int> Describe(
             GroupsDescribeOpts opts,
             CancellationToken cancellationToken
@@ -131,9 +176,54 @@ namespace Kafka.Cli.Cmd
                     new DescribeGroupOptions(opts.ShowAllowedOperations),
                     cancellationToken
                 );
-                var json = JsonSerializer.Serialize(result, _jsonSerializerOptions);
-                Console.WriteLine(json);
-                Console.WriteLine();
+
+                foreach (var group in result)
+                {
+                    Console.WriteLine();
+                    Console.WriteLine(group.GroupId.Value);
+                    Console.WriteLine($"  Coordinator:             {group.Coordinator.Value}");
+                    Console.WriteLine($"  Protocol Type:           {group.ProtocolType}");
+                    Console.WriteLine($"  Protocol Data:           {group.ProtocolData}");
+                    Console.WriteLine($"  Group State:             {group.GroupId.Value}");
+                    Console.WriteLine($"  Auturization:            {group.AuthorizedOperations}");
+                    Console.WriteLine($"  Error:                   {group.Error.Label}");
+                    if (group.Error.Code != ApiError.None.Code)
+                    {
+                        Console.WriteLine($"    Code:                  {group.Error.Code}");
+                        Console.WriteLine($"    Message:               {group.Error.Message}");
+                    }
+                    Console.Write($"  Members:");
+                    if (group.Members.Count > 0)
+                    {
+                        Console.WriteLine();
+                        foreach (var member in group.Members)
+                        {
+                            Console.WriteLine($"    {member.MemberId}");
+                            Console.WriteLine($"      Group Instance Id:   {member.GroupInstanceId}");
+                            Console.WriteLine($"      Client Id:           {member.ClientId}");
+                            Console.WriteLine($"      Client Host:         {member.ClientHost}");
+                            Console.Write($"      Member Metadata: [");
+                            if (member.MemberMetadata.Assignments.Count > 0)
+                            {
+                                Console.WriteLine();
+                                foreach (var assignment in member.MemberMetadata.Assignments)
+                                    Console.WriteLine($"        {Formatter.Print(assignment)}");
+                                Console.Write("      ");
+                            }
+                            Console.WriteLine("]");
+                            Console.Write($"      Member Assingment: [");
+                            if (member.MemberAssignment.Count > 0)
+                            {
+                                Console.WriteLine();
+                                foreach (var topicPartition in member.MemberAssignment)
+                                    Console.WriteLine($"        {Formatter.Print(topicPartition)}");
+                                Console.Write("      ");
+                            }
+                            Console.WriteLine("]");
+                        }
+                        Console.Write("  ");
+                    }
+                }
                 await client.Close(CancellationToken.None);
                 return 0;
             }

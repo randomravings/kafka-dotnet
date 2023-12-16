@@ -30,7 +30,7 @@ namespace KafkaGraphQL.Queries
                 options ?? ListTopicsOptions.Empty,
                 cancellationToken
             );
-            return result.Topics.AsQueryable();
+            return result.AsQueryable();
         }
 
         [GraphQLDescription("Gets a list of topic and partition descriptions.")]

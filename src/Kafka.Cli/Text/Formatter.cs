@@ -9,6 +9,10 @@ namespace Kafka.Cli.Text
             $"{Print(value.TopicPartition)}:{Print(value.Offset)}:{PrintKey(value.Key)}:{PrintValue(value.Value)}"
         ;
 
+        public static string Print(in bool value) =>
+            value.ToString().ToLowerInvariant()
+        ;
+
         public static string Print(in ApiError value) =>
             value.Code switch
             {

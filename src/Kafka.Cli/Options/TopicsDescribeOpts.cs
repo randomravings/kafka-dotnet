@@ -8,5 +8,7 @@ namespace Kafka.Cli.Options
     {
         [Option("topic", Required = true)]
         public string Topic { get; set; } = "";
+        [Option("show-allowed-operations")]
+        public bool ShowAllowedOperations { get; set; } = false;
     }
 }

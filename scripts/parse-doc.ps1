@@ -33,7 +33,10 @@ function Create-ApiKeys {
   $lines.Add("    {") | Out-Null;
   Get-KafkaHtmlTableRows -WebResponse:$WebResponse -TableId:$TableId | `
     ForEach-Object {
-      $lines.Add("        $($_[0].innerText) = $($_[1].innerText),") | Out-Null;
+      $member = $_[0].innerText;
+      $label = [regex]::replace($member, '(?<=.)(?=[A-Z])', '_').ToUpper();
+      $lines.Add("        [EnumMember(Value = `"$($label)`")]") | Out-Null;
+      $lines.Add("        $($member) = $($_[1].innerText),") | Out-Null;
     }
   ;
   $lines.Add("    }") | Out-Null;
@@ -63,7 +66,7 @@ function Create-ApiErrors {
       $errorCode = $_[1].innerText;
       $errorRetriable = $_[2].innerText.ToLower();
       $errorText = $_[3].innerText;
-      $propertyName = ($errorLabel -split '_' | foreach { $_[0] + $_.SubString(1).ToLower() }) -join '';
+      $propertyName = [regex]::replace($errorLabel.ToLower(), '(^|_)(.)', { $args[0].Groups[2].Value.ToUpper()});
       $definition = "public static readonly ApiError $($propertyName) = new($($errorCode), `"$($errorLabel)`", $($errorRetriable), `"$($errorText)`");"
       $lines.Add($definition) | Out-Null;
     }

@@ -1,9 +1,13 @@
-﻿using System.Runtime.Serialization;
+﻿using System.ComponentModel;
+using System.Runtime.Serialization;
 
 namespace Kafka.Common.Model
 {
+    [DefaultValue(GssApi)]
     public enum SaslMechanism
     {
+        [EnumMember(Value = "NONE")]
+        None = -1,
         [EnumMember(Value = "GSSAPI")]
         GssApi = 0,
         [EnumMember(Value = "PLAIN")]

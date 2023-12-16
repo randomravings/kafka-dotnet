@@ -1,4 +1,6 @@
-﻿namespace Kafka.Common.Model
+﻿using System.Text.Json.Serialization;
+
+namespace Kafka.Common.Model
 {
     public readonly record struct NodeId(
         int Value

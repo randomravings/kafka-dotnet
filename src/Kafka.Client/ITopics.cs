@@ -6,19 +6,19 @@ namespace Kafka.Client
 {
     public interface ITopics
     {
-        ValueTask<ListTopicsResult> List(
+        ValueTask<IReadOnlyList<TopicDescription>> List(
             ListTopicsOptions options,
             CancellationToken cancellationToken
         );
 
-        ValueTask<ListTopicsResult> List(
+        ValueTask<IReadOnlyList<TopicDescription>> List(
             TopicName topics,
             ListTopicsOptions options,
             CancellationToken cancellationToken
         );
 
-        ValueTask<ListTopicsResult> List(
-            IReadOnlyList<TopicName> topics,
+        ValueTask<IReadOnlyList<TopicDescription>> List(
+            IEnumerable<TopicName> topics,
             ListTopicsOptions options,
             CancellationToken cancellationToken
         );
@@ -30,7 +30,7 @@ namespace Kafka.Client
         );
 
         ValueTask<CreateTopicsResult> Create(
-            IReadOnlyList<CreateTopicDefinition> topics,
+            IEnumerable<CreateTopicDefinition> topics,
             CreateTopicOptions options,
             CancellationToken cancellationToken
         );
@@ -41,7 +41,7 @@ namespace Kafka.Client
         );
 
         ValueTask<DeleteTopicsResult> Delete(
-            IReadOnlyList<TopicName> topics,
+            IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         );
 
@@ -63,7 +63,7 @@ namespace Kafka.Client
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> OffsetsStart(
-            IReadOnlySet<TopicName> topicNames,
+            IEnumerable<TopicName> topicNames,
             CancellationToken cancellationToken
         );
 
@@ -85,7 +85,7 @@ namespace Kafka.Client
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> OffsetsStart(
-            IReadOnlySet<TopicPartition> topicPartitions,
+            IEnumerable<TopicPartition> topicPartitions,
             CancellationToken cancellationToken
         );
 
@@ -107,7 +107,7 @@ namespace Kafka.Client
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> OffsetsEnd(
-            IReadOnlySet<TopicName> topicNames,
+            IEnumerable<TopicName> topicNames,
             CancellationToken cancellationToken
         );
 
@@ -129,7 +129,7 @@ namespace Kafka.Client
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> OffsetsEnd(
-            IReadOnlySet<TopicPartition> topicPartitions,
+            IEnumerable<TopicPartition> topicPartitions,
             CancellationToken cancellationToken
         );
 
@@ -152,7 +152,7 @@ namespace Kafka.Client
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> OffsetsForTimestamp(
-            IReadOnlySet<TopicName> topicNames,
+            IEnumerable<TopicName> topicNames,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
         );
@@ -176,7 +176,7 @@ namespace Kafka.Client
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> OffsetsForTimestamp(
-            IReadOnlySet<TopicPartition> topicPartitions,
+            IEnumerable<TopicPartition> topicPartitions,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
         );

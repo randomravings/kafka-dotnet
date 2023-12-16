@@ -1,8 +1,16 @@
-﻿namespace Kafka.Common.Model
+﻿using System.ComponentModel;
+using System.Runtime.Serialization;
+
+namespace Kafka.Common.Model
 {
+    [DefaultValue(None)]
     public enum CoordinatorType : int
     {
-        GROUP = 0,
-        TRANSACTION =1
+        [EnumMember(Value = "NONE")]
+        None = -1,
+        [EnumMember(Value = "GROUP")]
+        Group = 0,
+        [EnumMember(Value = "TRANSACTION")]
+        Transaction = 1
     }
 }
