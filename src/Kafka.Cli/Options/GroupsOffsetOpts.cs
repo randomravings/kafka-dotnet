@@ -6,8 +6,8 @@ namespace Kafka.Cli.Options
     public sealed class GroupsOffsetOpts
         : Opts
     {
-        [Option("group")]
-        public string Group { get; set; } = "";
+        [Option("groups")]
+        public IEnumerable<string> Groups { get; set; } = [];
 
         [Option("topics")]
         public IEnumerable<string> Topics { get; set; } = [];

@@ -113,5 +113,20 @@ namespace Kafka.Client.Net
             FetchRequestData request,
             CancellationToken cancellationToken
         );
+
+        Task<DescribeAclsResponseData> DescribeAcls(
+            DescribeAclsRequestData request,
+            CancellationToken cancellationToken
+        );
+
+        Task<CreateAclsResponseData> CreateAcls(
+            CreateAclsRequestData request,
+            CancellationToken cancellationToken
+        );
+
+        Task<DeleteAclsResponseData> DeleteAcls(
+            DeleteAclsRequestData request,
+            CancellationToken cancellationToken
+        );
     }
 }

@@ -21,6 +21,6 @@
             string.CompareOrdinal(a.Value, b.Value) > 0
         ;
         public static TopicName FromString(string? value) => new(value);
-        public int CompareTo(TopicName other) => string.CompareOrdinal(this.Value, other.Value);
+        public int CompareTo(TopicName other) => string.CompareOrdinal(Value, other.Value);
     }
 }

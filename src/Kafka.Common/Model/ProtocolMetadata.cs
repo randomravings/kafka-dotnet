@@ -6,5 +6,12 @@ namespace Kafka.Common.Model
         short Version,
         IReadOnlySet<TopicName> Assignments,
         ImmutableArray<byte> UserData
-    );
+    )
+    {
+        public static ProtocolMetadata Empty { get; } = new(
+            0,
+            ImmutableSortedSet<TopicName>.Empty,
+            []
+        );
+    }
 }

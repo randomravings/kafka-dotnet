@@ -6,10 +6,8 @@ namespace Kafka.Common.Model
     [DefaultValue(None)]
     public enum ConsumerGroupState
     {
-        [EnumMember(Value = "NONE")]
-        None = -1,
         [EnumMember(Value = "UNKNOWN")]
-        Unknown,
+        None,
         [EnumMember(Value = "EMPTY")]
         Empty,
         [EnumMember(Value = "STABLE")]

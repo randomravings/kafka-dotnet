@@ -136,6 +136,15 @@ namespace Kafka.Client.Net
         private readonly FetchRequestEncoder _fetchRequestEncoder = new();
         private readonly FetchResponseDecoder _fetchResponseDecoder = new();
 
+        private readonly DescribeAclsRequestEncoder _describeAclsRequestEncoder = new();
+        private readonly DescribeAclsResponseDecoder _describeAclsResponseDecoder = new();
+
+        private readonly CreateAclsRequestEncoder _createAclsRequestEncoder = new();
+        private readonly CreateAclsResponseDecoder _createAclsResponseDecoder = new();
+
+        private readonly DeleteAclsRequestEncoder _deleteAclsRequestEncoder = new();
+        private readonly DeleteAclsResponseDecoder _deleteAclsResponseDecoder = new();
+
         private CancellationTokenSource _internalCts = new();
         private Task _senderThread = Task.CompletedTask;
         private Task _receiverThread = Task.CompletedTask;
@@ -733,6 +742,88 @@ namespace Kafka.Client.Net
             return (IsTransient(errors), errors);
         }
 
+        async Task<DescribeAclsResponseData> INodeLink.DescribeAcls(
+            DescribeAclsRequestData request,
+            CancellationToken cancellationToken
+        ) =>
+            await Execute(
+                request,
+                _describeAclsRequestEncoder,
+                _describeAclsResponseDecoder,
+                DescribeAclsError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ApiErrorsReturnValue DescribeAclsError(
+            in DescribeAclsResponseData response
+        )
+        {
+            if (response.ErrorCodeField == 0)
+                return (false, ImmutableArray<ApiError>.Empty);
+            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
+            return (IsTransient(errors), errors);
+        }
+
+        async Task<CreateAclsResponseData> INodeLink.CreateAcls(
+            CreateAclsRequestData request,
+            CancellationToken cancellationToken
+        ) =>
+            await Execute(
+                request,
+                _createAclsRequestEncoder,
+                _createAclsResponseDecoder,
+                CreateAclsError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ApiErrorsReturnValue CreateAclsError(
+            in CreateAclsResponseData response
+        )
+        {
+            var errors = response
+                .ResultsField
+                .Where(r => r.ErrorCodeField != 0)
+                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
+                .ToImmutableArray()
+            ;
+            return (IsTransient(errors), errors);
+        }
+
+        async Task<DeleteAclsResponseData> INodeLink.DeleteAcls(
+            DeleteAclsRequestData request,
+            CancellationToken cancellationToken
+        ) =>
+            await Execute(
+                request,
+                _deleteAclsRequestEncoder,
+                _deleteAclsResponseDecoder,
+                DeleteAclsError,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private static ApiErrorsReturnValue DeleteAclsError(
+            in DeleteAclsResponseData response
+        )
+        {
+            var errors = response
+                .FilterResultsField
+                .Where(r => r.ErrorCodeField != 0)
+                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
+                .Concat(response
+                    .FilterResultsField
+                    .SelectMany(r => r.MatchingAclsField
+                        .Where(m => m.ErrorCodeField != 0)
+                        .Select(r => ApiErrors.Translate(r.ErrorCodeField))
+                    )
+                )
+                .ToImmutableArray()
+            ;
+            return (IsTransient(errors), errors);
+        }
+
         public void Dispose()
         {
             _internalCts.Dispose();
@@ -1233,6 +1324,15 @@ namespace Kafka.Client.Net
 
             SetCodecVersion(_fetchRequestEncoder, _apiVersions);
             SetCodecVersion(_fetchResponseDecoder, _apiVersions);
+
+            SetCodecVersion(_describeAclsRequestEncoder, _apiVersions);
+            SetCodecVersion(_describeAclsResponseDecoder, _apiVersions);
+
+            SetCodecVersion(_createAclsRequestEncoder, _apiVersions);
+            SetCodecVersion(_createAclsResponseDecoder, _apiVersions);
+
+            SetCodecVersion(_deleteAclsRequestEncoder, _apiVersions);
+            SetCodecVersion(_deleteAclsResponseDecoder, _apiVersions);
         }
 
         private async Task NetworkLoopStop(CancellationToken cancellationToken)

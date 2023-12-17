@@ -20,6 +20,11 @@ namespace Kafka.Client
         IGroups Groups { get; }
 
         /// <summary>
+        /// Gets the admin interface.
+        /// </summary>
+        ISecurity Security { get; }
+
+        /// <summary>
         /// Creates a new input stream to cluster for writing records.
         /// </summary>
         /// <returns></returns>

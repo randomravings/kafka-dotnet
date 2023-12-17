@@ -10,10 +10,11 @@ var result = await new Parser(with =>
         with.CaseSensitive = true;
         with.HelpWriter = Console.Out;
     })
-    .ParseArguments<TopicsVerb, GroupsVerb, ReadVerb, WriteVerb>(args.Length > 0 ? args.Take(1) : [])
+    .ParseArguments<TopicsVerb, GroupsVerb, AclsVerb, ReadVerb, WriteVerb>(args.Length > 0 ? args.Take(1) : [])
     .MapResult(
         (TopicsVerb verb) => TopicsCmd.Parse(args.Skip(1), cts.Token),
         (GroupsVerb verb) => GroupsCmd.Parse(args.Skip(1), cts.Token),
+        (AclsVerb verb) => AclsCmd.Parse(args.Skip(1), cts.Token),
         (ReadVerb verb) => ReadCmd.Parse(args.Skip(1), cts.Token),
         (WriteVerb verb) => WriteCmd.Parse(args.Skip(1), cts.Token),
         errs => Task.FromResult(-1)

@@ -44,6 +44,9 @@ namespace Kafka.CodeGen.Cmd
             ApiKey.EndTxn,
             ApiKey.SaslHandshake,
             ApiKey.SaslAuthenticate,
+            ApiKey.CreateAcls,
+            ApiKey.DeleteAcls,
+            ApiKey.DescribeAcls
         ];
 
         public static async ValueTask<int> Fetch(

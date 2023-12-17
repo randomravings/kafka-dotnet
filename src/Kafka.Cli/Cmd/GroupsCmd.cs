@@ -5,6 +5,7 @@ using Kafka.Cli.Text;
 using Kafka.Client.Config;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
 using System.Collections.Immutable;
 using System.Text.Json;
 
@@ -132,15 +133,38 @@ namespace Kafka.Cli.Cmd
 
 
                 var result = await client.Groups.OffsetsCommitted(
-                    [opts.Group],
+                    opts.Groups.Select(r => new ConsumerGroup(r)),
                     opts.Topics.Select(r => new TopicName(r)),
                     cancellationToken
                 );
+
+                var groupWidth = 5;
+                var topicWidth = 5;
+
                 foreach (var (group, topicPartitionOffsets) in result)
                 {
-                    Console.WriteLine(group.Value);
-                    foreach (var topicPartitionOffset in topicPartitionOffsets)
-                        Console.WriteLine($"  {Formatter.Print(topicPartitionOffset)}");
+                    groupWidth = Math.Max(groupWidth, group.Value.Length);
+                    if(topicPartitionOffsets.Count > 0)
+                        topicWidth = Math.Max(topicWidth, topicPartitionOffsets.Max(r => r.TopicPartition.Topic.TopicName.Value?.Length ?? 0));
+                }
+                groupWidth += 2;
+                topicWidth += 2;
+
+                Console.Write("GROUP".PadRight(groupWidth));
+                Console.Write("TOPIC".PadRight(topicWidth));
+                Console.Write("PARTITION  ");
+                Console.Write("OFFSET");
+                Console.WriteLine();
+                foreach (var (group, topicPartitionOffsets) in result.OrderBy(r => r.Key, ConsumerGroupCompare.Instance))
+                {
+                    foreach (var topicPartitionOffset in topicPartitionOffsets.OrderBy(r => r.TopicPartition, TopicPartitionCompare.Instance))
+                    {
+                        Console.Write(group.Value.PadRight(groupWidth));
+                        Console.Write((topicPartitionOffset.TopicPartition.Topic.TopicName.Value ?? "").PadRight(topicWidth));
+                        Console.Write(topicPartitionOffset.TopicPartition.Partition.Value.ToString().PadRight(11));
+                        Console.Write(topicPartitionOffset.Offset.Value.ToString().PadRight(11));
+                        Console.WriteLine();
+                    }
                 }
                 await client.Close(CancellationToken.None);
                 return 0;
