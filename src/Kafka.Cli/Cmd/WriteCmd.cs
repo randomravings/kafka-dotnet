@@ -157,7 +157,8 @@ namespace Kafka.Cli.Cmd
                             else
                             {
                                 var result = await writer.Write(topic, split[0], split[1], cancellationToken).ConfigureAwait(false);
-                                Console.WriteLine(Formatter.Print(result.TopicPartitionOffset));
+                                if(opts.Verbose)
+                                    Console.WriteLine(Formatter.Print(result.TopicPartitionOffset));
                             }
                             continue;
                     }
