@@ -154,6 +154,37 @@ namespace Kafka.Cli.Cmd
             }
         }
 
+        private static async Task RunInteractive<TKey, TValue>(
+            IAssignedReadStream stream,
+            IAssignedReader<TKey, TValue> reader,
+            CancellationToken cancellationToken
+        )
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                Console.Write("> ");
+                var key = Console.ReadLine();
+                if (key == null)
+                    break;
+                try
+                {
+                    var args = key.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    if (args.Length == 0)
+                        continue;
+                    switch (args[0])
+                    {
+                        case "fetch":
+                            var recordsToFetch = int.Parse(args[1]);
+                            if (args.Length < 3 || !int.TryParse(args[2], out var waitTimeout))
+                                waitTimeout = 1000;
+                            await Fetch(reader, recordsToFetch, waitTimeout, cancellationToken);
+                            break;
+                    }
+                }
+                catch (OperationCanceledException) { }
+            }
+        }
+
         private static bool TryParseTopicPartitionOffsets(IReadOnlySet<TopicName> topicNames, string[] args, out IList<TopicPartitionOffset> topicPartitionOffsets)
         {
             topicPartitionOffsets = new List<TopicPartitionOffset>(args.Length);
@@ -195,14 +226,14 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task RunContinuously<TKey, TValue>(
-            IGroupReader<TKey, TValue> streamReader,
+            IReader<TKey, TValue> reader,
             CancellationToken cancellationToken
         )
         {
             Console.WriteLine("Stream Reader: Ctrl+C will terminate session.");
             while (!cancellationToken.IsCancellationRequested)
             {
-                var readRecord = await streamReader.Read(cancellationToken);
+                var readRecord = await reader.Read(cancellationToken);
                 Console.WriteLine(
                     Formatter.Print(
                         readRecord
@@ -212,7 +243,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task Fetch<TKey, TValue>(
-            IGroupReader<TKey, TValue> reader,
+            IReader<TKey, TValue> reader,
             int recordCount,
             int timeoutMs,
             CancellationToken cancellationToken
@@ -262,16 +293,10 @@ namespace Kafka.Cli.Cmd
 
             try
             {
-                Console.WriteLine("Stream Reader: Ctrl+C will terminate session.");
-                while (!cancellationToken.IsCancellationRequested)
-                {
-                    var readRecord = await reader.Read(cancellationToken);
-                    Console.WriteLine(
-                        Formatter.Print(
-                            readRecord
-                        )
-                    );
-                }
+            if(opts.Interactive)
+                await RunInteractive(stream, reader, cancellationToken);
+            else
+                await RunContinuously(reader, cancellationToken);
             }
             catch (OperationCanceledException) { }
             catch (Exception ex)

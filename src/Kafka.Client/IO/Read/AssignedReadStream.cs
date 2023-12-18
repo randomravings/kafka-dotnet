@@ -73,7 +73,7 @@ namespace Kafka.Client.IO.Read
             CancellationToken cancellationToken
         )
         {
-            throw new NotImplementedException();
+            return ValueTask.CompletedTask;
         }
 
         protected override async ValueTask UpdateTrackedOffsets(
