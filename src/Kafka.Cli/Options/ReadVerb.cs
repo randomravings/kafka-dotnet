@@ -2,6 +2,6 @@
 
 namespace Kafka.Cli.Options
 {
-    [Verb("read")]
+    [Verb("read", HelpText = "Create and run a read stream")]
     public sealed class ReadVerb { }
 }

@@ -2,6 +2,6 @@
 
 namespace Kafka.Cli.Options
 {
-    [Verb("groups")]
+    [Verb("groups", HelpText = "View/Alter consumer groups")]
     public sealed class GroupsVerb { }
 }

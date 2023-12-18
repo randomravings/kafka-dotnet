@@ -5,9 +5,9 @@ namespace Kafka.Cli.Options
     public sealed class ReadOpts
         : Opts
     {
-        [Option("topics", SetName = "group-assign", Required = true)]
+        [Option("topics", SetName = "group-assign", Required = true, HelpText = "List of topics to subscribe to")]
         public IEnumerable<string> Topics { get; set; } = Array.Empty<string>();
-        [Option("group-id", SetName = "group-assign")]
+        [Option("group-id", SetName = "group-assign", HelpText = "Consumer group id to use")]
         public string GroupId { get; set; } = "";
         [Option("partition-assign", SetName = "partition-assign", Required = true, HelpText = PARTITION_ASSIGN_HELP)]
         public IEnumerable<string> ToppicPartitionAssign { get; set; } = Array.Empty<string>();

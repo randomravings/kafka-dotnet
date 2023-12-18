@@ -2,6 +2,6 @@
 
 namespace Kafka.Cli.Options
 {
-    [Verb("acls")]
+    [Verb("acls", HelpText = "View/Alter ACLs")]
     public sealed class AclsVerb { }
 }

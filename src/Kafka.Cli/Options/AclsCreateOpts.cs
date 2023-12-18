@@ -2,7 +2,7 @@
 
 namespace Kafka.Cli.Options
 {
-    [Verb("create")]
+    [Verb("create", HelpText = "Create acls")]
     public sealed class AclsCreateOpts
         : Opts
     {

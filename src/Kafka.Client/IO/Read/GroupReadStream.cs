@@ -640,6 +640,8 @@ namespace Kafka.Client.IO.Read
                 {
                     foreach (var partition in topic.PartitionsField)
                     {
+                        if(partition.CommittedOffsetField < 0)
+                            continue;
                         var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
                         topicPartitionOffsets[topicPartition] = partition.CommittedOffsetField;
                     }
@@ -651,6 +653,8 @@ namespace Kafka.Client.IO.Read
             {
                 foreach (var partition in topic.PartitionsField)
                 {
+                    if(partition.CommittedOffsetField < 0)
+                            continue;
                     var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
                     topicPartitionOffsets[topicPartition] = partition.CommittedOffsetField;
                 }
