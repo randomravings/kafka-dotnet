@@ -4,13 +4,13 @@ namespace Kafka.Common.Model
 {
     public sealed record ProtocolMetadata(
         short Version,
-        IReadOnlySet<TopicName> Assignments,
+        IReadOnlySet<Topic> Assignments,
         ImmutableArray<byte> UserData
     )
     {
         public static ProtocolMetadata Empty { get; } = new(
             0,
-            ImmutableSortedSet<TopicName>.Empty,
+            ImmutableSortedSet<Topic>.Empty,
             []
         );
     }

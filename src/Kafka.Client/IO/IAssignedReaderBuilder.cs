@@ -6,7 +6,7 @@ namespace Kafka.Client.IO
 {
     public interface IAssignedReaderBuilder
     {
-        IAssignedReaderBuilder WithTopicPartitions(params TopicPartition[] topicPartitions);
+        IAssignedReaderBuilder WithTopicPartitionOffsets(IEnumerable<TopicPartitionOffset> topicPartitionOffsets);
         IAssignedReaderBuilder WithLogger(ILogger logger);
         IManualReaderBuilder<TKey> WithKey<TKey>(
             IDeserializer<TKey> keyDeserializer

@@ -1,5 +1,4 @@
 ﻿using Kafka.Client.Collections;
-using Kafka.Client.Collections.Internal;
 using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
@@ -7,6 +6,7 @@ using Kafka.Client.Model;
 using Kafka.Client.Model.Internal;
 using Kafka.Client.Net;
 using Kafka.Common.Model;
+using Kafka.Common.Model.Comparison;
 using Kafka.Common.Protocol;
 using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
@@ -40,7 +40,22 @@ namespace Kafka.Client.IO.Read
             _logger.FetchLoopStart(_nodeId);
             try
             {
-                var fetchRequest = CreateFetchRequest(topicPartitionOffsets);
+                var buildSequence = topicPartitionOffsets
+                    .Values
+                    .GroupBy(g => g.Key.Topic, TopicCompare.Equality)
+                    .Select(r =>
+                        new KeyValuePair<Topic, ImmutableArray<KeyValuePair<Partition, TopicPartitionReadState>>>(
+                            r.Key,
+                            r.OrderBy(o => o.Key.Partition.Value)
+                                .Select(r => new KeyValuePair<Partition, TopicPartitionReadState>(r.Key.Partition, r.Value))
+                                .ToImmutableArray()
+                        )
+                    )
+                    .ToImmutableArray()
+                ;
+                var fetchRequest = CreateFetchRequest(
+                    buildSequence
+                );
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     var fetchResponse = await connection.Fetch(
@@ -69,11 +84,18 @@ namespace Kafka.Client.IO.Read
                     }
 
                     if (offsetsProcessed > 0)
-                        fetchRequest = CreateFetchRequest(topicPartitionOffsets);
+                        fetchRequest = CreateFetchRequest(
+                            buildSequence
+                        );
                 }
             }
             catch (TaskCanceledException) { }
             catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                _logger.FetchLoopException(_nodeId, ex);
+                throw;
+            }
             finally
             {
                 _logger.FetchLoopStop(_nodeId);
@@ -116,7 +138,8 @@ namespace Kafka.Client.IO.Read
             {
                 var partition = topicResponse.PartitionsField[i];
                 var topicPartition = new TopicPartition(topic, partition.PartitionIndexField);
-                topicPartitionOffsets.Get(topicPartition, out var readState);
+                if (!topicPartitionOffsets.Get(topicPartition, out var readState))
+                    throw new InvalidOperationException($"State not avilabile for {topicPartition}");
                 if (partition.ErrorCodeField != 0)
                 {
                     var watermark = readState.Value.GetOffset();
@@ -209,41 +232,36 @@ namespace Kafka.Client.IO.Read
         }
 
         private FetchRequestData CreateFetchRequest(
-            in ImmutableTopicPartitionMap<TopicPartitionReadState> topicPartitionOffsets
+            in ImmutableArray<KeyValuePair<Topic, ImmutableArray<KeyValuePair<Partition, TopicPartitionReadState>>>> buildSequence
         )
         {
-            var items = topicPartitionOffsets.Values;
             var fetchTopicsBuilder = ImmutableArray.CreateBuilder<FetchRequestData.FetchTopic>();
             var fetchPartitionsBuilder = ImmutableArray.CreateBuilder<FetchRequestData.FetchTopic.FetchPartition>();
-            var index = 0;
-            var length = items.Length;
-            var currentTopic = items[0].Key.Topic;
-            while (index < length)
+            for (int i = 0; i < buildSequence.Length; i++)
             {
-                (var (topic, partition), var state) = items[index];
-                var fetchPartition = new FetchRequestData.FetchTopic.FetchPartition(
-                    PartitionField: partition,
-                    CurrentLeaderEpochField: -1,
-                    FetchOffsetField: state.GetOffset(),
-                    LastFetchedEpochField: -1,
-                    LogStartOffsetField: -1,
-                    PartitionMaxBytesField: _maxPartitionFetchBytes,
-                    []
-                );
-                fetchPartitionsBuilder.Add(fetchPartition);
-                index++;
-                if (currentTopic != topic || index == length)
+                var (topic, partitions) = buildSequence[i];
+                for (int j = 0; j < partitions.Length; j++)
                 {
-                    var fetchPartitions = fetchPartitionsBuilder.DrainToImmutable();
-                    var fetchTopic = new FetchRequestData.FetchTopic(
-                        currentTopic.TopicName,
-                        currentTopic.TopicId,
-                        fetchPartitions,
+                    var (partition, state) = partitions[j];
+                    var fetchPartition = new FetchRequestData.FetchTopic.FetchPartition(
+                        PartitionField: partition,
+                        CurrentLeaderEpochField: -1,
+                        FetchOffsetField: state.GetOffset(),
+                        LastFetchedEpochField: -1,
+                        LogStartOffsetField: -1,
+                        PartitionMaxBytesField: _maxPartitionFetchBytes,
                         []
                     );
-                    fetchTopicsBuilder.Add(fetchTopic);
-                    currentTopic = topic;
+                    fetchPartitionsBuilder.Add(fetchPartition);
                 }
+                var fetchPartitions = fetchPartitionsBuilder.DrainToImmutable();
+                var fetchTopic = new FetchRequestData.FetchTopic(
+                    topic.TopicName,
+                    topic.TopicId,
+                    fetchPartitions,
+                    []
+                );
+                fetchTopicsBuilder.Add(fetchTopic);
             }
             var fetchTopics = fetchTopicsBuilder.ToImmutable();
             return new(

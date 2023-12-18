@@ -27,7 +27,7 @@ namespace KafkaGraphQL.Queries
             CancellationToken cancellationToken
         )
         {
-            var result = await kafkaClient.Topics.Create(
+            var result = await kafkaClient.CreateTopic(
                 definition,
                 options ?? CreateTopicOptions.Empty,
                 cancellationToken
@@ -41,7 +41,7 @@ namespace KafkaGraphQL.Queries
             [GraphQLType<StringType>]
             [GraphQLNonNullType]
             [GraphQLDescription("List of topics to get, omit for all topics.")]
-            TopicName topicName,
+            TopicName topic,
 
             [Service]
             IKafkaClient kafkaClient,
@@ -49,8 +49,8 @@ namespace KafkaGraphQL.Queries
             CancellationToken cancellationToken
         )
         {
-            var result = await kafkaClient.Topics.Delete(
-                topicName,
+            var result = await kafkaClient.DeleteTopic(
+                topic,
                 cancellationToken
             );
             return result;

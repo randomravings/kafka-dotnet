@@ -32,6 +32,24 @@ namespace Kafka.Cli.Text
             }
         ;
 
+        public static string Print(in TopicId topic) =>
+            topic switch
+            {
+                { IsEmpty: true } => "(null)",
+                TopicId t => $"{t.Value}"
+            }
+        ;
+
+        public static string Print(in Topic topic) =>
+            (topic.TopicId, topic.TopicName) switch
+            {
+                ({ IsEmpty: true }, { IsEmpty:true }) => "(null)",
+                ({ IsEmpty: true }, { IsEmpty: false}) t => $"{t.TopicName.Value}",
+                ({ IsEmpty: false }, { IsEmpty: true }) t => $"{t.TopicId.Value}",
+                ({ IsEmpty: false }, { IsEmpty: false }) t => $"{t.TopicName.Value} ({t.TopicId.Value})",
+            }
+        ;
+
         public static string PrintKey<TKey>(in TKey key) =>
             key switch
             {

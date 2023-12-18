@@ -13,5 +13,8 @@ namespace Kafka.Cli.Options
 
         [Option("properties")]
         public IEnumerable<string> Properties { get; set; } = Array.Empty<string>();
+
+        [Option("verbose", HelpText = "Command line will print out affirmed actions.", Default = false)]
+        public bool Verbose { get; set; } = false;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Kafka.Client.Model;
+using Kafka.Common.Model;
 
 namespace KafkaGraphQL.Types
 {
@@ -29,6 +30,15 @@ namespace KafkaGraphQL.Types
             descriptor
                 .Field(t => t.TopicAuthorizedOperations)
                 .Description("Authorized operations on the topic.")
+                .Type<ListType<EnumType<AclOperation>>>()
+                .Resolve(context =>
+                {
+                    var value = context.Parent<TopicDescription>().TopicAuthorizedOperations;
+                    if (value == AclOperation.None)
+                        return [];
+                    else
+                        return Enum.GetValues<AclOperation>().Where(r => r != AclOperation.None && value.HasFlag(r)).ToArray();
+                })
             ;
             descriptor
                 .Field(t => t.Partitions)

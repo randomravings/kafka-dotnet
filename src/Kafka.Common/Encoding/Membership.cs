@@ -15,7 +15,7 @@ namespace Kafka.Common.Encoding
             var metadataSize =
                 2 + // version
                 4 + // count
-                memberMetadata.Assignments.Sum(r => 2 + r.Value?.Length ?? 0) +
+                memberMetadata.Assignments.Sum(r => 2 + r.TopicName.Value?.Length ?? 0) +
                 memberMetadata.UserData.Length
             ;
             var protocolMetadata = new byte[metadataSize];
@@ -23,7 +23,7 @@ namespace Kafka.Common.Encoding
             offset = BinaryEncoder.WriteInt16(protocolMetadata, offset, memberMetadata.Version);
             offset = BinaryEncoder.WriteInt32(protocolMetadata, offset, memberMetadata.Assignments.Count);
             foreach (var topic in memberMetadata.Assignments)
-                offset = BinaryEncoder.WriteString(protocolMetadata, offset, topic);
+                offset = BinaryEncoder.WriteString(protocolMetadata, offset, topic.TopicName.Value ?? "");
             memberMetadata.UserData.CopyTo(0, protocolMetadata, offset, memberMetadata.UserData.Length);
             return protocolMetadata;
         }
@@ -69,7 +69,7 @@ namespace Kafka.Common.Encoding
             [NotNull] in byte[] data
         )
         {
-            var set = ImmutableSortedSet.CreateBuilder(TopicNameCompare.Instance);
+            var set = ImmutableSortedSet.CreateBuilder(TopicCompare.Instance);
             var offset = 0;
             (offset, var version) = BinaryDecoder.ReadInt16(data, offset);
             (offset, var assignments) = BinaryDecoder.ReadInt32(data, offset);

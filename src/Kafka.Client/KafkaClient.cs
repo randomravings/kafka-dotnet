@@ -19,10 +19,7 @@ namespace Kafka.Client
         KafkaClientConfig config,
         ILogger<IKafkaClient> logger
     ) :
-        IKafkaClient,
-        ITopics,
-        IGroups,
-        ISecurity
+        IKafkaClient
     {
         private readonly Net.Cluster _connections =
             new(
@@ -33,10 +30,6 @@ namespace Kafka.Client
         ;
         private readonly KafkaClientConfig _config = config;
         private readonly ILogger<IKafkaClient> _logger = logger;
-
-        ITopics IKafkaClient.Topics => this;
-        IGroups IKafkaClient.Groups => this;
-        ISecurity IKafkaClient.Security => this;
 
         async Task IKafkaClient.Close(
             CancellationToken cancellationToken
@@ -85,7 +78,7 @@ namespace Kafka.Client
             );
         }
 
-        async ValueTask<CreateTopicsResult> ITopics.Create(
+        async ValueTask<CreateTopicsResult> IKafkaClient.CreateTopic(
             CreateTopicDefinition topic,
             CreateTopicOptions options,
             CancellationToken cancellationToken
@@ -97,7 +90,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<CreateTopicsResult> ITopics.Create(
+        async ValueTask<CreateTopicsResult> IKafkaClient.CreateTopics(
             IEnumerable<CreateTopicDefinition> topics,
             CreateTopicOptions options,
             CancellationToken cancellationToken
@@ -175,7 +168,7 @@ namespace Kafka.Client
             );
         }
 
-        async ValueTask<DeleteTopicsResult> ITopics.Delete(
+        async ValueTask<DeleteTopicsResult> IKafkaClient.DeleteTopic(
             TopicName topic,
             CancellationToken cancellationToken
         ) =>
@@ -185,7 +178,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<DeleteTopicsResult> ITopics.Delete(
+        async ValueTask<DeleteTopicsResult> IKafkaClient.DeleteTopics(
             IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         ) =>
@@ -245,7 +238,7 @@ namespace Kafka.Client
             );
         }
 
-        async ValueTask<IReadOnlyList<TopicDescription>> ITopics.List(
+        async ValueTask<IReadOnlyList<TopicDescription>> IKafkaClient.ListTopics(
             TopicName topic,
             ListTopicsOptions options,
             CancellationToken cancellationToken
@@ -257,7 +250,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyList<TopicDescription>> ITopics.List(
+        async ValueTask<IReadOnlyList<TopicDescription>> IKafkaClient.ListTopics(
             IEnumerable<TopicName> topics,
             ListTopicsOptions options,
             CancellationToken cancellationToken
@@ -269,7 +262,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyList<TopicDescription>> ITopics.List(
+        async ValueTask<IReadOnlyList<TopicDescription>> IKafkaClient.ListTopics(
             ListTopicsOptions options,
             CancellationToken cancellationToken
         ) =>
@@ -337,7 +330,7 @@ namespace Kafka.Client
                                 ApiErrors.Translate(p.ErrorCodeField)
                         ))
                         .ToImmutableArray(),
-                    (AclOperation)t.TopicAuthorizedOperationsField,
+                    AclOperations(t.TopicAuthorizedOperationsField),
                     t.ErrorCodeField == 0 ?
                         ApiError.None :
                         ApiErrors.Translate(t.ErrorCodeField)
@@ -348,7 +341,7 @@ namespace Kafka.Client
             ;
         }
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsStart(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsStart(
             TopicName topic,
             CancellationToken cancellationToken
         ) =>
@@ -360,7 +353,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsStart(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsStart(
             IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         ) =>
@@ -372,7 +365,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsStart(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsStart(
             TopicPartition topicPartition,
             CancellationToken cancellationToken
         ) =>
@@ -384,7 +377,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsStart(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsStart(
             IEnumerable<TopicPartition> topicPartitions,
             CancellationToken cancellationToken
         ) =>
@@ -396,7 +389,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsEnd(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsEnd(
             TopicName topicName,
             CancellationToken cancellationToken
         ) =>
@@ -408,7 +401,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsEnd(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsEnd(
             IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
         ) =>
@@ -420,19 +413,19 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsEnd(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsEnd(
             TopicPartition topicPartition,
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
                 ToNameReadonlySet(topicPartition),
-                ImmutableSortedSet.Create(topicPartition),
+                [topicPartition],
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.End.Value),
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsEnd(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsEnd(
             IEnumerable<TopicPartition> topicPartitions,
             CancellationToken cancellationToken
         ) =>
@@ -444,7 +437,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsForTimestamp(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsForTimestamp(
             TopicName topicName,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
@@ -457,7 +450,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsForTimestamp(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsForTimestamp(
             IEnumerable<TopicName> topics,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
@@ -470,7 +463,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsForTimestamp(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsForTimestamp(
             TopicPartition topicPartition,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
@@ -483,7 +476,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> ITopics.OffsetsForTimestamp(
+        async ValueTask<IReadOnlyDictionary<TopicName, ImmutableArray<PartitionOffset>>> IKafkaClient.GetOffsetsForTimestamp(
             IEnumerable<TopicPartition> topicPartitions,
             DateTimeOffset timestamp,
             CancellationToken cancellationToken
@@ -496,7 +489,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyList<GroupDescription>> IGroups.List(
+        async ValueTask<IReadOnlyList<GroupDescription>> IKafkaClient.ListGroups(
             ListGroupsOptions options,
             CancellationToken cancellationToken
         )
@@ -558,7 +551,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false);
         }
 
-        async ValueTask<IReadOnlyList<DescribeGroupResult>> IGroups.Describe(
+        async ValueTask<IReadOnlyList<DescribeGroupResult>> IKafkaClient.DescribeGroups(
             IEnumerable<ConsumerGroup> groups,
             DescribeGroupOptions options,
             CancellationToken cancellationToken
@@ -613,7 +606,7 @@ namespace Kafka.Client
                                 result.ProtocolTypeField == "consumer" ? Membership.UnpackProtocolMetadata(r.MemberMetadataField) : ProtocolMetadata.Empty,
                                 result.ProtocolTypeField == "consumer" ? Membership.UnpackTopicPartitions(r.MemberAssignmentField) : ImmutableSortedSet<TopicPartition>.Empty
                             )).ToImmutableArray(),
-                        (AclOperation)result.AuthorizedOperationsField,
+                        AclOperations(result.AuthorizedOperationsField),
                         result.ErrorCodeField == 0 ?
                             ApiError.None :
                             ApiErrors.Translate(result.ErrorCodeField)
@@ -623,7 +616,7 @@ namespace Kafka.Client
             return resultsBuilder.ToImmutable();
         }
 
-        async ValueTask<IReadOnlyList<DeleteGroupResult>> IGroups.Delete(
+        async ValueTask<IReadOnlyList<DeleteGroupResult>> IKafkaClient.DeleteGroups(
             IEnumerable<ConsumerGroup> groups,
             CancellationToken cancellationToken
         )
@@ -672,18 +665,18 @@ namespace Kafka.Client
             return resultsBuilder.ToImmutable();
         }
 
-        async ValueTask<IReadOnlyDictionary<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>> IGroups.OffsetsCommitted(
+        async ValueTask<IReadOnlyDictionary<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>> IKafkaClient.GetOffsetsCommitted(
             IEnumerable<ConsumerGroup> group,
             CancellationToken cancellationToken
         ) =>
             await FetchTopicPartitionOffsets(
                 ToReadOnlySet(group),
-                ImmutableSortedSet<TopicName>.Empty,
+                [],
                 cancellationToken
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyDictionary<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>> IGroups.OffsetsCommitted(
+        async ValueTask<IReadOnlyDictionary<ConsumerGroup, IReadOnlyList<TopicPartitionOffset>>> IKafkaClient.GetOffsetsCommitted(
             IEnumerable<ConsumerGroup> group,
             IEnumerable<TopicName> topics,
             CancellationToken cancellationToken
@@ -695,7 +688,7 @@ namespace Kafka.Client
             ).ConfigureAwait(false)
         ;
 
-        async ValueTask<IReadOnlyList<AclResource>> ISecurity.DescribeAcls(
+        async ValueTask<IReadOnlyList<AclResource>> IKafkaClient.DescribeAcls(
             DescribeAclOptions options,
             CancellationToken cancellationToken
         )
@@ -737,7 +730,7 @@ namespace Kafka.Client
             ;
         }
 
-        ValueTask<IReadOnlyList<CreateAclResult>> ISecurity.CreateAcls(
+        ValueTask<IReadOnlyList<CreateAclResult>> IKafkaClient.CreateAcls(
             CreateAclOptions options,
             CancellationToken cancellationToken
         )
@@ -745,7 +738,7 @@ namespace Kafka.Client
             throw new NotImplementedException();
         }
 
-        ValueTask<IReadOnlyList<DeleteAclResult>> ISecurity.DeleteAcls(
+        ValueTask<IReadOnlyList<DeleteAclResult>> IKafkaClient.DeleteAcls(
             DeleteAclOptions options,
             CancellationToken cancellationToken
         )
@@ -1006,6 +999,13 @@ namespace Kafka.Client
             consumerGroups.ToImmutableSortedSet(ConsumerGroupCompare.Instance)
         ;
 
+        private static AclOperation AclOperations(int mask)
+        {
+            if (mask == int.MinValue)
+                return AclOperation.NotSpecified;
+            var flags = (AclOperation)mask;
+            return flags & ~(AclOperation.Any | AclOperation.All | AclOperation.NotSpecified);
+        }
 
         void IDisposable.Dispose()
         {

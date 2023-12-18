@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Net.Http.Headers;
 
 namespace Kafka.Client.IO.Read
 {
@@ -30,7 +31,6 @@ namespace Kafka.Client.IO.Read
         private long _stateAltered = 1;
         private bool _disposed;
 
-        protected readonly SortedSet<TopicPartition> _assignments = new(TopicPartitionCompare.Instance);
         protected readonly ICluster<INodeLink> _cluster;
         protected readonly ConcurrentDictionary<TopicPartition, Offset> _trackedOffsets = new(TopicPartitionCompare.Equality);
         protected readonly SortedSet<TopicPartition> _pausedTopicPartitions = new(TopicPartitionCompare.Instance);
@@ -59,10 +59,6 @@ namespace Kafka.Client.IO.Read
 
         IReadOnlySet<TopicPartition> IReadStream.PausedPartitions =>
             _pausedTopicPartitions
-        ;
-
-        IReadOnlySet<TopicPartition> IReadStream.Assignments =>
-            _assignments
         ;
 
         void IReadStream.PausePartitions(
@@ -242,27 +238,28 @@ namespace Kafka.Client.IO.Read
                 _channels.Clear();
                 _recordQueue.Clear();
                 _channelTasks.Clear();
-                _trackedOffsets.Clear();
 
                 var coordinator = await _cluster.Controller(
                     cancellationToken
                 ).ConfigureAwait(false);
 
-                var topicPartitionOffsets = await GetTopicPartitionOffsets(
+                await UpdateTrackedOffsets(
+                    _trackedOffsets,
                     cancellationToken
                 ).ConfigureAwait(false);
 
-                var missingOffsets = topicPartitionOffsets
-                    .Where(r => r.Value.Offset == Offset.Unset)
+                var missingOffsets = _trackedOffsets
+                    .Where(r => r.Value == Offset.Unset)
                     .ToImmutableArray()
                 ;
 
                 if (_autoOffsetReset == AutoOffsetReset.None && missingOffsets.Length > 0)
                     throw new InvalidOperationException("Unset partitions found with auto.offset.reset=none");
 
-                var assignments = GetTopicPartitionAssignments(
-                    topicPartitionOffsets
-                );
+                var assignments = await GetTopicPartitionAssignments(
+                    _trackedOffsets,
+                    cancellationToken
+                ).ConfigureAwait(false);
 
                 _channelCts = new();
                 foreach (var (nodeId, assignedTopicPartitionOffsets) in assignments)
@@ -282,27 +279,55 @@ namespace Kafka.Client.IO.Read
             }
         }
 
-        private static Dictionary<NodeId, IDictionary<TopicPartition, Offset>> GetTopicPartitionAssignments(
-            IDictionary<TopicPartition, LeaderAndOffset> topicPartitionDetails
+        private async Task<Dictionary<NodeId, IDictionary<TopicPartition, Offset>>> GetTopicPartitionAssignments(
+            IDictionary<TopicPartition, Offset> topicPartitions,
+            CancellationToken cancellationToken
         )
         {
-            var brokerGrouping = topicPartitionDetails
-                .GroupBy(k => k.Value.LeaderId)
-            ;
+            var controller = await _cluster.Controller(
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            var metadataRequest = new MetadataRequestData(
+                topicPartitions.Select(r => new MetadataRequestData.MetadataRequestTopic(
+                    r.Key.Topic.TopicId,
+                    r.Key.Topic.TopicName,
+                    []
+                ))
+                .ToImmutableArray(),
+                false,
+                false,
+                false,
+                []
+            );
+
+            var metadataResponse = await controller.Metadata(
+                metadataRequest,
+                cancellationToken
+            ).ConfigureAwait(false);
+
             var topicPartitionAssignments = new Dictionary<NodeId, IDictionary<TopicPartition, Offset>>();
-            foreach (var broker in brokerGrouping)
+            foreach (var topic in metadataResponse.TopicsField)
             {
-                var topicPartitionOffsets = new Dictionary<TopicPartition, Offset>(TopicPartitionCompare.Equality);
-                foreach (var (topicPartition, leaderAndOffset) in broker)
-                    topicPartitionOffsets.Add(topicPartition, leaderAndOffset.Offset);
-                topicPartitionAssignments.Add(broker.Key, topicPartitionOffsets);
+                foreach (var partition in topic.PartitionsField)
+                {
+                    var topicPartition = new TopicPartition(new Topic(topic.TopicIdField, topic.NameField), partition.PartitionIndexField);
+                    if (!topicPartitions.TryGetValue(topicPartition, out var offset))
+                        continue;
+                    if (!topicPartitionAssignments.TryGetValue(partition.LeaderIdField, out var topicPartitionAssignment))
+                    {
+                        topicPartitionAssignment = new Dictionary<TopicPartition, Offset>(TopicPartitionCompare.Equality);
+                        topicPartitionAssignments.Add(partition.LeaderIdField, topicPartitionAssignment);
+                    }
+                    topicPartitionAssignment.Add(topicPartition, offset);
+                }
             }
             return topicPartitionAssignments;
         }
 
         private async Task CreateChannel(
             NodeId nodeId,
-            IDictionary<TopicPartition,Offset> topicPartitionOffsets,
+            IDictionary<TopicPartition, Offset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
         {
@@ -388,14 +413,15 @@ namespace Kafka.Client.IO.Read
             CancellationToken cancellationToken
         )
         {
-            var timestamp = _autoOffsetReset switch
-            {
-                AutoOffsetReset.Earliest => Offset.Beginning.Value,
-                _ => Offset.End.Value
-            };
             var missingOffsets = topicPartitionOffsets
                 .Where(r => r.Value < 0)
-                .Select(r => new KeyValuePair<TopicPartition, long>(r.Key, timestamp))
+                .Select(r => new KeyValuePair<TopicPartition, long>(
+                    r.Key,
+                    TimestampFromOffset(
+                        r.Value,
+                        _autoOffsetReset
+                    )
+                ))
                 .ToImmutableArray()
             ;
             if (missingOffsets.Length > 0)
@@ -413,6 +439,20 @@ namespace Kafka.Client.IO.Read
                     listOffsetsResponse
                 );
             }
+        }
+
+        private static long TimestampFromOffset(
+            in Offset offset,
+            in AutoOffsetReset autoOffsetReset
+        )
+        {
+            if (offset == Offset.Beginning || offset == Offset.End)
+                return offset;
+            return autoOffsetReset switch
+            {
+                AutoOffsetReset.Earliest => Offset.Beginning.Value,
+                _ => Offset.End.Value
+            };
         }
 
         private static void UpdateTopicPartitionOffsets(
@@ -440,14 +480,14 @@ namespace Kafka.Client.IO.Read
 
         protected static async ValueTask<SortedSet<TopicPartition>> GetTopicPartitions(
             INodeLink connection,
-            IReadOnlySet<TopicName> topics,
+            IReadOnlySet<Topic> topics,
             CancellationToken cancellationToken
         )
         {
             var metadataRequest = new MetadataRequestData(
                 topics.Select(t => new MetadataRequestData.MetadataRequestTopic(
-                    Guid.Empty,
-                    t,
+                    t.TopicId,
+                    t.TopicName,
                     []
                 )).ToImmutableArray(),
                 false,
@@ -475,60 +515,16 @@ namespace Kafka.Client.IO.Read
             return topicPartitions;
         }
 
-        protected static async ValueTask<IDictionary<TopicPartition, LeaderAndOffset>> GetTopicPartitionLeaders(
-            INodeLink connection,
-            IReadOnlySet<TopicPartition> topicPartitions,
+        protected async ValueTask<ImmutableArray<Topic>> CheckTopicList(
+            IEnumerable<Topic> topics,
             CancellationToken cancellationToken
         )
         {
+            var topicSet = topics.ToImmutableSortedSet(TopicCompare.Instance);
             var metadataRequest = new MetadataRequestData(
-                topicPartitions
-                .GroupBy(g => g.Topic.TopicName)
-                .Select(t => new MetadataRequestData.MetadataRequestTopic(
-                    Guid.Empty,
-                    t.Key,
-                    []
-                )).ToImmutableArray(),
-                false,
-                false,
-                false,
-                []
-            );
-            var metadataResponse = await connection.Metadata(
-            metadataRequest,
-                cancellationToken
-            ).ConfigureAwait(false);
-
-            var topicPartitionLeaders = new Dictionary<TopicPartition, LeaderAndOffset>(TopicPartitionCompare.Equality);
-            foreach (var topic in metadataResponse.TopicsField)
-                foreach (var partition in topic.PartitionsField)
-                    topicPartitionLeaders.Add(
-                        new TopicPartition(
-                            new Topic(
-                                topic.TopicIdField,
-                                topic.NameField
-                            ),
-                            new Partition(
-                                partition.PartitionIndexField
-                            )
-                        ),
-                        new LeaderAndOffset(
-                            partition.LeaderIdField,
-                            Offset.Unset
-                        )
-                    );
-            return topicPartitionLeaders;
-        }
-
-        protected async ValueTask<ImmutableArray<TopicName>> CheckTopicList(
-            IReadOnlySet<TopicName> topics,
-            CancellationToken cancellationToken
-        )
-        {
-            var metadataRequest = new MetadataRequestData(
-                topics.Select(t => new MetadataRequestData.MetadataRequestTopic(
-                    Guid.Empty,
-                    t,
+                topicSet.Select(t => new MetadataRequestData.MetadataRequestTopic(
+                    t.TopicId,
+                    t.TopicName,
                     []
                 )).ToImmutableArray(),
                 false,
@@ -539,20 +535,185 @@ namespace Kafka.Client.IO.Read
             var controller = await _cluster.Controller(
                 cancellationToken
             ).ConfigureAwait(false);
-            var metadataResponse = await  controller.Metadata(
+            var metadataResponse = await controller.Metadata(
                 metadataRequest,
                 cancellationToken
             ).ConfigureAwait(false);
 
             var clusterTopics = metadataResponse
                 .TopicsField
-                .Select(r => new TopicName(r.NameField))
-                .ToImmutableSortedSet(TopicNameCompare.Instance)
+                .Select(r => new Topic(r.TopicIdField, r.NameField))
+                .ToImmutableSortedSet(TopicCompare.Instance)
             ;
-            return topics
+            return topicSet
                 .Where(r => !clusterTopics.Contains(r))
                 .ToImmutableArray()
             ;
+        }
+
+        protected async ValueTask<ImmutableArray<TopicPartitionOffset>> CheckTopicPartitionOffsetList(
+            IEnumerable<TopicPartitionOffset> topicPartitionOffsets,
+            CancellationToken cancellationToken
+        )
+        {
+            var topicPartitionOffsetArray = topicPartitionOffsets
+                .ToImmutableSortedDictionary(
+                    k => k.TopicPartition,
+                    v => v.Offset,
+                    TopicPartitionCompare.Instance
+                )
+            ;
+            var missingOrBadTopicPartitionOffsets = ImmutableArray.CreateBuilder<TopicPartitionOffset>();
+            var metadataRequest = new MetadataRequestData(
+                topicPartitionOffsetArray
+                .GroupBy(g => g.Key.Topic, TopicCompare.Equality)
+                .Select(t => new MetadataRequestData.MetadataRequestTopic(
+                    t.Key.TopicId,
+                    t.Key.TopicName,
+                    []
+                )).ToImmutableArray(),
+                false,
+                false,
+                false,
+                []
+            );
+            var controller = await _cluster.Controller(
+                cancellationToken
+            ).ConfigureAwait(false);
+            var metadataResponse = await controller.Metadata(
+                metadataRequest,
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            var clusterTopics = metadataResponse
+                .TopicsField
+                .SelectMany(t => t.PartitionsField
+                    .Select(p => new TopicPartition(
+                        new Topic(
+                            t.TopicIdField,
+                            t.NameField
+                        ),
+                        new Partition(p.PartitionIndexField)
+                    ))
+                )
+                .ToImmutableSortedSet(TopicPartitionCompare.Instance)
+            ;
+            var missingTopicPartitions = topicPartitionOffsetArray
+                .Where(r => !clusterTopics.Contains(r.Key))
+                .ToImmutableArray()
+            ;
+            foreach (var (topicPartition, offset) in topicPartitionOffsetArray)
+                if (!clusterTopics.Contains(topicPartition))
+                    missingOrBadTopicPartitionOffsets.Add(new(topicPartition, offset));
+
+            if (missingOrBadTopicPartitionOffsets.Count > 0)
+                return missingOrBadTopicPartitionOffsets.ToImmutable();
+
+            var assignments = await GetTopicPartitionAssignments(
+                topicPartitionOffsetArray,
+                cancellationToken
+            ).ConfigureAwait(false);
+
+            var tasks = assignments.Select(r => Task.Run(async () =>
+            {
+                var connection = await _cluster.Connection(
+                    r.Key,
+                    cancellationToken
+                ).ConfigureAwait(false);
+                var listOffsetsLow = r
+                    .Value
+                    .GroupBy(g => g.Key.Topic, TopicCompare.Equality)
+                    .Select(t => new ListOffsetsRequestData.ListOffsetsTopic(
+                        t.Key.TopicName,
+                        t.Select(p => new ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition(
+                            p.Key.Partition,
+                            -1,
+                            -1,
+                            1,
+                            []
+                        )).ToImmutableArray(),
+                        []
+                    ))
+                    .ToImmutableArray()
+                ;
+
+                var listOffsetLowRequest = new ListOffsetsRequestData(
+                    -1,
+                    (sbyte)_isolationLevel,
+                    listOffsetsLow,
+                    []
+                );
+
+                var listOffsetLowReponse = await connection.ListOffsets(
+                    listOffsetLowRequest,
+                    cancellationToken
+                ).ConfigureAwait(false);
+
+                var listOffsetsHigh = r
+                    .Value
+                    .GroupBy(g => g.Key.Topic, TopicCompare.Equality)
+                    .Select(t => new ListOffsetsRequestData.ListOffsetsTopic(
+                        t.Key.TopicName,
+                        t.Select(p => new ListOffsetsRequestData.ListOffsetsTopic.ListOffsetsPartition(
+                            p.Key.Partition,
+                            -1,
+                            -2,
+                            1,
+                            []
+                        )).ToImmutableArray(),
+                        []
+                    ))
+                    .ToImmutableArray()
+                ;
+
+                var listOffsetHighRequest = new ListOffsetsRequestData(
+                    -1,
+                    (sbyte)_isolationLevel,
+                    listOffsetsHigh,
+                    []
+                );
+
+                var listOffsetHighReponse = await connection.ListOffsets(
+                    listOffsetHighRequest,
+                    cancellationToken
+                ).ConfigureAwait(false);
+
+                var builder = ImmutableArray.CreateBuilder<KeyValuePair<TopicPartition, (Offset Low, Offset High)>>();
+                for (int i = 0; i < listOffsetLowReponse.TopicsField.Length; i++)
+                {
+                    var topicLow = listOffsetLowReponse.TopicsField[i];
+                    var topicHigh = listOffsetHighReponse.TopicsField[i];
+                    var topic = new Topic(Guid.Empty, topicLow.NameField);
+                    for (int j = 0; j < topicLow.PartitionsField.Length; j++)
+                    {
+                        var low = topicLow.PartitionsField[j];
+                        var high = topicHigh.PartitionsField[j];
+                        var topicPartition = new TopicPartition(topic, low.PartitionIndexField);
+                        builder.Add(new KeyValuePair<TopicPartition, (Offset Low, Offset High)>(
+                            topicPartition, (low.OffsetField, high.OffsetField)
+                        ));
+                    }
+                }
+                return builder.ToImmutable();
+            }));
+            var lists = await Task.WhenAll(tasks).ConfigureAwait(false);
+            var watermarks = lists
+                .SelectMany(r => r)
+                .OrderBy(r => r.Key, TopicPartitionCompare.Instance)
+                .ToImmutableArray()
+            ;
+
+            for (int i = 0; i < topicPartitionOffsetArray.Count; i++)
+            {
+                var (topicPartition, (low, high)) = watermarks[i];
+                topicPartitionOffsetArray.TryGetKey(topicPartition, out topicPartition);
+                var offset = topicPartitionOffsetArray[topicPartition];
+                if (offset == Offset.Unset || offset == Offset.Beginning || offset == Offset.End)
+                    continue;
+                if (offset < low || offset > high + 1)
+                    missingOrBadTopicPartitionOffsets.Add(new(topicPartition, offset));
+            }
+            return missingOrBadTopicPartitionOffsets.ToImmutable();
         }
 
         protected bool IsTracked(
@@ -563,7 +724,8 @@ namespace Kafka.Client.IO.Read
             offset <= trackedOffset
         ;
 
-        protected abstract ValueTask<IDictionary<TopicPartition, LeaderAndOffset>> GetTopicPartitionOffsets(
+        protected abstract ValueTask UpdateTrackedOffsets(
+            ConcurrentDictionary<TopicPartition, Offset> trackedOffsets,
             CancellationToken cancellationToken
         );
     }

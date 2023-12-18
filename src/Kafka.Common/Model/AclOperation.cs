@@ -5,6 +5,13 @@ namespace Kafka.Common.Model
     [Flags]
     public enum AclOperation
     {
+        /// <summary>
+        /// Used for return values where showing authorizations was omitted.
+        /// This may have the change of the most significant bit will be used in the future.
+        /// </summary>
+        [EnumMember(Value = "NOT_SPEFICIED")]
+        NotSpecified = 0x10000000,
+
         [EnumMember(Value = "UNKNOWN")]
         None = 0x0,
 

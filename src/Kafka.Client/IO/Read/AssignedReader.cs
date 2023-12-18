@@ -1,27 +1,27 @@
-﻿using Kafka.Client.Model;
-using Kafka.Common.Model;
+﻿using Kafka.Common.Model;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Logging;
 
 namespace Kafka.Client.IO.Read
 {
-    internal class AssignedReader<TKey, TValue> :
+    internal sealed class AssignedReader<TKey, TValue> :
         Reader<TKey, TValue>,
         IAssignedReader<TKey, TValue>
     {
-        private readonly IDeserializer<TKey> _keyDeserializer;
-        private readonly IDeserializer<TValue> _valueDeserializer;
+        private readonly IAssignedReadStream _assingedStream;
+        private readonly List<TopicPartitionOffset> _assignList = [];
+        private readonly List<TopicPartitionOffset> _unassignList = [];
 
         internal AssignedReader(
             IAssignedReadStream stream,
-            IReadOnlyList<TopicPartition> topicPartitions,
+            IReadOnlyList<TopicPartitionOffset> topicPartitionOffsets,
             IDeserializer<TKey> keyDeserializer,
             IDeserializer<TValue> valueDeserializer,
             ILogger logger
         ) : base(stream, keyDeserializer, valueDeserializer, logger)
         {
-            _keyDeserializer = keyDeserializer;
-            _valueDeserializer = valueDeserializer;
+            _assingedStream = stream;
+            _assignList.AddRange(topicPartitionOffsets);
         }
 
         ValueTask IAssignedReader<TKey, TValue>.Assign(TopicPartition topicPartition)
@@ -104,14 +104,22 @@ namespace Kafka.Client.IO.Read
             throw new NotImplementedException();
         }
 
-        protected override ValueTask Initialize(CancellationToken cancellationToken)
+        protected override async ValueTask Initialize(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            if (_assignList.Count == 0 && _unassignList.Count == 0)
+                return;
+            await _assingedStream.Assign(
+                _assignList,
+                cancellationToken
+            ).ConfigureAwait(false);
+            _assignList.Clear();
+            _unassignList.Clear();
+            _initialized = true;
         }
 
         Task IReader<TKey, TValue>.Close(CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            return Task.CompletedTask;
         }
     }
 }

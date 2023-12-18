@@ -8,11 +8,18 @@ namespace Kafka.Client.IO
         IAssignedReaderBuilder CreateReader();
 
         ValueTask Seek(
-            IReadOnlyList<TopicPartitionOffset> topicPartitionOffsets
+            IReadOnlyList<TopicPartitionOffset> topicPartitionOffsets,
+            CancellationToken cancellationToken
         );
 
-        ValueTask Assign(IReadOnlyList<TopicPartition> topicPartitions);
+        ValueTask Assign(
+            IReadOnlyList<TopicPartitionOffset> topicPartitionOffsets,
+            CancellationToken cancellationToken
+        );
 
-        ValueTask Unassign(IReadOnlyList<TopicPartition> topicPartitions);
+        ValueTask Unassign(
+            IReadOnlyList<TopicPartition> topicPartitions,
+            CancellationToken cancellationToken
+        );
     }
 }

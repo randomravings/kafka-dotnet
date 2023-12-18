@@ -5,6 +5,12 @@ namespace Kafka.Client.IO
     public interface IGroupReadStream :
         IReadStream
     {
+        /// <summary>
+        /// Gets all Topic Partitions in the current stream.
+        /// </summary>
+        /// <returns></returns>
+        IReadOnlySet<TopicPartition> Assignments { get; }
+
         IGroupReaderBuilder CreateReader();
 
         Task Commit(
@@ -21,7 +27,7 @@ namespace Kafka.Client.IO
             CancellationToken cancellationToken
         );
         Task AddReader(
-            IReadOnlySet<TopicName> topics,
+            IReadOnlySet<Topic> topics,
             CancellationToken cancellationToken
         );
     }

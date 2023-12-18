@@ -59,7 +59,7 @@ namespace Kafka.Cli.Cmd
 
             var topic = new TopicName(opts.Topic);
 
-            Console.WriteLine("Empty new line will terminate session.");
+            Console.WriteLine("Stream Writer: Empty new or Ctrl+C line will terminate session.");
             var transaction = default(ITransaction);
             var batch = new List<KeyValuePair<string, string>>();
             var batching = false;
@@ -80,7 +80,8 @@ namespace Kafka.Cli.Cmd
                             else
                             {
                                 batching = true;
-                                Console.WriteLine("Batching started");
+                                if (opts.Verbose)
+                                    Console.WriteLine("Batching started");
                             }
                             continue;
                         case "/eb":
@@ -90,11 +91,13 @@ namespace Kafka.Cli.Cmd
                             }
                             else
                             {
-                                Console.WriteLine("Batching completed");
+                                if (opts.Verbose)
+                                    Console.WriteLine($"Batching completed {batch.Count} records");
                                 await HandleBatch(
                                     topic,
                                     writer,
                                     batch,
+                                    opts,
                                     cancellationToken
                                 );
                                 batching = false;
@@ -104,7 +107,8 @@ namespace Kafka.Cli.Cmd
                             if (transaction == null)
                             {
                                 transaction = await outputStream.BeginTransaction(cancellationToken).ConfigureAwait(false);
-                                Console.WriteLine("Transaction in progress");
+                                if (opts.Verbose)
+                                    Console.WriteLine("Transaction in progress");
                             }
                             else
                             {
@@ -116,7 +120,8 @@ namespace Kafka.Cli.Cmd
                             {
                                 await transaction.Commit(cancellationToken).ConfigureAwait(false);
                                 transaction = null;
-                                Console.WriteLine("Transaction committed");
+                                if (opts.Verbose)
+                                    Console.WriteLine("Transaction committed");
                             }
                             else
                             {
@@ -128,7 +133,8 @@ namespace Kafka.Cli.Cmd
                             {
                                 await transaction.Rollback(cancellationToken).ConfigureAwait(false);
                                 transaction = null;
-                                Console.WriteLine("Transaction rolled back");
+                                if (opts.Verbose)
+                                    Console.WriteLine("Transaction rolled back");
                             }
                             else
                             {
@@ -170,6 +176,7 @@ namespace Kafka.Cli.Cmd
                     topic,
                     writer,
                     batch,
+                    opts,
                     cts.Token
                 );
             await outputStream.Flush(cts.Token).ConfigureAwait(false);
@@ -184,6 +191,7 @@ namespace Kafka.Cli.Cmd
             TopicName topic,
             IStreamWriter<string, string> writer,
             List<KeyValuePair<string, string>> batch,
+            WriteOpts opts,
             CancellationToken cancellationToken
         )
         {
@@ -201,8 +209,9 @@ namespace Kafka.Cli.Cmd
                     .ToArray()
                 ;
                 var results = await Task.WhenAll(tasks);
-                foreach (var result in results)
-                    Console.WriteLine(Formatter.Print(result.TopicPartitionOffset));
+                if (opts.Verbose)
+                    foreach (var result in results)
+                        Console.WriteLine(Formatter.Print(result.TopicPartitionOffset));
             }
             catch (AggregateException ex)
             {

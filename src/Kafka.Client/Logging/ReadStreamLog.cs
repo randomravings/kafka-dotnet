@@ -33,6 +33,8 @@ namespace Kafka.Client.Logging
         
         [LoggerMessage(EventId = 2101, Level = LogLevel.Information, Message = "Fetch loop stoppped for node: {nodeId}", SkipEnabledCheck = false)]
         public static partial void FetchLoopStop(this ILogger logger, in NodeId nodeId);
+        [LoggerMessage(EventId = 2102, Level = LogLevel.Critical, Message = "Fetch loop exception for node: {nodeId}", SkipEnabledCheck = true)]
+        public static partial void FetchLoopException(this ILogger logger, in NodeId nodeId, Exception ex);
 
 
         [LoggerMessage(EventId = 3000, Level = LogLevel.Information, Message = "Heartbeat loop started", SkipEnabledCheck = false)]

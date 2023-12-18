@@ -6,12 +6,12 @@ using System.Collections.Immutable;
 
 namespace Kafka.Client.IO.Read
 {
-    internal class GroupReader<TKey, TValue> :
+    internal sealed class GroupReader<TKey, TValue> :
         Reader<TKey, TValue>,
         IGroupReader<TKey, TValue>
     {
-        private protected readonly IGroupReadStream _applicationStream;
-        private protected readonly ISet<TopicName> _topics = new SortedSet<TopicName>(TopicNameCompare.Instance);
+        private readonly IGroupReadStream _applicationStream;
+        private readonly SortedSet<TopicName> _topics = new SortedSet<TopicName>(TopicNameCompare.Instance);
 
         internal GroupReader(
             IGroupReadStream stream,
@@ -58,7 +58,7 @@ namespace Kafka.Client.IO.Read
         protected override async ValueTask Initialize(CancellationToken cancellationToken)
         {
             await _applicationStream.AddReader(
-                _topics.ToImmutableSortedSet(TopicNameCompare.Instance),
+                _topics.Select(r => new Topic(Guid.Empty, r)).ToImmutableSortedSet(TopicCompare.Instance),
                 cancellationToken
             ).ConfigureAwait(false);
             _initialized = true;

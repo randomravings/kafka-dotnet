@@ -55,7 +55,7 @@ namespace Kafka.Cli.Cmd
                     opts.IncludeInternal,
                     opts.ShowAllowedOperations
                 );
-                var result = await client.Topics.List(
+                var result = await client.ListTopics(
                     options,
                     cancellationToken
                 );
@@ -107,7 +107,7 @@ namespace Kafka.Cli.Cmd
                     ImmutableDictionary<Partition, IReadOnlySet<NodeId>>.Empty,
                     ImmutableDictionary<string, string?>.Empty
                 );
-                var result = await client.Topics.Create(
+                var result = await client.CreateTopic(
                     definition,
                     CreateTopicOptions.Empty,
                     cancellationToken
@@ -163,7 +163,7 @@ namespace Kafka.Cli.Cmd
                     config
                 );
 
-                var result = await client.Topics.Delete(
+                var result = await client.DeleteTopic(
                     opts.Topic,
                     cancellationToken
                 );
@@ -209,7 +209,7 @@ namespace Kafka.Cli.Cmd
                     config
                 );
 
-                var result = await client.Topics.List(
+                var result = await client.ListTopics(
                     opts.Topic,
                     new ListTopicsOptions(true, opts.ShowAllowedOperations),
                     cancellationToken

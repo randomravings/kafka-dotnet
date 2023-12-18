@@ -1,13 +1,8 @@
 ﻿using CommandLine;
 using Kafka.Cli.Client;
 using Kafka.Cli.Options;
-using Kafka.Cli.Text;
 using Kafka.Client.Config;
 using Kafka.Client.Model;
-using Kafka.Common.Model;
-using Kafka.Common.Model.Comparison;
-using System.Collections.Immutable;
-using System.Text.Json;
 
 namespace Kafka.Cli.Cmd
 {
@@ -52,7 +47,7 @@ namespace Kafka.Cli.Cmd
 
                 var options = DescribeAclOptions.Empty;
 
-                var result = await client.Security.DescribeAcls(
+                var result = await client.DescribeAcls(
                     options,
                     cancellationToken
                 );

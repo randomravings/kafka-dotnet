@@ -7,6 +7,7 @@ using Kafka.Client.Config;
 using Kafka.Client.IO;
 using Kafka.Common.Model;
 using Kafka.Common.Serialization.Nullable;
+using System.Collections.Immutable;
 
 namespace Kafka.Cli.Cmd
 {
@@ -48,11 +49,10 @@ namespace Kafka.Cli.Cmd
 
             try
             {
-                var topicNames = opts.Topics.Select(r => new TopicName(r)).ToHashSet();
-                if (opts.PartitionAssign.Any())
-                    await RunAssignedReader(client, cancellationToken);
+                if (opts.ToppicPartitionAssign.Any())
+                    await RunAssignedReader(client, opts, cancellationToken);
                 else
-                    await RunGroupReader(client, topicNames, opts.Interactive, cancellationToken);
+                    await RunGroupReader(client, opts, cancellationToken);
             }
             finally
             {
@@ -65,14 +65,14 @@ namespace Kafka.Cli.Cmd
 
         private static async Task RunGroupReader(
             IKafkaClient client,
-            IReadOnlySet<TopicName> topicNames,
-            bool interactive,
+            ReadOpts opts,
             CancellationToken cancellationToken
         )
         {
+            var topicNames = opts.Topics.Select(r => new TopicName(r)).ToHashSet();
             var stream = client
                 .CreateReadStream()
-                .AsApplication()
+                .AsGroup()
                 .Build()
             ;
 
@@ -85,7 +85,7 @@ namespace Kafka.Cli.Cmd
             ;
             try
             {
-                if (interactive)
+                if (opts.Interactive)
                     await RunInteractive(stream, reader, topicNames, cancellationToken);
                 else
                     await RunContinuously(reader, cancellationToken);
@@ -106,9 +106,9 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task RunInteractive<TKey, TValue>(
-            IGroupReadStream inputStream,
-            IGroupReader<TKey, TValue> streamReader,
-            IReadOnlySet<TopicName> topicNames,
+            IGroupReadStream stream,
+            IGroupReader<TKey, TValue> reader,
+            IReadOnlySet<TopicName> topics,
             CancellationToken cancellationToken
         )
         {
@@ -129,22 +129,22 @@ namespace Kafka.Cli.Cmd
                             var recordsToFetch = int.Parse(args[1]);
                             if (args.Length < 3 || !int.TryParse(args[2], out var waitTimeout))
                                 waitTimeout = 1000;
-                            await Fetch(streamReader, recordsToFetch, waitTimeout, cancellationToken);
+                            await Fetch(reader, recordsToFetch, waitTimeout, cancellationToken);
                             break;
                         case "commit":
                             var commitArgs = args.Skip(1).ToArray();
                             switch (commitArgs)
                             {
                                 case { Length: 0 }:
-                                    await inputStream.Commit(cancellationToken);
+                                    await stream.Commit(cancellationToken);
                                     break;
                                 case { Length: 1 }:
-                                    if(TryParseTopicPartitionOffset(topicNames, args[1], out var topicPartitionOffset))
-                                        await inputStream.Commit(topicPartitionOffset, cancellationToken);
+                                    if (TryParseTopicPartitionOffset(topics, args[1], out var topicPartitionOffset))
+                                        await stream.Commit(topicPartitionOffset, cancellationToken);
                                     break;
                                 default:
-                                    if (TryParseTopicPartitionOffsets(topicNames, args.Skip(1).ToArray(), out var topicPartitionOffsets))
-                                        await inputStream.Commit(topicPartitionOffsets, cancellationToken);
+                                    if (TryParseTopicPartitionOffsets(topics, args.Skip(1).ToArray(), out var topicPartitionOffsets))
+                                        await stream.Commit(topicPartitionOffsets, cancellationToken);
                                     break;
                             }
                             break;
@@ -199,6 +199,7 @@ namespace Kafka.Cli.Cmd
             CancellationToken cancellationToken
         )
         {
+            Console.WriteLine("Stream Reader: Ctrl+C will terminate session.");
             while (!cancellationToken.IsCancellationRequested)
             {
                 var readRecord = await streamReader.Read(cancellationToken);
@@ -211,7 +212,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task Fetch<TKey, TValue>(
-            IGroupReader<TKey, TValue> streamReader,
+            IGroupReader<TKey, TValue> reader,
             int recordCount,
             int timeoutMs,
             CancellationToken cancellationToken
@@ -223,7 +224,7 @@ namespace Kafka.Cli.Cmd
                 cts.CancelAfter(timeoutMs);
                 for (int i = 0; i < recordCount && !cts.Token.IsCancellationRequested; i++)
                 {
-                    var readRecord = await streamReader.Read(cts.Token);
+                    var readRecord = await reader.Read(cts.Token);
                     Console.WriteLine(
                         Formatter.Print(
                             readRecord
@@ -238,12 +239,109 @@ namespace Kafka.Cli.Cmd
             }
         }
 
-        private static Task RunAssignedReader(
+        private static async Task<int> RunAssignedReader(
             IKafkaClient client,
+            ReadOpts opts,
             CancellationToken cancellationToken
         )
         {
-            throw new NotImplementedException();
+            var topicParitionOffsets = ParsePartitionAssign(opts.ToppicPartitionAssign);
+            var stream = client
+                .CreateReadStream()
+                .AsAssigned()
+                .Build()
+            ;
+
+            var reader = stream
+                .CreateReader()
+                .WithTopicPartitionOffsets(topicParitionOffsets)
+                .WithKey(StringSerde.Deserializer)
+                .WithValue(StringSerde.Deserializer)
+                .Build()
+            ;
+
+            try
+            {
+                Console.WriteLine("Stream Reader: Ctrl+C will terminate session.");
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    var readRecord = await reader.Read(cancellationToken);
+                    Console.WriteLine(
+                        Formatter.Print(
+                            readRecord
+                        )
+                    );
+                }
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
+            finally
+            {
+                using var cts = new CancellationTokenSource();
+                cts.CancelAfter(5000);
+                await CloseReader(reader, cts.Token);
+                await CloseStream(stream, cts.Token);
+                await CloseClient(client, cts.Token);
+            }
+
+            return 0;
+        }
+
+        internal static readonly char[] separator = ['[', ']'];
+
+        private static ImmutableArray<TopicPartitionOffset> ParsePartitionAssign(IEnumerable<string> topicPartitionAssignments)
+        {
+            var builder = ImmutableArray.CreateBuilder<TopicPartitionOffset>();
+            foreach (var topicAssignment in topicPartitionAssignments)
+            {
+                var topicAndPartitionOffsets = topicAssignment.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+                if (topicAndPartitionOffsets.Length != 2)
+                {
+                    Console.WriteLine($"Invalid topic partition assignment '{topicAssignment} - expected 'topic_name[partition_offsets]'");
+                    return [];
+                }
+                var topicNameOrId = topicAndPartitionOffsets[0];
+                var topic = Topic.Empty;
+                if (Guid.TryParse(topicNameOrId, out var topicIdValue))
+                    topic = topicIdValue;
+                else
+                    topic = topicNameOrId;
+
+
+                var partitionsAndOffsets = topicAndPartitionOffsets[1].Split(',', StringSplitOptions.RemoveEmptyEntries);
+                if (partitionsAndOffsets.Length == 0)
+                {
+                    Console.WriteLine($"Invalid topic partition assignment '{topicAssignment} - expected 'topic_name[partition_offsets]'");
+                    return [];
+                }
+
+                foreach (var partitionsAndOffset in partitionsAndOffsets)
+                {
+                    var partitionOffset = partitionsAndOffset.Split(':', StringSplitOptions.RemoveEmptyEntries);
+                    if (partitionOffset.Length < 1 || !int.TryParse(partitionOffset[0], out var partitionValue))
+                    {
+                        Console.WriteLine($"Invalid partition {partitionsAndOffset} in '{topicAssignment}'");
+                        return [];
+                    }
+
+                    var partition = new Partition(partitionValue);
+                    var offset = Offset.Unset;
+                    if (partitionOffset.Length == 2)
+                    {
+                        if (!long.TryParse(partitionOffset[1], out var offsetValue))
+                        {
+                            Console.WriteLine($"Invalid offset {partitionsAndOffset} in '{topicAssignment}'");
+                            return [];
+                        }
+                        offset = offsetValue;
+                    }
+                    builder.Add(new(new(topic, partition), offset));
+                }
+            }
+            return builder.ToImmutable();
         }
 
         private static async Task CloseClient(
@@ -277,7 +375,7 @@ namespace Kafka.Cli.Cmd
         }
 
         private static async Task CloseReader<TKey, TValue>(
-            IGroupReader<TKey, TValue> streamReader,
+            IReader<TKey, TValue> streamReader,
             CancellationToken cancellationToken
         )
         {

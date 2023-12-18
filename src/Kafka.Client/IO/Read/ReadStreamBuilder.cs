@@ -24,11 +24,11 @@ namespace Kafka.Client.IO.Read
             return this;
         }
 
-        public IGroupReadStreamBuilder AsApplication() =>
+        public IGroupReadStreamBuilder AsGroup() =>
             this
         ;
 
-        public IAssignedReadStreamBuilder AsManual() =>
+        public IAssignedReadStreamBuilder AsAssigned() =>
             this
         ;
 

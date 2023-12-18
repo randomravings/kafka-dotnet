@@ -13,10 +13,6 @@ namespace Kafka.Cli.Cmd
 {
     internal static class GroupsCmd
     {
-        private static readonly JsonSerializerOptions _jsonSerializerOptions = new()
-        {
-            WriteIndented = true
-        };
         public static async Task<int> Parse(
                 IEnumerable<string> args,
                 CancellationToken cancellationToken
@@ -71,7 +67,7 @@ namespace Kafka.Cli.Cmd
                     statesList
                 );
 
-                var result = await client.Groups.List(
+                var result = await client.ListGroups(
                     options,
                     cancellationToken
                 );
@@ -132,7 +128,7 @@ namespace Kafka.Cli.Cmd
                 );
 
 
-                var result = await client.Groups.OffsetsCommitted(
+                var result = await client.GetOffsetsCommitted(
                     opts.Groups.Select(r => new ConsumerGroup(r)),
                     opts.Topics.Select(r => new TopicName(r)),
                     cancellationToken
@@ -195,7 +191,7 @@ namespace Kafka.Cli.Cmd
                     config
                 );
 
-                var result = await client.Groups.Describe(
+                var result = await client.DescribeGroups(
                     opts.Groups.Select(r => new ConsumerGroup(r)).ToImmutableArray(),
                     new DescribeGroupOptions(opts.ShowAllowedOperations),
                     cancellationToken
@@ -209,7 +205,7 @@ namespace Kafka.Cli.Cmd
                     Console.WriteLine($"  Protocol Type:           {group.ProtocolType}");
                     Console.WriteLine($"  Protocol Data:           {group.ProtocolData}");
                     Console.WriteLine($"  Group State:             {group.GroupId.Value}");
-                    Console.WriteLine($"  Auturization:            {group.AuthorizedOperations}");
+                    Console.WriteLine($"  Authorization:           {group.AuthorizedOperations}");
                     Console.WriteLine($"  Error:                   {group.Error.Label}");
                     if (group.Error.Code != ApiError.None.Code)
                     {
@@ -278,7 +274,7 @@ namespace Kafka.Cli.Cmd
                 );
 
 
-                var result = await client.Groups.Delete(
+                var result = await client.DeleteGroups(
                     opts.Groups.Select(r => new ConsumerGroup(r)),
                     cancellationToken
                 );

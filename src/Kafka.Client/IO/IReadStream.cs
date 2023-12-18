@@ -6,12 +6,6 @@ namespace Kafka.Client.IO
     public interface IReadStream
     {
         /// <summary>
-        /// Gets all Topic Partitions in the current stream.
-        /// </summary>
-        /// <returns></returns>
-        IReadOnlySet<TopicPartition> Assignments { get; }
-
-        /// <summary>
         /// Gets a list of suspended partitions.
         /// </summary>
         /// <returns></returns>

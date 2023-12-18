@@ -86,7 +86,7 @@ namespace Kafka.Client.Extensions.DependencyInjection
                 var logger = sp.GetRequiredService<ILogger<IGroupReadStream>>();
                 var stream = client.CreateReadStream()
                     .WithLogger(logger)
-                    .AsApplication()
+                    .AsGroup()
                     .Build();
                 ;
                 return stream

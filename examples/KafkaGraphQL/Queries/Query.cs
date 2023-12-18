@@ -13,7 +13,7 @@ namespace KafkaGraphQL.Queries
 
             [GraphQLType<ListType<StringType>>]
             [GraphQLDescription("List of topics to get, omit for all topics.")]
-            TopicName[]? topicNames,
+            TopicName[]? topics,
 
 
             [GraphQLDescription("Options fetching topics.")]
@@ -25,8 +25,8 @@ namespace KafkaGraphQL.Queries
             CancellationToken cancellationToken
         )
         {
-            var result = await kafkaClient.Topics.List(
-                topicNames ?? [],
+            var result = await kafkaClient.ListTopics(
+                topics ?? [],
                 options ?? ListTopicsOptions.Empty,
                 cancellationToken
             );
@@ -38,7 +38,7 @@ namespace KafkaGraphQL.Queries
 
             [GraphQLType<ListType<StringType>>]
             [GraphQLDescription("List of topics to get, omit for all topics.")]
-            TopicName[] topicNames,
+            TopicName[] topics,
 
             [Service]
             IGroupReader<string, string> streamReader,
@@ -49,9 +49,9 @@ namespace KafkaGraphQL.Queries
         )
         {
             var results = new List<Record>();
-            if (topicNames.Length == 0)
+            if (topics.Length == 0)
                 return results.AsQueryable();
-            if (await streamReader.SetTopics(topicNames))
+            if (await streamReader.SetTopics(topics))
             {
                 var result = await streamReader.Read(
                     cancellationToken

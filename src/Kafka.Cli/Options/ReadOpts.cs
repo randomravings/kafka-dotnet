@@ -5,12 +5,12 @@ namespace Kafka.Cli.Options
     public sealed class ReadOpts
         : Opts
     {
-        [Option("topics", Required = true)]
+        [Option("topics", SetName = "group-assign", Required = true)]
         public IEnumerable<string> Topics { get; set; } = Array.Empty<string>();
         [Option("group-id", SetName = "group-assign")]
         public string GroupId { get; set; } = "";
-        [Option("partition-assign", SetName = "partition-assign", HelpText = PARTITION_ASSIGN_HELP)]
-        public IEnumerable<string> PartitionAssign { get; set; } = Array.Empty<string>();
+        [Option("partition-assign", SetName = "partition-assign", Required = true, HelpText = PARTITION_ASSIGN_HELP)]
+        public IEnumerable<string> ToppicPartitionAssign { get; set; } = Array.Empty<string>();
         [Option("interactive", HelpText = "Starts reader in interactive mode")]
         public bool Interactive { get; set; }
 
