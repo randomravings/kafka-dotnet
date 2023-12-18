@@ -35,13 +35,13 @@ To run the Cli:
 Creating a topic:
 
 ```bash
-./kafka-cli.exe topics create --bootstrap-server localhost:9092 --topic test
+./kafka-cli topics create --bootstrap-server localhost:9092 --topic test
 ```
 
 Producing to a topic:
 
 ```bash
-./kafka-cli.exe producer --bootstrap-server localhost:9092 --topic test
+./kafka-cli write --bootstrap-server localhost:9092 --topic test
 ```
 
 The produce command only accepts comma separated key value pairs eg. "some_key,some_value".
@@ -49,5 +49,6 @@ The produce command only accepts comma separated key value pairs eg. "some_key,s
 Consuming from a topic:
 
 ```bash
-./kafka-cli.exe consumer --bootstrap-server localhost:9092 --topics test --group-id test-cg
+./kafka-cli read --bootstrap-server localhost:9092 --topics test --group-id test-cg
 ```
+> Note: for windows machines the executable is `kafka-cli.exe`
