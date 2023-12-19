@@ -11,7 +11,8 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/src/Kafka.Cli/bin/Debug/net8.0/kafka-cli",
-            "args": ["read", "--bootstrap-server", "localhost:9092", "--topics", "test", "--group-id", "test-cgx", "--properties", "auto.offset.reset=earliest", "--log-level", "trace"],
+            //"args": ["read", "--bootstrap-server", "localhost:9092", "--topics", "test", "--group-id", "test-cg", "--properties", "auto.offset.reset=earliest", "enable.auto.commit=false", "--interactive", "--log-level", "trace"],
+            "args": ["read"],
             "cwd": "${workspaceFolder}/src/Kafka.Cli",
             "stopAtEntry": false,
             // Enable launching a web browser when ASP.NET Core starts. For more information: https://aka.ms/VSCode-CS-LaunchJson-WebBrowser

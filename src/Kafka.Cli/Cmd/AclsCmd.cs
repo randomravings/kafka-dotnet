@@ -9,22 +9,25 @@ namespace Kafka.Cli.Cmd
     internal static class AclsCmd
     {
         public static async Task<int> Parse(
-                IEnumerable<string> args,
-                CancellationToken cancellationToken
-            ) =>
-                await new Parser(with =>
-                {
-                    with.CaseSensitive = true;
-                    with.HelpWriter = Console.Out;
-                    with.IgnoreUnknownArguments = false;
-                    with.CaseInsensitiveEnumValues = true;
-                    with.AllowMultiInstance = false;
-                }).ParseArguments<AclsListOpts>(args)
-                    .MapResult(
-                        (AclsListOpts opts) => List(opts, cancellationToken),
-                        errs => Task.FromResult(-1)
-                    )
-                ;
+            IEnumerable<string> args,
+            CancellationToken cancellationToken
+        )
+        {
+            var parser = new Parser(with =>
+            {
+                with.CaseSensitive = true;
+                with.HelpWriter = null;
+                with.IgnoreUnknownArguments = false;
+                with.CaseInsensitiveEnumValues = true;
+                with.AllowMultiInstance = false;
+            });
+            var result = parser.ParseArguments<AclsListOpts, AclsCreateOpts>(args);
+            return await result.MapResult(
+                (AclsListOpts opts) => List(opts, cancellationToken),
+                (AclsCreateOpts opts) => Create(opts, cancellationToken),
+                err => HelpTextWriter.DisplayHelp(result)
+            );
+        }
 
         public static async Task<int> List(
             AclsListOpts opts,
@@ -60,6 +63,14 @@ namespace Kafka.Cli.Cmd
                 Console.WriteLine(ex.ToString());
                 return -1;
             }
+        }
+
+        public static Task<int> Create(
+            AclsCreateOpts opts,
+            CancellationToken cancellationToken
+        )
+        {
+            return Task.FromResult(-1);
         }
 
         private static KafkaClientConfig CreateConfig(

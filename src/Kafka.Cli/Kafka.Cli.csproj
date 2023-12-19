@@ -9,6 +9,12 @@
     <PublishAot>false</PublishAot>
     <InvariantGlobalization>true</InvariantGlobalization>
     <AssemblyName>kafka-cli</AssemblyName>
+    <Version>0.1.0-alpha</Version>
+    <Authors>Bergur Ziska</Authors>
+    <Company>Random Ravings</Company>
+    <Product>Kafka Client .Net</Product>
+    <Copyright>Copyright (c) Random Ravings 2023</Copyright>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
   </PropertyGroup>
 
   <ItemGroup>

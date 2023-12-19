@@ -7,32 +7,33 @@ using Kafka.Client.Model;
 using Kafka.Common.Model;
 using Kafka.Common.Model.Comparison;
 using System.Collections.Immutable;
-using System.Text.Json;
 
 namespace Kafka.Cli.Cmd
 {
     internal static class GroupsCmd
     {
         public static async Task<int> Parse(
-                IEnumerable<string> args,
-                CancellationToken cancellationToken
-            ) =>
-                await new Parser(with =>
-                {
-                    with.CaseSensitive = true;
-                    with.HelpWriter = Console.Out;
-                    with.IgnoreUnknownArguments = false;
-                    with.CaseInsensitiveEnumValues = true;
-                    with.AllowMultiInstance = false;
-                }).ParseArguments<GroupsListOpts, GroupsDescribeOpts, GroupsOffsetOpts, GroupsDeleteOpts>(args)
-                    .MapResult(
-                        (GroupsListOpts opts) => List(opts, cancellationToken),
-                        (GroupsDescribeOpts opts) => Describe(opts, cancellationToken),
-                        (GroupsOffsetOpts opts) => Offsets(opts, cancellationToken),
-                        (GroupsDeleteOpts opts) => Delete(opts, cancellationToken),
-                        errs => Task.FromResult(-1)
-                    )
-                ;
+            IEnumerable<string> args,
+            CancellationToken cancellationToken
+        )
+        {
+            var parser = new Parser(with =>
+            {
+                with.CaseSensitive = true;
+                with.HelpWriter = null;
+                with.IgnoreUnknownArguments = false;
+                with.CaseInsensitiveEnumValues = true;
+                with.AllowMultiInstance = false;
+            });
+            var result = parser.ParseArguments<GroupsListOpts, GroupsDescribeOpts, GroupsOffsetOpts, GroupsDeleteOpts>(args);
+            return await result.MapResult(
+                (GroupsListOpts opts) => List(opts, cancellationToken),
+                (GroupsDescribeOpts opts) => Describe(opts, cancellationToken),
+                (GroupsOffsetOpts opts) => Offsets(opts, cancellationToken),
+                (GroupsDeleteOpts opts) => Delete(opts, cancellationToken),
+                err => HelpTextWriter.DisplayHelp(result)
+            );
+        }
 
         public static async Task<int> List(
             GroupsListOpts opts,
@@ -140,7 +141,7 @@ namespace Kafka.Cli.Cmd
                 foreach (var (group, topicPartitionOffsets) in result)
                 {
                     groupWidth = Math.Max(groupWidth, group.Value.Length);
-                    if(topicPartitionOffsets.Count > 0)
+                    if (topicPartitionOffsets.Count > 0)
                         topicWidth = Math.Max(topicWidth, topicPartitionOffsets.Max(r => r.TopicPartition.Topic.TopicName.Value?.Length ?? 0));
                 }
                 groupWidth += 2;

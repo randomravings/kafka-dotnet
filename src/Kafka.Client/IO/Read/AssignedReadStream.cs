@@ -17,6 +17,8 @@ namespace Kafka.Client.IO.Read
         ReadStream(connectionManager, config, logger),
         IAssignedReadStream
     {
+        private readonly SemaphoreSlim _reconfigureSemaphore = new(1, 1);
+
         IAssignedReaderBuilder IAssignedReadStream.CreateReader() =>
             new AssignedReaderBuilder(
                 this,
@@ -29,44 +31,94 @@ namespace Kafka.Client.IO.Read
             CancellationToken cancellationToken
         )
         {
-            var topicsToCheckBuilder = ImmutableSortedSet.CreateBuilder(TopicCompare.Instance);
-            var topicPartitionOffsetsToAddBuilder = ImmutableArray.CreateBuilder<TopicPartitionOffset>();
-            foreach (var topicPartitionOffset in topicPartitionOffsets)
-            {
-                if (_trackedOffsets.ContainsKey(topicPartitionOffset.TopicPartition))
-                    continue;
-                topicsToCheckBuilder.Add(topicPartitionOffset.TopicPartition.Topic);
-                topicPartitionOffsetsToAddBuilder.Add(topicPartitionOffset);
-            }
-            var topicPartitionOffsetsToAdd = topicPartitionOffsetsToAddBuilder.ToImmutable();
-            if (topicPartitionOffsetsToAdd.Length == 0)
-                return;
-
-            var invalidTopicPartitionOffsets = await CheckTopicPartitionOffsetList(
-                topicPartitionOffsetsToAdd,
+            await _reconfigureSemaphore.WaitAsync(
                 cancellationToken
             ).ConfigureAwait(false);
-            if (invalidTopicPartitionOffsets.Length > 0)
-                throw new ArgumentException($"Cluster returned missing topic partitions invalid offsets: '{string.Join(',', invalidTopicPartitionOffsets)}'");
-            foreach (var (topicPartition, offset) in topicPartitionOffsets)
-                _trackedOffsets.TryAdd(topicPartition, offset);
-            SignalStateAltered();
+            try
+            {
+                var topicPartitionOffsetsToAddBuilder = ImmutableArray.CreateBuilder<TopicPartitionOffset>();
+                foreach (var topicPartitionOffset in topicPartitionOffsets)
+                {
+                    if (_trackedOffsets.ContainsKey(topicPartitionOffset.TopicPartition))
+                        continue;
+                    topicPartitionOffsetsToAddBuilder.Add(topicPartitionOffset);
+                }
+                var topicPartitionOffsetsToAdd = topicPartitionOffsetsToAddBuilder.ToImmutable();
+                if (topicPartitionOffsetsToAdd.Length == 0)
+                    return;
+
+                var invalidTopicPartitionOffsets = await CheckTopicPartitionOffsetList(
+                    topicPartitionOffsetsToAdd,
+                    cancellationToken
+                ).ConfigureAwait(false);
+                if (invalidTopicPartitionOffsets.Length > 0)
+                    throw new ArgumentException($"Cluster returned missing topic partitions invalid offsets: '{string.Join(',', invalidTopicPartitionOffsets)}'");
+                foreach (var (topicPartition, offset) in topicPartitionOffsets)
+                    _trackedOffsets.TryAdd(topicPartition, offset);
+                SignalStateAltered();
+            }
+            finally
+            {
+                _reconfigureSemaphore.Release();
+            }
         }
 
-        ValueTask IAssignedReadStream.Unassign(
+        async ValueTask IAssignedReadStream.Unassign(
             IReadOnlyList<TopicPartition> topicPartitions,
             CancellationToken cancellationToken
         )
         {
-            throw new NotImplementedException();
+            await _reconfigureSemaphore.WaitAsync(
+                cancellationToken
+            ).ConfigureAwait(false);
+            try
+            {
+                var topicPartitionsToRemove = new List<TopicPartition>();
+                foreach (var topicPartition in topicPartitions)
+                    if (_trackedOffsets.ContainsKey(topicPartition))
+                        topicPartitionsToRemove.Add(topicPartition);
+            }
+            finally
+            {
+                _reconfigureSemaphore.Release();
+            }
         }
 
-        ValueTask IAssignedReadStream.Seek(
+        async ValueTask IAssignedReadStream.Seek(
             IReadOnlyList<TopicPartitionOffset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
         {
-            throw new NotImplementedException();
+            await _reconfigureSemaphore.WaitAsync(
+                cancellationToken
+            ).ConfigureAwait(false);
+            try
+            {
+                var topicPartitionOffsetsToSeekBuilder = ImmutableArray.CreateBuilder<TopicPartitionOffset>();
+                foreach (var topicPartitionOffset in topicPartitionOffsets)
+                {
+                    if (!_trackedOffsets.ContainsKey(topicPartitionOffset.TopicPartition))
+                        continue;
+                    topicPartitionOffsetsToSeekBuilder.Add(topicPartitionOffset);
+                }
+                var topicPartitionOffsetsToSeek = topicPartitionOffsetsToSeekBuilder.ToImmutable();
+                if (topicPartitionOffsetsToSeek.Length == 0)
+                    return;
+
+                var invalidTopicPartitionOffsets = await CheckTopicPartitionOffsetList(
+                    topicPartitionOffsetsToSeek,
+                    cancellationToken
+                ).ConfigureAwait(false);
+                if (invalidTopicPartitionOffsets.Length > 0)
+                    throw new ArgumentException($"Cluster returned missing topic partitions invalid offsets: '{string.Join(',', invalidTopicPartitionOffsets)}'");
+                foreach (var (topicPartition, offset) in topicPartitionOffsets)
+                    _trackedOffsets[topicPartition] = offset;
+                SignalStateAltered();
+            }
+            finally
+            {
+                _reconfigureSemaphore.Release();
+            }
         }
 
         protected override ValueTask Closing(
@@ -102,6 +154,15 @@ namespace Kafka.Client.IO.Read
             trackedOffsets.Clear();
             foreach (var topicPartition in topicPartitions)
                 trackedOffsets.TryAdd(topicPartition, stored[topicPartition]);
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            if (disposing)
+            {
+                _reconfigureSemaphore.Dispose();
+            }
         }
     }
 }

@@ -14,23 +14,25 @@ namespace Kafka.Cli.Cmd
         public static async Task<int> Parse(
             IEnumerable<string> args,
             CancellationToken cancellationToken
-        ) =>
-            await new Parser(with =>
+        )
+        {
+            var parser = new Parser(with =>
             {
                 with.CaseSensitive = true;
-                with.HelpWriter = Console.Out;
+                with.HelpWriter = null;
                 with.IgnoreUnknownArguments = false;
                 with.CaseInsensitiveEnumValues = true;
                 with.AllowMultiInstance = false;
-            }).ParseArguments<TopicsListOpts, TopicsCreateOpts, TopicsDescribeOpts, TopicsDeleteOpts>(args)
-                .MapResult(
-                    (TopicsListOpts verb) => List(verb, cancellationToken),
-                    (TopicsCreateOpts verb) => Create(verb, cancellationToken),
-                    (TopicsDescribeOpts verb) => Describe(verb, cancellationToken),
-                    (TopicsDeleteOpts verb) => Delete(verb, cancellationToken),
-                    errs => Task.FromResult(-1)
-                )
-            ;
+            });
+            var result = parser.ParseArguments<TopicsListOpts, TopicsCreateOpts, TopicsDescribeOpts, TopicsDeleteOpts>(args);
+            return await result.MapResult(
+                (TopicsListOpts opts) => List(opts, cancellationToken),
+                (TopicsCreateOpts opts) => Create(opts, cancellationToken),
+                (TopicsDescribeOpts opts) => Describe(opts, cancellationToken),
+                (TopicsDeleteOpts opts) => Delete(opts, cancellationToken),
+                err => HelpTextWriter.DisplayHelp(result)
+            );
+        }
 
         public static async Task<int> List(
             TopicsListOpts opts,
@@ -171,7 +173,7 @@ namespace Kafka.Cli.Cmd
                 {
                     if (topic.Error.Code == 0)
                     {
-                        Console.WriteLine($"  Topic Id:   {topic.TopicId.Value})");
+                        Console.WriteLine($"  Topic Id:   {topic.TopicId.Value}");
                         Console.WriteLine($"  Topic Name: {topic.TopicName.Value}");
                     }
                     else

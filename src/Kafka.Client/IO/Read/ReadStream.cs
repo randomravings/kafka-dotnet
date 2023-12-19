@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Net.Http.Headers;
 
 namespace Kafka.Client.IO.Read
 {
@@ -20,7 +19,9 @@ namespace Kafka.Client.IO.Read
         IReadStream,
         IDisposable
     {
-        private static readonly TimeSpan WAIT_INDEFINITELY = TimeSpan.FromMilliseconds(-1);
+        private static readonly TimeSpan WAIT_INDEFINITELY =
+            TimeSpan.FromMilliseconds(-1)
+        ;
 
         private readonly List<ReadChannel> _channels = [];
         private readonly List<Task> _channelTasks = [];
@@ -32,8 +33,12 @@ namespace Kafka.Client.IO.Read
         private bool _disposed;
 
         protected readonly ICluster<INodeLink> _cluster;
-        protected readonly ConcurrentDictionary<TopicPartition, Offset> _trackedOffsets = new(TopicPartitionCompare.Equality);
-        protected readonly SortedSet<TopicPartition> _pausedTopicPartitions = new(TopicPartitionCompare.Instance);
+        protected readonly ConcurrentDictionary<TopicPartition, Offset> _trackedOffsets = new(
+            TopicPartitionCompare.Equality
+        );
+        protected readonly SortedSet<TopicPartition> _pausedTopicPartitions = new(
+            TopicPartitionCompare.Instance
+        );
         protected readonly ReadStreamConfig _config;
         protected readonly ILogger _logger;
         protected readonly int _sessionTimeoutMs;
@@ -223,13 +228,19 @@ namespace Kafka.Client.IO.Read
             CancellationToken cancellationToken
         )
         {
-            await _semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+            await _semaphore.WaitAsync(
+                cancellationToken
+            ).ConfigureAwait(false);
             try
             {
                 if (Interlocked.Read(ref _stateAltered) == 0)
                     return;
 
-                await _channelCts.CancelAsync().ConfigureAwait(false);
+                await _channelCts
+                    .CancelAsync()
+                    .ConfigureAwait(false)
+                ;
+
                 await Task.WhenAll(
                     _channelTasks
                 ).ConfigureAwait(false);
@@ -254,7 +265,9 @@ namespace Kafka.Client.IO.Read
                 ;
 
                 if (_autoOffsetReset == AutoOffsetReset.None && missingOffsets.Length > 0)
-                    throw new InvalidOperationException("Unset partitions found with auto.offset.reset=none");
+                    throw new InvalidOperationException(
+                        "Unset partitions found with auto.offset.reset=none"
+                    );
 
                 var assignments = await GetTopicPartitionAssignments(
                     _trackedOffsets,
@@ -311,7 +324,13 @@ namespace Kafka.Client.IO.Read
             {
                 foreach (var partition in topic.PartitionsField)
                 {
-                    var topicPartition = new TopicPartition(new Topic(topic.TopicIdField, topic.NameField), partition.PartitionIndexField);
+                    var topicPartition = new TopicPartition(
+                        new Topic(
+                            topic.TopicIdField,
+                            topic.NameField
+                        ),
+                        partition.PartitionIndexField
+                    );
                     if (!topicPartitions.TryGetValue(topicPartition, out var offset))
                         continue;
                     if (!topicPartitionAssignments.TryGetValue(partition.LeaderIdField, out var topicPartitionAssignment))
@@ -718,11 +737,12 @@ namespace Kafka.Client.IO.Read
 
         protected bool IsTracked(
             in TopicPartition topicPartition,
-            in Offset offset
+            in Offset offset,
+            out Offset trackedOffset
         ) =>
-            _trackedOffsets.TryGetValue(topicPartition, out var trackedOffset) &&
+            _trackedOffsets.TryGetValue(topicPartition, out trackedOffset) &&
             offset <= trackedOffset
-        ;
+        ;            
 
         protected abstract ValueTask UpdateTrackedOffsets(
             ConcurrentDictionary<TopicPartition, Offset> trackedOffsets,

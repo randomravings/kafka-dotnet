@@ -13,6 +13,10 @@ namespace Kafka.Cli.Text
             value.ToString().ToLowerInvariant()
         ;
 
+        public static string Print(in Timestamp value, in string formatString) =>
+            value.ToDateTimeOffset().ToString(formatString)
+        ;
+
         public static string Print(in ApiError value) =>
             value.Code switch
             {

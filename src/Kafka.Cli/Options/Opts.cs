@@ -14,7 +14,7 @@ namespace Kafka.Cli.Options
         [Option("properties", HelpText = "List of kafka client configurations as <key>=<value>")]
         public IEnumerable<string> Properties { get; set; } = Array.Empty<string>();
 
-        [Option("verbose", HelpText = "Shows all cli print outs.", Default = false)]
-        public bool Verbose { get; set; } = false;
+        [Option('q', "quiet", HelpText = "Hides intro messages")]
+        public bool Quiet { get; set; }
     }
 }

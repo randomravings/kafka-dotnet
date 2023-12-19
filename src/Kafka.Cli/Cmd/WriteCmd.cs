@@ -4,6 +4,7 @@ using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Client.Config;
 using Kafka.Client.IO;
+using Kafka.Client.Model;
 using Kafka.Common.Model;
 using Kafka.Common.Serialization.Nullable;
 
@@ -14,19 +15,22 @@ namespace Kafka.Cli.Cmd
         public static async Task<int> Parse(
             IEnumerable<string> args,
             CancellationToken cancellationToken
-        ) => await new Parser(with =>
+        )
         {
-            with.CaseSensitive = true;
-            with.HelpWriter = Console.Out;
-            with.IgnoreUnknownArguments = false;
-            with.CaseInsensitiveEnumValues = true;
-            with.AllowMultiInstance = false;
-        }).ParseArguments<WriteOpts>(args)
-            .MapResult(
+            var parser = new Parser(with =>
+            {
+                with.CaseSensitive = true;
+                with.HelpWriter = null;
+                with.IgnoreUnknownArguments = false;
+                with.CaseInsensitiveEnumValues = true;
+                with.AllowMultiInstance = false;
+            });
+            var result = parser.ParseArguments<WriteOpts>(args);
+            return await result.MapResult(
                 (WriteOpts opts) => Run(opts, cancellationToken),
-                errs => Task.FromResult(-1)
-            )
-        ;
+                err => HelpTextWriter.DisplayHelp(result)
+            );
+        }
 
         private static async Task<int> Run(
             WriteOpts opts,
@@ -59,7 +63,8 @@ namespace Kafka.Cli.Cmd
 
             var topic = new TopicName(opts.Topic);
 
-            Console.WriteLine("Stream Writer: Empty new or Ctrl+C line will terminate session.");
+            if (!opts.Quiet)
+                Console.WriteLine("Stream Writer: Empty new or Ctrl+C line will terminate session.");
             var transaction = default(ITransaction);
             var batch = new List<KeyValuePair<string, string>>();
             var batching = false;
@@ -73,26 +78,12 @@ namespace Kafka.Cli.Cmd
                     switch (input)
                     {
                         case "/sb":
-                            if (batching)
-                            {
-                                Console.WriteLine("Batching is already in progress");
-                            }
-                            else
-                            {
+                            if (!batching)
                                 batching = true;
-                                if (opts.Verbose)
-                                    Console.WriteLine("Batching started");
-                            }
                             continue;
                         case "/eb":
-                            if (!batching)
+                            if (batching)
                             {
-                                Console.WriteLine("Batching is not in progress");
-                            }
-                            else
-                            {
-                                if (opts.Verbose)
-                                    Console.WriteLine($"Batching completed {batch.Count} records");
                                 await HandleBatch(
                                     topic,
                                     writer,
@@ -104,28 +95,13 @@ namespace Kafka.Cli.Cmd
                             }
                             continue;
                         case "/bt":
-                            if (transaction == null)
-                            {
-                                transaction = await outputStream.BeginTransaction(cancellationToken).ConfigureAwait(false);
-                                if (opts.Verbose)
-                                    Console.WriteLine("Transaction in progress");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Transaction is already in progress");
-                            }
+                            transaction ??= await outputStream.BeginTransaction(cancellationToken).ConfigureAwait(false);
                             continue;
                         case "/ct":
                             if (transaction != null)
                             {
                                 await transaction.Commit(cancellationToken).ConfigureAwait(false);
                                 transaction = null;
-                                if (opts.Verbose)
-                                    Console.WriteLine("Transaction committed");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Transaction is not in progress");
                             }
                             continue;
                         case "/rt":
@@ -133,12 +109,6 @@ namespace Kafka.Cli.Cmd
                             {
                                 await transaction.Rollback(cancellationToken).ConfigureAwait(false);
                                 transaction = null;
-                                if (opts.Verbose)
-                                    Console.WriteLine("Transaction rolled back");
-                            }
-                            else
-                            {
-                                Console.WriteLine("Transaction is not in progress");
                             }
                             continue;
                         case "/fl":
@@ -148,7 +118,7 @@ namespace Kafka.Cli.Cmd
                             var split = input.Split(',', StringSplitOptions.RemoveEmptyEntries);
                             if (split.Length != 2)
                             {
-                                Console.WriteLine("Format must be 'key,value'");
+                                Console.WriteLine("format must be 'key,value'");
                             }
                             else if (batching)
                             {
@@ -157,8 +127,7 @@ namespace Kafka.Cli.Cmd
                             else
                             {
                                 var result = await writer.Write(topic, split[0], split[1], cancellationToken).ConfigureAwait(false);
-                                if(opts.Verbose)
-                                    Console.WriteLine(Formatter.Print(result.TopicPartitionOffset));
+                                PrintResult(result, opts);
                             }
                             continue;
                     }
@@ -210,9 +179,8 @@ namespace Kafka.Cli.Cmd
                     .ToArray()
                 ;
                 var results = await Task.WhenAll(tasks);
-                if (opts.Verbose)
-                    foreach (var result in results)
-                        Console.WriteLine(Formatter.Print(result.TopicPartitionOffset));
+                foreach (var result in results)
+                    PrintResult(result, opts);
             }
             catch (AggregateException ex)
             {
@@ -226,6 +194,29 @@ namespace Kafka.Cli.Cmd
             batch.Clear();
         }
 
+        private static void PrintResult(
+            in WriteResult result,
+            in WriteOpts opts
+        )
+        {
+            if (opts.TopicDetails == TopicDisplayLevel.None)
+                return;
+            if (opts.TopicDetails.HasFlag(TopicDisplayLevel.Topic))
+            {
+                Console.Write(Formatter.Print(result.TopicPartitionOffset.TopicPartition.Topic.TopicName));
+                if (opts.TopicDetails.HasFlag(TopicDisplayLevel.PartitionOffset))
+                    Console.Write(':');
+            }
+            if (opts.TopicDetails.HasFlag(TopicDisplayLevel.Partition))
+            {
+                Console.Write(Formatter.Print(result.TopicPartitionOffset.TopicPartition.Partition));
+                if (opts.TopicDetails.HasFlag(TopicDisplayLevel.Offset))
+                    Console.Write(':');
+            }
+            if (opts.TopicDetails.HasFlag(TopicDisplayLevel.Offset))
+                Console.Write(Formatter.Print(result.TopicPartitionOffset.Offset));
+            Console.WriteLine();
+        }
 
         private static KafkaClientConfig CreateConfig(
             WriteOpts opts

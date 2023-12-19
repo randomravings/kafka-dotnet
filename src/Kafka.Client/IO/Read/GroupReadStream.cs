@@ -1,5 +1,4 @@
-﻿using Kafka.Client.Collections;
-using Kafka.Client.Config;
+﻿using Kafka.Client.Config;
 using Kafka.Client.Logging;
 using Kafka.Client.Messages;
 using Kafka.Client.Model.Internal;
@@ -70,7 +69,7 @@ namespace Kafka.Client.IO.Read
             var added = false;
             foreach (var topic in topics)
                 added |= _topics.Add(topic);
-            if(added)
+            if (added)
                 SignalStateAltered();
         }
 
@@ -85,26 +84,24 @@ namespace Kafka.Client.IO.Read
         async Task IGroupReadStream.Commit(
             TopicPartitionOffset topicPartitionOffset,
             CancellationToken cancellationToken
-        )
-        {
-            await _commitSync.WaitAsync(cancellationToken).ConfigureAwait(false);
-            try
-            {
-                var offsetsToCommit = GetOffsetToCommit();
-                if (offsetsToCommit.Count == 0)
-                    return;
-                await CommitOffsets(
-                    offsetsToCommit,
-                    cancellationToken
-                ).ConfigureAwait(false);
-            }
-            finally
-            {
-                _commitSync.Release();
-            }
-        }
+        ) =>
+            await Commit(
+                [topicPartitionOffset],
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
 
         async Task IGroupReadStream.Commit(
+            IEnumerable<TopicPartitionOffset> topicPartitionOffsets,
+            CancellationToken cancellationToken
+        ) =>
+            await Commit(
+                topicPartitionOffsets,
+                cancellationToken
+            ).ConfigureAwait(false)
+        ;
+
+        private async Task Commit(
             IEnumerable<TopicPartitionOffset> topicPartitionOffsets,
             CancellationToken cancellationToken
         )
@@ -115,11 +112,11 @@ namespace Kafka.Client.IO.Read
                 var offsetToCommit = new Dictionary<TopicPartition, Offset>();
                 foreach ((var topicPartition, var offset) in topicPartitionOffsets)
                 {
-                    if (!IsTracked(topicPartition, offset))
+                    if (!IsTracked(topicPartition, offset, out var trackedOffset))
                         break;
-                    if (IsCommited(topicPartition, offset))
+                    if (IsCommited(topicPartition, trackedOffset))
                         break;
-                    offsetToCommit.Add(topicPartition, offset);
+                    offsetToCommit.Add(topicPartition, trackedOffset);
                 }
                 if (offsetToCommit.Count > 0)
                     await CommitOffsets(offsetToCommit, cancellationToken).ConfigureAwait(false);
@@ -640,7 +637,7 @@ namespace Kafka.Client.IO.Read
                 {
                     foreach (var partition in topic.PartitionsField)
                     {
-                        if(partition.CommittedOffsetField < 0)
+                        if (partition.CommittedOffsetField < 0)
                             continue;
                         var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
                         topicPartitionOffsets[topicPartition] = partition.CommittedOffsetField;
@@ -653,8 +650,8 @@ namespace Kafka.Client.IO.Read
             {
                 foreach (var partition in topic.PartitionsField)
                 {
-                    if(partition.CommittedOffsetField < 0)
-                            continue;
+                    if (partition.CommittedOffsetField < 0)
+                        continue;
                     var topicPartition = new TopicPartition(topic.NameField, partition.PartitionIndexField);
                     topicPartitionOffsets[topicPartition] = partition.CommittedOffsetField;
                 }
