@@ -16,10 +16,10 @@ services:
       KAFKA_LISTENERS: 'CONTROLLER://broker-01:29093,BROKER://broker-01:29092,HOST://0.0.0.0:9092'
       KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
       KAFKA_SSL_KEYSTORE_FILENAME: kafka.broker-01.keystore.pkcs12
-      KAFKA_SSL_KEYSTORE_CREDENTIALS: broker_keystore_creds
-      KAFKA_SSL_KEY_CREDENTIALS: broker_sslkey_creds
-      KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.broker-01.truststore.pkcs12
-      KAFKA_SSL_TRUSTSTORE_CREDENTIALS: broker_truststore_creds
+      KAFKA_SSL_KEYSTORE_CREDENTIALS: broker-01_keystore_creds
+      KAFKA_SSL_KEY_CREDENTIALS: broker-01_sslkey_creds
+      #KAFKA_SSL_TRUSTSTORE_FILENAME: kafka.broker-01.truststore.pkcs12
+      #KAFKA_SSL_TRUSTSTORE_CREDENTIALS: broker-01_truststore_creds
       AFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: "HTTPS"
       KAFKA_SSL_CLIENT_AUTH: "required"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -55,7 +55,7 @@ services:
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
       KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
     volumes:
-      - ./broker-01-creds:/etc/kafka/secrets
+      - ./secrets/broker-01-creds:/etc/kafka/secrets
 
   schema-registry:
     image: confluentinc/cp-schema-registry:7.5.1
