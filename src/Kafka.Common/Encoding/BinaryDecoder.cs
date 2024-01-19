@@ -7,17 +7,26 @@ namespace Kafka.Common.Encoding
 {
     public static class BinaryDecoder
     {
-        public static DecodeResult<bool> ReadBoolean([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<bool> ReadBoolean(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             return new(index + 1, buffer[index] != 0);
         }
 
-        public static DecodeResult<sbyte> ReadInt8([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<sbyte> ReadInt8(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             return new(index + 1, unchecked((sbyte)buffer[index]));
         }
 
-        public static DecodeResult<short> ReadInt16([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<short> ReadInt16(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             var value = unchecked((short)(
@@ -27,14 +36,20 @@ namespace Kafka.Common.Encoding
             return new(i, value);
         }
 
-        public static DecodeResult<ushort> ReadUInt16([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<ushort> ReadUInt16(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var value) = ReadInt16(buffer, i);
             return new(i, (ushort)value);
         }
 
-        public static DecodeResult<int> ReadInt32([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<int> ReadInt32(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             var value = unchecked(
@@ -46,14 +61,20 @@ namespace Kafka.Common.Encoding
             return new(i, value);
         }
 
-        public static DecodeResult<uint> ReadUInt32([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<uint> ReadUInt32(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var value) = ReadInt32(buffer, i);
             return new(i, (uint)value);
         }
 
-        public static DecodeResult<long> ReadInt64([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<long> ReadInt64(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             var value = unchecked(
@@ -69,45 +90,68 @@ namespace Kafka.Common.Encoding
             return new(i, value);
         }
 
-        public static DecodeResult<ulong> ReadUInt64([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<ulong> ReadUInt64(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var value) = ReadInt64(buffer, i);
             return new(i, (ulong)value);
         }
 
-        public static DecodeResult<int> ReadVarInt32([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<int> ReadVarInt32(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var value) = ZigZagDecode(buffer, i, 31);
             return new(i, unchecked((int)(value >> 1) ^ -(int)(value & 1)));
         }
 
-        public static DecodeResult<uint> ReadVarUInt32([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<uint> ReadVarUInt32(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var value) = ZigZagDecode(buffer, i, 31);
             return new(i, unchecked((uint)value));
         }
 
-        public static DecodeResult<long> ReadVarInt64([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<long> ReadVarInt64(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var value) = ZigZagDecode(buffer, i, 63);
             return new(i, unchecked((long)(value >> 1) ^ -(long)(value & 1)));
         }
 
-        public static DecodeResult<double> ReadFloat64([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<double> ReadFloat64(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var bits) = ReadInt64(buffer, i);
             return new(i, BitConverter.Int64BitsToDouble(bits));
         }
 
-        public static DecodeResult<Guid> ReadUuid([NotNull] in byte[] buffer, in int index) =>
-            new(index + 16, new Guid(buffer.AsSpan(index, 16)));
+        public static DecodeResult<Guid> ReadUuid(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
+        {
+            return new(index + 16, new Guid(buffer.AsSpan(index, 16)));
+        }
 
-        public static DecodeResult<string> ReadString([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<string> ReadString(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadInt16(buffer, i);
@@ -115,7 +159,10 @@ namespace Kafka.Common.Encoding
             return new(i + length, value);
         }
 
-        public static DecodeResult<string> ReadCompactString([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<string> ReadCompactString(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadVarUInt32(buffer, i);
@@ -124,7 +171,10 @@ namespace Kafka.Common.Encoding
             return new(i + intLength, value);
         }
 
-        public static DecodeResult<string?> ReadNullableString([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<string?> ReadNullableString(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadInt16(buffer, i);
@@ -134,7 +184,10 @@ namespace Kafka.Common.Encoding
             return new(i + length, value);
         }
 
-        public static DecodeResult<string?> ReadCompactNullableString([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<string?> ReadCompactNullableString(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadVarUInt32(buffer, i);
@@ -145,7 +198,10 @@ namespace Kafka.Common.Encoding
             return new(i + intLength, value);
         }
 
-        public static DecodeResult<byte[]> ReadBytes([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<byte[]> ReadBytes(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadInt32(buffer, i);
@@ -153,7 +209,10 @@ namespace Kafka.Common.Encoding
             return new(endIndex, buffer[i..endIndex]);
         }
 
-        public static DecodeResult<byte[]> ReadCompactBytes([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<byte[]> ReadCompactBytes(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadVarUInt32(buffer, i);
@@ -162,7 +221,10 @@ namespace Kafka.Common.Encoding
             return new(endIndex, buffer[i..endIndex]);
         }
 
-        public static DecodeResult<byte[]?> ReadNullableBytes([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<byte[]?> ReadNullableBytes(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadInt32(buffer, i);
@@ -172,7 +234,10 @@ namespace Kafka.Common.Encoding
             return new(endIndex, buffer[i..endIndex]);
         }
 
-        public static DecodeResult<byte[]?> ReadCompactNullableBytes([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<byte[]?> ReadCompactNullableBytes(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadVarUInt32(buffer, i);
@@ -183,14 +248,20 @@ namespace Kafka.Common.Encoding
             return new(endIndex, buffer[i..endIndex]);
         }
 
-        public static DecodeResult<ImmutableArray<IRecords>> ReadRecords([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<ImmutableArray<IRecords>> ReadRecords(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadInt32(buffer, i);
             return ReadRecordBatches(buffer, length, i);
         }
 
-        public static DecodeResult<ImmutableArray<IRecords>> ReadCompactRecords([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<ImmutableArray<IRecords>> ReadCompactRecords(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var length) = ReadVarUInt32(buffer, i);
@@ -198,7 +269,11 @@ namespace Kafka.Common.Encoding
             return ReadRecordBatches(buffer, intLength, i);
         }
 
-        private static DecodeResult<ImmutableArray<IRecords>> ReadRecordBatches([NotNull] in byte[] buffer, int length, in int index)
+        private static DecodeResult<ImmutableArray<IRecords>> ReadRecordBatches(
+            [NotNull] in byte[] buffer,
+            int length,
+            in int index
+        )
         {
             if (length == 0)
                 return new(index, default);
@@ -213,7 +288,10 @@ namespace Kafka.Common.Encoding
             return new(i, recordBatchesBuilder.ToImmutable());
         }
 
-        private static DecodeResult<IRecords> ReadRecordBatch([NotNull] in byte[] buffer, in int index)
+        private static DecodeResult<IRecords> ReadRecordBatch(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             var records = ImmutableArray<IRecord>.Empty;
@@ -260,7 +338,10 @@ namespace Kafka.Common.Encoding
             ));
         }
 
-        private static DecodeResult<IRecord> ReadControlRecord([NotNull] in byte[] buffer, in int index)
+        private static DecodeResult<IRecord> ReadControlRecord(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             var version = default(short);
@@ -310,7 +391,10 @@ namespace Kafka.Common.Encoding
             ));
         }
 
-        private static DecodeResult<IRecord> ReadRecord([NotNull] in byte[] buffer, in int index)
+        private static DecodeResult<IRecord> ReadRecord(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             var key = default(ReadOnlyMemory<byte>?);
@@ -365,7 +449,11 @@ namespace Kafka.Common.Encoding
             return new(i, new(key, value));
         }
 
-        public static DecodeResult<ImmutableArray<TItem>> ReadArray<TItem>([NotNull] in byte[] buffer, in int index, [NotNull] in DecodeValue<TItem> readItem)
+        public static DecodeResult<ImmutableArray<TItem>> ReadArray<TItem>(
+            [NotNull] in byte[] buffer,
+            in int index,
+            [NotNull] in DecodeValue<TItem> readItem
+        )
         {
             var i = index;
             (i, var length) = ReadInt32(buffer, i);
@@ -380,7 +468,11 @@ namespace Kafka.Common.Encoding
             return new(i, items.ToImmutable());
         }
 
-        public static DecodeResult<ImmutableArray<TItem>> ReadCompactArray<TItem>([NotNull] in byte[] buffer, in int index, [NotNull] in DecodeValue<TItem> readItem)
+        public static DecodeResult<ImmutableArray<TItem>> ReadCompactArray<TItem>(
+            [NotNull] in byte[] buffer,
+            in int index,
+            [NotNull] in DecodeValue<TItem> readItem
+        )
         {
             var (i, length) = ReadVarUInt32(buffer, index);
             if (length == 0)
@@ -395,7 +487,10 @@ namespace Kafka.Common.Encoding
             return new(i, items.ToImmutable());
         }
 
-        public static DecodeResult<ImmutableArray<TaggedField>> ReadTaggedFields([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<ImmutableArray<TaggedField>> ReadTaggedFields(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var (i, count) = ReadVarInt32(buffer, index);
             if (count == 0)
@@ -409,7 +504,10 @@ namespace Kafka.Common.Encoding
             return new(i, taggedFieldsBuilder.ToImmutable());
         }
 
-        public static DecodeResult<TaggedField> ReadTaggedField([NotNull] in byte[] buffer, in int index)
+        public static DecodeResult<TaggedField> ReadTaggedField(
+            [NotNull] in byte[] buffer,
+            in int index
+        )
         {
             var i = index;
             (i, var tag) = ReadVarInt32(buffer, i);
@@ -417,7 +515,11 @@ namespace Kafka.Common.Encoding
             return new(i, new(tag, value));
         }
 
-        private static DecodeResult<ulong> ZigZagDecode([NotNull] in byte[] buffer, in int index, int bits)
+        private static DecodeResult<ulong> ZigZagDecode([
+            NotNull] in byte[] buffer,
+            in int index,
+            in int bits
+        )
         {
             var i = index;
             var value = 0UL;
