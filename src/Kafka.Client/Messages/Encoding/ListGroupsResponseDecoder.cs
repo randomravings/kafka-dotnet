@@ -16,7 +16,7 @@ namespace Kafka.Client.Messages.Encoding
         internal ListGroupsResponseDecoder() :
             base(
                 ApiKey.ListGroups,
-                new(0, 4),
+                new(0, 5),
                 new(3, 32767),
                 ResponseHeaderDecoder.ReadV0,
                 ReadV0
@@ -37,6 +37,7 @@ namespace Kafka.Client.Messages.Encoding
                 2 => ReadV2,
                 3 => ReadV3,
                 4 => ReadV4,
+                5 => ReadV5,
                 _ => throw new NotSupportedException()
             }
         ;
@@ -163,6 +164,38 @@ namespace Kafka.Client.Messages.Encoding
                 taggedFields
             ));
         }
+        private static DecodeResult<ListGroupsResponseData> ReadV5([NotNull] in byte[] buffer, in int index)
+        {
+            var i = index;
+            var throttleTimeMsField = default(int);
+            var errorCodeField = default(short);
+            var groupsField = ImmutableArray<ListedGroup>.Empty;
+            var taggedFields = ImmutableArray<TaggedField>.Empty;
+            (i, throttleTimeMsField) = BinaryDecoder.ReadInt32(buffer, i);
+            (i, errorCodeField) = BinaryDecoder.ReadInt16(buffer, i);
+            (i, groupsField) = BinaryDecoder.ReadCompactArray<ListedGroup>(buffer, i, ListedGroupDecoder.ReadV5);
+            if (groupsField.IsDefault)
+                throw new InvalidDataException("groupsField was null");
+;
+            (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
+            if (taggedFieldsCount > 0)
+            {
+                var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
+                while (taggedFieldsCount > 0)
+                {
+                    (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                    (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
+                    taggedFieldsBuilder.Add(new(tag, bytes));
+                    taggedFieldsCount--;
+                }
+            }
+            return new(i, new(
+                throttleTimeMsField,
+                errorCodeField,
+                groupsField,
+                taggedFields
+            ));
+        }
         [GeneratedCodeAttribute("kgen", "1.0.0.0")]
         private static class ListedGroupDecoder
         {
@@ -172,6 +205,7 @@ namespace Kafka.Client.Messages.Encoding
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
+                var groupTypeField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, groupIdField) = BinaryDecoder.ReadString(buffer, i);
                 (i, protocolTypeField) = BinaryDecoder.ReadString(buffer, i);
@@ -179,6 +213,7 @@ namespace Kafka.Client.Messages.Encoding
                     groupIdField,
                     protocolTypeField,
                     groupStateField,
+                    groupTypeField,
                     taggedFields
                 ));
             }
@@ -188,6 +223,7 @@ namespace Kafka.Client.Messages.Encoding
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
+                var groupTypeField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, groupIdField) = BinaryDecoder.ReadString(buffer, i);
                 (i, protocolTypeField) = BinaryDecoder.ReadString(buffer, i);
@@ -195,6 +231,7 @@ namespace Kafka.Client.Messages.Encoding
                     groupIdField,
                     protocolTypeField,
                     groupStateField,
+                    groupTypeField,
                     taggedFields
                 ));
             }
@@ -204,6 +241,7 @@ namespace Kafka.Client.Messages.Encoding
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
+                var groupTypeField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, groupIdField) = BinaryDecoder.ReadString(buffer, i);
                 (i, protocolTypeField) = BinaryDecoder.ReadString(buffer, i);
@@ -211,6 +249,7 @@ namespace Kafka.Client.Messages.Encoding
                     groupIdField,
                     protocolTypeField,
                     groupStateField,
+                    groupTypeField,
                     taggedFields
                 ));
             }
@@ -220,6 +259,7 @@ namespace Kafka.Client.Messages.Encoding
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
+                var groupTypeField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, groupIdField) = BinaryDecoder.ReadCompactString(buffer, i);
                 (i, protocolTypeField) = BinaryDecoder.ReadCompactString(buffer, i);
@@ -239,6 +279,7 @@ namespace Kafka.Client.Messages.Encoding
                     groupIdField,
                     protocolTypeField,
                     groupStateField,
+                    groupTypeField,
                     taggedFields
                 ));
             }
@@ -248,6 +289,7 @@ namespace Kafka.Client.Messages.Encoding
                 var groupIdField = "";
                 var protocolTypeField = "";
                 var groupStateField = "";
+                var groupTypeField = "";
                 var taggedFields = ImmutableArray<TaggedField>.Empty;
                 (i, groupIdField) = BinaryDecoder.ReadCompactString(buffer, i);
                 (i, protocolTypeField) = BinaryDecoder.ReadCompactString(buffer, i);
@@ -268,6 +310,39 @@ namespace Kafka.Client.Messages.Encoding
                     groupIdField,
                     protocolTypeField,
                     groupStateField,
+                    groupTypeField,
+                    taggedFields
+                ));
+            }
+            public static DecodeResult<ListedGroup> ReadV5([NotNull] in byte[] buffer, in int index)
+            {
+                var i = index;
+                var groupIdField = "";
+                var protocolTypeField = "";
+                var groupStateField = "";
+                var groupTypeField = "";
+                var taggedFields = ImmutableArray<TaggedField>.Empty;
+                (i, groupIdField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, protocolTypeField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, groupStateField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, groupTypeField) = BinaryDecoder.ReadCompactString(buffer, i);
+                (i, var taggedFieldsCount) = BinaryDecoder.ReadVarUInt32(buffer, i);
+                if (taggedFieldsCount > 0)
+                {
+                    var taggedFieldsBuilder = ImmutableArray.CreateBuilder<TaggedField>();
+                    while (taggedFieldsCount > 0)
+                    {
+                        (i, var tag) = BinaryDecoder.ReadVarInt32(buffer, i);
+                        (i, var bytes) = BinaryDecoder.ReadCompactBytes(buffer, i);
+                        taggedFieldsBuilder.Add(new(tag, bytes));
+                        taggedFieldsCount--;
+                    }
+                }
+                return new(i, new(
+                    groupIdField,
+                    protocolTypeField,
+                    groupStateField,
+                    groupTypeField,
                     taggedFields
                 ));
             }

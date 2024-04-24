@@ -59,8 +59,8 @@ namespace Kafka.Client.Messages {
         };
         /// <summary>
         /// <param name="ErrorCodeField">The topic error, or 0 if there was no error.</param>
-        /// <param name="NameField">The topic name.</param>
-        /// <param name="TopicIdField">The topic id.</param>
+        /// <param name="NameField">The topic name. Null for non-existing topics queried by ID. This is never null when ErrorCode is zero. One of Name and TopicId is always populated.</param>
+        /// <param name="TopicIdField">The topic id. Zero for non-existing topics queried by name. This is never zero when ErrorCode is zero. One of Name and TopicId is always populated.</param>
         /// <param name="IsInternalField">True if the topic is internal.</param>
         /// <param name="PartitionsField">Each partition in the topic.</param>
         /// <param name="TopicAuthorizedOperationsField">32-bit bitfield to represent authorized operations for this topic.</param>

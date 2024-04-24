@@ -1,7 +1,6 @@
 ﻿using Kafka.Client.Config;
-using Kafka.Client.IO;
-using Kafka.Client.IO.Read;
-using Kafka.Client.IO.Write;
+using Kafka.Client.Read;
+using Kafka.Client.Write;
 using Kafka.Client.Messages;
 using Kafka.Client.Model;
 using Kafka.Client.Model.Internal;
@@ -370,7 +369,7 @@ namespace Kafka.Client
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                ToNameReadonlySet(topicPartition),
+                ToNameReadOnlySet(topicPartition),
                 ToReadOnlySet(topicPartition),
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.Beginning.Value),
                 cancellationToken
@@ -382,7 +381,7 @@ namespace Kafka.Client
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                ToNameReadonlySet(topicPartitions),
+                ToNameReadOnlySet(topicPartitions),
                 ToReadOnlySet(topicPartitions),
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.Beginning.Value),
                 cancellationToken
@@ -418,7 +417,7 @@ namespace Kafka.Client
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                ToNameReadonlySet(topicPartition),
+                ToNameReadOnlySet(topicPartition),
                 [topicPartition],
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.End.Value),
                 cancellationToken
@@ -430,7 +429,7 @@ namespace Kafka.Client
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                ToNameReadonlySet(topicPartitions),
+                ToNameReadOnlySet(topicPartitions),
                 ToReadOnlySet(topicPartitions),
                 DateTimeOffset.FromUnixTimeMilliseconds(Offset.End.Value),
                 cancellationToken
@@ -469,7 +468,7 @@ namespace Kafka.Client
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                ToNameReadonlySet(topicPartition),
+                ToNameReadOnlySet(topicPartition),
                 ToReadOnlySet(topicPartition),
                 timestamp,
                 cancellationToken
@@ -482,7 +481,7 @@ namespace Kafka.Client
             CancellationToken cancellationToken
         ) =>
             await ListTopicPartitionOffsets(
-                ToNameReadonlySet(topicPartitions),
+                ToNameReadOnlySet(topicPartitions),
                 ToReadOnlySet(topicPartitions),
                 timestamp,
                 cancellationToken
@@ -525,8 +524,10 @@ namespace Kafka.Client
             ).ConfigureAwait(false);
 
             var states = options.States.Select(r => r.ToString()).ToImmutableArray();
+            var types = options.Types.Select(r => r.ToString()).ToImmutableArray();
             var request = new ListGroupsRequestData(
                 states,
+                types,
                 []
             );
 
@@ -969,11 +970,11 @@ namespace Kafka.Client
             ;
         }
 
-        private static ImmutableSortedSet<TopicName> ToNameReadonlySet(TopicPartition topicPartition) =>
+        private static ImmutableSortedSet<TopicName> ToNameReadOnlySet(TopicPartition topicPartition) =>
             ToReadOnlySet(topicPartition.Topic.TopicName)
         ;
 
-        private static ImmutableSortedSet<TopicName> ToNameReadonlySet(IEnumerable<TopicPartition> topicPartitions) =>
+        private static ImmutableSortedSet<TopicName> ToNameReadOnlySet(IEnumerable<TopicPartition> topicPartitions) =>
             ToReadOnlySet(topicPartitions.Select(r => r.Topic.TopicName))
         ;
 

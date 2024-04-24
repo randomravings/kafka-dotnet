@@ -10,7 +10,7 @@ namespace Kafka.Cli.Options
         public string Topic { get; set; } = "";
         [Option("partition-count", Default = 1, HelpText = "Number of partitions for topics")]
         public int PartitionCount { get; set; } = 1;
-        [Option("replication-factor", Default = 1, HelpText = "Number of replications per partition")]
+        [Option("replication-factor", Default = (short)1, HelpText = "Number of replications per partition")]
         public short ReplicationFactor { get; set; } = 1;
         [Option("replica-assignment", HelpText = "Explicit assigment of replicas (not supported currently)")]
         public string ReplicaAssignment { get; set; } = "";

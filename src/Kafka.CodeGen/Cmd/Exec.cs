@@ -163,8 +163,8 @@ namespace Kafka.CodeGen.Cmd
             (messageDefinition.MessageType, profile) switch
             {
                 (_, Profile.Both) => true,
-                (MessageType.Header, Profile.Server) => messageDefinition.Name.ToLower().StartsWith("response"),
-                (MessageType.Header, Profile.Client) => messageDefinition.Name.ToLower().StartsWith("request"),
+                (MessageType.Header, Profile.Server) => messageDefinition.Name.StartsWith("response", StringComparison.CurrentCultureIgnoreCase),
+                (MessageType.Header, Profile.Client) => messageDefinition.Name.StartsWith("request", StringComparison.CurrentCultureIgnoreCase),
                 (MessageType.Response, Profile.Server) => apiKeys.Contains(messageDefinition.ApiKey),
                 (MessageType.Request, Profile.Client) => apiKeys.Contains(messageDefinition.ApiKey),
                 _ => false,
@@ -179,8 +179,8 @@ namespace Kafka.CodeGen.Cmd
             (messageDefinition.MessageType, profile) switch
             {
                 (_, Profile.Both) => true,
-                (MessageType.Header, Profile.Client) => messageDefinition.Name.ToLower().StartsWith("response"),
-                (MessageType.Header, Profile.Server) => messageDefinition.Name.ToLower().StartsWith("request"),
+                (MessageType.Header, Profile.Client) => messageDefinition.Name.StartsWith("response", StringComparison.CurrentCultureIgnoreCase),
+                (MessageType.Header, Profile.Server) => messageDefinition.Name.StartsWith("request", StringComparison.CurrentCultureIgnoreCase),
                 (MessageType.Response, Profile.Client) => apiKeys.Contains(messageDefinition.ApiKey),
                 (MessageType.Request, Profile.Server) => apiKeys.Contains(messageDefinition.ApiKey),
                 _ => false,

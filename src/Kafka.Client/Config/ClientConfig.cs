@@ -392,7 +392,7 @@ namespace Kafka.Client.Config
         public SecurityProtocol SecurityProtocol { get; set; } = SecurityProtocol.Plaintext;
 
         /// <summary>
-        /// Protocol used to communicate with brokers. Valid values are: PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL.
+        /// Protocol used to communicate with brokers. Valid values are: GSSAPI, PLAIN.
         /// <list type="table">
         ///   <item>
         ///     <term>Type</term>
@@ -404,7 +404,7 @@ namespace Kafka.Client.Config
         ///   </item>
         ///   <item>
         ///     <term>Valid Values</term>
-        ///     <description>[GSSAPI, PLAINTEXT]</description>
+        ///     <description>[GSSAPI, PLAIN]</description>
         ///   </item>
         ///   <item>
         ///     <term>Importance</term>

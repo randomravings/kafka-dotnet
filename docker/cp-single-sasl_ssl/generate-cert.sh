@@ -17,6 +17,16 @@ openssl req -new -nodes \
    -config secrets/ca/ca.cnf
 cat secrets/ca/ca.crt secrets/ca/ca.key > secrets/ca/ca.pem
 
+
+mkdir secrets/client-creds
+keytool -keystore secrets/client-creds/kafka.client.truststore.pkcs12 \
+    -alias CARoot \
+    -import \
+    -file secrets/ca/ca.crt \
+    -storepass secret  \
+    -noprompt \
+    -storetype PKCS12
+
 for i in $(seq -f "%02g" 1 3);
 do
     BROKER="broker-${i}"

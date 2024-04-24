@@ -14,6 +14,7 @@ namespace Kafka.CodeGen.Model
         bool LatestVersionUnstable,
         VersionRange ValidVersions,
         VersionRange FlexibleVersions,
+        VersionRange DeprecatedVersions,
         ImmutableSortedSet<Listener> Listeners,
         ImmutableArray<Field> Fields,
         ImmutableSortedDictionary<string, StructDefinition> Structs

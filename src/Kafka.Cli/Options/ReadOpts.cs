@@ -25,7 +25,7 @@ namespace Kafka.Cli.Options
         [Option("timestamp-format", Group = "stdout", HelpText = "Starts reader in interactive mode")]
         public string TimeStampFormat{get;set;} = "yyyy-MM-ddTHH:mm:ss.fffZ";
 
-        [Option("as-json", Group = "json", HelpText = "Writes the entire records details as JSON")]
+        [Option("as-json", Group = "json", Required = false, Default = false, HelpText = "Writes the entire records details as JSON")]
         public bool AsJson{get;set;}
 
         private const string PARTITION_ASSIGN_HELP = "List of topic partition assignments. Example: <topic0>[0:1,1:1,2:1]";

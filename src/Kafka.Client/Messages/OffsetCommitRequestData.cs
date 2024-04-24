@@ -7,7 +7,7 @@ using OffsetCommitRequestTopic = Kafka.Client.Messages.OffsetCommitRequestData.O
 namespace Kafka.Client.Messages {
     /// <summary>
     /// <param name="GroupIdField">The unique group identifier.</param>
-    /// <param name="GenerationIdOrMemberEpochField">The generation of the group if using the generic group protocol or the member epoch if using the consumer protocol.</param>
+    /// <param name="GenerationIdOrMemberEpochField">The generation of the group if using the classic group protocol or the member epoch if using the consumer protocol.</param>
     /// <param name="MemberIdField">The member ID assigned by the group coordinator.</param>
     /// <param name="GroupInstanceIdField">The unique identifier of the consumer instance provided by end user.</param>
     /// <param name="RetentionTimeMsField">The time period in ms to retain the offset.</param>

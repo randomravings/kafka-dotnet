@@ -14,7 +14,7 @@ namespace Kafka.Client.Messages.Encoding
         internal ListGroupsRequestEncoder() :
             base(
                 ApiKey.ListGroups,
-                new(0, 4),
+                new(0, 5),
                 new(3, 32767),
                 RequestHeaderEncoder.WriteV0,
                 WriteV0
@@ -35,6 +35,7 @@ namespace Kafka.Client.Messages.Encoding
                 2 => WriteV2,
                 3 => WriteV3,
                 4 => WriteV4,
+                5 => WriteV5,
                 _ => throw new NotSupportedException()
             }
         ;
@@ -73,6 +74,24 @@ namespace Kafka.Client.Messages.Encoding
         {
             var i = index;
             i = BinaryEncoder.WriteCompactArray<string>(buffer, i, message.StatesFilterField, BinaryEncoder.WriteCompactString);
+            var taggedFieldsCount = 0u;
+            var previousTagged = -1;
+            taggedFieldsCount += (uint)message.TaggedFields.Length;
+            i = BinaryEncoder.WriteVarUInt32(buffer, i, taggedFieldsCount);
+            foreach(var taggedField in message.TaggedFields)
+            {
+                if(taggedField.Tag <= previousTagged)
+                    throw new InvalidOperationException($"Reserved or out of order tag: {taggedField.Tag} - Reserved Range: -1");
+                i = BinaryEncoder.WriteVarInt32(buffer, i, taggedField.Tag);
+                i = BinaryEncoder.WriteCompactBytes(buffer, i, taggedField.Value);
+            }
+            return i;
+        }
+        private static int WriteV5([NotNull] in byte[] buffer, in int index, [NotNull] in ListGroupsRequestData message)
+        {
+            var i = index;
+            i = BinaryEncoder.WriteCompactArray<string>(buffer, i, message.StatesFilterField, BinaryEncoder.WriteCompactString);
+            i = BinaryEncoder.WriteCompactArray<string>(buffer, i, message.TypesFilterField, BinaryEncoder.WriteCompactString);
             var taggedFieldsCount = 0u;
             var previousTagged = -1;
             taggedFieldsCount += (uint)message.TaggedFields.Length;

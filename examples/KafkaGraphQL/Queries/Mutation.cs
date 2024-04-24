@@ -1,5 +1,5 @@
 ﻿using Kafka.Client;
-using Kafka.Client.IO;
+using Kafka.Client;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
 using KafkaGraphQL.InputTypes;

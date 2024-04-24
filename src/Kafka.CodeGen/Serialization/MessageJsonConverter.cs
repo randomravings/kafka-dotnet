@@ -34,6 +34,7 @@ namespace Kafka.CodeGen.Serialization
             var latestVersionUnstable = false;
             var validVersions = VersionRange.Empty;
             var flexibleVersions = VersionRange.Empty;
+            var deprecatedVersions = VersionRange.Empty;
             var fieldsBuilder = ImmutableArray.CreateBuilder<Field>();
             var structsBuilder = ImmutableSortedDictionary.CreateBuilder <string, StructDefinition>();
             while (reader.Read())
@@ -72,6 +73,10 @@ namespace Kafka.CodeGen.Serialization
                                 var flexibleVersionsValue = reader.ReadAsString() ?? "";
                                 flexibleVersions = ParseVersion(flexibleVersionsValue);
                                 break;
+                            case "deprecatedVersions":
+                                var deprecatedVersionsValue = reader.ReadAsString() ?? "";
+                                deprecatedVersions = ParseVersion(deprecatedVersionsValue);
+                                break;
                             case "fields":
                                 reader.Read(); // Start array
                                 reader.Read(); // Start object
@@ -96,6 +101,7 @@ namespace Kafka.CodeGen.Serialization
                 latestVersionUnstable,
                 validVersions,
                 flexibleVersions,
+                deprecatedVersions,
                 listenerBuilder.ToImmutable(),
                 fieldsBuilder.ToImmutable(),
                 structsBuilder.ToImmutable()

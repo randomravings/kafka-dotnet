@@ -27,16 +27,19 @@ namespace Kafka.Client.Messages {
         /// <param name="GroupIdField">The group ID.</param>
         /// <param name="ProtocolTypeField">The group protocol type.</param>
         /// <param name="GroupStateField">The group state name.</param>
+        /// <param name="GroupTypeField">The group type name.</param>
         /// </summary>
         [GeneratedCode("kgen", "1.0.0.0")]
         internal sealed record ListedGroup (
             string GroupIdField,
             string ProtocolTypeField,
             string GroupStateField,
+            string GroupTypeField,
             ImmutableArray<TaggedField> TaggedFields
         )
         {
             internal static ListedGroup Empty { get; } = new(
+                "",
                 "",
                 "",
                 "",

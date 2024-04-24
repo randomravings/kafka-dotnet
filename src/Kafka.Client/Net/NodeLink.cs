@@ -199,20 +199,9 @@ namespace Kafka.Client.Net
                 request,
                 _apiVersionRequestEncoder,
                 _apiVersionResponseDecoder,
-                ApiVersionsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue ApiVersionsError(
-            in ApiVersionsResponseData response
-        )
-        {
-            if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<ApiError>.Empty);
-            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
-            return (IsTransient(errors), errors);
-        }
 
         public async Task<MetadataResponseData> Metadata(
             CancellationToken cancellationToken
@@ -241,35 +230,9 @@ namespace Kafka.Client.Net
                 request,
                 _metadataRequestEncoder,
                 _metadataResponseDecoder,
-                MetadataError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue MetadataError(
-            in MetadataResponseData response
-        )
-        {
-            var errors = response
-                .TopicsField
-                .Where(t => t.ErrorCodeField != 0)
-                .Select(t => ApiErrors.Translate(t.ErrorCodeField))
-                .Concat(response
-                    .TopicsField
-                    .SelectMany(t => t.PartitionsField
-                        .Where(p => p.ErrorCodeField != 0)
-                        .Select(p => ApiErrors.Translate(p.ErrorCodeField))
-                    )
-                )
-                .ToImmutableArray()
-            ;
-
-            if (errors.Length == 0)
-                return (false, errors);
-            if (errors.Any(r => r.Code == ApiError.UnknownTopicOrPartition.Code))
-                return (false, errors);
-            return (IsTransient(errors), errors);
-        }
 
         async Task<CreateTopicsResponseData> INodeLink.CreateTopics(
             CreateTopicsRequestData request,
@@ -279,23 +242,9 @@ namespace Kafka.Client.Net
                 request,
                 _createTopicsRequestEncoder,
                 _createTopicsResponseDecoder,
-                CreateTopicsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue CreateTopicsError(
-            in CreateTopicsResponseData response
-        )
-        {
-            var errors = response
-                .TopicsField
-                .Where(r => r.ErrorCodeField != 0)
-                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
-                .ToImmutableArray()
-            ;
-            return (IsTransient(errors), errors);
-        }
 
         async Task<DeleteTopicsResponseData> INodeLink.DeleteTopics(
             DeleteTopicsRequestData request,
@@ -305,24 +254,9 @@ namespace Kafka.Client.Net
                 request,
                 _deleteTopicsRequestEncoder,
                 _deleteTopicsResponseDecoder,
-                DeleteTopicsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue DeleteTopicsError(
-            in DeleteTopicsResponseData response
-        )
-        {
-            var errors = response.ResponsesField
-                .Where(r => r.ErrorCodeField != 0)
-                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
-                .ToImmutableArray()
-            ;
-            if (errors.Length > 0 && errors.Any(r => r.Code == ApiError.UnknownTopicOrPartition.Code))
-                return (false, errors);
-            return (IsTransient(errors), errors);
-        }
 
         async Task<ListGroupsResponseData> INodeLink.ListGroups(
             ListGroupsRequestData request,
@@ -332,7 +266,6 @@ namespace Kafka.Client.Net
                 request,
                 _listGroupsRequestEncoder,
                 _listGroupsResponseDecoder,
-                ListGroupsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
@@ -355,23 +288,9 @@ namespace Kafka.Client.Net
                 request,
                 _describeGroupsRequestEncoder,
                 _describeGroupsResponseDecoder,
-                DescribeGroupsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue DescribeGroupsError(
-            in DescribeGroupsResponseData response
-        )
-        {
-            var errors = response
-                .GroupsField
-                .Where(r => r.ErrorCodeField != 0)
-                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
-                .ToImmutableArray()
-            ;
-            return (IsTransient(errors), errors);
-        }
 
         async Task<DeleteGroupsResponseData> INodeLink.DeleteGroups(
             DeleteGroupsRequestData request,
@@ -381,23 +300,9 @@ namespace Kafka.Client.Net
                 request,
                 _deleteGroupsRequestEncoder,
                 _deleteGroupsResponseDecoder,
-                DeleteGroupsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue DeleteGroupsError(
-            in DeleteGroupsResponseData response
-        )
-        {
-            var errors = response
-                .ResultsField
-                .Where(r => r.ErrorCodeField != 0)
-                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
-                .ToImmutableArray()
-            ;
-            return (IsTransient(errors), errors);
-        }
 
         async Task<FindCoordinatorResponseData> INodeLink.FindCoordinator(
             FindCoordinatorRequestData request,
@@ -407,26 +312,9 @@ namespace Kafka.Client.Net
                 request,
                 _findCoordinatorRequestEncoder,
                 _findCoordinatorResponseDecoder,
-                FindCoordinatorError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue FindCoordinatorError(
-            in FindCoordinatorResponseData response
-        )
-        {
-            var errors = response.ErrorCodeField switch
-            {
-                0 => response
-                        .CoordinatorsField
-                        .Where(r => r.ErrorCodeField != 0)
-                        .Select(r => ApiErrors.Translate(r.ErrorCodeField))
-                        .ToImmutableArray(),
-                _ => [ApiErrors.Translate(response.ErrorCodeField)]
-            };
-            return (IsTransient(errors), errors);
-        }
 
         async Task<OffsetFetchResponseData> INodeLink.OffsetFetch(
             OffsetFetchRequestData request,
@@ -436,20 +324,9 @@ namespace Kafka.Client.Net
                 request,
                 _offsetFetchRequestEncoder,
                 _offsetFetchResponseDecoder,
-                OffsetFetchError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue OffsetFetchError(
-            in OffsetFetchResponseData response
-        )
-        {
-            if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<ApiError>.Empty);
-            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
-            return (IsTransient(errors), errors);
-        }
 
         async Task<ListOffsetsResponseData> INodeLink.ListOffsets(
             ListOffsetsRequestData request,
@@ -459,25 +336,9 @@ namespace Kafka.Client.Net
                 request,
                 _listOffsetsRequestEncoder,
                 _listOffsetsResponseDecoder,
-                ListOffsetsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue ListOffsetsError(
-            in ListOffsetsResponseData response
-        )
-        {
-            var errors = response
-                .TopicsField
-                .SelectMany(t => t.PartitionsField
-                    .Where(p => p.ErrorCodeField != 0)
-                    .Select(p => ApiErrors.Translate(p.ErrorCodeField))
-                )
-                .ToImmutableArray()
-            ;
-            return (IsTransient(errors), errors);
-        }
 
         async Task<InitProducerIdResponseData> INodeLink.InitProducerId(
             InitProducerIdRequestData request,
@@ -486,20 +347,9 @@ namespace Kafka.Client.Net
                 request,
                 _initProducerIdRequestEncoder,
                 _initProducerIdResponseDecoder,
-                InitProducerIdError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue InitProducerIdError(
-            in InitProducerIdResponseData response
-        )
-        {
-            if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<ApiError>.Empty);
-            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
-            return (IsTransient(errors), errors);
-        }
 
         async Task<ProduceResponseData> INodeLink.Produce(
             ProduceRequestData request,
@@ -509,25 +359,9 @@ namespace Kafka.Client.Net
                 request,
                 _produceRequestEncoder,
                 _produceResponseDecoder,
-                ProduceError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue ProduceError(
-            in ProduceResponseData response
-        )
-        {
-            var errors = response
-                .ResponsesField
-                .SelectMany(t => t.PartitionResponsesField
-                    .Where(r => r.ErrorCodeField != 0)
-                    .Select(r => ApiErrors.Translate(r.ErrorCodeField))
-                )
-                .ToImmutableArray()
-            ;
-            return (IsTransient(errors), errors);
-        }
 
         async Task INodeLink.ProduceNoAck(
             ProduceRequestData request,
@@ -548,25 +382,9 @@ namespace Kafka.Client.Net
                 request,
                 _addPartitionsToTxnRequestEncoder,
                 _addPartitionsToTxnResponseDecoder,
-                AddPartitionsToTxnError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue AddPartitionsToTxnError(
-            in AddPartitionsToTxnResponseData response
-        )
-        {
-            var errors = response
-                .ResultsByTopicV3AndBelowField
-                .SelectMany(t => t.ResultsByPartitionField
-                    .Where(p => p.PartitionErrorCodeField != 0)
-                    .Select(p => ApiErrors.Translate(p.PartitionErrorCodeField))
-                )
-                .ToImmutableArray()
-            ;
-            return (IsTransient(errors), errors);
-        }
 
         async Task<EndTxnResponseData> INodeLink.EndTxn(
             EndTxnRequestData request,
@@ -576,20 +394,9 @@ namespace Kafka.Client.Net
                 request,
                 _endTxnRequestEncoder,
                 _endTxnResponseDecoder,
-                EndTxnError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue EndTxnError(
-            in EndTxnResponseData response
-        )
-        {
-            if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<ApiError>.Empty);
-            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
-            return (IsTransient(errors), errors);
-        }
 
         async Task<HeartbeatResponseData> INodeLink.Heartbeat(
             HeartbeatRequestData request,
@@ -599,20 +406,9 @@ namespace Kafka.Client.Net
                 request,
                 _heartbeatRequestEncoder,
                 _heartbeatResponseDecoder,
-                HeartbeatError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue HeartbeatError(
-            in HeartbeatResponseData response
-        )
-        {
-            if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<ApiError>.Empty);
-            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
-            return (IsTransient(errors), errors);
-        }
 
         async Task<JoinGroupResponseData> INodeLink.JoinGroup(
             JoinGroupRequestData request,
@@ -622,20 +418,9 @@ namespace Kafka.Client.Net
                 request,
                 _joinGroupRequestEncoder,
                 _joinGroupResponseDecoder,
-                JoinGroupError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue JoinGroupError(
-            in JoinGroupResponseData response
-        )
-        {
-            if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<ApiError>.Empty);
-            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
-            return (IsTransient(errors), errors);
-        }
 
         async Task<SyncGroupResponseData> INodeLink.SyncGroup(
             SyncGroupRequestData request,
@@ -645,20 +430,9 @@ namespace Kafka.Client.Net
                 request,
                 _syncGroupRequestEncoder,
                 _syncGroupResponseDecoder,
-                SyncGroupError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue SyncGroupError(
-            in SyncGroupResponseData response
-        )
-        {
-            if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<ApiError>.Empty);
-            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
-            return (IsTransient(errors), errors);
-        }
 
         async Task<LeaveGroupResponseData> INodeLink.LeaveGroup(
             LeaveGroupRequestData request,
@@ -668,20 +442,9 @@ namespace Kafka.Client.Net
                 request,
                 _leaveGroupRequestEncoder,
                 _leaveGroupResponseDecoder,
-                LeaveGroupError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue LeaveGroupError(
-            in LeaveGroupResponseData response
-        )
-        {
-            if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<ApiError>.Empty);
-            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
-            return (IsTransient(errors), errors);
-        }
 
         async Task<OffsetCommitResponseData> INodeLink.OffsetCommit(
             OffsetCommitRequestData request,
@@ -691,25 +454,9 @@ namespace Kafka.Client.Net
                 request,
                 _offsetCommitRequestEncoder,
                 _offsetCommitResponseDecoder,
-                OffsetCommitError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue OffsetCommitError(
-            in OffsetCommitResponseData response
-        )
-        {
-            var errors = response
-                .TopicsField
-                .SelectMany(t => t.PartitionsField
-                    .Where(p => p.ErrorCodeField != 0)
-                    .Select(p => ApiErrors.Translate(p.ErrorCodeField))
-                )
-                .ToImmutableArray()
-            ;
-            return (IsTransient(errors), errors);
-        }
 
         async Task<FetchResponseData> INodeLink.Fetch(
             FetchRequestData request,
@@ -719,28 +466,9 @@ namespace Kafka.Client.Net
                 request,
                 _fetchRequestEncoder,
                 _fetchResponseDecoder,
-                FetchError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue FetchError(
-            in FetchResponseData response
-        )
-        {
-            var errors = response.ErrorCodeField switch
-            {
-                0 => response
-                        .ResponsesField
-                        .SelectMany(t => t.PartitionsField
-                            .Where(p => p.ErrorCodeField != 0)
-                            .Select(p => ApiErrors.Translate(p.ErrorCodeField))
-                        )
-                        .ToImmutableArray(),
-                _ => [ApiErrors.Translate(response.ErrorCodeField)]
-            };
-            return (IsTransient(errors), errors);
-        }
 
         async Task<DescribeAclsResponseData> INodeLink.DescribeAcls(
             DescribeAclsRequestData request,
@@ -750,20 +478,9 @@ namespace Kafka.Client.Net
                 request,
                 _describeAclsRequestEncoder,
                 _describeAclsResponseDecoder,
-                DescribeAclsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue DescribeAclsError(
-            in DescribeAclsResponseData response
-        )
-        {
-            if (response.ErrorCodeField == 0)
-                return (false, ImmutableArray<ApiError>.Empty);
-            var errors = ImmutableArray.Create(ApiErrors.Translate(response.ErrorCodeField));
-            return (IsTransient(errors), errors);
-        }
 
         async Task<CreateAclsResponseData> INodeLink.CreateAcls(
             CreateAclsRequestData request,
@@ -773,7 +490,6 @@ namespace Kafka.Client.Net
                 request,
                 _createAclsRequestEncoder,
                 _createAclsResponseDecoder,
-                CreateAclsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
@@ -799,30 +515,9 @@ namespace Kafka.Client.Net
                 request,
                 _deleteAclsRequestEncoder,
                 _deleteAclsResponseDecoder,
-                DeleteAclsError,
                 cancellationToken
             ).ConfigureAwait(false)
         ;
-
-        private static ApiErrorsReturnValue DeleteAclsError(
-            in DeleteAclsResponseData response
-        )
-        {
-            var errors = response
-                .FilterResultsField
-                .Where(r => r.ErrorCodeField != 0)
-                .Select(r => ApiErrors.Translate(r.ErrorCodeField))
-                .Concat(response
-                    .FilterResultsField
-                    .SelectMany(r => r.MatchingAclsField
-                        .Where(m => m.ErrorCodeField != 0)
-                        .Select(r => ApiErrors.Translate(r.ErrorCodeField))
-                    )
-                )
-                .ToImmutableArray()
-            ;
-            return (IsTransient(errors), errors);
-        }
 
         public void Dispose()
         {
@@ -837,49 +532,35 @@ namespace Kafka.Client.Net
             TRequest requestMessage,
             IRequestEncoder<RequestHeaderData, TRequest> requestEncoder,
             IResponseDecoder<ResponseHeaderData, TResponse> responseDecoder,
-            ApiErrorDelegate<TResponse> errorDelegate,
             CancellationToken cancellationToken
         )
             where TRequest : notnull, RequestMessage
             where TResponse : notnull, ResponseMessage
         {
-            var tries = 0;
             var requestBytes = new byte[1024 * 1024];
-            while (true)
-            {
-                await EnsureConnection(cancellationToken).ConfigureAwait(false);
-                var offset = 0;
-                var requestHeader = CreateRequestHeader(requestEncoder, []);
-                offset = requestEncoder.WriteHeader(requestBytes, offset, requestHeader);
-                offset = requestEncoder.WriteMessage(requestBytes, offset, requestMessage);
-                var taskCompletionSource = new TaskCompletionSource<byte[]>(
-                    TaskCreationOptions.RunContinuationsAsynchronously
-                );
-                var sendThing = new SendThing(
-                    requestHeader.CorrelationId,
-                    requestBytes.AsMemory(0, offset),
-                    false,
-                    taskCompletionSource
-                );
-                _sendQueue.Add(sendThing, cancellationToken);
-                var responseBytes = await taskCompletionSource
-                    .Task
-                    .WaitAsync(cancellationToken)
-                    .ConfigureAwait(false)
-                ;
-                (offset, var _) = responseDecoder.ReadHeader(responseBytes, 0);
-                (_, var response) = responseDecoder.ReadMessage(responseBytes, offset);
-                var (retriable, errors) = errorDelegate(response);
-                if (errors.Length == 0)
-                    return response;
-                LogError(_logger, requestHeader, errors);
-                if (!retriable)
-                    return response;
-                if (tries++ <= _retries)
-                    cancellationToken.WaitHandle.WaitOne(_retryBackOffMs);
-                else
-                    return response;
-            }
+            await EnsureConnection(cancellationToken).ConfigureAwait(false);
+            var offset = 0;
+            var requestHeader = CreateRequestHeader(requestEncoder, []);
+            offset = requestEncoder.WriteHeader(requestBytes, offset, requestHeader);
+            offset = requestEncoder.WriteMessage(requestBytes, offset, requestMessage);
+            var taskCompletionSource = new TaskCompletionSource<byte[]>(
+                TaskCreationOptions.RunContinuationsAsynchronously
+            );
+            var sendThing = new SendThing(
+                requestHeader.CorrelationId,
+                requestBytes.AsMemory(0, offset),
+                false,
+                taskCompletionSource
+            );
+            _sendQueue.Add(sendThing, cancellationToken);
+            var responseBytes = await taskCompletionSource
+                .Task
+                .WaitAsync(cancellationToken)
+                .ConfigureAwait(false)
+            ;
+            (offset, var _) = responseDecoder.ReadHeader(responseBytes, 0);
+            (_, var response) = responseDecoder.ReadMessage(responseBytes, offset);
+            return response;
         }
 
         private readonly record struct SendThing(
@@ -930,34 +611,22 @@ namespace Kafka.Client.Net
         {
             _apiVersionRequestEncoder.SetApiVersion(0);
             _apiVersionResponseDecoder.SetApiVersion(0);
-            var tries = 0;
             var requestBytes = new byte[1024 * 1024];
-            while (true)
-            {
-                var offset = 0;
-                var requestHeader = CreateRequestHeader(_apiVersionRequestEncoder, []);
-                offset = _apiVersionRequestEncoder.WriteHeader(requestBytes, offset, requestHeader);
-                offset = _apiVersionRequestEncoder.WriteMessage(requestBytes, offset, API_VERSION_REQUEST);
+            var offset = 0;
+            var requestHeader = CreateRequestHeader(_apiVersionRequestEncoder, []);
+            offset = _apiVersionRequestEncoder.WriteHeader(requestBytes, offset, requestHeader);
+            offset = _apiVersionRequestEncoder.WriteMessage(requestBytes, offset, API_VERSION_REQUEST);
 
-                await _transport.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
-                var responseBytes = await _transport.Receive(cancellationToken).ConfigureAwait(false);
+            await _transport.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
+            var responseBytes = await _transport.Receive(cancellationToken).ConfigureAwait(false);
 
-                (offset, var _) = _apiVersionResponseDecoder.ReadHeader(responseBytes, 0);
-                (_, var apiVersionsResponse) = _apiVersionResponseDecoder.ReadMessage(responseBytes, offset);
+            (offset, var _) = _apiVersionResponseDecoder.ReadHeader(responseBytes, 0);
+            (_, var apiVersionsResponse) = _apiVersionResponseDecoder.ReadMessage(responseBytes, offset);
 
-                var (_, errors) = ApiVersionsError(apiVersionsResponse);
-                if (errors.Length == 0)
-                {
-                    UpdateApiVersions(apiVersionsResponse);
-                    return;
-                }
-
-                LogError(_logger, requestHeader, errors);
-                if (tries++ <= _retries && IsTransient(errors))
-                    cancellationToken.WaitHandle.WaitOne(_retryBackOffMs);
-                else
-                    ApiExceptions(errors);
-            }
+            if (apiVersionsResponse.ErrorCodeField == 0)
+                UpdateApiVersions(apiVersionsResponse);
+            else
+                ApiException(ApiErrors.Translate(apiVersionsResponse.ErrorCodeField));
         }
 
         private async Task SaslHandshake(
@@ -1080,40 +749,29 @@ namespace Kafka.Client.Net
             CancellationToken cancellationToken
         )
         {
-            var tries = 0;
             var requestBytes = new byte[1024 * 1024];
-            while (true)
-            {
-                var offset = 0;
-                var requestHeader = CreateRequestHeader(_metadataRequestEncoder, []);
-                offset = _metadataRequestEncoder.WriteHeader(requestBytes, offset, requestHeader);
-                offset = _metadataRequestEncoder.WriteMessage(requestBytes, offset, CLUSTER_METADATA_REQUEST);
+            var offset = 0;
+            var requestHeader = CreateRequestHeader(_metadataRequestEncoder, []);
+            offset = _metadataRequestEncoder.WriteHeader(requestBytes, offset, requestHeader);
+            offset = _metadataRequestEncoder.WriteMessage(requestBytes, offset, CLUSTER_METADATA_REQUEST);
 
-                await _transport.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
-                var responseBytes = await _transport.Receive(cancellationToken).ConfigureAwait(false);
+            await _transport.Send(requestBytes.AsMemory(0, offset), cancellationToken).ConfigureAwait(false);
+            var responseBytes = await _transport.Receive(cancellationToken).ConfigureAwait(false);
 
-                (offset, var _) = _metadataResponseDecoder.ReadHeader(responseBytes, 0);
-                (_, var metadataResponse) = _metadataResponseDecoder.ReadMessage(responseBytes, offset);
+            (offset, var _) = _metadataResponseDecoder.ReadHeader(responseBytes, 0);
+            (_, var metadataResponse) = _metadataResponseDecoder.ReadMessage(responseBytes, offset);
 
-                var (_, errors) = MetadataError(metadataResponse);
-                if (errors.Length == 0)
-                {
-                    UpdateMetadata(metadataResponse);
-                    return;
-                }
-
-                LogError(_logger, requestHeader, errors);
-                if (tries++ <= _retries && IsTransient(errors))
-                    cancellationToken.WaitHandle.WaitOne(_retryBackOffMs);
-                else
-                    ApiExceptions(errors);
-            }
+            UpdateMetadata(metadataResponse);
         }
 
-        private static void ApiExceptions(ImmutableArray<ApiError> errors) =>
+        private static void ApiExceptions(in ImmutableArray<ApiError> errors) =>
             throw new AggregateException(
                 errors.Select(e => new ApiException(e))
             )
+        ;
+
+        private static void ApiException(in ApiError error) =>
+            throw new ApiException(error)
         ;
 
         private async Task OpenTransport(
@@ -1214,7 +872,7 @@ namespace Kafka.Client.Net
             }
         }
 
-        private static void LogError(ILogger logger, RequestHeaderData header, ImmutableArray<ApiError> errors)
+        private static void LogError(in ILogger logger, in RequestHeaderData header, in ImmutableArray<ApiError> errors)
         {
             foreach (var error in errors)
                 logger.LogApiError(header, error);

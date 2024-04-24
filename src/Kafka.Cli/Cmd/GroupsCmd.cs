@@ -65,7 +65,8 @@ namespace Kafka.Cli.Cmd
                     statesList.AddRange(Enum.GetValues<ConsumerGroupState>());
 
                 var options = new ListGroupsOptions(
-                    statesList
+                    statesList,
+                    opts.Types.ToList()
                 );
 
                 var result = await client.ListGroups(

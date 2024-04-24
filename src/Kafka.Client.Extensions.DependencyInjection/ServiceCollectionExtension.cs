@@ -1,5 +1,5 @@
 ﻿using Kafka.Client.Config;
-using Kafka.Client.IO;
+using Kafka.Client;
 using Kafka.Common.Serialization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

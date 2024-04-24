@@ -1,5 +1,5 @@
 ﻿using Kafka.Client.Config;
-using Kafka.Client.IO;
+using Kafka.Client;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
 using System.Collections.Immutable;

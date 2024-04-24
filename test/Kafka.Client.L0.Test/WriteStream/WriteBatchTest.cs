@@ -1,5 +1,5 @@
-﻿using Kafka.Client.IO.Write;
-using Kafka.Client.Model.Internal;
+﻿using Kafka.Client.Model.Internal;
+using Kafka.Client.Write;
 using Kafka.Common.Encoding;
 using Kafka.Common.Model;
 using System.Collections.Immutable;
