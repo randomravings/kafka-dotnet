@@ -31,4 +31,4 @@ jobs:
     - name: Register
       run: dotnet nuget add source --username randomravings --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/randomravings/index.json"
     - name: Publish
-      run: dotnet nuget push "bin/Release/Kafka.Client.1.0.0.nupkg" --source "github"
+      run: dotnet nuget push "src/Kafka.Client/bin/Release/Kafka.Client.1.0.0.nupkg" --source "github"
