@@ -178,7 +178,7 @@ namespace Kafka.Client.L0.Test.WriteStream
             {
                 var size = 20;
                 tasks[i] = Task.Run(() => AddBufferToQueue(results, i, bufferPool, size, 10000));
-                Task.Delay(5).Wait();
+                Task.Delay(10).Wait();
             }
 
             for (int i = 0; i < tasks.Length; i++)
@@ -188,7 +188,7 @@ namespace Kafka.Client.L0.Test.WriteStream
                 Assert.That(buffer, Is.InstanceOf<byte[]>());
                 Assert.That(buffer, Has.Length.EqualTo(size));
                 bufferPool.DeallocateBuffer(buffer);
-                Task.Delay(5).Wait();
+                Task.Delay(10).Wait();
             }
 
             Task.WaitAll(tasks);
@@ -205,7 +205,7 @@ namespace Kafka.Client.L0.Test.WriteStream
             {
                 var size = 20 + i % 2;
                 tasks[i] = Task.Run(() => AddBufferToQueue(results, i, bufferPool, size, 10000));
-                Task.Delay(5).Wait();
+                Task.Delay(10).Wait();
             }
 
             for (int i = 0; i < tasks.Length; i++)
@@ -215,7 +215,7 @@ namespace Kafka.Client.L0.Test.WriteStream
                 Assert.That(buffer, Is.InstanceOf<byte[]>());
                 Assert.That(buffer, Has.Length.EqualTo(size));
                 bufferPool.DeallocateBuffer(buffer);
-                Task.Delay(5).Wait();
+                Task.Delay(10).Wait();
             }
 
             Task.WaitAll(tasks);
