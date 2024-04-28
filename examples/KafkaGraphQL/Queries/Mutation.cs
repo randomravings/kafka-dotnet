@@ -1,10 +1,8 @@
 ﻿using Kafka.Client;
-using Kafka.Client;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
 using KafkaGraphQL.InputTypes;
 using KafkaGraphQL.Model;
-using KafkaGraphQL.Types;
 
 namespace KafkaGraphQL.Queries
 {

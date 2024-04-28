@@ -4,7 +4,6 @@ using Kafka.Cli.Options;
 using Kafka.Cli.Text;
 using Kafka.Client;
 using Kafka.Client.Config;
-using Kafka.Client;
 using Kafka.Client.Model;
 using Kafka.Common.Model;
 using Kafka.Common.Serialization.Nullable;

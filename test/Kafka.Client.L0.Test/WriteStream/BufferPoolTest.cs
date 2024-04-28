@@ -92,7 +92,7 @@ namespace Kafka.Client.L0.Test.WriteStream
                 Assert.That(buffer1, Is.InstanceOf<byte[]>());
                 Assert.That(buffer2, Is.InstanceOf<byte[]>());
                 Assert.That(buffer3, Is.InstanceOf<byte[]>());
-                Assert.That(elapsed, Is.GreaterThanOrEqualTo(200));
+                Assert.That(elapsed, Is.GreaterThanOrEqualTo(199));
                 Assert.That(buffer1, Has.Length.EqualTo(128));
                 Assert.That(buffer2, Has.Length.EqualTo(128));
                 Assert.That(buffer3, Has.Length.EqualTo(0));

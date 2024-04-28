@@ -1,5 +1,3 @@
----
-version: '3.5'
 services:
   broker-01:
     image: confluentinc/cp-server:7.5.1
